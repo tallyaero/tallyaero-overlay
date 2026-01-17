@@ -28,6 +28,9 @@ from utility import (
     compute_stall_speed,
     wind_components,
     simulate_steep_turn,
+    simulate_chandelle,
+    simulate_lazy_eight,
+    simulate_steep_spiral,
     render_hover_polyline,
     simulate_engineout_glide,
     simulate_impossible_turn,
@@ -266,7 +269,7 @@ app.layout = html.Div(className="full-height-container", children=[
                     {"label": "Chandelle", "value": "chandelle"},
                     {"label": "Lazy Eight", "value": "lazy8"},
                     {"label": "Steep Spiral", "value": "steep_spiral"},
-                    {"label": "S-Turns", "value": "sturns"},
+                    {"label": "S-Turns", "value": "s_turn"},
                     {"label": "Turns Around a Point", "value": "turns_point"},
                     {"label": "Rectangular Course", "value": "rect_course"},
                     {"label": "Eights on Pylons", "value": "pylons"},
@@ -299,7 +302,8 @@ app.layout = html.Div(className="full-height-container", children=[
                         style={"width": "100%", "height": "100%"},
                         children=[
                             dl.TileLayer(),
-                            dl.LayerGroup(id="layer")
+                            dl.LayerGroup(id="layer"),
+                            dl.LayerGroup(id="scrubber-layer"),  # Dedicated layer for time scrubber marker
                         ]
                     )
                 ]
@@ -334,17 +338,20 @@ app.layout = html.Div(className="full-height-container", children=[
             # Lazy Eight
             dcc.Store(id={"type": "point-store", "m_id": "lazy8", "role": "start"}),
 
-            # Steep Spiral (center point)
-            dcc.Store(id={"type": "point-store", "m_id": "steep_spiral", "role": "start"}),
+            # Steep Spiral (reference point only - entry calculated from aircraft physics)
+            dcc.Store(id={"type": "point-store", "m_id": "steep_spiral", "role": "ref"}),
 
-            # S-Turns
-            dcc.Store(id={"type": "point-store", "m_id": "sturns", "role": "start"}),
+            # S-Turns (ref = reference point on line, bearing = second point to define line direction)
+            dcc.Store(id={"type": "point-store", "m_id": "s_turn", "role": "ref"}),
+            dcc.Store(id={"type": "point-store", "m_id": "s_turn", "role": "bearing"}),
+            dcc.Store(id="sturn-calculated-bearing"),  # Store for calculated bearing value
 
             # Turns Around a Point (center point)
-            dcc.Store(id={"type": "point-store", "m_id": "turns_point", "role": "start"}),
+            dcc.Store(id={"type": "point-store", "m_id": "turns_point", "role": "center"}),
 
-            # Rectangular Course (start point)
-            dcc.Store(id={"type": "point-store", "m_id": "rect_course", "role": "start"}),
+            # Rectangular Course (downwind edge points)
+            dcc.Store(id={"type": "point-store", "m_id": "rect_course", "role": "dw_start"}),
+            dcc.Store(id={"type": "point-store", "m_id": "rect_course", "role": "dw_end"}),
 
             # Eights on Pylons (two pylons)
             dcc.Store(id={"type": "point-store", "m_id": "pylons", "role": "pylon_a"}),
@@ -354,6 +361,9 @@ app.layout = html.Div(className="full-height-container", children=[
             dcc.Store(id={"type": "point-store", "m_id": "impossible_turn", "role": "start"}),
             dcc.Store(id="active-click-target"),
             dcc.Store(id="selected-airport-id"),
+
+            # Rectangular course calculated edge (needs to be in main layout for callback)
+            dcc.Store(id="rectcourse-calculated-edge", data={}),
 
             html.Div("© 2025 Nicholas Len, AEROEDGE. All rights reserved.",
                      className="footer", style={"paddingBottom": "10px"})
@@ -770,7 +780,7 @@ def chandelle_layout():
             className="radio-inline-group"
         ),
 
-        html.Label("Entry Altitude (ft)", className="input-label"),
+        html.Label("Entry Altitude (ft AGL)", className="input-label"),
         dcc.Input(
             id="chandelle-altitude",
             type="number",
@@ -778,9 +788,21 @@ def chandelle_layout():
             className="input-small"
         ),
 
+        html.Label("Entry Speed (KIAS)", className="input-label"),
+        dcc.Input(
+            id="chandelle-ias",
+            type="number",
+            placeholder="e.g. Va",
+            className="input-small"
+        ),
+
         html.Hr(),
 
-        html.Button("Set Entry Point", id={"type": "click-button", "m_id": "chandelle", "role": "start"}, className="green-button"),
+        html.Div([
+            html.Button("Set Entry Point", id={"type": "click-button", "m_id": "chandelle", "role": "start"}, className="green-button"),
+            html.Button("Draw Chandelle", id="chandelle-draw-btn", className="blue-button", style={"marginLeft": "10px"})
+        ], style={"display": "flex", "alignItems": "center"}),
+
         html.Div(id={"type": "click-status", "m_id": "chandelle"}, style={"marginTop": "10px", "fontStyle": "italic", "color": "#555"})
     ]
 
@@ -794,7 +816,7 @@ def lazy8_layout():
             className="input-small"
         ),
 
-        html.Label("Entry Altitude (ft)", className="input-label"),
+        html.Label("Entry Altitude (ft AGL)", className="input-label"),
         dcc.Input(
             id="lazy8-entry-altitude",
             type="number",
@@ -802,60 +824,64 @@ def lazy8_layout():
             className="input-small"
         ),
 
-        html.Label("Maneuver Symmetry / Direction", className="input-label"),
+        html.Label("Entry Speed (KIAS)", className="input-label"),
+        dcc.Input(
+            id="lazy8-ias",
+            type="number",
+            placeholder="e.g. Va",
+            className="input-small"
+        ),
+
+        html.Label("Max Bank Angle (°)", className="input-label"),
+        dcc.Input(
+            id="lazy8-bank-angle",
+            type="number",
+            value=30,
+            min=20,
+            max=40,
+            className="input-small"
+        ),
+
+        html.Label("First Turn Direction", className="input-label"),
         dcc.RadioItems(
             id="lazy8-direction-sequence",
             options=[
-                {"label": "Left → Right", "value": "left-right"},
-                {"label": "Right → Left", "value": "right-left"},
-                {"label": "Left Only", "value": "left"},
-                {"label": "Right Only", "value": "right"}
+                {"label": "Left first", "value": "left"},
+                {"label": "Right first", "value": "right"}
             ],
-            value="left-right",
+            value="left",
             inline=True,
             className="radio-inline-group"
         ),
 
         html.Hr(),
 
-        html.Button("Set Entry Point", id={"type": "click-button", "m_id": "lazy8", "role": "start"}, className="green-button"),
+        html.Div([
+            html.Button("Set Entry Point", id={"type": "click-button", "m_id": "lazy8", "role": "start"}, className="green-button"),
+            html.Button("Draw Lazy Eight", id="lazy8-draw-btn", className="blue-button", style={"marginLeft": "10px"})
+        ], style={"display": "flex", "alignItems": "center"}),
+
         html.Div(id={"type": "click-status", "m_id": "lazy8"}, style={"marginTop": "10px", "fontStyle": "italic", "color": "#555"})
     ]
 
 def steep_spiral_layout():
     return [
-        html.Label("Number of Turns", className="input-label"),
+        html.Label("Number of Turns (min 3 per FAA)", className="input-label"),
         dcc.Input(
             id="steepspiral-turns",
             type="number",
             value=3,
-            min=1,
+            min=3,
             max=10,
             step=1,
             className="input-small"
         ),
 
-        html.Label("Entry Heading (°)", className="input-label"),
-        dcc.Input(
-            id="steepspiral-entry-heading",
-            type="number",
-            value=0,
-            className="input-small"
-        ),
-
-        html.Label("Entry Altitude (ft)", className="input-label"),
+        html.Label("Entry Altitude (ft AGL)", className="input-label"),
         dcc.Input(
             id="steepspiral-altitude",
             type="number",
-            value=3000,
-            className="input-small"
-        ),
-
-        html.Label("Target Airspeed (KIAS)", className="input-label"),
-        dcc.Input(
-            id="steepspiral-airspeed",
-            type="number",
-            value=80,
+            value=5000,
             className="input-small"
         ),
 
@@ -869,70 +895,23 @@ def steep_spiral_layout():
             className="input-small"
         ),
 
-        html.Hr(),
-
-        html.Button("Set Spiral Center", id={"type": "click-button", "m_id": "steepspiral", "role": "start"}, className="green-button"),
-        html.Div(id={"type": "click-status", "m_id": "steepspiral"}, style={"marginTop": "10px", "fontStyle": "italic", "color": "#555"})
-    ]
-
-def sturns_layout():
-    return [
-        html.Label("Entry Heading (°)", className="input-label"),
-        dcc.Input(
-            id="sturns-entry-heading",
-            type="number",
-            value=0,
-            className="input-small"
-        ),
-
-        html.Label("Entry Altitude (ft)", className="input-label"),
-        dcc.Input(
-            id="sturns-altitude",
-            type="number",
-            value=1000,
-            className="input-small"
-        ),
-
-        html.Label("Turn Sequence", className="input-label"),
-        dcc.RadioItems(
-            id="sturns-sequence",
+        html.Label("Entry Position (clock)", className="input-label"),
+        dcc.Dropdown(
+            id="steepspiral-clock-position",
             options=[
-                {"label": "Left → Right", "value": "left-right"},
-                {"label": "Right → Left", "value": "right-left"}
+                {"label": "12 o'clock (North of ref)", "value": "12"},
+                {"label": "3 o'clock (East of ref)", "value": "3"},
+                {"label": "6 o'clock (South of ref)", "value": "6"},
+                {"label": "9 o'clock (West of ref)", "value": "9"},
             ],
-            value="left-right",
-            inline=True,
-            className="radio-inline-group"
+            value="12",
+            clearable=False,
+            className="dropdown-small"
         ),
-
-        html.Label("Number of Arc Pairs", className="input-label"),
-        dcc.Input(
-            id="sturns-arcs",
-            type="number",
-            value=2,
-            min=1,
-            max=5,
-            step=1,
-            className="input-small"
-        ),
-
-        html.Hr(),
-
-        html.Button("Set Entry Point", id={"type": "click-button", "m_id": "sturns", "role": "start"}, className="green-button"),
-        html.Div(id={"type": "click-status", "m_id": "sturns"}, style={"marginTop": "10px", "fontStyle": "italic", "color": "#555"})
-    ]
-
-def turns_point_layout():
-    return [
-        html.Label("Ground Speed (kt)", className="input-label"),
-        dcc.Input(id="global-groundspeed", type="number", value=90, className="input-small"),
-
-        html.Label("Calculated Pivotal Altitude (ft)", className="input-label"),
-        html.Div(id="global-pivotal-altitude", className="weight-box", style={"marginBottom": "10px"}),
 
         html.Label("Turn Direction", className="input-label"),
         dcc.RadioItems(
-            id="turns-point-direction",
+            id="steepspiral-direction",
             options=[
                 {"label": "Left", "value": "left"},
                 {"label": "Right", "value": "right"}
@@ -942,64 +921,460 @@ def turns_point_layout():
             className="radio-inline-group"
         ),
 
-        html.Label("Entry Heading (°)", className="input-label"),
+        html.Hr(),
+
+        html.Button("Set Reference Point", id={"type": "click-button", "m_id": "steep_spiral", "role": "ref"}, className="green-button"),
+
+        html.Div(id={"type": "click-status", "m_id": "steep_spiral"}, style={"marginTop": "10px", "fontStyle": "italic", "color": "#555"}),
+
+        html.Div([
+            html.Button("Draw Steep Spiral", id="steepspiral-draw-btn", className="blue-button", style={"marginTop": "10px"})
+        ]),
+
+        # Time slider for scrubbing through hover points
+        html.Div(id="steepspiral-slider-container", children=[
+            html.Label("Time Scrubber", className="input-label", style={"marginTop": "15px"}),
+            dcc.Slider(
+                id="steepspiral-time-slider",
+                min=0,
+                max=100,
+                step=1,
+                value=0,
+                marks={0: "Start", 100: "End"},
+                tooltip={"placement": "bottom", "always_visible": False},
+            ),
+        ], style={"display": "none"}),  # Hidden until drawing is complete
+
+        # Stores for hover data and path
+        dcc.Store(id="steepspiral-hover-store", data=[]),
+        dcc.Store(id="steepspiral-path-store", data=[]),
+
+        # Warnings display area
+        html.Div(id="steepspiral-warnings", style={"marginTop": "10px", "padding": "10px", "borderRadius": "5px"})
+    ]
+
+def s_turn_layout():
+    """S-Turns across a reference line - ground reference maneuver."""
+    return [
+        # Reference Line Selection (interactive two-click)
+        html.Label("Reference Line", className="input-label"),
+        html.Div([
+            html.Button(
+                "1. Click Reference Point",
+                id={"type": "click-button", "m_id": "s_turn", "role": "ref"},
+                className="green-button",
+                style={"marginRight": "10px"}
+            ),
+            html.Button(
+                "2. Click Along Line",
+                id={"type": "click-button", "m_id": "s_turn", "role": "bearing"},
+                className="green-button"
+            ),
+        ], style={"marginBottom": "5px"}),
+
+        html.Div([
+            html.Span("Bearing: ", style={"fontWeight": "bold"}),
+            dcc.Input(
+                id="sturn-line-bearing",
+                type="number",
+                value=90,
+                min=0,
+                max=360,
+                className="input-small",
+                style={"width": "70px", "display": "inline-block"}
+            ),
+            html.Span("°", style={"marginLeft": "2px"}),
+            html.Span(" (auto-calculated from clicks, or enter manually)",
+                      style={"marginLeft": "10px", "fontSize": "11px", "color": "#666"})
+        ], style={"marginBottom": "5px"}),
+
+        html.Div(id={"type": "click-status", "m_id": "s_turn"},
+                 style={"marginTop": "5px", "marginBottom": "10px", "fontStyle": "italic", "color": "#555"}),
+
+        html.Hr(),
+
+        html.Label("Altitude (ft AGL)", className="input-label"),
         dcc.Input(
-            id="turns-point-entry-heading",
+            id="sturn-altitude",
             type="number",
-            value=0,
+            value=800,
+            min=400,
+            max=1500,
+            className="input-small"
+        ),
+
+        html.Label("Airspeed (KIAS)", className="input-label"),
+        dcc.Input(
+            id="sturn-ias",
+            type="number",
+            value=100,
+            className="input-small"
+        ),
+
+        html.Label("Bank Angle (°)", className="input-label"),
+        dcc.Input(
+            id="sturn-bank-angle",
+            type="number",
+            value=35,
+            min=20,
+            max=45,
+            className="input-small"
+        ),
+
+        html.Label("Number of S-Turns", className="input-label"),
+        dcc.Input(
+            id="sturn-num-turns",
+            type="number",
+            value=2,
+            min=1,
+            max=5,
+            step=1,
+            className="input-small"
+        ),
+
+        html.Label("Entry Side (of line)", className="input-label"),
+        dcc.RadioItems(
+            id="sturn-entry-side",
+            options=[
+                {"label": "Left", "value": "left"},
+                {"label": "Right", "value": "right"}
+            ],
+            value="left",
+            inline=True,
+            className="radio-inline-group"
+        ),
+
+        html.Label("First Turn Direction", className="input-label"),
+        dcc.RadioItems(
+            id="sturn-first-turn",
+            options=[
+                {"label": "Left", "value": "left"},
+                {"label": "Right", "value": "right"}
+            ],
+            value="right",
+            inline=True,
+            className="radio-inline-group"
+        ),
+
+        html.Hr(),
+
+        html.Div([
+            html.Button("Draw S-Turns", id="sturn-draw-btn", className="blue-button")
+        ]),
+
+        # Time slider for scrubbing through hover points
+        html.Div(id="sturn-slider-container", children=[
+            html.Label("Time Scrubber", className="input-label", style={"marginTop": "15px"}),
+            dcc.Slider(
+                id="sturn-time-slider",
+                min=0,
+                max=100,
+                step=1,
+                value=0,
+                marks={0: "Start", 100: "End"},
+                tooltip={"placement": "bottom", "always_visible": False},
+            ),
+        ], style={"display": "none"}),
+
+        # Stores for hover data and path
+        dcc.Store(id="sturn-hover-store", data=[]),
+        dcc.Store(id="sturn-path-store", data=[]),
+
+        # Info display area
+        html.Div(id="sturn-info", style={"marginTop": "10px", "padding": "10px", "borderRadius": "5px"})
+    ]
+
+def turns_point_layout():
+    """Turns Around a Point - ground reference maneuver."""
+    return [
+        # Center Point Selection
+        html.Label("Center Point (Reference)", className="input-label"),
+        html.Button(
+            "Click to Set Center Point",
+            id={"type": "click-button", "m_id": "turns_point", "role": "center"},
+            className="green-button",
+            style={"marginBottom": "5px"}
+        ),
+        html.Div(id={"type": "click-status", "m_id": "turns_point"},
+                 style={"marginTop": "5px", "marginBottom": "10px", "fontStyle": "italic", "color": "#555"}),
+
+        html.Hr(),
+
+        html.Label("Altitude (ft AGL)", className="input-label"),
+        dcc.Input(
+            id="turnspoint-altitude",
+            type="number",
+            value=800,
+            min=400,
+            max=1500,
+            className="input-small"
+        ),
+
+        html.Label("Airspeed (KIAS)", className="input-label"),
+        dcc.Input(
+            id="turnspoint-ias",
+            type="number",
+            value=100,
+            className="input-small"
+        ),
+
+        html.Label("Orbit Radius (nm)", className="input-label"),
+        dcc.Input(
+            id="turnspoint-radius",
+            type="number",
+            value=0.25,
+            min=0.1,
+            max=1.0,
+            step=0.05,
+            className="input-small"
+        ),
+        html.Span("~1500 ft typical", style={"marginLeft": "5px", "fontSize": "11px", "color": "#666"}),
+
+        html.Label("Number of Turns", className="input-label"),
+        dcc.Input(
+            id="turnspoint-num-turns",
+            type="number",
+            value=2,
+            min=1,
+            max=5,
+            step=1,
+            className="input-small"
+        ),
+
+        html.Label("Turn Direction", className="input-label"),
+        dcc.RadioItems(
+            id="turnspoint-direction",
+            options=[
+                {"label": "Left", "value": "left"},
+                {"label": "Right", "value": "right"}
+            ],
+            value="left",
+            inline=True,
+            className="radio-inline-group"
+        ),
+
+        html.Label("Entry Heading (° - leave blank for downwind)", className="input-label"),
+        dcc.Input(
+            id="turnspoint-entry-heading",
+            type="number",
+            placeholder="Auto (downwind)",
             className="input-small"
         ),
 
         html.Hr(),
 
-        html.Button("Set Center Point", id={"type": "click-button", "m_id": "turns_point", "role": "start"}, className="green-button"),
-        html.Div(id={"type": "click-status", "m_id": "turns_point"}, style={"marginTop": "10px", "fontStyle": "italic", "color": "#555"})
+        html.Div([
+            html.Button("Draw Turns Around Point", id="turnspoint-draw-btn", className="blue-button")
+        ]),
+
+        # Time slider for scrubbing through hover points
+        html.Div(id="turnspoint-slider-container", children=[
+            html.Label("Time Scrubber", className="input-label", style={"marginTop": "15px"}),
+            dcc.Slider(
+                id="turnspoint-time-slider",
+                min=0,
+                max=100,
+                step=1,
+                value=0,
+                marks={0: "Start", 100: "End"},
+                tooltip={"placement": "bottom", "always_visible": False},
+            ),
+        ], style={"display": "none"}),
+
+        # Stores for hover data and path
+        dcc.Store(id="turnspoint-hover-store", data=[]),
+        dcc.Store(id="turnspoint-path-store", data=[]),
+        dcc.Store(id="turnspoint-warnings-store", data={}),
+
+        # Info display area
+        html.Div(id="turnspoint-info", style={"marginTop": "10px", "padding": "10px", "borderRadius": "5px"})
     ]
 
 def rect_course_layout():
+    """Rectangular Course - ground reference maneuver simulating traffic pattern."""
     return [
-        html.Label("Entry Altitude (ft)", className="input-label"),
+        # Two-click downwind leg definition
+        html.Label("Define Downwind Leg", className="input-label"),
+        html.Div([
+            html.Button(
+                "1. Click Downwind Start",
+                id={"type": "click-button", "m_id": "rect_course", "role": "dw_start"},
+                className="green-button",
+                style={"marginRight": "10px"}
+            ),
+            html.Button(
+                "2. Click Downwind End",
+                id={"type": "click-button", "m_id": "rect_course", "role": "dw_end"},
+                className="green-button"
+            ),
+        ], style={"marginBottom": "5px"}),
+
+        html.Div([
+            html.Span("Downwind Length: ", style={"fontWeight": "bold"}),
+            html.Span(id="rectcourse-edge-length", children="-- nm"),
+            html.Span(" | Track: ", style={"fontWeight": "bold", "marginLeft": "15px"}),
+            html.Span(id="rectcourse-edge-bearing", children="--°"),
+        ], style={"marginTop": "5px", "marginBottom": "5px", "fontSize": "13px"}),
+
+        html.Div(id={"type": "click-status", "m_id": "rect_course"},
+                 style={"marginTop": "5px", "marginBottom": "10px", "fontStyle": "italic", "color": "#555"}),
+
+        html.Hr(),
+
+        html.Label("Altitude (ft AGL)", className="input-label"),
         dcc.Input(
             id="rectcourse-altitude",
             type="number",
-            value=1000,
+            value=800,
+            min=400,
+            max=1500,
+            className="input-small"
+        ),
+
+        html.Label("Airspeed (KIAS)", className="input-label"),
+        dcc.Input(
+            id="rectcourse-ias",
+            type="number",
+            value=95,
+            className="input-small"
+        ),
+
+        html.Label("Lateral Offset (nm)", className="input-label"),
+        dcc.Input(
+            id="rectcourse-width",
+            type="number",
+            value=0.75,
+            min=0.1,
+            max=1.5,
+            step=0.05,
+            className="input-small"
+        ),
+        html.Span("distance between downwind & upwind legs", style={"marginLeft": "5px", "fontSize": "11px", "color": "#666"}),
+
+        html.Label("Pattern Direction", className="input-label"),
+        dcc.RadioItems(
+            id="rectcourse-direction",
+            options=[
+                {"label": "Left", "value": "left"},
+                {"label": "Right", "value": "right"}
+            ],
+            value="left",
+            inline=True,
+            className="radio-inline-group"
+        ),
+
+        html.Label("Number of Circuits", className="input-label"),
+        dcc.Input(
+            id="rectcourse-circuits",
+            type="number",
+            value=1,
+            min=1,
+            max=3,
+            step=1,
             className="input-small"
         ),
 
         html.Hr(),
 
-        html.Button("Draw Rectangular Course", id="rectcourse-draw-btn", className="green-button"),
-        html.Button("Set Start Point", id={"type": "click-button", "m_id": "rectcourse", "role": "start"}, className="green-button", style={"marginTop": "10px"}),
-        html.Div(id="rectcourse-heading-selector", children=[], style={"marginTop": "12px"}),
-        html.Div(id={"type": "click-status", "m_id": "rectcourse"}, style={"marginTop": "10px", "fontStyle": "italic", "color": "#555"})
+        html.Div([
+            html.Button("Draw Rectangular Course", id="rectcourse-draw-btn", className="blue-button")
+        ]),
+
+        # Time slider for scrubbing through hover points
+        html.Div(id="rectcourse-slider-container", children=[
+            html.Label("Time Scrubber", className="input-label", style={"marginTop": "15px"}),
+            dcc.Slider(
+                id="rectcourse-time-slider",
+                min=0,
+                max=100,
+                step=1,
+                value=0,
+                marks={0: "Start", 100: "End"},
+                tooltip={"placement": "bottom", "always_visible": False},
+            ),
+        ], style={"display": "none"}),
+
+        # Stores for hover data, path, and calculated values
+        dcc.Store(id="rectcourse-hover-store", data=[]),
+        dcc.Store(id="rectcourse-path-store", data=[]),
+        dcc.Store(id="rectcourse-warnings-store", data={}),
+        # Note: rectcourse-calculated-edge is in main layout (required for callback)
+
+        # Info display area
+        html.Div(id="rectcourse-info", style={"marginTop": "10px", "padding": "10px", "borderRadius": "5px"})
     ]
 
 def pylons_layout():
+    """Eights on Pylons - commercial pilot maneuver with integrated pivotal altitude calculator."""
     return [
-        html.Label("Ground Speed (kt)", className="input-label"),
-        dcc.Input(id="global-groundspeed", type="number", value=90, className="input-small"),
+        # Explanation of the pivotal altitude calculation
+        html.Div([
+            html.Strong("Pivotal Altitude Calculator"),
+            html.P("Altitude is automatically calculated based on groundspeed using PA = GS²/11.3",
+                   style={"fontSize": "12px", "color": "#666", "margin": "4px 0 10px 0"}),
+        ], style={"backgroundColor": "#e8f4e8", "padding": "8px", "borderRadius": "4px", "marginBottom": "12px"}),
 
-        html.Label("Calculated Pivotal Altitude (ft)", className="input-label"),
-        html.Div(id="global-pivotal-altitude", className="weight-box", style={"marginBottom": "10px"}),
+        html.Label("Indicated Airspeed (KIAS)", className="input-label"),
+        dcc.Input(id="pylons-ias", type="number", value=100, min=60, max=150, className="input-small"),
 
-        html.Label("Entry Altitude (ft)", className="input-label"),
-        dcc.Input(
-            id="pylons-altitude",
-            type="number",
-            value=1200,
-            className="input-small"
+        html.Label("Number of Figure-8s", className="input-label"),
+        dcc.Dropdown(
+            id="pylons-num-eights",
+            className="dropdown",
+            options=[
+                {"label": "1", "value": 1},
+                {"label": "2", "value": 2},
+                {"label": "3", "value": 3},
+            ],
+            value=1,
+            clearable=False,
+            style={"width": "80px"}
         ),
 
-        html.Div("Click to select pylon locations on the map:", style={
+        html.Label("Entry Direction", className="input-label"),
+        dcc.Dropdown(
+            id="pylons-entry-direction",
+            className="dropdown",
+            options=[
+                {"label": "Downwind (recommended)", "value": "downwind"},
+                {"label": "Upwind", "value": "upwind"},
+            ],
+            value="downwind",
+            clearable=False,
+        ),
+
+        html.Div("Click to set pylon locations (0.5-1.0 NM apart, perpendicular to wind):", style={
             "fontWeight": "bold",
             "marginTop": "12px"
         }),
 
-        html.Button("Set Pylon A", id={"type": "click-button", "m_id": "pylons", "role": "pylon_a"}, className="green-button"),
-        html.Button("Set Pylon B", id={"type": "click-button", "m_id": "pylons", "role": "pylon_b"}, className="green-button", style={"marginLeft": "10px"}),
+        html.Div([
+            html.Button("Set Pylon 1", id={"type": "click-button", "m_id": "pylons", "role": "pylon_a"}, className="green-button"),
+            html.Button("Set Pylon 2", id={"type": "click-button", "m_id": "pylons", "role": "pylon_b"}, className="green-button", style={"marginLeft": "10px"}),
+        ]),
         html.Div(id={"type": "click-status", "m_id": "pylons"}, style={"marginTop": "10px", "fontStyle": "italic", "color": "#555"}),
-        html.Label("Start Heading (Select One)", className="input-label", style={"marginTop": "12px"}),
-        html.Div(id="pylons-heading-options", children=[])
+
+        html.Div(style={"marginTop": "15px"}),
+        html.Button("Draw Eights on Pylons", id="pylons-draw-btn", className="blue-button"),
+
+        # Time scrubber (hidden until path is drawn)
+        html.Div(id="pylons-slider-container", style={"display": "none"}, children=[
+            html.Label("Time Scrubber", className="input-label"),
+            dcc.Slider(
+                id="pylons-time-slider",
+                min=0,
+                max=100,
+                step=1,
+                value=0,
+                marks={},
+                tooltip={"placement": "bottom", "always_visible": False}
+            ),
+        ]),
+        dcc.Store(id="pylons-hover-store", data=[]),
+        dcc.Store(id="pylons-path-store", data=[]),
+
+        # Info panel
+        html.Div(id="pylons-info", style={"marginTop": "10px", "padding": "10px", "borderRadius": "5px"})
     ]
 
 # === Utility Callbacks ===
@@ -1118,8 +1493,8 @@ def render_maneuver_layout(maneuver, airport_id):
         return lazy8_layout()
     elif maneuver == "steep_spiral":
         return steep_spiral_layout()
-    elif maneuver == "sturns":
-        return sturns_layout()
+    elif maneuver == "s_turn":
+        return s_turn_layout()
     elif maneuver == "turns_point":
         return turns_point_layout()
     elif maneuver == "rect_course":
@@ -1308,6 +1683,14 @@ def write_point_to_scoped_store(click, target, store_ids, store_data, layer_chil
         color = "red"
     elif role in ("impact", "failure", "engine_failure"):
         color = "black"
+    elif role in ("ref", "reference", "center"):
+        color = "blue"
+    elif role in ("entry", "start"):
+        color = "green"
+    elif role == "dw_start":
+        color = "green"
+    elif role == "dw_end":
+        color = "orange"
 
     marker = dl.CircleMarker(
         id=marker_id,
@@ -2197,6 +2580,7 @@ def draw_engineout(
     State("aircraft-select", "value"),
     State("engine-select", "value"),
     State("runtime-total-weight-lb", "data"),
+    State("selected-airport-id", "data"),
     prevent_initial_call=True
 )
 def draw_steep_turn(
@@ -2214,7 +2598,8 @@ def draw_steep_turn(
     wind_speed,
     aircraft_name,
     engine_name,
-    runtime_weight
+    runtime_weight,
+    selected_airport_id
 ):
     if not n_clicks or not start or not aircraft_name or not engine_name:
         raise PreventUpdate
@@ -2255,34 +2640,2342 @@ def draw_steep_turn(
     ac_rt = dict(ac)
     ac_rt["total_weight_lb"] = float(weight_lbs)
 
+    # Get airport elevation for TAS calculation
+    selected_airport = next((a for a in airport_data if a.get("id") == selected_airport_id), None)
+    field_elev_ft = float(selected_airport.get("elevation_ft", 0.0)) if selected_airport else 0.0
+
+    # Parse altimeter setting
+    altimeter_val = float(altimeter_inhg) if altimeter_inhg not in [None, "", "null"] else 29.92
+
     path, hover = simulate_steep_turn(
         entry_point={"lat": start["lat"], "lon": start["lon"]},
         entry_heading_deg=float(entry_heading),
         altitude_ft=float(altitude_ft),
         bank_angle_deg=float(bank_angle),
         turn_sequence=sequence,
-        tas_knots=float(entry_ias),
+        ias_knots=float(entry_ias),
         wind_dir_deg=float(wind_dir) if wind_dir not in [None, "", "null"] else 0.0,
         wind_speed_kt=float(wind_speed) if wind_speed not in [None, "", "null"] else 0.0,
-        # If you later wire weight into simulate_steep_turn, you already have it here:
-        # ac=ac_rt,
-        # weight_lbs=float(weight_lbs),
-        # oat_c=float(oat_c),
-        # altimeter_inhg=float(altimeter_inhg),
+        oat_c=float(oat_c),
+        altimeter_inhg=float(altimeter_val),
+        field_elev_ft=float(field_elev_ft),
     )
 
-    return [render_hover_polyline(path, hover, color="blue", weight=3)]
+    if not path or not hover:
+        raise PreventUpdate
+
+    # Build elements matching other maneuvers' style
+    # Red polyline for the path
+    path_line = dl.Polyline(positions=path, color="red", weight=3)
+
+    # Hover markers (every 5th point to avoid clutter)
+    hover_markers = []
+    for i, pt in enumerate(hover):
+        if i % 5 != 0 or i >= len(path):
+            continue
+
+        tooltip_children = [
+            html.Div(f"{pt.get('alt', 0):.0f} ft AGL"),
+            html.Div(f"TAS: {pt.get('tas', 0):.0f} kt"),
+            html.Div(f"GS: {pt.get('gs', pt.get('tas', 0)):.0f} kt"),
+            html.Div(f"Time: {pt.get('time', 0):.1f} sec"),
+            html.Div(f"AOB: {pt.get('aob', 0):.1f}°"),
+            html.Div(f"VS: {pt.get('vs', 0):.0f} fpm"),
+            html.Div(f"Track: {pt.get('track', 0):.0f}°"),
+            html.Div(f"Heading: {pt.get('heading', 0):.0f}°"),
+            html.Div(f"Drift: {pt.get('drift', 0):+.1f}°"),
+            html.Div(f"Segment: {pt.get('segment', '')}"),
+        ]
+
+        hover_markers.append(
+            dl.CircleMarker(
+                center=path[i],
+                radius=3,
+                color="red",
+                fill=True,
+                fillOpacity=0.8,
+                children=dl.Tooltip(tooltip_children),
+            )
+        )
+
+    # Start marker (green, larger)
+    start_marker = dl.CircleMarker(
+        center=[start["lat"], start["lon"]],
+        radius=7,
+        color="green",
+        fill=True,
+        fillOpacity=1.0,
+        children=dl.Tooltip("Start Point"),
+    )
+
+    # End marker (red, larger)
+    end_marker = dl.CircleMarker(
+        center=path[-1],
+        radius=7,
+        color="red",
+        fill=True,
+        fillOpacity=1.0,
+        children=dl.Tooltip("End Point"),
+    )
+
+    elements = [start_marker, end_marker] + hover_markers + [path_line]
+
+    return elements
+
+
+# === Chandelle Rendering Callback ===
+@app.callback(
+    Output("layer", "children", allow_duplicate=True),
+    Input("chandelle-draw-btn", "n_clicks"),
+    State({"type": "point-store", "m_id": "chandelle", "role": "start"}, "data"),
+    State("chandelle-entry-heading", "value"),
+    State("chandelle-bank-angle", "value"),
+    State("chandelle-direction", "value"),
+    State("chandelle-altitude", "value"),
+    State("chandelle-ias", "value"),
+    State("env-oat", "value"),
+    State("env-altimeter", "value"),
+    State("env-wind-dir", "value"),
+    State("env-wind-speed", "value"),
+    State("aircraft-select", "value"),
+    State("selected-airport-id", "data"),
+    State("runtime-total-weight-lb", "data"),
+    prevent_initial_call=True
+)
+def draw_chandelle(
+    n_clicks,
+    start,
+    entry_heading,
+    bank_angle,
+    direction,
+    entry_alt_ft,
+    entry_ias,
+    oat_f,
+    altimeter_inhg,
+    wind_dir,
+    wind_speed,
+    aircraft_name,
+    selected_airport_id,
+    weight_lb
+):
+    if not n_clicks or not start or not aircraft_name:
+        raise PreventUpdate
+
+    ac = aircraft_data[aircraft_name]
+
+    # Use Va as default entry IAS if user left blank
+    if int(ac.get("engine_count", 1)) > 1:
+        va = float((ac.get("multi_engine_limits", {}) or {}).get("va", 100))
+    else:
+        va = float((ac.get("single_engine_limits", {}) or {}).get("va", 100))
+    entry_ias = float(entry_ias) if entry_ias not in [None, "", "null"] else float(va)
+
+    # Parse altitude
+    altitude_ft = float(entry_alt_ft) if entry_alt_ft not in [None, "", "null"] else 3000.0
+
+    # OAT F -> C
+    try:
+        oat_c = (float(oat_f) - 32.0) * 5.0 / 9.0
+    except Exception:
+        oat_c = (52.0 - 32.0) * 5.0 / 9.0
+
+    # Get airport elevation
+    selected_airport = next((a for a in airport_data if a.get("id") == selected_airport_id), None)
+    field_elev_ft = float(selected_airport.get("elevation_ft", 0.0)) if selected_airport else 0.0
+
+    # Parse altimeter
+    altimeter_val = float(altimeter_inhg) if altimeter_inhg not in [None, "", "null"] else 29.92
+
+    # Parse bank angle
+    bank = float(bank_angle) if bank_angle not in [None, "", "null"] else 30.0
+
+    # Parse heading
+    heading = float(entry_heading) if entry_heading not in [None, "", "null"] else 0.0
+
+    # Get weight (use runtime total weight or fall back to max takeoff)
+    weight = float(weight_lb) if weight_lb not in [None, "", "null"] else ac.get("max_takeoff_weight", 2300.0)
+
+    path, hover = simulate_chandelle(
+        entry_point={"lat": start["lat"], "lon": start["lon"]},
+        entry_heading_deg=heading,
+        turn_direction=direction,
+        entry_altitude_ft=altitude_ft,
+        entry_ias_knots=entry_ias,
+        bank_angle_deg=bank,
+        wind_dir_deg=float(wind_dir) if wind_dir not in [None, "", "null"] else 0.0,
+        wind_speed_kt=float(wind_speed) if wind_speed not in [None, "", "null"] else 0.0,
+        oat_c=oat_c,
+        altimeter_inhg=altimeter_val,
+        field_elev_ft=field_elev_ft,
+        ac=ac,
+        weight_lb=weight,
+    )
+
+    if not path or not hover:
+        raise PreventUpdate
+
+    # Build elements matching other maneuvers' style
+    path_line = dl.Polyline(positions=path, color="red", weight=3)
+
+    # Hover markers (every 5th point)
+    hover_markers = []
+    for i, pt in enumerate(hover):
+        if i % 5 != 0 or i >= len(path):
+            continue
+
+        tooltip_children = [
+            html.Div(f"{pt.get('alt', 0):.0f} ft AGL"),
+            html.Div(f"IAS: {pt.get('ias', 0):.0f} kt"),
+            html.Div(f"TAS: {pt.get('tas', 0):.0f} kt"),
+            html.Div(f"GS: {pt.get('gs', pt.get('tas', 0)):.0f} kt"),
+            html.Div(f"Time: {pt.get('time', 0):.1f} sec"),
+            html.Div(f"AOB: {pt.get('aob', 0):.1f}°"),
+            html.Div(f"Pitch: {pt.get('pitch', 0):.1f}°"),
+            html.Div(f"VS: {pt.get('vs', 0):.0f} fpm"),
+            html.Div(f"Heading: {pt.get('heading', 0):.0f}°"),
+            html.Div(f"Vs (Pwr On): {pt.get('vs_ref', 0):.0f} kt"),
+            html.Div(f"Stall Margin: +{pt.get('speed_margin', 0):.0f} kt"),
+            html.Div(f"Power: {pt.get('power', 'N/A')} ({pt.get('hp', 0):.0f} HP)"),
+            html.Div(f"Segment: {pt.get('segment', '')}"),
+        ]
+
+        hover_markers.append(
+            dl.CircleMarker(
+                center=path[i],
+                radius=3,
+                color="red",
+                fill=True,
+                fillOpacity=0.8,
+                children=dl.Tooltip(tooltip_children),
+            )
+        )
+
+    # Start marker (green)
+    start_marker = dl.CircleMarker(
+        center=[start["lat"], start["lon"]],
+        radius=7,
+        color="green",
+        fill=True,
+        fillOpacity=1.0,
+        children=dl.Tooltip("Entry Point"),
+    )
+
+    # End marker (red)
+    end_marker = dl.CircleMarker(
+        center=path[-1],
+        radius=7,
+        color="red",
+        fill=True,
+        fillOpacity=1.0,
+        children=dl.Tooltip(f"Exit: {hover[-1].get('heading', 0):.0f}° hdg, {hover[-1].get('alt', 0):.0f} ft"),
+    )
+
+    elements = [start_marker, end_marker] + hover_markers + [path_line]
+
+    return elements
+
+
+# === Lazy Eight Rendering Callback ===
+@app.callback(
+    Output("layer", "children", allow_duplicate=True),
+    Input("lazy8-draw-btn", "n_clicks"),
+    State({"type": "point-store", "m_id": "lazy8", "role": "start"}, "data"),
+    State("lazy8-entry-heading", "value"),
+    State("lazy8-entry-altitude", "value"),
+    State("lazy8-ias", "value"),
+    State("lazy8-bank-angle", "value"),
+    State("lazy8-direction-sequence", "value"),
+    State("env-oat", "value"),
+    State("env-altimeter", "value"),
+    State("env-wind-dir", "value"),
+    State("env-wind-speed", "value"),
+    State("aircraft-select", "value"),
+    State("selected-airport-id", "data"),
+    State("runtime-total-weight-lb", "data"),
+    prevent_initial_call=True
+)
+def draw_lazy_eight(
+    n_clicks,
+    start,
+    entry_heading,
+    entry_alt_ft,
+    entry_ias,
+    bank_angle,
+    first_turn_direction,
+    oat_f,
+    altimeter_inhg,
+    wind_dir,
+    wind_speed,
+    aircraft_name,
+    selected_airport_id,
+    weight_lb
+):
+    if not n_clicks or not start or not aircraft_name:
+        raise PreventUpdate
+
+    ac = aircraft_data[aircraft_name]
+
+    # Use Va as default entry IAS if user left blank
+    if int(ac.get("engine_count", 1)) > 1:
+        va = float((ac.get("multi_engine_limits", {}) or {}).get("va", 100))
+    else:
+        va = float((ac.get("single_engine_limits", {}) or {}).get("va", 100))
+    entry_ias = float(entry_ias) if entry_ias not in [None, "", "null"] else float(va)
+
+    # Parse altitude
+    altitude_ft = float(entry_alt_ft) if entry_alt_ft not in [None, "", "null"] else 3000.0
+
+    # OAT F -> C
+    try:
+        oat_c = (float(oat_f) - 32.0) * 5.0 / 9.0
+    except Exception:
+        oat_c = (52.0 - 32.0) * 5.0 / 9.0
+
+    # Get airport elevation
+    selected_airport = next((a for a in airport_data if a.get("id") == selected_airport_id), None)
+    field_elev_ft = float(selected_airport.get("elevation_ft", 0.0)) if selected_airport else 0.0
+
+    # Parse altimeter
+    altimeter_val = float(altimeter_inhg) if altimeter_inhg not in [None, "", "null"] else 29.92
+
+    # Parse bank angle
+    bank = float(bank_angle) if bank_angle not in [None, "", "null"] else 30.0
+
+    # Parse heading
+    heading = float(entry_heading) if entry_heading not in [None, "", "null"] else 0.0
+
+    # Get weight
+    weight = float(weight_lb) if weight_lb not in [None, "", "null"] else ac.get("max_takeoff_weight", 2300.0)
+
+    path, hover = simulate_lazy_eight(
+        entry_point={"lat": start["lat"], "lon": start["lon"]},
+        entry_heading_deg=heading,
+        first_turn_direction=first_turn_direction,
+        entry_altitude_ft=altitude_ft,
+        entry_ias_knots=entry_ias,
+        max_bank_angle_deg=bank,
+        wind_dir_deg=float(wind_dir) if wind_dir not in [None, "", "null"] else 0.0,
+        wind_speed_kt=float(wind_speed) if wind_speed not in [None, "", "null"] else 0.0,
+        oat_c=oat_c,
+        altimeter_inhg=altimeter_val,
+        field_elev_ft=field_elev_ft,
+        ac=ac,
+        weight_lb=weight,
+    )
+
+    if not path or not hover:
+        raise PreventUpdate
+
+    # Build elements matching other maneuvers' style
+    path_line = dl.Polyline(positions=path, color="red", weight=3)
+
+    # Hover markers (every 5th point)
+    hover_markers = []
+    for i, pt in enumerate(hover):
+        if i % 5 != 0 or i >= len(path):
+            continue
+
+        tooltip_children = [
+            html.Div(f"{pt.get('alt', 0):.0f} ft AGL"),
+            html.Div(f"IAS: {pt.get('ias', 0):.0f} kt"),
+            html.Div(f"TAS: {pt.get('tas', 0):.0f} kt"),
+            html.Div(f"GS: {pt.get('gs', pt.get('tas', 0)):.0f} kt"),
+            html.Div(f"Time: {pt.get('time', 0):.1f} sec"),
+            html.Div(f"AOB: {pt.get('aob', 0):.1f}°"),
+            html.Div(f"Pitch: {pt.get('pitch', 0):.1f}°"),
+            html.Div(f"VS: {pt.get('vs', 0):.0f} fpm"),
+            html.Div(f"Heading: {pt.get('heading', 0):.0f}°"),
+            html.Div(f"Turn Progress: {pt.get('turn_progress', 0):.0f}°"),
+            html.Div(f"Stall Margin: +{pt.get('speed_margin', 0):.0f} kt"),
+            html.Div(f"Segment: {pt.get('segment', '')}"),
+        ]
+
+        hover_markers.append(
+            dl.CircleMarker(
+                center=path[i],
+                radius=3,
+                color="red",
+                fill=True,
+                fillOpacity=0.8,
+                children=dl.Tooltip(tooltip_children),
+            )
+        )
+
+    # Start marker (green)
+    start_marker = dl.CircleMarker(
+        center=[start["lat"], start["lon"]],
+        radius=7,
+        color="green",
+        fill=True,
+        fillOpacity=1.0,
+        children=dl.Tooltip("Entry Point"),
+    )
+
+    # End marker (red)
+    end_marker = dl.CircleMarker(
+        center=path[-1],
+        radius=7,
+        color="red",
+        fill=True,
+        fillOpacity=1.0,
+        children=dl.Tooltip(f"Exit: {hover[-1].get('heading', 0):.0f}° hdg, {hover[-1].get('alt', 0):.0f} ft"),
+    )
+
+    elements = [start_marker, end_marker] + hover_markers + [path_line]
+
+    return elements
+
+
+# === Steep Spiral Rendering Callback ===
+@app.callback(
+    Output("layer", "children", allow_duplicate=True),
+    Output("steepspiral-warnings", "children"),
+    Output("steepspiral-hover-store", "data"),
+    Output("steepspiral-path-store", "data"),
+    Output("steepspiral-slider-container", "style"),
+    Output("steepspiral-time-slider", "max"),
+    Output("steepspiral-time-slider", "marks"),
+    Output("steepspiral-time-slider", "value"),
+    Input("steepspiral-draw-btn", "n_clicks"),
+    State({"type": "point-store", "m_id": "steep_spiral", "role": "ref"}, "data"),
+    State("steepspiral-turns", "value"),
+    State("steepspiral-altitude", "value"),
+    State("steepspiral-bank-angle", "value"),
+    State("steepspiral-clock-position", "value"),
+    State("steepspiral-direction", "value"),
+    State("env-oat", "value"),
+    State("env-altimeter", "value"),
+    State("env-wind-dir", "value"),
+    State("env-wind-speed", "value"),
+    State("aircraft-select", "value"),
+    State("selected-airport-id", "data"),
+    State("runtime-total-weight-lb", "data"),
+    prevent_initial_call=True
+)
+def draw_steep_spiral(
+    n_clicks,
+    ref_point,
+    num_turns,
+    entry_alt_ft,
+    bank_angle,
+    clock_position,
+    turn_direction,
+    oat_f,
+    altimeter_inhg,
+    wind_dir,
+    wind_speed,
+    aircraft_name,
+    selected_airport_id,
+    weight_lb
+):
+    if not n_clicks or not ref_point or not aircraft_name:
+        raise PreventUpdate
+
+    ac = aircraft_data[aircraft_name]
+
+    # Parse inputs
+    num_turns = int(num_turns) if num_turns not in [None, "", "null"] else 3
+    num_turns = max(3, num_turns)  # Minimum 3 per FAA
+
+    altitude_ft = float(entry_alt_ft) if entry_alt_ft not in [None, "", "null"] else 5000.0
+    bank = float(bank_angle) if bank_angle not in [None, "", "null"] else 45.0
+    clock_pos = str(clock_position) if clock_position not in [None, "", "null"] else "12"
+
+    # OAT F -> C
+    try:
+        oat_c = (float(oat_f) - 32.0) * 5.0 / 9.0
+    except Exception:
+        oat_c = (52.0 - 32.0) * 5.0 / 9.0
+
+    # Get airport elevation
+    selected_airport = next((a for a in airport_data if a.get("id") == selected_airport_id), None)
+    field_elev_ft = float(selected_airport.get("elevation_ft", 0.0)) if selected_airport else 0.0
+
+    # Parse altimeter
+    altimeter_val = float(altimeter_inhg) if altimeter_inhg not in [None, "", "null"] else 29.92
+
+    # Get weight
+    weight = float(weight_lb) if weight_lb not in [None, "", "null"] else ac.get("max_takeoff_weight", 2300.0)
+
+    # Run simulation
+    path, hover, warnings = simulate_steep_spiral(
+        reference_point={"lat": ref_point["lat"], "lon": ref_point["lon"]},
+        clock_position=clock_pos,
+        turn_direction=turn_direction,
+        entry_altitude_ft=altitude_ft,
+        bank_angle_deg=bank,
+        num_turns=num_turns,
+        wind_dir_deg=float(wind_dir) if wind_dir not in [None, "", "null"] else 0.0,
+        wind_speed_kt=float(wind_speed) if wind_speed not in [None, "", "null"] else 0.0,
+        oat_c=oat_c,
+        altimeter_inhg=altimeter_val,
+        field_elev_ft=field_elev_ft,
+        ac=ac,
+        weight_lb=weight,
+    )
+
+    if not path or not hover:
+        raise PreventUpdate
+
+    # Get entry point from warnings (calculated by simulation)
+    entry_pt = warnings.get('entry_point', {})
+
+    # Color palette for turns (altitude-based gradient: high=green, low=red)
+    turn_colors = ["#00aa00", "#66bb00", "#aacc00", "#ddaa00", "#ff8800", "#ff5500", "#ff2200", "#cc0000", "#990000", "#660000"]
+
+    # Build path segments with altitude-based coloring
+    # Group points by turn number for distinct coloring
+    path_segments = []
+    current_turn = 1
+    segment_start = 0
+
+    for i, pt in enumerate(hover):
+        turn_num = pt.get('turn_number', 1)
+        if turn_num != current_turn or i == len(hover) - 1:
+            # End of current segment
+            end_idx = i if i == len(hover) - 1 else i
+            segment_path = path[segment_start:end_idx + 1]
+            if len(segment_path) >= 2:
+                color_idx = min(current_turn - 1, len(turn_colors) - 1)
+                path_segments.append(
+                    dl.Polyline(
+                        positions=segment_path,
+                        color=turn_colors[color_idx],
+                        weight=3,
+                        children=dl.Tooltip(f"Turn {current_turn}")
+                    )
+                )
+            segment_start = i
+            current_turn = turn_num
+
+    # Hover markers with altitude-based coloring (every 8th point)
+    hover_markers = []
+    for i, pt in enumerate(hover):
+        if i % 8 != 0 or i >= len(path):
+            continue
+
+        turn_num = pt.get('turn_number', 1)
+        color_idx = min(turn_num - 1, len(turn_colors) - 1)
+
+        tooltip_children = [
+            html.Div(f"Turn {turn_num} - {pt.get('turn_progress', 0):.0f}°", style={"fontWeight": "bold"}),
+            html.Div(f"{pt.get('alt', 0):.0f} ft AGL"),
+            html.Div(f"IAS: {pt.get('ias', 0):.0f} kt | GS: {pt.get('gs', 0):.0f} kt"),
+            html.Div(f"Time: {pt.get('time', 0):.1f} sec"),
+            html.Div(f"AOB: {pt.get('aob', 0):.1f}° | VS: {pt.get('vs', 0):.0f} fpm"),
+            html.Div(f"Hdg: {pt.get('heading', 0):.0f}° | Track: {pt.get('track', 0):.0f}°"),
+            html.Div(f"Drift: {pt.get('drift', 0):.1f}°"),
+        ]
+
+        hover_markers.append(
+            dl.CircleMarker(
+                center=path[i],
+                radius=4,
+                color=turn_colors[color_idx],
+                fill=True,
+                fillOpacity=0.9,
+                children=dl.Tooltip(tooltip_children),
+            )
+        )
+
+    # Reference point marker (blue target)
+    ref_marker = dl.CircleMarker(
+        center=[ref_point["lat"], ref_point["lon"]],
+        radius=10,
+        color="blue",
+        fill=True,
+        fillOpacity=0.5,
+        children=dl.Tooltip(f"Reference Point (Spiral Center)\nRadius: {warnings.get('orbit_radius_ft', 0):.0f} ft"),
+    )
+
+    # Entry marker (green) - calculated position
+    entry_marker = dl.CircleMarker(
+        center=[entry_pt.get('lat', path[0][0]), entry_pt.get('lon', path[0][1])],
+        radius=7,
+        color="green",
+        fill=True,
+        fillOpacity=1.0,
+        children=dl.Tooltip(f"Entry: {altitude_ft:.0f} ft AGL\nHeading: {warnings.get('entry_heading', 0):.0f}°"),
+    )
+
+    # End marker
+    end_marker = dl.CircleMarker(
+        center=path[-1],
+        radius=7,
+        color="red",
+        fill=True,
+        fillOpacity=1.0,
+        children=dl.Tooltip(f"Exit: {warnings.get('final_altitude_agl', 0):.0f} ft AGL"),
+    )
+
+    elements = [ref_marker, entry_marker, end_marker] + hover_markers + path_segments
+
+    # Build warnings display
+    warning_elements = []
+
+    # Ground impact warning (critical)
+    if warnings.get('ground_impact'):
+        warning_elements.append(
+            html.Div([
+                html.Strong("⚠️ GROUND IMPACT: "),
+                html.Span("Aircraft would impact terrain before completing the maneuver. "),
+                html.Span(f"Suggested minimum start altitude: {warnings.get('suggested_min_start_alt', 0):.0f} ft AGL"),
+            ], style={"color": "white", "backgroundColor": "#dc3545", "padding": "8px", "borderRadius": "4px", "marginBottom": "5px"})
+        )
+
+    # Below minimum warning
+    elif warnings.get('below_minimum'):
+        warning_elements.append(
+            html.Div([
+                html.Strong("⚠️ BELOW MINIMUM: "),
+                html.Span(f"Final altitude {warnings.get('final_altitude_agl', 0):.0f} ft AGL is below 1,500 ft AGL minimum. "),
+                html.Span(f"Suggested minimum start altitude: {warnings.get('suggested_min_start_alt', 0):.0f} ft AGL"),
+            ], style={"color": "#856404", "backgroundColor": "#fff3cd", "padding": "8px", "borderRadius": "4px", "marginBottom": "5px"})
+        )
+
+    # Stats display with turn color legend
+    turn_legend = " | ".join([f"Turn {i+1}" for i in range(min(num_turns, len(turn_colors)))])
+    warning_elements.append(
+        html.Div([
+            html.Div(f"Turns completed: {warnings.get('turns_completed', 0)} of {num_turns}"),
+            html.Div(f"Orbit radius: {warnings.get('orbit_radius_ft', 0):.0f} ft ({warnings.get('orbit_radius_nm', 0):.2f} nm)"),
+            html.Div(f"Final altitude: {warnings.get('final_altitude_agl', 0):.0f} ft AGL"),
+            html.Div(f"Altitude loss per turn: ~{warnings.get('altitude_per_turn', 0):.0f} ft"),
+            html.Div(f"Suggested min start alt: {warnings.get('suggested_min_start_alt', 0):.0f} ft AGL"),
+            html.Hr(style={"margin": "5px 0"}),
+            html.Div("Colors: Green (high) → Red (low altitude)", style={"fontSize": "12px", "fontStyle": "italic"}),
+            html.Div("Use the Time Scrubber to view flight data at each point", style={"fontSize": "12px", "fontStyle": "italic", "marginTop": "5px"}),
+        ], style={"color": "#333", "backgroundColor": "#e9ecef", "padding": "8px", "borderRadius": "4px"})
+    )
+
+    # Prepare slider configuration
+    num_points = len(hover)
+    slider_max = max(0, num_points - 1)
+
+    # Create marks at key intervals (start, each turn boundary, end)
+    slider_marks = {0: "Start"}
+    if slider_max > 0:
+        slider_marks[slider_max] = "End"
+        # Add marks at approximate turn boundaries
+        for i, pt in enumerate(hover):
+            if pt.get('turn_progress', 0) < 5 and pt.get('turn_number', 1) > 1:
+                turn_num = pt.get('turn_number', 1)
+                slider_marks[i] = f"T{turn_num}"
+
+    # Show slider container
+    slider_style = {"display": "block", "marginTop": "10px"}
+
+    return (
+        elements,
+        warning_elements,
+        hover,  # Store hover data
+        path,   # Store path data
+        slider_style,
+        slider_max,
+        slider_marks,
+        0,  # Reset slider to start
+    )
+
 
 from dash import no_update
 
 from dash import callback, Input, Output, State, ctx
 from dash.exceptions import PreventUpdate
 
+
+# === S-Turn Reference Line Bearing Calculation ===
+@app.callback(
+    Output("sturn-calculated-bearing", "data"),
+    Output("layer", "children", allow_duplicate=True),
+    Input({"type": "point-store", "m_id": "s_turn", "role": "ref"}, "data"),
+    Input({"type": "point-store", "m_id": "s_turn", "role": "bearing"}, "data"),
+    State("layer", "children"),
+    State("maneuver-select", "value"),
+    prevent_initial_call=True
+)
+def calculate_sturn_bearing_and_preview(ref_point, bearing_point, layer_children, current_maneuver):
+    """
+    Calculate bearing from reference point to bearing point and draw a preview line.
+    The reference line extends in both directions from the reference point.
+    """
+    from physics import calculate_initial_compass_bearing, point_from
+
+    # Only run this callback when S-turn maneuver is selected
+    if current_maneuver != "s_turn":
+        raise PreventUpdate
+
+    # Remove any existing S-turn reference line preview
+    if layer_children is None:
+        layer_children = []
+    layer_children = [c for c in layer_children if not (isinstance(c, dict) and c.get('props', {}).get('id') == 'sturn-ref-line-preview')]
+
+    # If we don't have both points, just return current state
+    if not ref_point or not isinstance(ref_point, dict) or ref_point.get('lat') is None:
+        return no_update, layer_children
+
+    ref_lat = ref_point['lat']
+    ref_lon = ref_point['lon']
+
+    # If we have a bearing point, calculate the bearing
+    if bearing_point and isinstance(bearing_point, dict) and bearing_point.get('lat') is not None:
+        bearing_lat = bearing_point['lat']
+        bearing_lon = bearing_point['lon']
+
+        # Calculate bearing from ref to bearing point
+        from geopy import Point as GeoPoint
+        ref_geo = GeoPoint(ref_lat, ref_lon)
+        bearing_geo = GeoPoint(bearing_lat, bearing_lon)
+        calculated_bearing = calculate_initial_compass_bearing(ref_geo, bearing_geo)
+        calculated_bearing = round(calculated_bearing, 1)
+
+        # Draw a reference line extending in both directions (about 1 nm each way)
+        line_length_nm = 1.0
+        pt_forward = point_from(ref_geo, calculated_bearing, line_length_nm)
+        pt_backward = point_from(ref_geo, (calculated_bearing + 180) % 360, line_length_nm)
+
+        # Create the preview line
+        preview_line = dl.Polyline(
+            id='sturn-ref-line-preview',
+            positions=[
+                [pt_backward.latitude, pt_backward.longitude],
+                [ref_lat, ref_lon],
+                [pt_forward.latitude, pt_forward.longitude]
+            ],
+            color="#ff6600",
+            weight=3,
+            dashArray="10, 5",
+            children=dl.Tooltip(f"Reference Line: {calculated_bearing:.0f}°")
+        )
+        layer_children.append(preview_line)
+
+        # Add markers for the two click points
+        ref_marker = dl.CircleMarker(
+            center=[ref_lat, ref_lon],
+            radius=8,
+            color="#ff6600",
+            fill=True,
+            fillColor="#ff6600",
+            fillOpacity=0.8,
+            children=dl.Tooltip("Reference Point (on line)")
+        )
+        bearing_marker = dl.CircleMarker(
+            center=[bearing_lat, bearing_lon],
+            radius=6,
+            color="#ff9900",
+            fill=True,
+            fillColor="#ff9900",
+            fillOpacity=0.6,
+            children=dl.Tooltip("Bearing Point")
+        )
+        layer_children.extend([ref_marker, bearing_marker])
+
+        return calculated_bearing, layer_children
+    else:
+        # Only ref point set - just show the ref marker
+        ref_marker = dl.CircleMarker(
+            center=[ref_lat, ref_lon],
+            radius=8,
+            color="#ff6600",
+            fill=True,
+            fillColor="#ff6600",
+            fillOpacity=0.8,
+            children=dl.Tooltip("Reference Point (click 2nd point to set bearing)")
+        )
+        layer_children.append(ref_marker)
+        return no_update, layer_children
+
+
+# === Rectangular Course Edge Calculation ===
+@app.callback(
+    Output("rectcourse-calculated-edge", "data"),
+    Output("rectcourse-edge-length", "children"),
+    Output("rectcourse-edge-bearing", "children"),
+    Output("layer", "children", allow_duplicate=True),
+    Input({"type": "point-store", "m_id": "rect_course", "role": "dw_start"}, "data"),
+    Input({"type": "point-store", "m_id": "rect_course", "role": "dw_end"}, "data"),
+    State("layer", "children"),
+    State("maneuver-select", "value"),
+    prevent_initial_call=True
+)
+def calculate_rectcourse_edge_and_preview(dw_start, dw_end, layer_children, current_maneuver):
+    """
+    Calculate the downwind leg length and bearing from two clicked points.
+    Draw a preview of the downwind leg on the map.
+    """
+    import math
+    from physics import calculate_initial_compass_bearing
+
+    # Only run when rect_course maneuver is selected
+    if current_maneuver != "rect_course":
+        raise PreventUpdate
+
+    # Remove any existing rectangular course preview
+    if layer_children is None:
+        layer_children = []
+
+    def should_keep(c):
+        if not isinstance(c, dict):
+            return True
+        el_id = c.get('props', {}).get('id', '')
+        # ID can be a string or a dict (for pattern-matching IDs)
+        if isinstance(el_id, str) and el_id.startswith('rectcourse-preview'):
+            return False
+        return True
+
+    layer_children = [c for c in layer_children if should_keep(c)]
+
+    # If we don't have the start point, return defaults
+    if not dw_start or not isinstance(dw_start, dict) or dw_start.get('lat') is None:
+        return {}, "-- nm", "--°", layer_children
+
+    start_lat = dw_start['lat']
+    start_lon = dw_start['lon']
+
+    # Add start marker
+    start_marker = dl.CircleMarker(
+        id='rectcourse-preview-start',
+        center=[start_lat, start_lon],
+        radius=8,
+        color="#00aa00",
+        fill=True,
+        fillColor="#00aa00",
+        fillOpacity=0.8,
+        children=dl.Tooltip("Downwind Start (Entry)")
+    )
+    layer_children.append(start_marker)
+
+    # If we have both points, calculate edge
+    if dw_end and isinstance(dw_end, dict) and dw_end.get('lat') is not None:
+        end_lat = dw_end['lat']
+        end_lon = dw_end['lon']
+
+        # Calculate bearing from start to end (this is the downwind track)
+        from geopy import Point as GeoPoint
+        start_geo = GeoPoint(start_lat, start_lon)
+        end_geo = GeoPoint(end_lat, end_lon)
+        bearing = calculate_initial_compass_bearing(start_geo, end_geo)
+        bearing = round(bearing, 1)
+
+        # Calculate distance
+        ft_per_deg_lat = 364567.2
+        ft_per_deg_lon = 364567.2 * math.cos(math.radians(start_lat))
+        dn = (end_lat - start_lat) * ft_per_deg_lat
+        de = (end_lon - start_lon) * ft_per_deg_lon
+        dist_ft = math.hypot(dn, de)
+        dist_nm = dist_ft / 6076.12
+
+        # Midpoint of downwind leg
+        mid_lat = (start_lat + end_lat) / 2
+        mid_lon = (start_lon + end_lon) / 2
+
+        # Draw the downwind leg line
+        edge_line = dl.Polyline(
+            id='rectcourse-preview-edge',
+            positions=[[start_lat, start_lon], [end_lat, end_lon]],
+            color="#cc0000",  # Red for downwind
+            weight=4,
+            dashArray="10, 5",  # Dashed to show it's a preview
+            children=dl.Tooltip(f"Downwind Leg: {dist_nm:.2f} nm, Track {bearing:.0f}°")
+        )
+
+        # End marker
+        end_marker = dl.CircleMarker(
+            id='rectcourse-preview-end',
+            center=[end_lat, end_lon],
+            radius=8,
+            color="#cc6600",
+            fill=True,
+            fillColor="#cc6600",
+            fillOpacity=0.8,
+            children=dl.Tooltip("Downwind End")
+        )
+
+        # Midpoint marker (on the downwind leg itself)
+        mid_marker = dl.CircleMarker(
+            id='rectcourse-preview-center',
+            center=[mid_lat, mid_lon],
+            radius=5,
+            color="#FFD700",
+            fill=True,
+            fillColor="#FFD700",
+            fillOpacity=0.8,
+            children=dl.Tooltip("Downwind Midpoint")
+        )
+
+        layer_children.extend([edge_line, end_marker, mid_marker])
+
+        # Store calculated values
+        edge_data = {
+            "start_lat": start_lat,
+            "start_lon": start_lon,
+            "end_lat": end_lat,
+            "end_lon": end_lon,
+            "mid_lat": mid_lat,
+            "mid_lon": mid_lon,
+            "bearing": bearing,
+            "length_nm": round(dist_nm, 3),
+            "length_ft": round(dist_ft, 0),
+        }
+
+        return edge_data, f"{dist_nm:.2f} nm", f"{bearing:.0f}°", layer_children
+    else:
+        # Only start point set
+        return {}, "-- nm", "--°", layer_children
+
+
+# === S-Turn Rendering Callback ===
+@app.callback(
+    Output("layer", "children", allow_duplicate=True),
+    Output("sturn-info", "children"),
+    Output("sturn-hover-store", "data"),
+    Output("sturn-path-store", "data"),
+    Output("sturn-slider-container", "style"),
+    Output("sturn-time-slider", "max"),
+    Output("sturn-time-slider", "marks"),
+    Output("sturn-time-slider", "value"),
+    Input("sturn-draw-btn", "n_clicks"),
+    State({"type": "point-store", "m_id": "s_turn", "role": "ref"}, "data"),
+    State("sturn-line-bearing", "value"),
+    State("sturn-calculated-bearing", "data"),
+    State("sturn-altitude", "value"),
+    State("sturn-ias", "value"),
+    State("sturn-bank-angle", "value"),
+    State("sturn-num-turns", "value"),
+    State("sturn-entry-side", "value"),
+    State("sturn-first-turn", "value"),
+    State("env-oat", "value"),
+    State("env-altimeter", "value"),
+    State("env-wind-dir", "value"),
+    State("env-wind-speed", "value"),
+    State("aircraft-select", "value"),
+    State("selected-airport-id", "data"),
+    State("runtime-total-weight-lb", "data"),
+    State("power-setting", "value"),
+    State("cg-slider", "value"),
+    prevent_initial_call=True
+)
+def draw_s_turn(
+    n_clicks,
+    ref_point,
+    line_bearing_input,
+    calculated_bearing,
+    altitude_ft,
+    ias_knots,
+    bank_angle,
+    num_s_turns,
+    entry_side,
+    first_turn,
+    oat_f,
+    altimeter_inhg,
+    wind_dir,
+    wind_speed,
+    aircraft_name,
+    selected_airport_id,
+    runtime_weight,
+    power_setting,
+    cg_position,
+):
+    if not n_clicks or not ref_point:
+        raise PreventUpdate
+
+    # Get aircraft data
+    if aircraft_name and aircraft_name in aircraft_data:
+        ac = dict(aircraft_data[aircraft_name])
+    else:
+        ac = {}
+
+    # Get weight
+    weight_lb = float(runtime_weight) if runtime_weight not in [None, "", "null"] else None
+    if weight_lb:
+        ac["total_weight_lb"] = weight_lb
+
+    # Parse inputs - prefer calculated bearing from map clicks, fallback to manual input
+    if calculated_bearing is not None and calculated_bearing not in ["", "null"]:
+        line_bearing = float(calculated_bearing)
+    elif line_bearing_input not in [None, "", "null"]:
+        line_bearing = float(line_bearing_input)
+    else:
+        line_bearing = 90.0
+    altitude = float(altitude_ft) if altitude_ft not in [None, "", "null"] else 800.0
+    ias = float(ias_knots) if ias_knots not in [None, "", "null"] else 100.0
+    bank = float(bank_angle) if bank_angle not in [None, "", "null"] else 35.0
+    num_turns = int(num_s_turns) if num_s_turns not in [None, "", "null"] else 2
+
+    # OAT F -> C
+    try:
+        oat_c = (float(oat_f) - 32.0) * 5.0 / 9.0
+    except Exception:
+        oat_c = (52.0 - 32.0) * 5.0 / 9.0
+
+    # Get airport elevation
+    selected_airport = next((a for a in airport_data if a.get("id") == selected_airport_id), None)
+    field_elev_ft = float(selected_airport.get("elevation_ft", 0.0)) if selected_airport else 0.0
+
+    # Parse altimeter
+    altimeter_val = float(altimeter_inhg) if altimeter_inhg not in [None, "", "null"] else 29.92
+
+    # Parse power setting (slider is 0.05-1.0 percentage)
+    power_pct = float(power_setting) if power_setting not in [None, "", "null"] else 0.5
+
+    # Parse CG position (slider is 0.0-1.0, where 0=forward, 1=aft within envelope)
+    cg_pct = float(cg_position) if cg_position not in [None, "", "null"] else 0.5
+
+    # Run simulation
+    from simulation import simulate_s_turn
+    path, hover, sim_warnings = simulate_s_turn(
+        reference_point={"lat": ref_point["lat"], "lon": ref_point["lon"]},
+        line_bearing_deg=line_bearing,
+        entry_side=entry_side,
+        turn_direction_first=first_turn,
+        altitude_ft=altitude,
+        ias_knots=ias,
+        base_bank_deg=bank,
+        num_s_turns=num_turns,
+        wind_dir_deg=float(wind_dir) if wind_dir not in [None, "", "null"] else 0.0,
+        wind_speed_kt=float(wind_speed) if wind_speed not in [None, "", "null"] else 0.0,
+        oat_c=oat_c,
+        altimeter_inhg=altimeter_val,
+        field_elev_ft=field_elev_ft,
+        ac=ac,
+        weight_lb=weight_lb,
+        power_setting=power_pct,
+        cg_position=cg_pct,
+    )
+
+    if not path or not hover:
+        raise PreventUpdate
+
+    # Color palette for semicircles
+    semicircle_colors = ["#0066cc", "#cc6600", "#0066cc", "#cc6600", "#0066cc", "#cc6600", "#0066cc", "#cc6600"]
+
+    # Build path segments with segment-based coloring
+    path_segments = []
+    current_segment = hover[0].get('segment', 'approach') if hover else 'approach'
+    segment_start = 0
+
+    for i, pt in enumerate(hover):
+        seg = pt.get('segment', 'approach')
+        if seg != current_segment or i == len(hover) - 1:
+            end_idx = i if i == len(hover) - 1 else i
+            segment_path = path[segment_start:end_idx + 1]
+            if len(segment_path) >= 2:
+                # Determine color based on segment
+                if current_segment == 'approach':
+                    color = "#888888"
+                elif current_segment == 'crossing':
+                    color = "#00aa00"
+                elif current_segment.startswith('turn_'):
+                    try:
+                        semi_num = int(current_segment.split('_')[1]) - 1
+                        color = semicircle_colors[semi_num % len(semicircle_colors)]
+                    except:
+                        color = "#0066cc"
+                else:
+                    color = "#666666"
+
+                path_segments.append(
+                    dl.Polyline(
+                        positions=segment_path,
+                        color=color,
+                        weight=3,
+                        children=dl.Tooltip(f"{current_segment.replace('_', ' ').title()}")
+                    )
+                )
+            segment_start = i
+            current_segment = seg
+
+    # Reference point marker
+    ref_marker = dl.CircleMarker(
+        center=[ref_point["lat"], ref_point["lon"]],
+        radius=8,
+        color="blue",
+        fill=True,
+        fillOpacity=0.7,
+        children=dl.Tooltip("Reference Point (on line)"),
+    )
+
+    # Draw the reference line through the reference point
+    import math
+    line_len_nm = 0.5  # Half-mile each direction
+    line_bearing_rad = math.radians(line_bearing)
+
+    # Calculate line endpoints
+    line_n_offset = line_len_nm * 6076.12 * math.cos(line_bearing_rad)  # feet
+    line_e_offset = line_len_nm * 6076.12 * math.sin(line_bearing_rad)
+
+    line_pt1_lat = ref_point["lat"] + (line_n_offset / 364567.2)
+    line_pt1_lon = ref_point["lon"] + (line_e_offset / (364567.2 * math.cos(math.radians(ref_point["lat"]))))
+    line_pt2_lat = ref_point["lat"] - (line_n_offset / 364567.2)
+    line_pt2_lon = ref_point["lon"] - (line_e_offset / (364567.2 * math.cos(math.radians(ref_point["lat"]))))
+
+    reference_line = dl.Polyline(
+        positions=[[line_pt1_lat, line_pt1_lon], [line_pt2_lat, line_pt2_lon]],
+        color="darkgreen",
+        weight=2,
+        dashArray="10, 5",
+        children=dl.Tooltip(f"Reference Line ({line_bearing:.0f}°)"),
+    )
+
+    # Entry marker
+    if path:
+        entry_marker = dl.CircleMarker(
+            center=path[0],
+            radius=7,
+            color="green",
+            fill=True,
+            fillOpacity=1.0,
+            children=dl.Tooltip(f"Entry: {altitude:.0f} ft AGL"),
+        )
+    else:
+        entry_marker = None
+
+    # End marker
+    if path:
+        end_marker = dl.CircleMarker(
+            center=path[-1],
+            radius=7,
+            color="red",
+            fill=True,
+            fillOpacity=1.0,
+            children=dl.Tooltip("Exit"),
+        )
+    else:
+        end_marker = None
+
+    elements = [ref_marker, reference_line]
+    if entry_marker:
+        elements.append(entry_marker)
+    if end_marker:
+        elements.append(end_marker)
+    elements.extend(path_segments)
+
+    # Info display with warnings and performance data
+    info_elements = []
+
+    # Warnings section (if any)
+    has_warnings = (
+        sim_warnings.get("stall_margin_warning") or
+        sim_warnings.get("g_limit_warning") or
+        sim_warnings.get("airspeed_warning") or
+        sim_warnings.get("altitude_warning")
+    )
+    if has_warnings:
+        warning_items = []
+        if sim_warnings.get("airspeed_warning"):
+            warning_items.append(html.Div(f"Airspeed: {sim_warnings['airspeed_warning']}"))
+        if sim_warnings.get("stall_margin_warning"):
+            warning_items.append(html.Div("Stall margin low - bank angle reduced for safety"))
+        if sim_warnings.get("g_limit_warning"):
+            warning_items.append(html.Div("G-limit exceeded - bank angle reduced"))
+        if sim_warnings.get("bank_limited"):
+            warning_items.append(html.Div(f"Bank limited: {sim_warnings.get('original_bank', 0):.0f}° → {sim_warnings.get('effective_bank', 0):.0f}°"))
+        if sim_warnings.get("altitude_warning"):
+            warning_items.append(html.Div(f"Altitude: {sim_warnings['altitude_warning']}"))
+
+        info_elements.append(
+            html.Div(warning_items, style={"color": "#856404", "backgroundColor": "#fff3cd", "padding": "8px", "borderRadius": "4px", "marginBottom": "5px"})
+        )
+
+    # Performance data
+    info_elements.append(
+        html.Div([
+            html.Div([
+                html.Strong("Maneuver Summary"),
+            ], style={"borderBottom": "1px solid #ccc", "paddingBottom": "3px", "marginBottom": "5px"}),
+            html.Div(f"S-Turns: {num_turns} | Reference line: {line_bearing:.0f}°"),
+            html.Div(f"Weight: {sim_warnings.get('weight_lb', 0):.0f} lb"),
+            html.Div(f"Power: {sim_warnings.get('power_setting_pct', 50):.0f}% | CG: {sim_warnings.get('cg_position_pct', 50):.0f}%"),
+            html.Div(f"IAS: {ias:.0f} kt | TAS: {sim_warnings.get('tas_knots', 0):.0f} kt"),
+            html.Div(f"Density Alt: {sim_warnings.get('density_altitude_ft', 0):.0f} ft"),
+            html.Hr(style={"margin": "5px 0"}),
+            html.Div([
+                html.Strong("Turn Performance"),
+            ], style={"marginBottom": "3px"}),
+            html.Div(f"Turn radius: {sim_warnings.get('turn_radius_ft', 0):.0f} ft ({sim_warnings.get('turn_radius_nm', 0):.2f} nm)"),
+            html.Div(f"Bank range: {sim_warnings.get('min_bank_achieved', 0):.0f}° - {sim_warnings.get('max_bank_achieved', 0):.0f}°"),
+            html.Div(f"GS range: {sim_warnings.get('min_groundspeed', 0):.0f} - {sim_warnings.get('max_groundspeed', 0):.0f} kt"),
+            html.Div(f"Load factor: {sim_warnings.get('load_factor', 0):.2f}G"),
+            html.Hr(style={"margin": "5px 0"}),
+            html.Div([
+                html.Strong("Altitude"),
+            ], style={"marginBottom": "3px"}),
+            html.Div(f"Entry: {sim_warnings.get('entry_altitude_ft', 0):.0f} ft | Final: {sim_warnings.get('final_altitude_ft', 0):.0f} ft"),
+            html.Div(f"Min: {sim_warnings.get('min_altitude_ft', 0):.0f} ft | Loss: {sim_warnings.get('altitude_loss_ft', 0):.0f} ft"),
+            html.Hr(style={"margin": "5px 0"}),
+            html.Div([
+                html.Strong("Stall Margins"),
+            ], style={"marginBottom": "3px"}),
+            html.Div(f"Vs (clean): {sim_warnings.get('stall_speed_clean', 0):.0f} kt"),
+            html.Div(f"Vs (in turn): {sim_warnings.get('stall_speed_in_turn', 0):.0f} kt"),
+            html.Div(f"Total time: {sim_warnings.get('total_time_sec', 0):.0f} sec"),
+            html.Hr(style={"margin": "5px 0"}),
+            html.Div("Blue = turns on one side, Orange = turns on other side", style={"fontSize": "12px", "fontStyle": "italic"}),
+            html.Div("Use the Time Scrubber to view flight data at each point", style={"fontSize": "12px", "fontStyle": "italic", "marginTop": "3px"}),
+        ], style={"color": "#333", "backgroundColor": "#e9ecef", "padding": "8px", "borderRadius": "4px"})
+    )
+
+    # Prepare slider configuration
+    num_points = len(hover)
+    slider_max = max(0, num_points - 1)
+
+    # Create marks at key intervals
+    slider_marks = {0: "Start"}
+    if slider_max > 0:
+        slider_marks[slider_max] = "End"
+
+    # Show slider container
+    slider_style = {"display": "block", "marginTop": "10px"}
+
+    return (
+        elements,
+        info_elements,
+        hover,
+        path,
+        slider_style,
+        slider_max,
+        slider_marks,
+        0,
+    )
+
+
+# === Helper function to create airplane marker for time scrubbers ===
+def create_airplane_marker(pos, heading, tooltip_content, bank_angle=0):
+    """
+    Create an airplane marker that points in the direction of flight.
+    Uses an F-18 Super Hornet style fighter jet icon.
+
+    Args:
+        pos: [lat, lon] position
+        heading: Aircraft heading in degrees (0=North, 90=East, etc.)
+        tooltip_content: List of html elements for the tooltip
+        bank_angle: Bank angle for visual tilt effect (optional)
+
+    Returns:
+        dl.Marker with rotated airplane icon
+    """
+    import base64
+
+    # F-18 Super Hornet style SVG pointing UP (north/0°)
+    svg_airplane = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="36" height="36">
+        <g transform="rotate({heading}, 50, 50)">
+            <!-- Main fuselage -->
+            <path d="M50,8 L54,25 L54,75 L50,88 L46,75 L46,25 Z" fill="#2d3436" stroke="#dfe6e9" stroke-width="1.5"/>
+
+            <!-- Nose cone -->
+            <path d="M50,8 L53,20 L47,20 Z" fill="#636e72" stroke="#dfe6e9" stroke-width="1"/>
+
+            <!-- Cockpit canopy -->
+            <ellipse cx="50" cy="26" rx="3.5" ry="7" fill="#74b9ff" stroke="#0984e3" stroke-width="1"/>
+
+            <!-- Leading Edge Extensions (LEX) -->
+            <path d="M46,30 L35,48 L46,45 Z" fill="#2d3436" stroke="#dfe6e9" stroke-width="1"/>
+            <path d="M54,30 L65,48 L54,45 Z" fill="#2d3436" stroke="#dfe6e9" stroke-width="1"/>
+
+            <!-- Main wings (swept delta style) -->
+            <path d="M46,42 L12,62 L14,66 L46,55 Z" fill="#2d3436" stroke="#dfe6e9" stroke-width="1.2"/>
+            <path d="M54,42 L88,62 L86,66 L54,55 Z" fill="#2d3436" stroke="#dfe6e9" stroke-width="1.2"/>
+
+            <!-- Wing tips -->
+            <path d="M12,62 L8,64 L14,66 Z" fill="#636e72" stroke="#dfe6e9" stroke-width="0.8"/>
+            <path d="M88,62 L92,64 L86,66 Z" fill="#636e72" stroke="#dfe6e9" stroke-width="0.8"/>
+
+            <!-- Horizontal stabilizers -->
+            <path d="M46,72 L28,82 L30,85 L46,78 Z" fill="#2d3436" stroke="#dfe6e9" stroke-width="1"/>
+            <path d="M54,72 L72,82 L70,85 L54,78 Z" fill="#2d3436" stroke="#dfe6e9" stroke-width="1"/>
+
+            <!-- Twin vertical tails (canted outward like F-18) -->
+            <path d="M44,65 L38,62 L40,78 L46,78 Z" fill="#2d3436" stroke="#dfe6e9" stroke-width="1"/>
+            <path d="M56,65 L62,62 L60,78 L54,78 Z" fill="#2d3436" stroke="#dfe6e9" stroke-width="1"/>
+
+            <!-- Engine exhausts -->
+            <ellipse cx="47" cy="86" rx="2.5" ry="3" fill="#fd79a8" stroke="#e84393" stroke-width="0.8"/>
+            <ellipse cx="53" cy="86" rx="2.5" ry="3" fill="#fd79a8" stroke="#e84393" stroke-width="0.8"/>
+
+            <!-- Afterburner glow -->
+            <ellipse cx="47" cy="89" rx="1.5" ry="2" fill="#ffeaa7" opacity="0.8"/>
+            <ellipse cx="53" cy="89" rx="1.5" ry="2" fill="#ffeaa7" opacity="0.8"/>
+        </g>
+    </svg>'''
+
+    # Encode SVG as base64 data URL
+    svg_base64 = base64.b64encode(svg_airplane.encode('utf-8')).decode('utf-8')
+    icon_url = f"data:image/svg+xml;base64,{svg_base64}"
+
+    # Create custom icon
+    airplane_icon = {
+        "iconUrl": icon_url,
+        "iconSize": [36, 36],
+        "iconAnchor": [18, 18],  # Center of the icon
+    }
+
+    marker = dl.Marker(
+        position=pos,
+        icon=airplane_icon,
+        children=dl.Tooltip(
+            tooltip_content,
+            permanent=True,
+            direction="right",
+            offset=[22, 0],
+            className="scrubber-tooltip"
+        ),
+    )
+
+    return marker
+
+
+# === S-Turn Time Scrubber Callback ===
+@app.callback(
+    Output("scrubber-layer", "children", allow_duplicate=True),
+    Input("sturn-time-slider", "value"),
+    State("sturn-hover-store", "data"),
+    State("sturn-path-store", "data"),
+    prevent_initial_call=True
+)
+def update_s_turn_scrubber(slider_value, hover_data, path_data):
+    """Update the scrubber marker and tooltip based on slider position."""
+    if not hover_data or not path_data or slider_value is None:
+        return []
+
+    idx = int(slider_value)
+    if idx < 0 or idx >= len(hover_data) or idx >= len(path_data):
+        return []
+
+    pt = hover_data[idx]
+    pos = path_data[idx]
+
+    # Get segment for display
+    segment = pt.get('segment', 'approach')
+
+    # Build tooltip content
+    tooltip_content = [
+        html.Div(f"{segment.replace('_', ' ').title()}", style={"fontWeight": "bold", "borderBottom": "1px solid #ccc", "paddingBottom": "3px", "marginBottom": "3px"}),
+        html.Div(f"Altitude: {pt.get('alt', 0):.0f} ft AGL"),
+        html.Div(f"Time: {pt.get('time', 0):.1f} sec"),
+        html.Div(f"IAS: {pt.get('ias', 0):.0f} kt | TAS: {pt.get('tas', 0):.0f} kt"),
+        html.Div(f"GS: {pt.get('gs', 0):.0f} kt"),
+        html.Div(f"Bank: {pt.get('aob', 0):.1f}°"),
+        html.Div(f"Heading: {pt.get('heading', 0):.0f}°"),
+        html.Div(f"Track: {pt.get('track', 0):.0f}°"),
+        html.Div(f"Drift: {pt.get('drift', 0):.1f}°"),
+    ]
+
+    # Create airplane marker pointing in direction of heading
+    heading = pt.get('heading', 0)
+    bank = pt.get('aob', 0)
+    marker = create_airplane_marker(pos, heading, tooltip_content, bank)
+
+    return [marker]
+
+
+# === Turns Around a Point Draw Callback ===
+@app.callback(
+    Output("layer", "children", allow_duplicate=True),
+    Output("turnspoint-info", "children"),
+    Output("turnspoint-hover-store", "data"),
+    Output("turnspoint-path-store", "data"),
+    Output("turnspoint-warnings-store", "data"),
+    Output("turnspoint-slider-container", "style"),
+    Output("turnspoint-time-slider", "max"),
+    Output("turnspoint-time-slider", "marks"),
+    Output("turnspoint-time-slider", "value"),
+    Input("turnspoint-draw-btn", "n_clicks"),
+    State({"type": "point-store", "m_id": "turns_point", "role": "center"}, "data"),
+    State("turnspoint-altitude", "value"),
+    State("turnspoint-ias", "value"),
+    State("turnspoint-radius", "value"),
+    State("turnspoint-num-turns", "value"),
+    State("turnspoint-direction", "value"),
+    State("turnspoint-entry-heading", "value"),
+    State("env-oat", "value"),
+    State("env-altimeter", "value"),
+    State("env-wind-dir", "value"),
+    State("env-wind-speed", "value"),
+    State("aircraft-select", "value"),
+    State("selected-airport-id", "data"),
+    State("runtime-total-weight-lb", "data"),
+    State("power-setting", "value"),
+    State("cg-slider", "value"),
+    prevent_initial_call=True
+)
+def draw_turns_around_point(
+    n_clicks,
+    center_point,
+    altitude_ft,
+    ias_knots,
+    orbit_radius,
+    num_turns,
+    turn_direction,
+    entry_heading,
+    oat_f,
+    altimeter_inhg,
+    wind_dir,
+    wind_speed,
+    aircraft_name,
+    selected_airport_id,
+    runtime_weight,
+    power_setting,
+    cg_position,
+):
+    if not n_clicks or not center_point:
+        raise PreventUpdate
+
+    # Get aircraft data
+    if aircraft_name and aircraft_name in aircraft_data:
+        ac = dict(aircraft_data[aircraft_name])
+    else:
+        ac = {}
+
+    # Get weight
+    weight_lb = float(runtime_weight) if runtime_weight not in [None, "", "null"] else None
+    if weight_lb:
+        ac["total_weight_lb"] = weight_lb
+
+    # Parse inputs
+    altitude = float(altitude_ft) if altitude_ft not in [None, "", "null"] else 800.0
+    ias = float(ias_knots) if ias_knots not in [None, "", "null"] else 100.0
+    radius_nm = float(orbit_radius) if orbit_radius not in [None, "", "null"] else 0.25
+    turns = int(num_turns) if num_turns not in [None, "", "null"] else 2
+    direction = str(turn_direction) if turn_direction not in [None, "", "null"] else "left"
+    entry_hdg = float(entry_heading) if entry_heading not in [None, "", "null"] else None
+
+    # OAT F -> C
+    try:
+        oat_c = (float(oat_f) - 32.0) * 5.0 / 9.0
+    except Exception:
+        oat_c = (52.0 - 32.0) * 5.0 / 9.0
+
+    # Get airport elevation
+    selected_airport = next((a for a in airport_data if a.get("id") == selected_airport_id), None)
+    field_elev_ft = float(selected_airport.get("elevation_ft", 0.0)) if selected_airport else 0.0
+
+    # Parse altimeter
+    altimeter_val = float(altimeter_inhg) if altimeter_inhg not in [None, "", "null"] else 29.92
+
+    # Parse power setting and CG
+    power_pct = float(power_setting) if power_setting not in [None, "", "null"] else 0.5
+    cg_pct = float(cg_position) if cg_position not in [None, "", "null"] else 0.5
+
+    # Run simulation
+    from simulation import simulate_turns_around_point
+    path, hover, sim_warnings = simulate_turns_around_point(
+        center_point={"lat": center_point["lat"], "lon": center_point["lon"]},
+        turn_direction=direction,
+        entry_heading_deg=entry_hdg,
+        altitude_ft=altitude,
+        ias_knots=ias,
+        orbit_radius_nm=radius_nm,
+        num_turns=turns,
+        wind_dir_deg=float(wind_dir) if wind_dir not in [None, "", "null"] else 0.0,
+        wind_speed_kt=float(wind_speed) if wind_speed not in [None, "", "null"] else 0.0,
+        oat_c=oat_c,
+        altimeter_inhg=altimeter_val,
+        field_elev_ft=field_elev_ft,
+        ac=ac,
+        weight_lb=weight_lb,
+        power_setting=power_pct,
+        cg_position=cg_pct,
+    )
+
+    if not path or not hover:
+        raise PreventUpdate
+
+    # Color palette for turns (alternating per turn)
+    turn_colors = ["#0066cc", "#cc6600", "#0066cc", "#cc6600", "#0066cc"]
+
+    # Build path segments with turn-based coloring
+    path_segments = []
+    current_turn = hover[0].get('turn_number', 1) if hover else 1
+    segment_start = 0
+
+    for i, pt in enumerate(hover):
+        turn_num = pt.get('turn_number', 1)
+        if turn_num != current_turn or i == len(hover) - 1:
+            end_idx = i if i == len(hover) - 1 else i
+            segment_path = path[segment_start:end_idx + 1]
+            if len(segment_path) >= 2:
+                color = turn_colors[(current_turn - 1) % len(turn_colors)]
+                path_segments.append(
+                    dl.Polyline(
+                        positions=segment_path,
+                        color=color,
+                        weight=3,
+                        children=dl.Tooltip(f"Turn {current_turn}")
+                    )
+                )
+            segment_start = i
+            current_turn = turn_num
+
+    # Center point marker (the reference point)
+    center_marker = dl.CircleMarker(
+        center=[center_point["lat"], center_point["lon"]],
+        radius=8,
+        color="red",
+        fill=True,
+        fillOpacity=0.8,
+        children=dl.Tooltip("Reference Point (center)"),
+    )
+
+    # Draw the ideal orbit circle
+    import math
+    orbit_radius_ft = radius_nm * 6076.12
+    orbit_circle_points = []
+    for angle_deg in range(0, 361, 5):
+        angle_rad = math.radians(angle_deg)
+        n_offset = orbit_radius_ft * math.cos(angle_rad)
+        e_offset = orbit_radius_ft * math.sin(angle_rad)
+        lat = center_point["lat"] + (n_offset / 364567.2)
+        lon = center_point["lon"] + (e_offset / (364567.2 * math.cos(math.radians(center_point["lat"]))))
+        orbit_circle_points.append([lat, lon])
+
+    orbit_circle = dl.Polyline(
+        positions=orbit_circle_points,
+        color="gray",
+        weight=1,
+        dashArray="5, 5",
+        opacity=0.5,
+        children=dl.Tooltip(f"Target orbit: {radius_nm:.2f} nm ({orbit_radius_ft:.0f} ft)"),
+    )
+
+    # Entry marker
+    if path:
+        entry_marker = dl.CircleMarker(
+            center=path[0],
+            radius=7,
+            color="green",
+            fill=True,
+            fillOpacity=1.0,
+            children=dl.Tooltip(f"Entry: {altitude:.0f} ft AGL, Hdg {sim_warnings.get('entry_heading', 0):.0f}°"),
+        )
+    else:
+        entry_marker = None
+
+    # Exit marker
+    if path:
+        exit_marker = dl.CircleMarker(
+            center=path[-1],
+            radius=7,
+            color="darkred",
+            fill=True,
+            fillOpacity=1.0,
+            children=dl.Tooltip("Exit"),
+        )
+    else:
+        exit_marker = None
+
+    elements = [center_marker, orbit_circle]
+    if entry_marker:
+        elements.append(entry_marker)
+    if exit_marker:
+        elements.append(exit_marker)
+    elements.extend(path_segments)
+
+    # Info display with warnings and performance data
+    info_elements = []
+
+    # Warnings section (if any)
+    has_warnings = (
+        sim_warnings.get("stall_margin_warning") or
+        sim_warnings.get("g_limit_warning") or
+        sim_warnings.get("airspeed_warning") or
+        sim_warnings.get("altitude_warning")
+    )
+    if has_warnings:
+        warning_items = []
+        if sim_warnings.get("airspeed_warning"):
+            warning_items.append(html.Div(f"Airspeed: {sim_warnings['airspeed_warning']}"))
+        if sim_warnings.get("stall_margin_warning"):
+            warning_items.append(html.Div("Low stall margin - maintain airspeed!"))
+        if sim_warnings.get("g_limit_warning"):
+            warning_items.append(html.Div("G-limit warning - reduce bank angle"))
+        if sim_warnings.get("altitude_warning"):
+            warning_items.append(html.Div(f"Altitude: {sim_warnings['altitude_warning']}"))
+
+        info_elements.append(
+            html.Div(warning_items, style={"color": "#856404", "backgroundColor": "#fff3cd", "padding": "8px", "borderRadius": "4px", "marginBottom": "5px"})
+        )
+
+    # Performance data
+    info_elements.append(
+        html.Div([
+            html.Div([
+                html.Strong("Turns Around a Point"),
+            ], style={"borderBottom": "1px solid #ccc", "paddingBottom": "3px", "marginBottom": "5px"}),
+            html.Div(f"Turns: {turns} | Direction: {direction.title()}"),
+            html.Div(f"Orbit radius: {sim_warnings.get('orbit_radius_ft', 0):.0f} ft ({sim_warnings.get('orbit_radius_nm', 0):.2f} nm)"),
+            html.Div(f"Weight: {sim_warnings.get('weight_lb', 0):.0f} lb"),
+            html.Div(f"Power: {sim_warnings.get('power_setting_pct', 50):.0f}% | CG: {sim_warnings.get('cg_position_pct', 50):.0f}%"),
+            html.Div(f"IAS: {ias:.0f} kt | TAS: {sim_warnings.get('tas_knots', 0):.0f} kt"),
+            html.Div(f"Density Alt: {sim_warnings.get('density_altitude_ft', 0):.0f} ft"),
+            html.Hr(style={"margin": "5px 0"}),
+            html.Div([
+                html.Strong("Bank Angle (varies with wind)"),
+            ], style={"marginBottom": "3px"}),
+            html.Div(f"Downwind (max): {sim_warnings.get('max_bank_achieved', 0):.0f}°"),
+            html.Div(f"Upwind (min): {sim_warnings.get('min_bank_achieved', 0):.0f}°"),
+            html.Div(f"GS range: {sim_warnings.get('min_groundspeed', 0):.0f} - {sim_warnings.get('max_groundspeed', 0):.0f} kt"),
+            html.Hr(style={"margin": "5px 0"}),
+            html.Div([
+                html.Strong("Altitude"),
+            ], style={"marginBottom": "3px"}),
+            html.Div(f"Entry: {sim_warnings.get('entry_altitude_ft', 0):.0f} ft | Final: {sim_warnings.get('final_altitude_ft', 0):.0f} ft"),
+            html.Div(f"Min: {sim_warnings.get('min_altitude_ft', 0):.0f} ft | Loss: {sim_warnings.get('altitude_loss_ft', 0):.0f} ft"),
+            html.Hr(style={"margin": "5px 0"}),
+            html.Div([
+                html.Strong("Stall Margins"),
+            ], style={"marginBottom": "3px"}),
+            html.Div(f"Vs (clean): {sim_warnings.get('stall_speed_clean', 0):.0f} kt"),
+            html.Div(f"Total time: {sim_warnings.get('total_time_sec', 0):.0f} sec"),
+            html.Hr(style={"margin": "5px 0"}),
+            html.Div("Blue = Turn 1, 3, 5... | Orange = Turn 2, 4...", style={"fontSize": "12px", "fontStyle": "italic"}),
+            html.Div("Bank steepens downwind (high GS), shallows upwind (low GS)", style={"fontSize": "12px", "fontStyle": "italic", "marginTop": "3px"}),
+        ], style={"color": "#333", "backgroundColor": "#e9ecef", "padding": "8px", "borderRadius": "4px"})
+    )
+
+    # Prepare slider configuration
+    num_points = len(hover)
+    slider_max = max(0, num_points - 1)
+
+    # Create marks at key intervals
+    slider_marks = {0: "Start"}
+    if slider_max > 0:
+        slider_marks[slider_max] = "End"
+
+    # Show slider container
+    slider_style = {"display": "block", "marginTop": "10px"}
+
+    return (
+        elements,
+        info_elements,
+        hover,
+        path,
+        sim_warnings,
+        slider_style,
+        slider_max,
+        slider_marks,
+        0,
+    )
+
+
+# === Turns Around a Point Time Scrubber Callback ===
+@app.callback(
+    Output("scrubber-layer", "children", allow_duplicate=True),
+    Input("turnspoint-time-slider", "value"),
+    State("turnspoint-hover-store", "data"),
+    State("turnspoint-path-store", "data"),
+    prevent_initial_call=True
+)
+def update_turns_around_point_scrubber(slider_value, hover_data, path_data):
+    """Update the scrubber marker and tooltip based on slider position."""
+    if not hover_data or not path_data or slider_value is None:
+        return []
+
+    idx = int(slider_value)
+    if idx < 0 or idx >= len(hover_data) or idx >= len(path_data):
+        return []
+
+    pt = hover_data[idx]
+    pos = path_data[idx]
+
+    # Build tooltip content
+    turn_num = pt.get('turn_number', 1)
+    tooltip_content = [
+        html.Div(f"Turn {turn_num} - {pt.get('turn_progress', 0):.0f}°", style={"fontWeight": "bold", "borderBottom": "1px solid #ccc", "paddingBottom": "3px", "marginBottom": "3px"}),
+        html.Div(f"Altitude: {pt.get('alt', 0):.0f} ft AGL"),
+        html.Div(f"Time: {pt.get('time', 0):.1f} sec"),
+        html.Div(f"IAS: {pt.get('ias', 0):.0f} kt | TAS: {pt.get('tas', 0):.0f} kt"),
+        html.Div(f"GS: {pt.get('gs', 0):.0f} kt"),
+        html.Div(f"Bank: {pt.get('aob', 0):.1f}°"),
+        html.Div(f"Load factor: {pt.get('load_factor', 1.0):.2f}G"),
+        html.Div(f"Heading: {pt.get('heading', 0):.0f}°"),
+        html.Div(f"Track: {pt.get('track', 0):.0f}°"),
+        html.Div(f"Drift: {pt.get('drift', 0):.1f}°"),
+    ]
+
+    # Create airplane marker pointing in direction of heading
+    heading = pt.get('heading', 0)
+    bank = pt.get('aob', 0)
+    marker = create_airplane_marker(pos, heading, tooltip_content, bank)
+
+    return [marker]
+
+
+# === Rectangular Course Draw Callback ===
+@app.callback(
+    Output("layer", "children", allow_duplicate=True),
+    Output("rectcourse-info", "children"),
+    Output("rectcourse-hover-store", "data"),
+    Output("rectcourse-path-store", "data"),
+    Output("rectcourse-warnings-store", "data"),
+    Output("rectcourse-slider-container", "style"),
+    Output("rectcourse-time-slider", "max"),
+    Output("rectcourse-time-slider", "marks"),
+    Output("rectcourse-time-slider", "value"),
+    Input("rectcourse-draw-btn", "n_clicks"),
+    State("rectcourse-calculated-edge", "data"),
+    State("rectcourse-altitude", "value"),
+    State("rectcourse-ias", "value"),
+    State("rectcourse-width", "value"),
+    State("rectcourse-direction", "value"),
+    State("rectcourse-circuits", "value"),
+    State("env-oat", "value"),
+    State("env-altimeter", "value"),
+    State("env-wind-dir", "value"),
+    State("env-wind-speed", "value"),
+    State("aircraft-select", "value"),
+    State("selected-airport-id", "data"),
+    State("runtime-total-weight-lb", "data"),
+    State("power-setting", "value"),
+    State("cg-slider", "value"),
+    State("layer", "children"),
+    prevent_initial_call=True
+)
+def draw_rectangular_course(
+    n_clicks,
+    edge_data,
+    altitude_ft,
+    ias_knots,
+    lateral_offset,
+    pattern_direction,
+    num_circuits,
+    oat_f,
+    altimeter_inhg,
+    wind_dir,
+    wind_speed,
+    aircraft_name,
+    selected_airport_id,
+    runtime_weight,
+    power_setting,
+    cg_position,
+    layer_children,
+):
+    # Check we have the edge data from the two-click selection
+    if not n_clicks or not edge_data or not edge_data.get('start_lat'):
+        raise PreventUpdate
+
+    # Remove preview markers from layer
+    if layer_children is None:
+        layer_children = []
+
+    def should_keep(c):
+        if not isinstance(c, dict):
+            return True
+        el_id = c.get('props', {}).get('id', '')
+        if isinstance(el_id, str) and el_id.startswith('rectcourse-preview'):
+            return False
+        # Also remove the click markers for rect_course
+        if isinstance(el_id, dict) and el_id.get('m_id') == 'rect_course':
+            return False
+        return True
+
+    layer_children = [c for c in layer_children if should_keep(c)]
+
+    # Extract downwind leg endpoints from the two clicks
+    dw_start = {"lat": edge_data['start_lat'], "lon": edge_data['start_lon']}
+    dw_end = {"lat": edge_data['end_lat'], "lon": edge_data['end_lon']}
+    dw_length_nm = edge_data.get('length_nm', 0.5)
+    dw_track = edge_data.get('bearing', 0.0)
+
+    # Get aircraft data
+    if aircraft_name and aircraft_name in aircraft_data:
+        ac = dict(aircraft_data[aircraft_name])
+    else:
+        ac = {}
+
+    # Get weight
+    weight_lb = float(runtime_weight) if runtime_weight not in [None, "", "null"] else None
+    if weight_lb:
+        ac["total_weight_lb"] = weight_lb
+
+    # Parse inputs
+    altitude = float(altitude_ft) if altitude_ft not in [None, "", "null"] else 800.0
+    ias = float(ias_knots) if ias_knots not in [None, "", "null"] else 95.0
+    lateral_nm = float(lateral_offset) if lateral_offset not in [None, "", "null"] else 0.25
+    direction = str(pattern_direction) if pattern_direction not in [None, "", "null"] else "left"
+    circuits = int(num_circuits) if num_circuits not in [None, "", "null"] else 1
+
+    # OAT F -> C
+    try:
+        oat_c = (float(oat_f) - 32.0) * 5.0 / 9.0
+    except Exception:
+        oat_c = (52.0 - 32.0) * 5.0 / 9.0
+
+    # Get airport elevation
+    selected_airport = next((a for a in airport_data if a.get("id") == selected_airport_id), None)
+    field_elev_ft = float(selected_airport.get("elevation_ft", 0.0)) if selected_airport else 0.0
+
+    # Parse altimeter
+    altimeter_val = float(altimeter_inhg) if altimeter_inhg not in [None, "", "null"] else 29.92
+
+    # Parse power setting and CG
+    power_pct = float(power_setting) if power_setting not in [None, "", "null"] else 0.5
+    cg_pct = float(cg_position) if cg_position not in [None, "", "null"] else 0.5
+
+    # Run simulation
+    from simulation import simulate_rectangular_course
+    path, hover, sim_warnings = simulate_rectangular_course(
+        dw_start=dw_start,
+        dw_end=dw_end,
+        lateral_offset_nm=lateral_nm,
+        pattern_direction=direction,
+        altitude_ft=altitude,
+        ias_knots=ias,
+        num_circuits=circuits,
+        wind_dir_deg=float(wind_dir) if wind_dir not in [None, "", "null"] else 0.0,
+        wind_speed_kt=float(wind_speed) if wind_speed not in [None, "", "null"] else 0.0,
+        oat_c=oat_c,
+        altimeter_inhg=altimeter_val,
+        field_elev_ft=field_elev_ft,
+        ac=ac,
+        weight_lb=weight_lb,
+        power_setting=power_pct,
+        cg_position=cg_pct,
+    )
+
+    if not path or not hover:
+        raise PreventUpdate
+
+    # Color palette for segments
+    segment_colors = {
+        "entry": "#9933ff",       # Purple for 45° entry
+        "downwind": "#cc0000",    # Red
+        "base": "#0066cc",        # Blue
+        "upwind": "#00aa00",      # Green
+        "crosswind": "#cc6600",   # Orange
+    }
+    turn_color = "#666666"  # Gray for turns
+
+    # Build path segments with segment-based coloring
+    path_segments = []
+    current_segment = hover[0].get('segment', 'entry') if hover else 'entry'
+    segment_start = 0
+
+    for i, pt in enumerate(hover):
+        seg = pt.get('segment', 'entry')
+        if seg != current_segment or i == len(hover) - 1:
+            end_idx = i if i == len(hover) - 1 else i
+            segment_path = path[segment_start:end_idx + 1]
+            if len(segment_path) >= 2:
+                # Determine color
+                if current_segment.startswith('turn_'):
+                    color = turn_color
+                    tooltip_text = current_segment.replace('_', ' ').title()
+                else:
+                    color = segment_colors.get(current_segment, "#666666")
+                    if current_segment == "entry":
+                        tooltip_text = "45° Entry"
+                    else:
+                        tooltip_text = current_segment.title() + " Leg"
+
+                path_segments.append(
+                    dl.Polyline(
+                        positions=segment_path,
+                        color=color,
+                        weight=3,
+                        children=dl.Tooltip(tooltip_text)
+                    )
+                )
+            segment_start = i
+            current_segment = seg
+
+    # Entry/Exit marker (at the intercept point on downwind - path start and end)
+    elements = []
+    if path:
+        entry_marker = dl.CircleMarker(
+            center=path[0],
+            radius=7,
+            color="#9933ff",
+            fill=True,
+            fillOpacity=1.0,
+            children=dl.Tooltip(f"45° Entry/Exit: {altitude:.0f} ft AGL"),
+        )
+        elements.append(entry_marker)
+
+    elements.extend(path_segments)
+
+    # Info display
+    info_elements = []
+
+    # Warnings section
+    has_warnings = (
+        sim_warnings.get("stall_margin_warning") or
+        sim_warnings.get("g_limit_warning") or
+        sim_warnings.get("airspeed_warning")
+    )
+    if has_warnings:
+        warning_items = []
+        if sim_warnings.get("airspeed_warning"):
+            warning_items.append(html.Div(f"Airspeed: {sim_warnings['airspeed_warning']}"))
+        if sim_warnings.get("stall_margin_warning"):
+            warning_items.append(html.Div("Low stall margin in turns"))
+        if sim_warnings.get("g_limit_warning"):
+            warning_items.append(html.Div("G-limit warning in turns"))
+
+        info_elements.append(
+            html.Div(warning_items, style={"color": "#856404", "backgroundColor": "#fff3cd", "padding": "8px", "borderRadius": "4px", "marginBottom": "5px"})
+        )
+
+    # Performance data
+    info_elements.append(
+        html.Div([
+            html.Div([
+                html.Strong("Rectangular Course"),
+            ], style={"borderBottom": "1px solid #ccc", "paddingBottom": "3px", "marginBottom": "5px"}),
+            html.Div(f"Downwind: {dw_length_nm:.2f} nm | Track: {dw_track:.0f}°"),
+            html.Div(f"Lateral offset: {lateral_nm:.2f} nm ({lateral_nm * 6076:.0f} ft)"),
+            html.Div(f"Pattern: {direction.title()} | Circuits: {circuits}"),
+            html.Div(f"Weight: {sim_warnings.get('weight_lb', 0):.0f} lb"),
+            html.Div(f"Power: {sim_warnings.get('power_setting_pct', 50):.0f}% | CG: {sim_warnings.get('cg_position_pct', 50):.0f}%"),
+            html.Div(f"IAS: {ias:.0f} kt | TAS: {sim_warnings.get('tas_knots', 0):.0f} kt"),
+            html.Hr(style={"margin": "5px 0"}),
+            html.Div([
+                html.Strong("Wind Correction"),
+            ], style={"marginBottom": "3px"}),
+            html.Div(f"Wind: {sim_warnings.get('wind_dir', 0):.0f}° at {sim_warnings.get('wind_speed', 0):.0f} kt"),
+            html.Div(f"Max crab angle: {sim_warnings.get('max_crab_angle', 0):.1f}°"),
+            html.Div(f"GS range: {sim_warnings.get('min_groundspeed', 0):.0f} - {sim_warnings.get('max_groundspeed', 0):.0f} kt"),
+            html.Hr(style={"margin": "5px 0"}),
+            html.Div([
+                html.Strong("Turn Performance"),
+            ], style={"marginBottom": "3px"}),
+            html.Div(f"Turn radius: {sim_warnings.get('turn_radius_ft', 0):.0f} ft"),
+            html.Div(f"Bank range: {sim_warnings.get('min_bank_achieved', 0):.0f}° - {sim_warnings.get('max_bank_achieved', 0):.0f}°"),
+            html.Div(f"Vs (clean): {sim_warnings.get('stall_speed_clean', 0):.0f} kt"),
+            html.Div(f"Total time: {sim_warnings.get('total_time_sec', 0):.0f} sec"),
+            html.Hr(style={"margin": "5px 0"}),
+            html.Div("Purple=Entry, Red=Downwind, Blue=Base, Green=Upwind, Orange=Crosswind", style={"fontSize": "12px", "fontStyle": "italic"}),
+            html.Div("Bank steeper entering from downwind (high GS)", style={"fontSize": "12px", "fontStyle": "italic", "marginTop": "3px"}),
+        ], style={"color": "#333", "backgroundColor": "#e9ecef", "padding": "8px", "borderRadius": "4px"})
+    )
+
+    # Slider configuration
+    num_points = len(hover)
+    slider_max = max(0, num_points - 1)
+    slider_marks = {0: "Start"}
+    if slider_max > 0:
+        slider_marks[slider_max] = "End"
+    slider_style = {"display": "block", "marginTop": "10px"}
+
+    # Combine cleaned layer (without preview) with new elements
+    final_layer = layer_children + elements
+
+    return (
+        final_layer,
+        info_elements,
+        hover,
+        path,
+        sim_warnings,
+        slider_style,
+        slider_max,
+        slider_marks,
+        0,
+    )
+
+
+# === Rectangular Course Time Scrubber Callback ===
+@app.callback(
+    Output("scrubber-layer", "children", allow_duplicate=True),
+    Input("rectcourse-time-slider", "value"),
+    State("rectcourse-hover-store", "data"),
+    State("rectcourse-path-store", "data"),
+    prevent_initial_call=True
+)
+def update_rectangular_course_scrubber(slider_value, hover_data, path_data):
+    """Update the scrubber marker and tooltip based on slider position."""
+    if not hover_data or not path_data or slider_value is None:
+        return []
+
+    idx = int(slider_value)
+    if idx < 0 or idx >= len(hover_data) or idx >= len(path_data):
+        return []
+
+    pt = hover_data[idx]
+    pos = path_data[idx]
+
+    # Get segment for display
+    segment = pt.get('segment', 'downwind')
+    if segment.startswith('turn_'):
+        segment_display = segment.replace('_', ' ').title()
+    else:
+        segment_display = segment.title() + " Leg"
+
+    # Build tooltip content
+    tooltip_content = [
+        html.Div(f"{segment_display}", style={"fontWeight": "bold", "borderBottom": "1px solid #ccc", "paddingBottom": "3px", "marginBottom": "3px"}),
+        html.Div(f"Circuit: {pt.get('circuit', 1)}"),
+        html.Div(f"Altitude: {pt.get('alt', 0):.0f} ft AGL"),
+        html.Div(f"Time: {pt.get('time', 0):.1f} sec"),
+        html.Div(f"IAS: {pt.get('ias', 0):.0f} kt | TAS: {pt.get('tas', 0):.0f} kt"),
+        html.Div(f"GS: {pt.get('gs', 0):.0f} kt"),
+        html.Div(f"Bank: {pt.get('aob', 0):.1f}°"),
+        html.Div(f"Heading: {pt.get('heading', 0):.0f}°"),
+        html.Div(f"Track: {pt.get('track', 0):.0f}°"),
+        html.Div(f"Crab: {pt.get('crab', '0°')}"),
+    ]
+
+    # Create airplane marker pointing in direction of heading
+    heading = pt.get('heading', 0)
+    bank = pt.get('aob', 0)
+    marker = create_airplane_marker(pos, heading, tooltip_content, bank)
+
+    return [marker]
+
+
+# === Eights on Pylons Draw Callback ===
+@app.callback(
+    Output("layer", "children", allow_duplicate=True),
+    Output("pylons-info", "children"),
+    Output("pylons-hover-store", "data"),
+    Output("pylons-path-store", "data"),
+    Output("pylons-slider-container", "style"),
+    Output("pylons-time-slider", "max"),
+    Output("pylons-time-slider", "marks"),
+    Output("pylons-time-slider", "value"),
+    Input("pylons-draw-btn", "n_clicks"),
+    State({"type": "point-store", "m_id": "pylons", "role": "pylon_a"}, "data"),
+    State({"type": "point-store", "m_id": "pylons", "role": "pylon_b"}, "data"),
+    State("pylons-ias", "value"),
+    State("pylons-num-eights", "value"),
+    State("pylons-entry-direction", "value"),
+    State("env-oat", "value"),
+    State("env-altimeter", "value"),
+    State("env-wind-dir", "value"),
+    State("env-wind-speed", "value"),
+    State("aircraft-select", "value"),
+    State("selected-airport-id", "data"),
+    State("runtime-total-weight-lb", "data"),
+    State("power-setting", "value"),
+    State("cg-slider", "value"),
+    State("layer", "children"),
+    prevent_initial_call=True
+)
+def draw_eights_on_pylons(
+    n_clicks,
+    pylon_a_data,
+    pylon_b_data,
+    ias_knots,
+    num_eights,
+    entry_direction,
+    oat_f,
+    altimeter_inhg,
+    wind_dir,
+    wind_speed,
+    aircraft_name,
+    selected_airport_id,
+    runtime_weight,
+    power_setting,
+    cg_position,
+    layer_children,
+):
+    """Draw Eights on Pylons with integrated pivotal altitude calculator."""
+    if not n_clicks:
+        raise PreventUpdate
+
+    # Validate we have both pylons
+    if not pylon_a_data or not pylon_b_data:
+        return (
+            layer_children or [],
+            html.Div("Please set both pylon locations first.", style={"color": "red"}),
+            [], [], {"display": "none"}, 0, {}, 0
+        )
+
+    pylon1 = {"lat": pylon_a_data.get("lat"), "lon": pylon_a_data.get("lon")}
+    pylon2 = {"lat": pylon_b_data.get("lat"), "lon": pylon_b_data.get("lon")}
+
+    if not pylon1.get("lat") or not pylon2.get("lat"):
+        return (
+            layer_children or [],
+            html.Div("Please set both pylon locations first.", style={"color": "red"}),
+            [], [], {"display": "none"}, 0, {}, 0
+        )
+
+    # Remove existing pylon markers from layer
+    if layer_children is None:
+        layer_children = []
+
+    def should_keep(c):
+        if not isinstance(c, dict):
+            return True
+        el_id = c.get('props', {}).get('id', '')
+        if isinstance(el_id, dict) and el_id.get('m_id') == 'pylons':
+            return False
+        return True
+
+    layer_children = [c for c in layer_children if should_keep(c)]
+
+    # Get aircraft data
+    if aircraft_name and aircraft_name in aircraft_data:
+        ac = dict(aircraft_data[aircraft_name])
+    else:
+        ac = {}
+
+    # Get weight
+    weight_lb = float(runtime_weight) if runtime_weight not in [None, "", "null"] else None
+    if weight_lb:
+        ac["total_weight_lb"] = weight_lb
+
+    # Parse inputs
+    ias = float(ias_knots) if ias_knots not in [None, "", "null"] else 100.0
+    n_eights = int(num_eights) if num_eights not in [None, "", "null"] else 1
+    entry_dir = str(entry_direction) if entry_direction not in [None, "", "null"] else "downwind"
+
+    # OAT F -> C
+    try:
+        oat_c = (float(oat_f) - 32.0) * 5.0 / 9.0
+    except Exception:
+        oat_c = (52.0 - 32.0) * 5.0 / 9.0
+
+    # Get airport elevation
+    selected_airport_elev_ft = 0.0
+    if selected_airport_id:
+        ap = next((a for a in airport_data if a.get("id") == selected_airport_id), None)
+        if ap:
+            selected_airport_elev_ft = ap.get("elevation_ft", 0.0)
+
+    # Run simulation
+    from simulation import simulate_eights_on_pylons
+    path, hover, sim_warnings = simulate_eights_on_pylons(
+        pylon1=pylon1,
+        pylon2=pylon2,
+        ias_knots=ias,
+        num_eights=n_eights,
+        wind_dir_deg=float(wind_dir) if wind_dir not in [None, "", "null"] else 0.0,
+        wind_speed_kt=float(wind_speed) if wind_speed not in [None, "", "null"] else 0.0,
+        oat_c=oat_c,
+        altimeter_inhg=float(altimeter_inhg) if altimeter_inhg not in [None, "", "null"] else 29.92,
+        field_elev_ft=selected_airport_elev_ft,
+        ac=ac,
+        weight_lb=weight_lb,
+        power_setting=float(power_setting) if power_setting not in [None, "", "null"] else 0.65,
+        cg_position=float(cg_position) if cg_position not in [None, "", "null"] else 0.5,
+        entry_direction=entry_dir,
+    )
+
+    if not path:
+        return (
+            layer_children,
+            html.Div("Failed to generate path. Check inputs.", style={"color": "red"}),
+            [], [], {"display": "none"}, 0, {}, 0
+        )
+
+    # Build polyline with hover data
+    from rendering import render_hover_polyline
+    polyline = render_hover_polyline(
+        path, hover,
+        color='#9b59b6',  # Purple
+        weight=4
+    )
+
+    # Pylon markers
+    pylon_markers = [
+        dl.CircleMarker(
+            center=[pylon1['lat'], pylon1['lon']],
+            radius=8,
+            color='#e74c3c',
+            fill=True,
+            fillColor='#e74c3c',
+            fillOpacity=0.8,
+            children=dl.Tooltip("Pylon 1")
+        ),
+        dl.CircleMarker(
+            center=[pylon2['lat'], pylon2['lon']],
+            radius=8,
+            color='#3498db',
+            fill=True,
+            fillColor='#3498db',
+            fillOpacity=0.8,
+            children=dl.Tooltip("Pylon 2")
+        ),
+    ]
+
+    elements = [polyline] + pylon_markers
+
+    # Build warnings if any
+    warning_elements = []
+    if sim_warnings.get("airspeed_warning"):
+        warning_elements.append(html.Div(f"Warning: {sim_warnings['airspeed_warning']}", style={"color": "#c0392b", "fontWeight": "bold"}))
+    if sim_warnings.get("bank_limited"):
+        warning_elements.append(html.Div("Bank angle limited to 40° (ACS maximum)", style={"color": "#e67e22"}))
+    if sim_warnings.get("stall_margin_warning"):
+        warning_elements.append(html.Div("Warning: Stall margin below 1.2", style={"color": "#c0392b"}))
+    # ACS compliance warnings
+    if sim_warnings.get("pylon_distance_warning"):
+        warning_elements.append(html.Div(f"⚠ {sim_warnings['pylon_distance_warning']}", style={"color": "#e67e22"}))
+    if sim_warnings.get("transition_time_warning"):
+        warning_elements.append(html.Div(f"ℹ {sim_warnings['transition_time_warning']}", style={"color": "#3498db"}))
+
+    # Build info panel - prominently featuring pivotal altitude
+    info_elements = html.Div([
+        html.Div(warning_elements) if warning_elements else None,
+
+        html.Div([
+            html.Strong("Pivotal Altitude Calculator Results"),
+        ], style={"marginBottom": "8px", "fontSize": "14px", "borderBottom": "2px solid #27ae60", "paddingBottom": "4px"}),
+
+        # The main output - pivotal altitude range
+        html.Div([
+            html.Div(f"Upwind (min GS): {sim_warnings.get('pivotal_alt_min', 0):.0f} ft AGL", style={"fontSize": "13px"}),
+            html.Div(f"Downwind (max GS): {sim_warnings.get('pivotal_alt_max', 0):.0f} ft AGL", style={"fontSize": "13px"}),
+            html.Div(f"Average: {sim_warnings.get('pivotal_alt_avg', 0):.0f} ft AGL", style={"fontSize": "13px", "fontWeight": "bold"}),
+            html.Div(f"Altitude range: {sim_warnings.get('pivotal_alt_range', 0):.0f} ft", style={"fontSize": "13px", "color": "#e67e22"}),
+        ], style={"backgroundColor": "#e8f8e8", "padding": "8px", "borderRadius": "4px", "marginBottom": "10px"}),
+
+        html.Div(f"No-wind pivotal altitude: {sim_warnings.get('pivotal_alt_no_wind', 0):.0f} ft AGL (GS²/11.3)",
+                 style={"fontSize": "11px", "color": "#666", "marginBottom": "8px"}),
+
+        html.Hr(style={"margin": "5px 0"}),
+        html.Div([
+            html.Strong("Groundspeed & Bank"),
+        ], style={"marginBottom": "3px"}),
+        html.Div(f"GS range: {sim_warnings.get('min_groundspeed', 0):.0f} - {sim_warnings.get('max_groundspeed', 0):.0f} kt"),
+        html.Div(f"Bank range: {sim_warnings.get('min_bank_achieved', 0):.0f}° - {sim_warnings.get('max_bank_achieved', 0):.0f}°"),
+
+        html.Hr(style={"margin": "5px 0"}),
+        html.Div([
+            html.Strong("Geometry & Timing"),
+        ], style={"marginBottom": "3px"}),
+        html.Div(f"Pylon separation: {sim_warnings.get('pylon_distance_nm', 0):.2f} nm ({sim_warnings.get('pylon_distance_ft', 0):.0f} ft)"),
+        html.Div(f"Transition time: {sim_warnings.get('transition_time_avg_sec', 0):.1f} sec (ACS: 3-5 sec)"),
+        html.Div(f"Turn arcs: P1={sim_warnings.get('p1_arc_degrees', 180):.0f}° | P2={sim_warnings.get('p2_arc_degrees', 180):.0f}°"),
+        html.Div(f"Turn radius: {sim_warnings.get('turn_radius_ft', 0):.0f} ft"),
+
+        html.Hr(style={"margin": "5px 0"}),
+        html.Div([
+            html.Strong("Aircraft"),
+        ], style={"marginBottom": "3px"}),
+        html.Div(f"IAS: {sim_warnings.get('ias_knots', 0):.0f} kt | TAS: {sim_warnings.get('tas_knots', 0):.0f} kt"),
+        html.Div(f"Weight: {sim_warnings.get('weight_lb', 0):.0f} lb"),
+        html.Div(f"Vs (clean): {sim_warnings.get('stall_speed_clean', 0):.0f} kt | Va: {sim_warnings.get('maneuvering_speed', 0):.0f} kt"),
+        html.Div(f"Wind: {sim_warnings.get('wind_dir', 0):.0f}° at {sim_warnings.get('wind_speed', 0):.0f} kt"),
+
+        html.Hr(style={"margin": "5px 0"}),
+        html.Div(f"Total time: {sim_warnings.get('total_time_sec', 0):.0f} sec | Entry: {entry_dir.title()}",
+                 style={"fontSize": "11px", "fontStyle": "italic"}),
+        html.Div("Climb with tailwind (higher GS), descend with headwind (lower GS)",
+                 style={"fontSize": "11px", "fontStyle": "italic", "color": "#666", "marginTop": "4px"}),
+    ], style={"color": "#333", "backgroundColor": "#e9ecef", "padding": "8px", "borderRadius": "4px"})
+
+    # Slider configuration
+    num_points = len(hover)
+    slider_max = max(0, num_points - 1)
+    slider_marks = {0: "Start"}
+    if slider_max > 0:
+        slider_marks[slider_max] = "End"
+    slider_style = {"display": "block", "marginTop": "10px"}
+
+    final_layer = layer_children + elements
+
+    return (
+        final_layer,
+        info_elements,
+        hover,
+        path,
+        slider_style,
+        slider_max,
+        slider_marks,
+        0,
+    )
+
+
+# === Eights on Pylons Time Scrubber Callback ===
+@app.callback(
+    Output("scrubber-layer", "children", allow_duplicate=True),
+    Input("pylons-time-slider", "value"),
+    State("pylons-hover-store", "data"),
+    State("pylons-path-store", "data"),
+    prevent_initial_call=True
+)
+def update_eights_on_pylons_scrubber(slider_value, hover_data, path_data):
+    """Update the scrubber marker and tooltip based on slider position."""
+    if not hover_data or not path_data or slider_value is None:
+        return []
+
+    idx = int(slider_value)
+    if idx < 0 or idx >= len(hover_data) or idx >= len(path_data):
+        return []
+
+    pt = hover_data[idx]
+    pos = path_data[idx]
+
+    # Get segment for display
+    segment = pt.get('segment', 'pylon_1')
+    if 'pylon_1' in segment:
+        segment_display = "Pylon 1 Orbit"
+    elif 'pylon_2' in segment:
+        segment_display = "Pylon 2 Orbit"
+    else:
+        segment_display = segment.replace('_', ' ').title()
+
+    # Build tooltip - prominently show pivotal altitude
+    tooltip_content = [
+        html.Div(f"{segment_display}", style={"fontWeight": "bold", "borderBottom": "1px solid #ccc", "paddingBottom": "3px", "marginBottom": "3px"}),
+        html.Div(f"PIVOTAL ALT: {pt.get('pivotal_alt', 0):.0f} ft AGL", style={"fontWeight": "bold", "color": "#27ae60"}),
+        html.Div(f"Groundspeed: {pt.get('gs', 0):.0f} kt"),
+        html.Div(f"Time: {pt.get('time', 0):.1f} sec"),
+        html.Div(f"IAS: {pt.get('ias', 0):.0f} kt | TAS: {pt.get('tas', 0):.0f} kt"),
+        html.Div(f"Bank: {pt.get('aob', 0):.1f}°"),
+        html.Div(f"Load: {pt.get('load_factor', 1.0):.2f}G"),
+        html.Div(f"Heading: {pt.get('heading', 0):.0f}°"),
+        html.Div(f"Track: {pt.get('track', 0):.0f}°"),
+        html.Div(f"Wind corr: {pt.get('wind_correction', 0):.1f}°"),
+    ]
+
+    heading = pt.get('heading', 0)
+    bank = pt.get('aob', 0)
+    marker = create_airplane_marker(pos, heading, tooltip_content, bank)
+
+    return [marker]
+
+
+# === Steep Spiral Time Scrubber Callback ===
+@app.callback(
+    Output("scrubber-layer", "children"),
+    Input("steepspiral-time-slider", "value"),
+    State("steepspiral-hover-store", "data"),
+    State("steepspiral-path-store", "data"),
+    prevent_initial_call=True
+)
+def update_steep_spiral_scrubber(slider_value, hover_data, path_data):
+    """Update the scrubber marker and tooltip based on slider position."""
+    if not hover_data or not path_data or slider_value is None:
+        return []
+
+    # Ensure slider value is within bounds
+    idx = int(slider_value)
+    if idx < 0 or idx >= len(hover_data) or idx >= len(path_data):
+        return []
+
+    pt = hover_data[idx]
+    pos = path_data[idx]
+
+    # Build tooltip content
+    turn_num = pt.get('turn_number', 1)
+    tooltip_content = [
+        html.Div(f"Turn {turn_num} - {pt.get('turn_progress', 0):.0f}°", style={"fontWeight": "bold", "borderBottom": "1px solid #ccc", "paddingBottom": "3px", "marginBottom": "3px"}),
+        html.Div(f"Altitude: {pt.get('alt', 0):.0f} ft AGL"),
+        html.Div(f"Time: {pt.get('time', 0):.1f} sec"),
+        html.Div(f"IAS: {pt.get('ias', 0):.0f} kt | TAS: {pt.get('tas', 0):.0f} kt"),
+        html.Div(f"GS: {pt.get('gs', 0):.0f} kt"),
+        html.Div(f"Bank: {pt.get('aob', 0):.1f}°"),
+        html.Div(f"VS: {pt.get('vs', 0):.0f} fpm"),
+        html.Div(f"Heading: {pt.get('heading', 0):.0f}°"),
+        html.Div(f"Track: {pt.get('track', 0):.0f}°"),
+        html.Div(f"Drift: {pt.get('drift', 0):.1f}°"),
+    ]
+
+    # Create airplane marker pointing in direction of heading
+    heading = pt.get('heading', 0)
+    bank = pt.get('aob', 0)
+    marker = create_airplane_marker(pos, heading, tooltip_content, bank)
+
+    return [marker]
+
+
 @callback(
     Output({"type": "point-store", "m_id": ALL, "role": ALL}, "data", allow_duplicate=True),
     Output("active-click-target", "data", allow_duplicate=True),
     Output("layer", "children", allow_duplicate=True),
     Output("map", "bounds", allow_duplicate=True),
+    Output("scrubber-layer", "children", allow_duplicate=True),
     Input("reset-all", "n_clicks"),
     Input("reset-clicks", "n_clicks"),
     State({"type": "point-store", "m_id": ALL, "role": ALL}, "id"),
@@ -2303,8 +4996,10 @@ def handle_resets(n_reset_all, n_reset_clicks, store_ids):
     cleared_layer = []
     cleared_bounds = None
 
+    # Clear scrubber layer
+    cleared_scrubber = []
 
-    return cleared_points, cleared_target, cleared_layer, cleared_bounds
+    return cleared_points, cleared_target, cleared_layer, cleared_bounds, cleared_scrubber
 
 @app.callback(
     Output("disclaimer-modal", "is_open"),
