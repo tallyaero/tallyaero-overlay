@@ -7,37 +7,92 @@
   "CD0": 0.029,
   "e": 0.81,
   "configuration_options": {
-    "flaps": ["clean", "takeoff", "landing"]
+    "flaps": [
+      "clean",
+      "takeoff",
+      "landing"
+    ]
   },
   "G_limits": {
     "normal": {
-      "clean": { "positive": 3.8, "negative": -1.5 },
-      "takeoff": { "positive": 2.0, "negative": -1.0 },
-      "landing": { "positive": 2.0, "negative": -1.0 }
+      "clean": {
+        "positive": 3.8,
+        "negative": -1.5
+      },
+      "takeoff": {
+        "positive": 2.0,
+        "negative": -1.0
+      },
+      "landing": {
+        "positive": 2.0,
+        "negative": -1.0
+      }
     },
     "utility": {
-      "clean": { "positive": 4.4, "negative": -1.5 },
-      "takeoff": { "positive": 2.0, "negative": -1.0 },
-      "landing": { "positive": 2.0, "negative": -1.0 }
+      "clean": {
+        "positive": 4.4,
+        "negative": -1.5
+      },
+      "takeoff": {
+        "positive": 2.0,
+        "negative": -1.0
+      },
+      "landing": {
+        "positive": 2.0,
+        "negative": -1.0
+      }
     },
     "aerobatic": {
-      "clean": { "positive": 0.0, "negative": 0.0 },
-      "takeoff": { "positive": 0.0, "negative": 0.0 },
-      "landing": { "positive": 0.0, "negative": 0.0 }
+      "clean": {
+        "positive": 0.0,
+        "negative": 0.0
+      },
+      "takeoff": {
+        "positive": 0.0,
+        "negative": 0.0
+      },
+      "landing": {
+        "positive": 0.0,
+        "negative": 0.0
+      }
     }
   },
   "stall_speeds": {
     "clean": {
-      "weights": [3000, 3400, 3800],
-      "speeds": [65, 69, 72]
+      "weights": [
+        3000,
+        3400,
+        3800
+      ],
+      "speeds": [
+        65,
+        69,
+        72
+      ]
     },
     "takeoff": {
-      "weights": [3000, 3400, 3800],
-      "speeds": [62, 66, 69]
+      "weights": [
+        3000,
+        3400,
+        3800
+      ],
+      "speeds": [
+        62,
+        66,
+        69
+      ]
     },
     "landing": {
-      "weights": [3000, 3400, 3800],
-      "speeds": [59, 63, 66]
+      "weights": [
+        3000,
+        3400,
+        3800
+      ],
+      "speeds": [
+        59,
+        63,
+        66
+      ]
     }
   },
   "single_engine_limits": {
@@ -134,19 +189,33 @@
     "landing": 1.8
   },
   "arcs": {
-    "white": [59, 111],
-    "green": [65, 169],
-    "yellow": [169, 202],
+    "white": [
+      59,
+      111
+    ],
+    "green": [
+      65,
+      169
+    ],
+    "yellow": [
+      169,
+      202
+    ],
     "red": 202
   },
   "empty_weight": 2400,
   "max_weight": 3800,
   "seats": 4,
-  "cg_range": [134.01, 144.01],
+  "cg_range": [
+    134.01,
+    144.01
+  ],
   "fuel_capacity_gal": 108,
   "fuel_weight_per_gal": 6.0,
   "prop_thrust_decay": {
     "T_static_factor": 2.6,
     "V_max_kts": 202
-  }
+  },
+  "Vx": 82,
+  "Vy": 88
 }

@@ -519,8 +519,8 @@ def simulate_chandelle(
         # Compute motion
         gs_fps, gs_kt, track_deg, drift_deg = compute_motion(tas)
 
-        # Record point with current engine power
-        record(gs_kt, bank, vs_fpm, track_deg, drift_deg, pitch, segment, current_hp)
+        # Record point with current engine power (apply turn_sign to bank for L/R display)
+        record(gs_kt, turn_sign * bank, vs_fpm, track_deg, drift_deg, pitch, segment, current_hp)
 
         # Move position
         step_ft = gs_fps * dt

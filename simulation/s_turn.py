@@ -481,7 +481,7 @@ def simulate_s_turn(
             "tas": round(tas_knots, 1),
             "ias": round(ias_knots, 1),
             "gs": round(gs_kt, 1),
-            "aob": round(bank_deg, 1),
+            "aob": round(turn_sign * bank_deg, 1),  # Apply turn_sign for L/R display
             "vs": round(-vs_fpm, 0),  # Negative because vs_fpm is descent rate
             "track": round(track_deg, 1),
             "heading": round(hdg_deg, 1),

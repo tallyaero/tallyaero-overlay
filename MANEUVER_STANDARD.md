@@ -373,12 +373,35 @@ Every maneuver must display a comprehensive info panel with:
 - Total maneuver time
 
 #### Footer
-- Color legend for path segments
 - Instructions for time scrubber
 
 ---
 
-### 8. Hover Data Structure
+### 8. Path Drawing Colors
+
+All maneuvers use a consistent color scheme:
+
+| Element | Color | Hex Code |
+|---------|-------|----------|
+| **Flight Path** | Red | `#ff0000` or `"red"` |
+| **Entry Point Marker** | Green | `#00aa00` or `"green"` |
+| **Exit Point Marker** | Red | `#cc0000` or `"red"` |
+| **Reference Points** | Blue | `#3498db` or `"blue"` |
+
+```python
+# Standard path drawing
+path_line = dl.Polyline(positions=path, color="red", weight=3)
+
+# Entry marker
+entry_marker = dl.CircleMarker(center=entry_pos, radius=6, color="green", fill=True)
+
+# Exit marker
+exit_marker = dl.CircleMarker(center=exit_pos, radius=6, color="red", fill=True)
+```
+
+---
+
+### 9. Hover Data Structure
 
 Every simulation must return hover data with these fields:
 

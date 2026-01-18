@@ -289,14 +289,14 @@ def simulate_steep_spiral(
         # Drift angle (difference between heading and track)
         drift_deg = _angle_diff_deg(track_deg, hdg_deg)
 
-        # Record point
+        # Record point (apply turn_sign to bank for L/R display)
         hover.append({
             "time": round(t, 2),
             "alt": round(alt_agl, 1),
             "tas": round(glide_tas_knots, 1),
             "ias": round(bg_kias, 1),
             "gs": round(gs_kt, 1),
-            "aob": round(actual_bank_deg, 1),
+            "aob": round(turn_sign * actual_bank_deg, 1),
             "vs": round(-descent_fpm, 0),
             "track": round(track_deg, 1),
             "heading": round(hdg_deg, 1),
@@ -337,7 +337,7 @@ def simulate_steep_spiral(
             "tas": round(glide_tas_knots, 1),
             "ias": round(bg_kias, 1),
             "gs": round(gs_kt, 1),
-            "aob": round(actual_bank_deg, 1),
+            "aob": round(turn_sign * actual_bank_deg, 1),  # Apply turn_sign for L/R display
             "vs": round(-descent_fpm, 0),
             "track": round(track_deg, 1),
             "heading": round(hdg_deg, 1),

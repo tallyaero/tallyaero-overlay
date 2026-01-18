@@ -388,8 +388,8 @@ def simulate_lazy_eight(
             # Compute motion
             gs_fps, gs_kt, track_deg, drift_deg = compute_motion(tas)
 
-            # Record point
-            record(gs_kt, target_bank, vs_fpm, track_deg, drift_deg, target_pitch, segment, turn_progress_deg)
+            # Record point (apply turn_sign to bank for L/R display)
+            record(gs_kt, turn_sign * target_bank, vs_fpm, track_deg, drift_deg, target_pitch, segment, turn_progress_deg)
 
             # Move position
             step_ft = gs_fps * dt

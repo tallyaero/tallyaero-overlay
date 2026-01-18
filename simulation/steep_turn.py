@@ -62,7 +62,7 @@ def simulate_steep_turn(
     field_elev_ft: float = 0.0,
     timestep_sec: float = 0.5,
     roll_rate_dps: float = 5.0,
-    pause_sec: float = 5.0,
+    pause_sec: float = 1.0,
     # Legacy parameter name support
     tas_knots: float = None,
 ) -> tuple:
@@ -83,7 +83,7 @@ def simulate_steep_turn(
         field_elev_ft: Field elevation in feet MSL
         timestep_sec: Time step in seconds (default 0.5)
         roll_rate_dps: Roll rate in degrees per second (default 5.0)
-        pause_sec: Pause duration between turns in seconds (default 5.0)
+        pause_sec: Pause duration between turns in seconds (default 1.0)
         tas_knots: (Legacy) TAS override if IAS not provided
 
     Returns:
@@ -111,7 +111,7 @@ def simulate_steep_turn(
     altimeter_inhg = float(altimeter_inhg if altimeter_inhg is not None else 29.92)
     field_elev_ft = float(field_elev_ft or 0.0)
     roll_rate_dps = float(roll_rate_dps or 5.0)
-    pause_sec = float(pause_sec or 5.0)
+    pause_sec = float(pause_sec or 1.0)
 
     # Compute TAS from IAS
     alt_msl_ft = field_elev_ft + altitude_ft
@@ -304,8 +304,8 @@ def simulate_steep_turn(
                 # Compute motion
                 gs_fps, gs_kt, track_deg, drift_deg = compute_motion()
 
-                # Record point
-                record(gs_kt, bank_state_deg, track_deg, drift_deg, segment)
+                # Record point (apply turn_sign to bank for L/R display)
+                record(gs_kt, turn_sign * bank_state_deg, track_deg, drift_deg, segment)
 
                 # Move position
                 move_position(gs_fps, track_deg)

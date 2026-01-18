@@ -69,22 +69,25 @@ label {
 
 /* === Disclaimer Banner + Legal Links === */
 .disclaimer-banner {
-  background-color: #fff3cd;
-  color: #856404;
-  padding: 10px 15px;
-  border: 1px solid #ffeeba;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  margin: 10px 16px 0 16px;
+  background-color: #fffbea;
+  color: #8a6d3b;
+  padding: 4px 12px;
+  border-bottom: 1px solid #f0e6c8;
+  font-size: 11px;
+  font-weight: 500;
+  margin: 0;
+  text-align: center;
 }
 
 .legal-links-row {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
-  margin: 6px 0 10px 0;
+  gap: 8px;
+  margin: 0;
+  padding: 4px 0;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
   line-height: 1.2;
 }
 
@@ -230,52 +233,85 @@ select,
 
 /* === Airport Search Results (global, not mobile-only) === */
 .search-results-box {
-  max-height: 200px;
+  max-height: 250px;
   overflow-y: auto;
-  border: 1px solid #ccc;
-  margin-bottom: 10px;
+  border: 1px solid #007bff;
   border-radius: 6px;
   background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 2px;
+  margin-bottom: 8px;
+}
+
+.search-results-box:empty {
+  display: none;
+  border: none;
+  box-shadow: none;
 }
 
 .airport-result {
-  padding: 6px 10px;
+  padding: 10px 14px;
   border-bottom: 1px solid #eee;
   cursor: pointer;
+  transition: background-color 0.1s ease;
+  font-size: 13px;
+}
+
+.airport-result:last-child {
+  border-bottom: none;
 }
 
 .airport-result:hover {
-  background-color: #f0f0f0;
+  background-color: #e3f2fd;
 }
 
 /* === Buttons (DO NOT override Bootstrap globally) === */
 .green-button {
   background-color: var(--orange-primary);
   color: white;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 12px;
   border: none;
-  border-radius: 6px;
-  padding: 10px 20px;
+  border-radius: 4px;
+  padding: 6px 12px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  margin-top: 10px;
+  margin-top: 3px;
 }
 
 .green-button:hover {
   background-color: var(--orange-dark);
 }
 
+/* Small reset buttons */
+.reset-btn-small {
+  background-color: #6c757d;
+  color: white;
+  font-weight: 500;
+  font-size: 11px;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.reset-btn-small:hover {
+  background-color: #5a6268;
+}
+
 /* Optional: secondary blue button you used in code */
 .blue-button {
   background-color: var(--blue-primary);
   color: #fff;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 12px;
   border: none;
-  border-radius: 6px;
-  padding: 10px 20px;
+  border-radius: 4px;
+  padding: 6px 12px;
   cursor: pointer;
   transition: filter 0.2s ease;
-  margin-top: 10px;
+  margin-top: 3px;
 }
 
 .blue-button:hover {
@@ -354,4 +390,42 @@ select,
     width: 100%;
     margin-bottom: 10px;
   }
+}
+
+/* === Input Tooltips === */
+.tooltip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #6c757d;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  cursor: help;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.tooltip-icon:hover {
+  background-color: var(--blue-primary);
+}
+
+.input-label-with-tooltip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* === Click Feedback === */
+.click-feedback {
+  animation: pulse-green 0.5s ease-out;
+}
+
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
 }

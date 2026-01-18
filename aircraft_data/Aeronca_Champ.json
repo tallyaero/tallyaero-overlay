@@ -148,5 +148,7 @@
   "prop_thrust_decay": {
     "T_static_factor": 2.4,
     "V_max_kts": 122
-  }
+  },
+  "Vx": 48,
+  "Vy": 60
 }

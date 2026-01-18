@@ -7,7 +7,11 @@
   "CD0": 0.027,
   "e": 0.8,
   "configuration_options": {
-    "flaps": ["clean", "takeoff", "landing"]
+    "flaps": [
+      "clean",
+      "takeoff",
+      "landing"
+    ]
   },
   "G_limits": {
     "normal": {
@@ -55,16 +59,40 @@
   },
   "stall_speeds": {
     "clean": {
-      "weights": [2000, 2300, 2450],
-      "speeds": [50, 54, 58]
+      "weights": [
+        2000,
+        2300,
+        2450
+      ],
+      "speeds": [
+        50,
+        54,
+        58
+      ]
     },
     "takeoff": {
-      "weights": [2000, 2300, 2450],
-      "speeds": [47, 50, 54]
+      "weights": [
+        2000,
+        2300,
+        2450
+      ],
+      "speeds": [
+        47,
+        50,
+        54
+      ]
     },
     "landing": {
-      "weights": [2000, 2300, 2450],
-      "speeds": [44, 47, 51]
+      "weights": [
+        2000,
+        2300,
+        2450
+      ],
+      "speeds": [
+        44,
+        47,
+        51
+      ]
     }
   },
   "single_engine_limits": {
@@ -93,19 +121,33 @@
     "landing": 1.9
   },
   "arcs": {
-    "white": [44, 85],
-    "green": [50, 140],
-    "yellow": [140, 179],
+    "white": [
+      44,
+      85
+    ],
+    "green": [
+      50,
+      140
+    ],
+    "yellow": [
+      140,
+      179
+    ],
     "red": 179
   },
   "empty_weight": 1450,
   "max_weight": 2450,
   "seats": 4,
-  "cg_range": [36.01, 46.01],
+  "cg_range": [
+    36.01,
+    46.01
+  ],
   "fuel_capacity_gal": 50,
   "fuel_weight_per_gal": 6.0,
   "prop_thrust_decay": {
     "T_static_factor": 2.6,
     "V_max_kts": 179
-  }
+  },
+  "Vx": 62,
+  "Vy": 76
 }

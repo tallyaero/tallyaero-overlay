@@ -406,14 +406,14 @@ def simulate_turns_around_point(
         pos_latlon = local_to_latlon(pos_n_ft, pos_e_ft)
         path.append(pos_latlon)
 
-        # Hover data for this point
+        # Hover data for this point (apply turn_sign to bank for L/R display)
         hover.append({
             "time": round(total_time, 2),
             "alt": round(altitude_ft, 1),
             "tas": round(tas_knots, 1),
             "ias": round(ias_knots, 1),
             "gs": round(gs_kt, 1),
-            "aob": round(bank_deg, 1),
+            "aob": round(turn_sign * bank_deg, 1),
             "vs": 0,  # Perfect execution = constant altitude
             "track": round(track_deg, 1),
             "heading": round(hdg_deg, 1),
