@@ -19,10 +19,13 @@ from .steep_spiral import simulate_steep_spiral
 
 from .s_turn import simulate_s_turn
 
-from .glide_path import (
-    simulate_glide_path_to_target,
-    find_required_aob_for_arc_fit
+from .po180 import (
+    simulate_power_off_180,
+    simulate_glide_path_to_target,  # Legacy compatibility
 )
+
+# Legacy import for backwards compatibility
+from .glide_path import find_required_aob_for_arc_fit
 
 from .engine_out import (
     simulate_engineout_glide,
@@ -52,7 +55,8 @@ __all__ = [
     'simulate_lazy_eight',
     'simulate_steep_spiral',
     'simulate_s_turn',
-    'simulate_glide_path_to_target',
+    'simulate_power_off_180',
+    'simulate_glide_path_to_target',  # Legacy compatibility
     'find_required_aob_for_arc_fit',
     'simulate_engineout_glide',
     'simulate_tight_overhead_orbit',

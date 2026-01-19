@@ -62,7 +62,7 @@ app = dash.Dash(
     __name__,
     external_stylesheets=[dbc.themes.BOOTSTRAP],
     suppress_callback_exceptions=True,
-    prevent_initial_callbacks=True
+    prevent_initial_callbacks="initial_duplicate"
 )
 server = app.server
 
@@ -78,6 +78,8 @@ def legal_banner_block():
             ),
             html.Div(
                 children=[
+                    html.A("Quick Start", href="#", id="open-quickstart", className="legal-link", style={"color": "#E65C00", "fontWeight": "bold"}),
+                    html.Span(" | ", className="legal-separator"),
                     html.A("EM Diagram Tool", href="https://app.flyaeroedge.com/", target="_blank", className="legal-link", style={"color": "#28a745", "fontWeight": "bold"}),
                     html.Span(" | ", className="legal-separator"),
                     html.A("Report an Error", href="https://forms.gle/VX6CA1ugifAtmBM79", target="_blank", className="legal-link", style={"color": "#dc3545"}),
@@ -85,6 +87,56 @@ def legal_banner_block():
                     html.A("Contact AeroEdge", href="https://forms.gle/nDahQbhYDNYh6P129", target="_blank", className="legal-link"),
                 ],
                 className="legal-links-row",
+            ),
+
+            # Quick Start Modal
+            dbc.Modal(
+                [
+                    dbc.ModalHeader(dbc.ModalTitle("Maneuver Overlay Tool - Quick Start"), close_button=True),
+                    dbc.ModalBody([
+                        html.H5("What is this tool?", style={"color": "#E65C00", "marginBottom": "10px"}),
+                        html.P("The Maneuver Overlay Tool visualizes aircraft maneuvers on real satellite imagery. "
+                               "It calculates flight paths using actual aircraft performance data and physics-based simulations."),
+
+                        html.H5("Who is it for?", style={"color": "#E65C00", "marginTop": "20px", "marginBottom": "10px"}),
+                        html.Ul([
+                            html.Li([html.Strong("Student Pilots: "), "Visualize maneuvers before flying them. Understand how wind, weight, and configuration affect your flight path."]),
+                            html.Li([html.Strong("Flight Instructors: "), "Use as a briefing tool to demonstrate maneuver geometry, energy management, and decision points."]),
+                            html.Li([html.Strong("Checkride Prep: "), "Practice planning Power-Off 180s, Steep Turns, Chandelles, and other ACS maneuvers with realistic parameters."]),
+                        ], style={"marginBottom": "15px"}),
+
+                        html.H5("How to Use", style={"color": "#E65C00", "marginTop": "20px", "marginBottom": "10px"}),
+                        html.Ol([
+                            html.Li([html.Strong("Select Aircraft"), " - Choose your aircraft from the dropdown. Performance data is loaded automatically."]),
+                            html.Li([html.Strong("Search Airport"), " - Type an ICAO code or name, then click to center the map."]),
+                            html.Li([html.Strong("Set Conditions"), " - Adjust weight, wind, and temperature in the sidebar."]),
+                            html.Li([html.Strong("Choose Maneuver"), " - Select from Impossible Turn, Power-Off 180, Steep Turns, and more."]),
+                            html.Li([html.Strong("Click the Map"), " - Set start/end points as prompted, then click Draw to visualize."]),
+                        ], style={"marginBottom": "15px"}),
+
+                        html.H5("Available Maneuvers", style={"color": "#E65C00", "marginTop": "20px", "marginBottom": "10px"}),
+                        html.Ul([
+                            html.Li([html.Strong("Impossible Turn"), " - Engine failure after takeoff: can you make it back?"]),
+                            html.Li([html.Strong("Power-Off 180"), " - Accuracy approach from abeam the touchdown point."]),
+                            html.Li([html.Strong("Engine-Out Glide"), " - Glide distance and path to a landing spot."]),
+                            html.Li([html.Strong("Steep Turns"), " - 45° bank turns with load factor and stall speed changes."]),
+                            html.Li([html.Strong("Chandelle"), " - Maximum performance climbing turn."]),
+                            html.Li([html.Strong("Lazy Eight"), " - Symmetrical climbing/descending turns."]),
+                        ], style={"marginBottom": "15px"}),
+
+                        html.Div([
+                            html.Strong("Remember: "),
+                            "This is an educational tool. Always verify with your aircraft's POH and use good judgment in the aircraft."
+                        ], style={"backgroundColor": "#fff3cd", "padding": "10px", "borderRadius": "4px", "marginTop": "15px"}),
+                    ]),
+                    dbc.ModalFooter(dbc.Button("Got It!", id="close-quickstart", className="green-button")),
+                ],
+                id="quickstart-modal",
+                is_open=False,
+                centered=True,
+                size="lg",
+                dialogClassName="aeroedge-modal",
+                scrollable=True,
             ),
 
             dbc.Modal(
@@ -137,31 +189,66 @@ def legal_banner_block():
         ]
     )
 
-app.layout = html.Div(className="full-height-container", children=[
-    # Header
-    html.Div(className="banner-header", children=[
-        html.Div(className="banner-inner", children=[
-            html.A(
-                html.Img(src="/assets/logo.png", className="banner-logo"),
-                href="https://www.flyaeroedge.com",
-                style={"textDecoration": "none"}
-            )
-            
-        ])
-    ]),
-    legal_banner_block(),
-    # Main 2-column layout
-    html.Div(className="main-row", children=[
-        # === Sidebar ===
-        html.Div(className="resizable-sidebar", children=[
-            html.Div("Maneuver Overlay Tool", style={
-                "fontWeight": "600",
-                "fontSize": "18px",
-                "marginBottom": "8px",
-                "color": "#1b1e23"
-            }),
+# === Root Layout with Routing ===
+app.layout = html.Div([
+    dcc.Location(id="url", refresh=False),
+    dcc.Store(id="screen-width"),
+    html.Div(id="page-content")
+])
 
-            # --- Airport Search (First - so user can navigate) ---
+# === Screen Width Detection ===
+app.clientside_callback(
+    """
+    function(_) {
+        return window.innerWidth;
+    }
+    """,
+    Output("screen-width", "data"),
+    Input("url", "pathname")
+)
+
+
+def desktop_layout():
+    """Desktop layout with resizable sidebar"""
+    return html.Div(className="full-height-container", children=[
+        # Header
+        html.Div(className="banner-header", children=[
+            html.Div(className="banner-inner", children=[
+                html.A(
+                    html.Img(src="/assets/logo.png", className="banner-logo"),
+                    href="https://www.flyaeroedge.com",
+                    style={"textDecoration": "none"}
+                )
+            ])
+        ]),
+        legal_banner_block(),
+        # Main 2-column layout
+        html.Div(className="main-row", children=[
+            # === Sidebar ===
+            html.Div(id="sidebar", className="resizable-sidebar", children=[
+                # Header row with title and collapse button
+                html.Div(className="sidebar-header", children=[
+                    html.Div("Maneuver Overlay Tool", className="sidebar-title"),
+                    html.Button(
+                        "«",
+                        id="sidebar-collapse-btn",
+                        className="sidebar-collapse-btn",
+                        title="Collapse sidebar"
+                    ),
+                ]),
+                html.Div(id="sidebar-content", children=[
+
+                # --- Action Buttons Row ---
+                html.Div(className="action-buttons-row", children=[
+                    html.A("Edit/Create Aircraft", href="https://app.flyaeroedge.com/edit-aircraft", target="_blank", className="btn-action-orange"),
+                    dcc.Upload(
+                        html.Button("Load Aircraft File", className="btn-action-orange"),
+                        id="upload-aircraft",
+                        accept=".json"
+                    ),
+                ]),
+
+                # --- Airport Search (First - so user can navigate) ---
             html.Label("Search Airport", className="input-label"),
             dcc.Input(
                 id="airport-search-input",
@@ -255,53 +342,22 @@ app.layout = html.Div(className="full-height-container", children=[
                     html.Label("Airport Elevation (ft)", className="input-label"),
                     html.Div(id="env-airport-agl", className="weight-box", style={"marginBottom": "10px"}),
 
-                    html.Div([
-                        html.Label("Outside Air Temp (°F)", className="input-label", style={"display": "inline"}),
-                        html.Span("?", className="tooltip-icon", title="Outside Air Temperature affects TAS calculation. Standard temp is 59°F at sea level."),
-                    ], className="input-label-with-tooltip"),
+                    html.Label("Outside Air Temp (°F)", className="input-label"),
                     dcc.Input(id="env-oat", type="number", value=52, className="input-small", persistence=True, persistence_type="local"),
 
-                    html.Div([
-                        html.Label("Altimeter Setting (inHg)", className="input-label", style={"display": "inline"}),
-                        html.Span("?", className="tooltip-icon", title="Local altimeter setting in inches of mercury. Standard is 29.92 inHg."),
-                    ], className="input-label-with-tooltip", style={"marginTop": "8px"}),
+                    html.Label("Altimeter Setting (inHg)", className="input-label", style={"marginTop": "8px"}),
                     dcc.Input(id="env-altimeter", type="number", value=29.92, className="input-small", persistence=True, persistence_type="local"),
                 ], title="Environment"),
-            ], start_collapsed=True, always_open=True, style={"marginTop": "10px"}),
+            ], start_collapsed=True, always_open=True, className="sidebar-accordion", style={"marginTop": "10px"}),
 
-            # --- Wind (Always Visible, styled like accordion) ---
+            # --- Wind (Compact single row) ---
             html.Div([
-                html.Div("Wind", style={
-                    "fontWeight": "500",
-                    "fontSize": "14px",
-                    "padding": "12px 16px",
-                    "backgroundColor": "#f8f9fa",
-                    "borderBottom": "1px solid #dee2e6",
-                }),
-                html.Div([
-                    html.Div(style={"display": "flex", "gap": "15px", "alignItems": "center"}, children=[
-                        html.Div([
-                            html.Div([
-                                html.Label("Direction (°)", className="input-label", style={"marginBottom": "2px", "fontSize": "12px", "display": "inline"}),
-                                html.Span("?", className="tooltip-icon", title="Wind FROM direction (1-360°). E.g., 270 means wind from the west."),
-                            ], className="input-label-with-tooltip"),
-                            dcc.Input(id="env-wind-dir", type="number", value=360, min=1, max=360, className="input-small", style={"width": "80px"}, persistence=True, persistence_type="local"),
-                        ]),
-                        html.Div([
-                            html.Div([
-                                html.Label("Speed (kt)", className="input-label", style={"marginBottom": "2px", "fontSize": "12px", "display": "inline"}),
-                                html.Span("?", className="tooltip-icon", title="Wind speed in knots. Affects ground track and groundspeed."),
-                            ], className="input-label-with-tooltip"),
-                            dcc.Input(id="env-wind-speed", type="number", value=0, min=0, className="input-small", style={"width": "80px"}, persistence=True, persistence_type="local"),
-                        ]),
-                    ]),
-                ], style={"padding": "12px 16px"}),
-            ], style={
-                "border": "1px solid #dee2e6",
-                "borderRadius": "0.375rem",
-                "marginBottom": "0",
-                "backgroundColor": "white",
-            }),
+                html.Span("Wind", style={"fontWeight": "600", "fontSize": "13px", "marginRight": "12px"}),
+                html.Span("Direction", style={"fontSize": "11px", "color": "#666", "marginRight": "4px"}),
+                dcc.Input(id="env-wind-dir", type="number", value=240, min=1, max=360, className="input-small", style={"width": "55px", "height": "28px", "marginRight": "10px"}, persistence=True, persistence_type="local"),
+                html.Span("Speed (Kts)", style={"fontSize": "11px", "color": "#666", "marginRight": "4px"}),
+                dcc.Input(id="env-wind-speed", type="number", value=10, min=0, className="input-small", style={"width": "50px", "height": "28px"}, persistence=True, persistence_type="local"),
+            ], className="wind-row"),
 
             # --- Power Accordion ---
             dbc.Accordion([
@@ -316,7 +372,7 @@ app.layout = html.Div(className="full-height-container", children=[
                         persistence_type="local"
                     ),
                 ], title="Power"),
-            ], start_collapsed=True, always_open=True, style={"marginBottom": "10px"}),
+            ], start_collapsed=True, always_open=True, className="sidebar-accordion", style={"marginBottom": "10px"}),
 
             # --- Maneuver Dropdown ---
             html.Label("Maneuver", className="input-label"),
@@ -353,6 +409,9 @@ app.layout = html.Div(className="full-height-container", children=[
 
             # Store for tracking last clicked point (for undo)
             dcc.Store(id="last-click-info", data=None),
+            ]),  # End sidebar-content
+            # Store for sidebar collapse state
+            dcc.Store(id="sidebar-collapsed-store", data=False),
         ]),
 
         # === Map Column ===
@@ -377,7 +436,7 @@ app.layout = html.Div(className="full-height-container", children=[
                             ),
                             dl.LayerGroup(id="layer"),
                             dl.LayerGroup(id="scrubber-layer"),  # Dedicated layer for time scrubber marker
-                            # Windsock indicator overlay - default shows "Calm" state
+                            # Windsock indicator overlay - default 240@10kt, updated by callback
                             html.Div(
                                 id="windsock-overlay",
                                 style={
@@ -396,15 +455,16 @@ app.layout = html.Div(className="full-height-container", children=[
                                     "minWidth": "130px",
                                     "minHeight": "60px",
                                 },
-                                # Default "Calm" windsock on startup
                                 children=[
                                     html.Div(
                                         html.Iframe(
                                             srcDoc='''<html><body style="margin:0;padding:0;overflow:hidden;background:transparent;">
-                                            <svg width="60" height="60" viewBox="0 0 60 60" style="transform: rotate(90deg); transform-origin: 30px 30px;">
+                                            <svg width="60" height="60" viewBox="0 0 60 60" style="transform: rotate(-30deg); transform-origin: 30px 30px;">
                                                 <circle cx="30" cy="30" r="2.5" fill="#666"/>
                                                 <line x1="30" y1="30" x2="35" y2="30" stroke="#666" stroke-width="2"/>
-                                                <circle cx="38" cy="30" r="3" fill="#FF6600" stroke="#CC5500" stroke-width="0.5"/>
+                                                <polygon points="35,26 40,26.6 40,33.4 35,34" fill="#FF6600" stroke="#CC5500" stroke-width="0.5"/>
+                                                <polygon points="40,26.6 45,27.2 45,32.8 40,33.4" fill="#FF6600" stroke="#CC5500" stroke-width="0.5"/>
+                                                <polygon points="45,27.2 50,27.8 50,32.2 45,32.8" fill="#FF6600" stroke="#CC5500" stroke-width="0.5"/>
                                             </svg>
                                             </body></html>''',
                                             style={"width": "60px", "height": "60px", "border": "none", "overflow": "hidden", "background": "transparent"}
@@ -412,7 +472,7 @@ app.layout = html.Div(className="full-height-container", children=[
                                         style={"width": "60px", "height": "60px", "flexShrink": "0"}
                                     ),
                                     html.Span(
-                                        "Calm",
+                                        "240° @ 10 kt",
                                         style={
                                             "fontSize": "12px",
                                             "fontWeight": "600",
@@ -500,6 +560,305 @@ app.layout = html.Div(className="full-height-container", children=[
         ])
     ])
 ])
+
+
+def mobile_layout():
+    """Mobile layout with collapsible settings"""
+    return html.Div(className="mobile-container", children=[
+        # Header (smaller)
+        html.Div(className="mobile-header", children=[
+            html.A(
+                html.Img(src="/assets/logo.png", className="mobile-logo"),
+                href="https://www.flyaeroedge.com",
+                style={"textDecoration": "none"}
+            ),
+        ]),
+
+        # Warning banner (compact)
+        html.Div(
+            "⚠️ Educational use only. Verify with POH/AFM.",
+            className="mobile-disclaimer",
+        ),
+
+        # Quick links
+        html.Div(className="quick-links-bar-slim", children=[
+            html.A("Quick Start", href="#", id="mobile-open-quickstart", className="legal-link", style={"color": "#E65C00", "fontWeight": "bold"}),
+            html.Span(" | ", className="legal-separator"),
+            html.A("EM Diagram", href="https://app.flyaeroedge.com/", target="_blank", className="legal-link", style={"color": "#28a745"}),
+            html.Span(" | ", className="legal-separator"),
+            html.A("Report Error", href="mailto:support@flyaeroedge.com?subject=Overlay%20Tool%20Error", className="legal-link"),
+            html.Span(" | ", className="legal-separator"),
+            html.A("Contact AeroEdge", href="https://www.flyaeroedge.com/contact", target="_blank", className="legal-link"),
+        ]),
+
+        # Config toggle bar
+        html.Div(className="mobile-config-bar", children=[
+            html.Span("Configuration", style={"fontWeight": "600"}),
+            html.Button("▼", id="mobile-settings-toggle", className="mobile-config-btn"),
+        ]),
+
+        # Collapsible settings - uses SAME IDs as desktop for callback compatibility
+        dbc.Collapse(
+            html.Div(className="mobile-settings-content", children=[
+                # Action buttons row (50/50 split)
+                html.Div(className="action-buttons-row", children=[
+                    html.A("Edit/Create Aircraft", href="https://app.flyaeroedge.com/edit-aircraft", target="_blank", className="btn-action-orange"),
+                    dcc.Upload(
+                        html.Button("Load Aircraft", className="btn-action-orange"),
+                        id="upload-aircraft",
+                        accept=".json"
+                    ),
+                ]),
+
+                # Airport Search
+                html.Label("Search Airport", className="input-label", style={"marginTop": "8px"}),
+                dcc.Input(
+                    id="airport-search-input",
+                    type="text",
+                    placeholder="ICAO or name...",
+                    className="mobile-input-full",
+                    debounce=False,
+                    autoComplete="off",
+                    style={"width": "100%", "marginBottom": "4px"}
+                ),
+                html.Div(id="airport-search-results", className="search-results-box"),
+                html.Div(style={"display": "flex", "gap": "8px", "alignItems": "center", "marginBottom": "8px"}, children=[
+                    html.Div(id="selected-airport-display", style={"fontSize": "12px", "color": "#28a745", "flex": "1"}),
+                    html.Button("Recenter", id="recenter-airport-btn", className="reset-btn-small", style={"fontSize": "10px"}),
+                ]),
+
+                # Aircraft Selection
+                html.Label("Aircraft", className="input-label"),
+                dcc.Dropdown(
+                    id="aircraft-select",
+                    className="mobile-dropdown",
+                    options=[{"label": name, "value": name} for name in available_aircraft],
+                    placeholder="Select Aircraft",
+                    persistence=True,
+                    persistence_type="local"
+                ),
+
+                # Weight & Balance Accordion
+                dbc.Accordion([
+                    dbc.AccordionItem([
+                        html.Label("Engine Option", className="input-label"),
+                        dcc.Dropdown(id="engine-select", className="mobile-dropdown", persistence=True, persistence_type="local"),
+
+                        html.Div(style={"display": "flex", "gap": "10px", "marginTop": "8px"}, children=[
+                            html.Div([
+                                html.Label("Occupants", className="input-label-sm"),
+                                dcc.Input(id="occupants", type="number", value=1, min=1, max=4, className="mobile-input-sm", persistence=True, persistence_type="local"),
+                            ], style={"flex": "1"}),
+                            html.Div([
+                                html.Label("Occ. Wt (lb)", className="input-label-sm"),
+                                dcc.Input(id="occupant-weight", type="number", value=180, className="mobile-input-sm", persistence=True, persistence_type="local"),
+                            ], style={"flex": "1"}),
+                        ]),
+
+                        html.Label("Fuel Load (gal)", className="input-label", style={"marginTop": "8px"}),
+                        dcc.Slider(id="fuel-load", min=0, max=50, step=1, value=25,
+                                   marks={0: "0", 25: "½", 50: "Full"}, tooltip={"always_visible": True}, persistence=True, persistence_type="local"),
+
+                        html.Label("Total Weight", className="input-label", style={"marginTop": "8px"}),
+                        dcc.Input(id="total-weight-display", type="text", readOnly=True, className="mobile-input-sm", style={"textAlign": "left"}),
+
+                        html.Label("CG Position", className="input-label", style={"marginTop": "8px"}),
+                        dcc.Slider(id="cg-slider", min=0, max=1, step=0.01, value=0.5,
+                                   marks={0: "FWD", 0.5: "MID", 1: "AFT"}, tooltip={"always_visible": True}, persistence=True, persistence_type="local"),
+                    ], title="Weight & Balance"),
+                ], start_collapsed=True, className="sidebar-accordion", style={"marginTop": "8px"}),
+
+                # Environment Accordion
+                dbc.Accordion([
+                    dbc.AccordionItem([
+                        html.Label("Airport Elevation (ft)", className="input-label"),
+                        html.Div(id="env-airport-agl", className="weight-box", style={"marginBottom": "8px", "fontSize": "14px"}),
+
+                        html.Div(style={"display": "flex", "gap": "10px"}, children=[
+                            html.Div([
+                                html.Label("OAT (°F)", className="input-label-sm"),
+                                dcc.Input(id="env-oat", type="number", value=52, className="mobile-input-sm", persistence=True, persistence_type="local"),
+                            ], style={"flex": "1"}),
+                            html.Div([
+                                html.Label("Altimeter", className="input-label-sm"),
+                                dcc.Input(id="env-altimeter", type="number", value=29.92, step=0.01, className="mobile-input-sm", persistence=True, persistence_type="local"),
+                            ], style={"flex": "1"}),
+                        ]),
+                    ], title="Environment"),
+                ], start_collapsed=True, className="sidebar-accordion", style={"marginTop": "4px"}),
+
+                # Wind Row (compact)
+                html.Div([
+                    html.Span("Wind", style={"fontWeight": "600", "fontSize": "13px", "marginRight": "10px"}),
+                    html.Span("Dir", style={"fontSize": "11px", "color": "#666", "marginRight": "4px"}),
+                    dcc.Input(id="env-wind-dir", type="number", value=240, min=1, max=360, className="mobile-input-sm", style={"width": "50px", "marginRight": "8px"}, persistence=True, persistence_type="local"),
+                    html.Span("Kts", style={"fontSize": "11px", "color": "#666", "marginRight": "4px"}),
+                    dcc.Input(id="env-wind-speed", type="number", value=10, min=0, className="mobile-input-sm", style={"width": "45px"}, persistence=True, persistence_type="local"),
+                ], className="wind-row", style={"marginTop": "8px"}),
+
+                # Power Accordion
+                dbc.Accordion([
+                    dbc.AccordionItem([
+                        html.Label("Power Setting", className="input-label"),
+                        dcc.Slider(id="power-setting", min=0.05, max=1.0, step=0.05, value=0.5,
+                                   marks={0.05: "IDLE", 0.5: "50%", 1.0: "100%"}, tooltip={"always_visible": True}, persistence=True, persistence_type="local"),
+                    ], title="Power"),
+                ], start_collapsed=True, className="sidebar-accordion", style={"marginTop": "4px"}),
+
+                # Maneuver Selection
+                html.Label("Maneuver", className="input-label", style={"marginTop": "8px"}),
+                dcc.Dropdown(
+                    id="maneuver-select",
+                    className="mobile-dropdown",
+                    placeholder="Select Maneuver",
+                    options=[
+                        {"label": "Impossible Turn", "value": "impossible_turn"},
+                        {"label": "Power-Off 180", "value": "poweroff180"},
+                        {"label": "Engine-Out Glide Simulation", "value": "engineout"},
+                        {"label": "Steep Turns", "value": "steep_turn"},
+                        {"label": "Chandelle", "value": "chandelle"},
+                        {"label": "Lazy Eight", "value": "lazy8"},
+                        {"label": "Steep Spiral", "value": "steep_spiral"},
+                        {"label": "S-Turns", "value": "s_turn"},
+                        {"label": "Turns Around a Point", "value": "turns_point"},
+                        {"label": "Rectangular Course", "value": "rect_course"},
+                        {"label": "Eights on Pylons", "value": "pylons"},
+                    ],
+                    persistence=True,
+                    persistence_type="local"
+                ),
+
+                # Maneuver params container
+                html.Div(id="maneuver-params-container", style={"marginTop": "8px"}),
+
+                # Reset buttons row
+                html.Div([
+                    html.Button("Reset All", id="reset-all", className="reset-btn-small"),
+                    html.Button("Reset Clicks", id="reset-clicks", className="reset-btn-small"),
+                    html.Button("Undo Click", id="undo-last-click", className="reset-btn-small", style={"backgroundColor": "#17a2b8"}),
+                ], style={"display": "flex", "gap": "6px", "marginTop": "10px", "paddingTop": "8px", "borderTop": "1px solid #ddd"}),
+
+                # Click debug
+                html.Div(id="click_debug", style={"fontSize": "11px", "color": "#666", "marginTop": "8px"}),
+            ]),
+            id="mobile-settings-collapse",
+            is_open=False,
+        ),
+
+        # Map container - uses same IDs as desktop
+        html.Div(className="mobile-map-wrapper", children=[
+            dl.Map(
+                id="map",
+                center=[33.0635, -80.2795],
+                zoom=12,
+                style={"width": "100%", "height": "100%", "minHeight": "70vh"},
+                children=[
+                    dl.TileLayer(
+                        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                        attribution="Tiles © Esri"
+                    ),
+                    dl.LayerGroup(id="layer"),
+                    dl.LayerGroup(id="scrubber-layer"),
+                    # Windsock overlay
+                    html.Div(
+                        id="windsock-overlay",
+                        style={
+                            "position": "absolute",
+                            "top": "10px",
+                            "right": "10px",
+                            "zIndex": "1000",
+                            "backgroundColor": "rgba(255,255,255,0.9)",
+                            "padding": "4px 8px",
+                            "borderRadius": "6px",
+                            "boxShadow": "0 2px 6px rgba(0,0,0,0.2)",
+                            "display": "flex",
+                            "alignItems": "center",
+                            "gap": "4px",
+                            "fontFamily": "'Inter', sans-serif",
+                        },
+                        children=[html.Span("240° @ 10 kt", style={"fontSize": "11px", "fontWeight": "600"})]
+                    ),
+                ]
+            ),
+        ]),
+
+        # Footer
+        html.Div("© 2026 AeroEdge", className="mobile-footer"),
+
+        # Hidden stores and placeholders needed for callbacks
+        html.Div(style={"display": "none"}, children=[
+            # Desktop-only UI elements
+            dcc.Store(id="sidebar-collapsed-store", data=False),
+            html.Button(id="sidebar-collapse-btn"),
+            html.Div(id="sidebar-content"),
+            html.Div(id="sidebar"),
+
+            # Required stores for callbacks
+            dcc.Store(id="runtime-total-weight-lb"),
+            dcc.Store(id="selected-airport-id", storage_type="local"),
+            dcc.Store(id="active-click-target"),
+            dcc.Store(id="last-click-info"),
+            dcc.Store(id="airport-highlight-index", data=0),
+            dcc.Store(id="airport-search-matches", data=[]),
+
+            # Point stores for all maneuvers
+            dcc.Store(id={"type": "point-store", "m_id": "poweroff180", "role": "touchdown"}),
+            dcc.Store(id={"type": "point-store", "m_id": "poweroff180", "role": "start"}),
+            dcc.Store(id={"type": "point-store", "m_id": "engineout", "role": "touchdown"}),
+            dcc.Store(id={"type": "point-store", "m_id": "engineout", "role": "start"}),
+            dcc.Store(id={"type": "point-store", "m_id": "steep_turn", "role": "start"}),
+            dcc.Store(id={"type": "point-store", "m_id": "chandelle", "role": "start"}),
+            dcc.Store(id={"type": "point-store", "m_id": "lazy8", "role": "start"}),
+            dcc.Store(id={"type": "point-store", "m_id": "steep_spiral", "role": "ref"}),
+            dcc.Store(id={"type": "point-store", "m_id": "s_turn", "role": "ref"}),
+            dcc.Store(id={"type": "point-store", "m_id": "s_turn", "role": "bearing"}),
+            dcc.Store(id="sturn-calculated-bearing"),
+            dcc.Store(id={"type": "point-store", "m_id": "turns_point", "role": "center"}),
+            dcc.Store(id={"type": "point-store", "m_id": "rect_course", "role": "dw_start"}),
+            dcc.Store(id={"type": "point-store", "m_id": "rect_course", "role": "dw_end"}),
+            dcc.Store(id={"type": "point-store", "m_id": "pylons", "role": "pylon_a"}),
+            dcc.Store(id={"type": "point-store", "m_id": "pylons", "role": "pylon_b"}),
+            dcc.Store(id="pylons-ias-store", data=100),
+            dcc.Store(id="pylons-bank-store", data=30),
+            dcc.Store(id={"type": "point-store", "m_id": "impossible_turn", "role": "start"}),
+            dcc.Store(id="rectcourse-calculated-edge", data={}),
+            html.Div(id="rectcourse-edge-info-display"),
+        ]),
+    ])
+
+
+# === Page Router Callback ===
+@app.callback(
+    Output("page-content", "children"),
+    Input("url", "pathname"),
+    Input("screen-width", "data")
+)
+def display_page(pathname, screen_width):
+    if screen_width is None:
+        screen_width = 1024  # assume desktop by default
+
+    is_mobile = screen_width < 768  # BREAKPOINT: 768px
+
+    if is_mobile:
+        return mobile_layout()
+    else:
+        return desktop_layout()
+
+
+# === Mobile Settings Toggle ===
+@app.callback(
+    Output("mobile-settings-collapse", "is_open"),
+    Output("mobile-settings-toggle", "children"),
+    Input("mobile-settings-toggle", "n_clicks"),
+    State("mobile-settings-collapse", "is_open"),
+    prevent_initial_call=True
+)
+def toggle_mobile_settings(n_clicks, is_open):
+    if n_clicks:
+        new_state = not is_open
+        return new_state, "▲" if new_state else "▼"
+    return is_open, "▼"
+
 
 # === Maneuver UI Layouts ===
 def impossible_turn_layout():
@@ -679,13 +1038,39 @@ def poweroff180_layout(default_elev=None):
         dbc.Accordion([
             dbc.AccordionItem([
                 html.P([
-                    "Simulates a power-off 180° approach from downwind abeam the touchdown point. ",
-                    "Start point is automatically calculated based on your selected distance offset."
+                    "Simulates a power-off 180° accuracy approach from downwind abeam the touchdown point. ",
+                    "Energy-based model calculates optimal glide path with automatic slip if needed."
                 ], style={"fontSize": "11px", "color": "#666", "margin": "0"}),
-                html.Div("• ACS: ±200 ft from touchdown, proper airspeed management", style={"fontSize": "11px", "color": "#555", "marginTop": "4px"}),
-                html.Div("• Model accounts for wind, configuration, weight, and glide performance", style={"fontSize": "11px", "color": "#555"}),
+                html.Div("• ACS Standard: -0/+200 ft (cannot land short, up to 200 ft beyond)", style={"fontSize": "11px", "color": "#555", "marginTop": "4px"}),
+                html.Div("• Uses aircraft best glide speed and calculated bank angles", style={"fontSize": "11px", "color": "#555"}),
+                html.Div("• Forward slip automatically applied when high on energy", style={"fontSize": "11px", "color": "#555"}),
             ], title="Power-Off 180° Accuracy Approach", style={"fontSize": "12px"}),
         ], start_collapsed=True, style={"marginBottom": "10px"}),
+
+        html.Label("Select Runway", className="input-label"),
+        dcc.Dropdown(
+            id="poweroff180-runway-select",
+            placeholder="Select airport first...",
+            clearable=True,
+            searchable=False,
+            style={"marginBottom": "5px"}
+        ),
+        html.Div(id="poweroff180-runway-info", style={"fontSize": "11px", "color": "#666", "marginBottom": "10px"}),
+
+        # Manual heading fallback (shown when no runway selected)
+        html.Div([
+            html.Label("Manual Runway Heading (°)", className="input-label"),
+            dcc.Input(
+                id="poweroff180-manual-heading",
+                type="number",
+                value=360,
+                min=1,
+                max=360,
+                step=1,
+                className="input-small",
+                placeholder="Enter heading..."
+            ),
+        ], id="poweroff180-manual-heading-div"),
 
         html.Label("Pattern Direction", className="input-label"),
         dcc.RadioItems(
@@ -724,47 +1109,46 @@ def poweroff180_layout(default_elev=None):
             className="dropdown"
         ),
 
-        html.Label("Touchdown Heading (°)", className="input-label"),
-        dcc.Input(
-            id="poweroff180-touchdown-heading",
-            type="number",
-            value=60,
-            className="input-small"
-        ),
-
-        html.Label("Start Distance From Touchdown (NM)", className="input-label"),
+        html.Label("Abeam Distance (NM)", className="input-label"),
         dcc.Slider(
-            id="poweroff180-start-distance-nm",
+            id="poweroff180-abeam-distance-nm",
             min=0.3,
-            max=2.5,
-            step=0.1,
-            value=0.8,
+            max=1.5,
+            step=0.05,
+            value=0.5,
             marks={
+                0.3: "0.3",
                 0.5: "0.5",
+                0.75: "0.75",
                 1.0: "1.0",
+                1.25: "1.25",
                 1.5: "1.5",
-                2.0: "2.0",
-                2.5: "2.5",
             },
             tooltip={"always_visible": True}
         ),
 
-        html.Label("Start Altitude (ft AGL)", className="input-label"),
+        html.Label("Pattern Altitude (ft AGL)", className="input-label"),
         dcc.Input(
             id="poweroff180-altitude",
             type="number",
             value=1000,
+            min=500,
+            max=2000,
+            step=100,
             className="input-small"
         ),
 
         html.Hr(),
 
+        # Click button to set touchdown point on map
         html.Button(
             "Set Touchdown Point",
             id={"type": "click-button", "m_id": "poweroff180", "role": "touchdown"},
             className="green-button"
         ),
-        # NOTE: removed "Set Start Point" – start point is now auto-generated
+        html.Div("Click on the runway where you intend to touch down",
+                 style={"fontSize": "10px", "color": "#666", "marginTop": "2px", "marginBottom": "5px"}),
+
         html.Div(
             id={"type": "click-status", "m_id": "poweroff180"},
             style={"marginTop": "10px", "fontStyle": "italic", "color": "#555"}
@@ -788,6 +1172,7 @@ def poweroff180_layout(default_elev=None):
         # Stores for hover data and path
         dcc.Store(id="poweroff180-hover-store", data=[]),
         dcc.Store(id="poweroff180-path-store", data=[]),
+        dcc.Store(id="poweroff180-results-store", data={}),
 
         html.Div(id="poweroff180-info", style={"marginTop": "10px", "padding": "10px", "borderRadius": "5px"})
     ]
@@ -1809,6 +2194,34 @@ def update_total_weight_display(ac_name, occupants, occupant_wt, fuel_gal):
     return f"{total_round}", total
 
 
+# === Sidebar Collapse Callback ===
+app.clientside_callback(
+    """
+    function(n_clicks, is_collapsed) {
+        if (n_clicks === undefined || n_clicks === null) {
+            return [window.dash_clientside.no_update, window.dash_clientside.no_update];
+        }
+
+        const sidebar = document.getElementById('sidebar');
+        const new_collapsed = !is_collapsed;
+
+        if (new_collapsed) {
+            sidebar.classList.add('collapsed');
+            return [new_collapsed, '»'];
+        } else {
+            sidebar.classList.remove('collapsed');
+            return [new_collapsed, '«'];
+        }
+    }
+    """,
+    Output("sidebar-collapsed-store", "data"),
+    Output("sidebar-collapse-btn", "children"),
+    Input("sidebar-collapse-btn", "n_clicks"),
+    State("sidebar-collapsed-store", "data"),
+    prevent_initial_call=True
+)
+
+
 @app.callback(
     Output("map", "center"),
     Output("env-airport-agl", "children"),
@@ -2138,6 +2551,68 @@ def update_runway_options(airport_id, maneuver):
     info_text = f"{airport.get('name', airport_id)} - {len(runways)} runway(s)"
 
     # Hide manual heading when runway dropdown has options
+    manual_style = {"display": "none"} if options else {"display": "block"}
+
+    return options, default_value, "Select runway...", info_text, manual_style
+
+
+# === Populate Power-Off 180 Runway Dropdown from Airport Selection ===
+@app.callback(
+    Output("poweroff180-runway-select", "options"),
+    Output("poweroff180-runway-select", "value"),
+    Output("poweroff180-runway-select", "placeholder"),
+    Output("poweroff180-runway-info", "children"),
+    Output("poweroff180-manual-heading-div", "style"),
+    Input("selected-airport-id", "data"),
+    Input("maneuver-select", "value"),
+    prevent_initial_call=False
+)
+def update_poweroff180_runway_options(airport_id, maneuver):
+    """Populate runway dropdown for heading selection in Power-Off 180."""
+    if not airport_id:
+        return [], None, "Select airport for runway heading...", "Or use manual heading below", {"display": "block"}
+
+    # Find airport in data
+    airport = next((a for a in airport_data if a.get("id") == airport_id), None)
+    if not airport:
+        return [], None, "Airport not found", "Use manual heading below", {"display": "block"}
+
+    # Get runways
+    runways = airport.get("runways", [])
+    if not runways:
+        return [], None, "No runway data", "Use manual heading below", {"display": "block"}
+
+    # Build options - format: "17 (170° - 5,500 ft)"
+    options = []
+    for rwy in runways:
+        rwy_id = rwy.get("id", "?")
+        heading = rwy.get("heading")
+        length = rwy.get("length_ft", 0)
+
+        if heading is not None:
+            label = f"{rwy_id} ({heading:03d}° - {length:,} ft)"
+        else:
+            label = f"{rwy_id} ({length:,} ft)"
+
+        options.append({"label": label, "value": rwy_id})
+
+    # Sort by runway ID
+    options.sort(key=lambda x: x["value"])
+
+    # Default to first runway with valid heading
+    default_value = None
+    for opt in options:
+        rwy = next((r for r in runways if r.get("id") == opt["value"]), None)
+        if rwy and rwy.get("heading") is not None:
+            default_value = opt["value"]
+            break
+
+    if not default_value and options:
+        default_value = options[0]["value"]
+
+    info_text = f"{airport.get('name', airport_id)} - select runway for heading"
+
+    # Hide manual heading when runway dropdown has valid options
     manual_style = {"display": "none"} if options else {"display": "block"}
 
     return options, default_value, "Select runway...", info_text, manual_style
@@ -3031,12 +3506,10 @@ def draw_impossible_turn(
     Output("poweroff180-info", "children"),
     Input("poweroff180-draw-btn", "n_clicks"),
     State({"type": "point-store", "m_id": "poweroff180", "role": "touchdown"}, "data"),
+    State("poweroff180-runway-select", "value"),
+    State("poweroff180-manual-heading", "value"),
     State("aircraft-select", "value"),
     State("engine-select", "value"),
-    State("occupants", "value"),
-    State("occupant-weight", "value"),
-    State("fuel-load", "value"),
-    State("cg-slider", "value"),
     State("env-wind-dir", "value"),
     State("env-wind-speed", "value"),
     State("env-oat", "value"),
@@ -3045,8 +3518,7 @@ def draw_impossible_turn(
     State("poweroff180-pattern", "value"),
     State("poweroff180-flap-setting", "value"),
     State("poweroff180-prop-condition", "value"),
-    State("poweroff180-touchdown-heading", "value"),
-    State("poweroff180-start-distance-nm", "value"),
+    State("poweroff180-abeam-distance-nm", "value"),
     State("selected-airport-id", "data"),
     State("runtime-total-weight-lb", "data"),
     prevent_initial_call=True
@@ -3054,251 +3526,260 @@ def draw_impossible_turn(
 def draw_poweroff180(
     n_clicks,
     touchdown_data,
+    runway_select,
+    manual_heading,
     ac_name,
     engine_key,
-    occupants,
-    occupant_wt,
-    fuel_gal,
-    cg_pos,
     wind_dir,
     wind_speed,
     oat_f,
     altimeter,
-    start_alt_agl,
+    pattern_alt_agl,
     pattern_dir,
     flap_setting,
     prop_condition,
-    touchdown_heading,
-    start_distance_nm,
+    abeam_distance_nm,
     selected_airport_id,
     runtime_weight
 ):
-    if not n_clicks or not touchdown_data:
-        return [], None, "⚠️ Set a touchdown point first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+    """Draw Power-Off 180 accuracy approach using energy-based simulation."""
+    from simulation import simulate_power_off_180
+
+    if not n_clicks:
+        return [], None, "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
     if not ac_name or not engine_key:
         return [], None, "⚠️ Select aircraft and engine first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
+    # Touchdown point is always required (user clicks on runway)
+    if not touchdown_data:
+        return [], None, "⚠️ Click 'Set Touchdown Point' then click on the runway where you want to land.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+
     try:
-        states = dash.callback_context.states
+        # Get airport data for elevation
+        selected_airport = next((a for a in airport_data if a.get("id") == selected_airport_id), None)
+        elev_ft = float(selected_airport.get("elevation_ft", 0.0)) if selected_airport else 0.0
 
-        def safe_float(key):
-            val = states.get(key)
-            return float(val) if val not in [None, "", "null"] else None
+        # Touchdown point from user click
+        runway_threshold = touchdown_data
+        runway_length_ft = 5000.0
 
-        start_alt_agl      = safe_float("poweroff180-altitude.value")
-        touchdown_heading  = safe_float("poweroff180-touchdown-heading.value")
-        wind_dir           = safe_float("env-wind-dir.value")
-        wind_speed         = safe_float("env-wind-speed.value")
-        oat_f              = safe_float("env-oat.value")
-        altimeter          = safe_float("env-altimeter.value")
-        start_distance_nm  = safe_float("poweroff180-start-distance-nm.value")
+        # Get runway heading from dropdown or manual input
+        runway_heading = None
 
-        total_wt = safe_float("runtime-total-weight-lb.data")
+        if selected_airport_id and runway_select and selected_airport:
+            # Get heading from selected runway
+            runways = selected_airport.get("runways", [])
+            runway = next((r for r in runways if r.get("id") == runway_select), None)
+            if runway:
+                runway_heading = runway.get("heading")
+                runway_length_ft = runway.get("length_ft", 5000.0)
+
+        # Fallback to manual heading
+        if runway_heading is None:
+            if manual_heading:
+                runway_heading = float(manual_heading)
+            else:
+                return [], None, "⚠️ Select a runway or enter manual heading.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+
+        # Get values
+        pattern_alt = float(pattern_alt_agl) if pattern_alt_agl else 1000.0
+        abeam_dist = float(abeam_distance_nm) if abeam_distance_nm else 0.5
+        wind_dir_val = float(wind_dir) if wind_dir else 0.0
+        wind_speed_val = float(wind_speed) if wind_speed else 0.0
+        oat_c = ((float(oat_f) if oat_f else 59.0) - 32.0) * 5.0 / 9.0
+        altimeter_val = float(altimeter) if altimeter else 29.92
+
+        total_wt = float(runtime_weight) if runtime_weight not in [None, "", "null"] else None
         if total_wt is None:
-            total_wt = float(runtime_weight) if runtime_weight not in [None, "", "null"] else None
+            ac_data = aircraft_data.get(ac_name, {})
+            total_wt = ac_data.get("max_takeoff_weight", ac_data.get("gross_weight", 2500.0))
 
-        required = [
-            start_alt_agl, touchdown_heading,
-            wind_dir, wind_speed, oat_f, altimeter,
-            start_distance_nm, total_wt
-        ]
-        if any(x is None for x in required):
-            return [], None, "⚠️ Missing or invalid input values.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
-
-        touchdown = GeoPoint(touchdown_data["lat"], touchdown_data["lon"])
-
-        downwind_heading = (touchdown_heading + 180.0) % 360.0
-
-        if pattern_dir == "left":
-            offset_bearing = (touchdown_heading - 90.0) % 360.0
-        else:
-            offset_bearing = (touchdown_heading + 90.0) % 360.0
-
-        start = point_from(touchdown, offset_bearing, start_distance_nm)
-        start_heading = downwind_heading
-
+        # Get aircraft data
         ac = dict(aircraft_data[ac_name])
         ac["total_weight_lb"] = float(total_wt)
 
-        selected_airport = next((a for a in airport_data if a["id"] == selected_airport_id), None)
-        elev_ft = float(selected_airport.get("elevation_ft", 0.0)) if selected_airport else 0.0
-
-        oat_c = (float(oat_f) - 32.0) * 5.0 / 9.0
-
-        start_ias_kias = 80.0
-
-        path, hover_data, impact_marker = simulate_glide_path_to_target(
-            start_point=start,
-            start_heading=start_heading,
-            touchdown_point=touchdown,
-            touchdown_heading=touchdown_heading,
+        # Run simulation
+        path, hover_data, results = simulate_power_off_180(
+            runway_threshold=runway_threshold,
+            runway_heading_deg=float(runway_heading),
+            runway_length_ft=float(runway_length_ft),
+            abeam_distance_nm=abeam_dist,
+            pattern_direction=pattern_dir or "left",
             ac=ac,
-            engine_option=engine_key,
             weight_lbs=float(total_wt),
-            flap_config=flap_setting,
-            prop_config=prop_condition,
-            oat_c=float(oat_c),
-            altimeter_inhg=float(altimeter),
-            wind_dir=float(wind_dir),
-            wind_speed=float(wind_speed),
-            start_ias_kias=float(start_ias_kias),
-            altitude_agl=float(start_alt_agl),
-            pattern_dir=pattern_dir,
-            selected_airport_elev_ft=float(elev_ft),
-            max_bank_deg=45,
+            flap_config=flap_setting or "clean",
+            prop_config=prop_condition or "idle",
+            oat_c=oat_c,
+            altimeter_inhg=altimeter_val,
+            wind_dir_deg=wind_dir_val,
+            wind_speed_kt=wind_speed_val,
+            field_elev_ft=elev_ft,
+            pattern_altitude_agl=pattern_alt,
             timestep_sec=0.5,
         )
 
         if not path or not hover_data:
             return [], None, "⚠️ No glide path generated. Check inputs.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
-        FT_PER_NM = 6076.12
+        # Build map elements
+        elements = []
 
-        dw_ft = hover_data[0].get("downwind_leg_ft", 0.0) or 0.0
-        fn_ft = hover_data[0].get("final_leg_ft", 0.0) or 0.0
+        # Main path
+        path_line = dl.Polyline(positions=path, color="red", weight=3)
+        elements.append(path_line)
 
-        final_out_bearing = (touchdown_heading + 180.0) % 360.0
-
-        dw_end = None
-        fn_start = None
-        if dw_ft > 0.0:
-            dw_nm = dw_ft / FT_PER_NM
-            p_dw_end = point_from(start, start_heading, dw_nm)
-            dw_end = [p_dw_end.latitude, p_dw_end.longitude]
-        if fn_ft > 0.0:
-            fn_nm = fn_ft / FT_PER_NM
-            p_fn_start = point_from(touchdown, final_out_bearing, fn_nm)
-            fn_start = [p_fn_start.latitude, p_fn_start.longitude]
-
-        arc_line = dl.Polyline(positions=path, color="red", weight=3)
-
-        start_marker = dl.CircleMarker(
-            center=[start.latitude, start.longitude],
-            radius=7,
-            color="green",
-            fill=True,
-            fillOpacity=1.0,
-        )
-        touchdown_marker = dl.CircleMarker(
-            center=[touchdown.latitude, touchdown.longitude],
-            radius=7,
-            color="red",
-            fill=True,
-            fillOpacity=1.0,
-        )
-
-        downwind_line = None
-        final_line = None
-
-        if dw_end is not None:
-            downwind_line = dl.Polyline(
-                positions=[[start.latitude, start.longitude], dw_end],
-                color="orange",
-                weight=2,
-            )
-
-        if fn_start is not None:
-            final_line = dl.Polyline(
-                positions=[fn_start, [touchdown.latitude, touchdown.longitude]],
-                color="purple",
-                weight=2,
-            )
-
-        elements = [start_marker, touchdown_marker, arc_line]
-        if downwind_line:
-            elements.append(downwind_line)
-        if final_line:
-            elements.append(final_line)
-
-        if impact_marker:
-            impact_lat, impact_lon = impact_marker
-            impact_mark = dl.CircleMarker(
-                center=[impact_lat, impact_lon],
+        # Start marker (abeam position)
+        if path:
+            start_marker = dl.CircleMarker(
+                center=path[0],
                 radius=7,
+                color="green",
+                fill=True,
+                fillOpacity=1.0,
+                children=dl.Tooltip("Abeam (Power Off)")
+            )
+            elements.append(start_marker)
+
+        # Touchdown/Aim marker
+        aim_marker = dl.CircleMarker(
+            center=[runway_threshold['lat'], runway_threshold['lon']],
+            radius=7,
+            color="blue",
+            fill=True,
+            fillOpacity=1.0,
+            children=dl.Tooltip(f"Runway {runway_select or 'threshold'}")
+        )
+        elements.append(aim_marker)
+
+        # Impact marker if failed
+        impact_point = results.get('impact_point')
+        if impact_point:
+            impact_marker = dl.CircleMarker(
+                center=impact_point,
+                radius=8,
                 color="black",
                 fill=True,
                 fillOpacity=1.0,
-                children=dl.Tooltip("☠️Impact point☠️"),
+                children=dl.Tooltip(f"Impact: {results.get('touchdown_error_ft', 0):.0f} ft short")
             )
-            elements.append(impact_mark)
+            elements.append(impact_marker)
 
-            msg = (
-                "⚠️ Glide path impacted ground before reaching touchdown at "
-                f"({impact_lat:.4f}, {impact_lon:.4f}). Path flown to impact point."
-            )
+        # Build status message
+        success = results.get('success', False)
+        td_error = results.get('touchdown_error_ft', 0)
+
+        if success:
+            if td_error == 0:
+                msg = "✅ SUCCESS - Touchdown on target!"
+            else:
+                msg = f"✅ SUCCESS - Touchdown +{td_error:.0f} ft (within ACS -0/+200)"
         else:
-            msg = "✅ Power-Off 180 path flown successfully."
+            if td_error < 0:
+                msg = f"❌ FAILED - SHORT by {abs(td_error):.0f} ft"
+            else:
+                msg = f"❌ FAILED - LONG by {td_error:.0f} ft (exceeds +200)"
 
-        lats = [pt[0] for pt in path] + [start.latitude, touchdown.latitude]
-        lons = [pt[1] for pt in path] + [start.longitude, touchdown.longitude]
-
-        if dw_end is not None:
-            lats.append(dw_end[0])
-            lons.append(dw_end[1])
-        if fn_start is not None:
-            lats.append(fn_start[0])
-            lons.append(fn_start[1])
-        if impact_marker:
-            lats.append(impact_marker[0])
-            lons.append(impact_marker[1])
-
+        # Calculate bounds
+        lats = [pt[0] for pt in path] + [runway_threshold['lat']]
+        lons = [pt[1] for pt in path] + [runway_threshold['lon']]
+        if impact_point:
+            lats.append(impact_point[0])
+            lons.append(impact_point[1])
         bounds = [[min(lats), min(lons)], [max(lats), max(lons)]]
 
-        # Build slider marks based on time
+        # Slider setup
         max_time = hover_data[-1]["time"] if hover_data else 100
         slider_marks = {0: "Start", int(max_time): "End"}
 
-        # Prepare hover data for store (ensure JSON-serializable)
+        # Prepare hover store with slip data
         hover_store = [
             {
-                "time": pt["time"],
-                "alt": pt["alt"],
-                "tas": pt["tas"],
-                "gs": pt.get("gs", pt["tas"]),
-                "aob": pt["aob"],
-                "vs": pt["vs"],
+                "time": pt.get("time", 0),
+                "alt": pt.get("alt", 0),
+                "ias": pt.get("ias", 0),
+                "tas": pt.get("tas", 0),
+                "gs": pt.get("gs", 0),
+                "aob": pt.get("aob", 0),
+                "vs": pt.get("vs", 0),
                 "track": pt.get("track", 0),
                 "heading": pt.get("heading", 0),
                 "drift": pt.get("drift", 0),
-                "segment": pt.get("segment", "glide"),
+                "segment": pt.get("segment", ""),
+                "slip_active": pt.get("slip_active", False),
+                "slip_intensity": pt.get("slip_intensity", 0),
             }
             for pt in hover_data
         ]
 
-        # Calculate glide metrics
-        total_distance_nm = start_distance_nm or 0
-        glide_ratio = (start_alt_agl / (total_distance_nm * 6076.12)) if total_distance_nm and total_distance_nm > 0 else 0
-        avg_vs = 0
-        avg_gs = 0
-        if hover_data and len(hover_data) > 0:
-            vs_values = [abs(pt.get('vs', 0)) for pt in hover_data if pt.get('vs') is not None]
-            gs_values = [pt.get('gs', pt.get('tas', 0)) for pt in hover_data if pt.get('gs') is not None or pt.get('tas') is not None]
-            avg_vs = sum(vs_values) / len(vs_values) if vs_values else 0
-            avg_gs = sum(gs_values) / len(gs_values) if gs_values else 0
+        # Build info panel with slip reporting
+        slip_used = results.get('slip_used', False)
+        slip_pct = results.get('slip_intensity_pct', 0)
+        best_glide = results.get('best_glide_kias', 0)
+        base_gr = results.get('base_glide_ratio', 0)
+        eff_gr = results.get('effective_glide_ratio', base_gr)
+        max_bank = results.get('max_bank_deg', 0)
+        headwind = results.get('headwind_on_final_kt', 0)
+        crosswind = results.get('crosswind_on_final_kt', 0)
+        xwind_dir = results.get('crosswind_direction', 'none')
 
-        # Info content - standardized format with glide data
+        # Success/Failure banner
+        if success:
+            result_banner = html.Div(
+                f"✅ SUCCESSFUL - Touchdown {'+' if td_error >= 0 else ''}{td_error:.0f} ft",
+                style={"fontWeight": "bold", "color": "#28a745", "marginBottom": "8px", "fontSize": "12px"}
+            )
+        else:
+            result_banner = html.Div(
+                f"❌ {'SHORT' if td_error < 0 else 'LONG'} - {abs(td_error):.0f} ft {'before' if td_error < 0 else 'beyond'} target",
+                style={"fontWeight": "bold", "color": "#dc3545", "marginBottom": "8px", "fontSize": "12px"}
+            )
+
+        # Slip info section
+        if slip_used:
+            slip_section = [
+                html.Div([html.Strong("Forward Slip Applied")], style={"marginBottom": "4px", "color": "#fd7e14"}),
+                html.Div(f"Intensity: {slip_pct:.0f}%", style={"fontSize": "11px"}),
+                html.Div(f"Glide ratio reduced: {base_gr:.1f}:1 → {eff_gr:.1f}:1", style={"fontSize": "11px"}),
+                html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
+            ]
+        else:
+            slip_section = [
+                html.Div("No slip required", style={"fontSize": "11px", "color": "#28a745"}),
+                html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
+            ]
+
         info_content = dbc.Accordion([
             dbc.AccordionItem([
-                html.Div([html.Strong("Aircraft & Environment")], style={"marginBottom": "4px"}),
-                html.Div(f"Weight: {total_wt:.0f} lb | Entry IAS: {start_ias_kias:.0f} kt", style={"fontSize": "11px"}),
-                html.Div(f"Wind: {wind_dir:.0f}° at {wind_speed:.0f} kt | Flaps: {flap_setting or 'None'}", style={"fontSize": "11px"}),
+                result_banner,
                 html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
-                html.Div([html.Strong("Glide Performance")], style={"marginBottom": "4px"}),
-                html.Div(f"Glide ratio: ~{glide_ratio:.1f}:1 | GS: {avg_gs:.0f} kt | VS: {avg_vs:.0f} fpm" if glide_ratio > 0 else "Glide ratio: n/a", style={"fontSize": "11px"}),
-                html.Div(f"Distance: {total_distance_nm:.2f} nm | Alt lost: {hover_data[0]['alt']:.0f} ft", style={"fontSize": "11px"}),
+
+                html.Div([html.Strong("Aircraft Performance")], style={"marginBottom": "4px"}),
+                html.Div(f"Best Glide: {best_glide:.0f} KIAS | Weight: {total_wt:.0f} lb", style={"fontSize": "11px"}),
+                html.Div(f"Glide Ratio: {base_gr:.1f}:1 | Max Bank: {max_bank:.1f}°", style={"fontSize": "11px"}),
                 html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
-                html.Div([html.Strong("Pattern & Timing")], style={"marginBottom": "4px"}),
-                html.Div(f"DW: {dw_ft/6076.12:.2f} nm | Final: {fn_ft/6076.12:.2f} nm | {pattern_dir.title()} pattern", style={"fontSize": "11px"}),
-                html.Div(f"Runway: {touchdown_heading:.0f}° | Time: {max_time:.0f}s", style={"fontSize": "11px"}),
+
+                *slip_section,
+
+                html.Div([html.Strong("Wind Analysis")], style={"marginBottom": "4px"}),
+                html.Div(f"Wind: {wind_dir_val:.0f}° at {wind_speed_val:.0f} kt", style={"fontSize": "11px"}),
+                html.Div(f"On Final: {'Headwind' if headwind > 0 else 'Tailwind'} {abs(headwind):.0f} kt | Crosswind {crosswind:.0f} kt from {xwind_dir}", style={"fontSize": "11px"}),
+                html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
+
+                html.Div([html.Strong("Pattern Data")], style={"marginBottom": "4px"}),
+                html.Div(f"Altitude: {pattern_alt:.0f} ft AGL | Abeam: {abeam_dist:.2f} nm", style={"fontSize": "11px"}),
+                html.Div(f"Runway: {runway_heading:.0f}° | {pattern_dir.title()} pattern", style={"fontSize": "11px"}),
+                html.Div(f"Flaps: {flap_setting or 'clean'} | Time: {max_time:.1f}s", style={"fontSize": "11px"}),
             ], title="Simulation Results", style={"fontSize": "12px"}),
-        ], start_collapsed=True, style={"marginTop": "8px"})
+        ], start_collapsed=False, style={"marginTop": "8px"})
 
         return elements, bounds, msg, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content
 
     except Exception as e:
+        import traceback
         print(f"❌ EXCEPTION in draw_poweroff180(): {e}")
-        return [], None, f"⚠️ Error generating path: {str(e)}", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+        traceback.print_exc()
+        return [], None, f"⚠️ Error: {str(e)}", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
 # ============== Engine-Out Glide Rendering Callback ======================#
 
@@ -5312,17 +5793,26 @@ def update_poweroff180_scrubber(slider_value, hover_data, path_data):
     pos = path_data[idx]
 
     segment = pt.get('segment', 'glide')
+    slip_active = pt.get('slip_active', False)
+    slip_intensity = pt.get('slip_intensity', 0)
 
+    # Build tooltip with slip info
     tooltip_content = [
         html.Div(f"{segment.replace('_', ' ').title()}", style={"fontWeight": "bold", "borderBottom": "1px solid #ccc", "paddingBottom": "3px", "marginBottom": "3px"}),
         html.Div(f"Altitude: {pt.get('alt', 0):.0f} ft AGL"),
         html.Div(f"Time: {pt.get('time', 0):.1f} sec"),
-        html.Div(f"TAS: {pt.get('tas', 0):.0f} kt | GS: {pt.get('gs', pt.get('tas', 0)):.0f} kt"),
+        html.Div(f"IAS: {pt.get('ias', 0):.0f} kt | GS: {pt.get('gs', pt.get('tas', 0)):.0f} kt"),
         html.Div(f"AOB: {'L ' if pt.get('aob', 0) < 0 else ('R ' if pt.get('aob', 0) > 0 else '')}{abs(pt.get('aob', 0)):.1f}°"),
         html.Div(f"VS: {pt.get('vs', 0):.0f} fpm"),
         html.Div(f"Heading: {pt.get('heading', 0):.0f}° | Track: {pt.get('track', 0):.0f}°"),
-        html.Div(f"Drift: {pt.get('drift', 0):+.1f}°"),
+        html.Div(f"Crab: {pt.get('drift', 0):+.1f}°"),
     ]
+
+    # Add slip info if active
+    if slip_active:
+        tooltip_content.append(
+            html.Div(f"SLIP: {slip_intensity:.0f}%", style={"color": "#fd7e14", "fontWeight": "bold"})
+        )
 
     heading = pt.get('heading', 0)
     bank = pt.get('aob', 0)
@@ -6506,27 +6996,35 @@ def handle_resets(n_reset_all, n_reset_clicks, store_ids):
 @app.callback(
     Output("disclaimer-modal", "is_open"),
     Output("terms-policy-modal", "is_open"),
+    Output("quickstart-modal", "is_open"),
     Input("open-disclaimer", "n_clicks"),
     Input("close-disclaimer", "n_clicks"),
     Input("open-terms-policy", "n_clicks"),
     Input("close-terms-policy", "n_clicks"),
+    Input("open-quickstart", "n_clicks"),
+    Input("close-quickstart", "n_clicks"),
     State("disclaimer-modal", "is_open"),
     State("terms-policy-modal", "is_open"),
+    State("quickstart-modal", "is_open"),
     prevent_initial_call=True,
 )
-def toggle_legal_modals(open_disc, close_disc, open_terms, close_terms, disc_open, terms_open):
+def toggle_legal_modals(open_disc, close_disc, open_terms, close_terms, open_qs, close_qs, disc_open, terms_open, qs_open):
     trigger = ctx.triggered_id
 
     if trigger == "open-disclaimer":
-        return True, False
+        return True, False, False
     if trigger == "close-disclaimer":
-        return False, terms_open
+        return False, terms_open, qs_open
     if trigger == "open-terms-policy":
-        return disc_open, True
+        return disc_open, True, False
     if trigger == "close-terms-policy":
-        return disc_open, False
+        return disc_open, False, qs_open
+    if trigger == "open-quickstart":
+        return False, False, True
+    if trigger == "close-quickstart":
+        return disc_open, terms_open, False
 
-    return no_update, no_update
+    return no_update, no_update, no_update
 
 
 # === Windsock Indicator Callback ===
@@ -6534,8 +7032,9 @@ def toggle_legal_modals(open_disc, close_disc, open_terms, close_terms, disc_ope
     Output("windsock-overlay", "children"),
     Input("env-wind-dir", "value"),
     Input("env-wind-speed", "value"),
+    Input("url", "pathname"),  # Trigger on page load
 )
-def update_windsock(wind_dir, wind_speed):
+def update_windsock(wind_dir, wind_speed, _pathname):
     """
     Update the windsock indicator based on wind direction and speed.
     Top-down view: length represents how extended the sock is.
@@ -6615,11 +7114,8 @@ def update_windsock(wind_dir, wind_speed):
     </svg>
     '''
 
-    # Format the label
-    if wind_speed_val == 0:
-        label_text = "Calm"
-    else:
-        label_text = f"{int(wind_dir_val):03d}@{int(wind_speed_val)} kt"
+    # Format the label - always show exact values from input fields
+    label_text = f"{int(wind_dir_val):03d}° @ {int(wind_speed_val)} kt"
 
     return [
         html.Div(
@@ -6642,4 +7138,5 @@ def update_windsock(wind_dir, wind_speed):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # host="0.0.0.0" allows access from other devices on the network
+    app.run(debug=True, host="0.0.0.0", port=8050)
