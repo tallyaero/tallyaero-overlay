@@ -212,6 +212,41 @@ def track_event(event_name: str, metadata: Optional[dict] = None):
     })
 
 
+def log_feature(feature_key: str, metadata: Optional[dict] = None, response_bytes: int = 0):
+    """
+    Log feature usage directly (non-decorator version).
+
+    Use this inside Dash callbacks or anywhere you want to track feature usage
+    without using a decorator or context manager.
+
+    Args:
+        feature_key: Unique identifier for the feature (e.g., 'maneuver_select')
+        metadata: Optional dictionary with details (e.g., {'maneuver': 'steep_turn'})
+        response_bytes: Optional size of response data
+
+    Example:
+        @app.callback(...)
+        def update_maneuver(selected):
+            log_feature('maneuver_select', {'maneuver': selected})
+            return ...
+    """
+    hashed_ip = None
+    request_bytes = 0
+    if has_request_context():
+        hashed_ip = hash_ip(get_client_ip())
+        request_bytes = getattr(g, 'request_size', 0)
+
+    _send_async(f"{TRACKING_API_URL}/track/feature", {
+        'project_slug': PROJECT_SLUG,
+        'feature_key': feature_key,
+        'hashed_ip': hashed_ip,
+        'request_bytes': request_bytes,
+        'response_bytes': response_bytes,
+        'duration_ms': 0,
+        'metadata': metadata
+    })
+
+
 class FeatureTracker:
     """
     Context manager for tracking feature usage with automatic timing.

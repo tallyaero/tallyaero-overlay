@@ -67,7 +67,7 @@ app = dash.Dash(
 server = app.server
 
 # Initialize usage tracking
-from aeroedge_tracker import init_tracking
+from aeroedge_tracker import init_tracking, log_feature
 init_tracking(server)
 
 app.title = "Maneuver Overlay Tool | AeroEdge"
@@ -2381,6 +2381,13 @@ def render_maneuver_layout(maneuver, airport_id):
         ap = next((a for a in airport_data if a["id"] == airport_id), None)
         elev_ft = ap.get("elevation_ft", None) if ap else None
 
+    # Track maneuver selection
+    if maneuver:
+        log_feature('maneuver_select', {
+            'maneuver': maneuver,
+            'airport': airport_id
+        })
+
     if maneuver == "impossible_turn":
         return impossible_turn_layout()
     elif maneuver == "poweroff180":
@@ -2450,6 +2457,14 @@ def update_aircraft_fields(selected_aircraft, maneuver, current_engine):
         )
 
     ac = aircraft_data[selected_aircraft]
+
+    # Track aircraft selection
+    log_feature('aircraft_select', {
+        'aircraft': selected_aircraft,
+        'type': ac.get('type', 'unknown'),
+        'category': ac.get('category', 'unknown'),
+        'seats': ac.get('seats', 0)
+    })
     engine_options = [{"label": k, "value": k} for k in ac.get("engine_options", {}).keys()]
     engine_values = [opt["value"] for opt in engine_options]
     # Preserve current engine if it's valid for this aircraft, otherwise use default
@@ -3490,6 +3505,17 @@ def draw_impossible_turn(
             ], title="Simulation Results", style={"fontSize": "12px"}),
         ], start_collapsed=True, style={"marginTop": "8px"})
 
+        # Track simulation run
+        log_feature('simulation_impossible_turn', {
+            'aircraft': ac_name,
+            'engine': engine_key,
+            'altitude_agl': failure_alt_agl,
+            'turn_direction': turn_dir,
+            'success': made_it,
+            'wind_speed': wind_speed,
+            'weight_lb': total_wt
+        })
+
         return elements, bounds, status, result, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content
 
     except Exception as e:
@@ -3777,6 +3803,16 @@ def draw_poweroff180(
             ], title="Simulation Results", style={"fontSize": "12px"}),
         ], start_collapsed=False, style={"marginTop": "8px"})
 
+        # Track simulation run
+        log_feature('simulation_poweroff180', {
+            'aircraft': ac_name,
+            'engine': engine_key,
+            'altitude_agl': pattern_alt,
+            'pattern_direction': pattern_dir,
+            'flap_setting': flap_setting,
+            'wind_speed': wind_speed_val
+        })
+
         return elements, bounds, msg, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content
 
     except Exception as e:
@@ -4027,6 +4063,15 @@ def draw_engineout(
             ], title="Simulation Results", style={"fontSize": "12px"}),
         ], start_collapsed=True, style={"marginTop": "8px"})
 
+        # Track simulation run
+        log_feature('simulation_engineout', {
+            'aircraft': ac_name,
+            'engine': engine_key,
+            'altitude_agl': start_alt_agl,
+            'flap_setting': flap_setting,
+            'wind_speed': wind_speed
+        })
+
         return elements, bounds, msg, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content
 
     except Exception as e:
@@ -4237,6 +4282,16 @@ def draw_steep_turn(
         bounds = [[min(lats), min(lons)], [max(lats), max(lons)]]
     else:
         bounds = None
+
+    # Track simulation run
+    log_feature('simulation_steep_turn', {
+        'aircraft': selected_aircraft,
+        'bank_angle': bank_angle,
+        'sequence': sequence,
+        'altitude_agl': entry_altitude,
+        'ias': entry_ias,
+        'weight_lb': weight_lbs
+    })
 
     return (
         elements,
@@ -4477,6 +4532,16 @@ def draw_chandelle(
         bounds = [[min(lats), min(lons)], [max(lats), max(lons)]]
     else:
         bounds = None
+
+    # Track simulation run
+    log_feature('simulation_chandelle', {
+        'aircraft': selected_aircraft,
+        'bank_angle': bank,
+        'direction': direction,
+        'altitude_ft': altitude_ft,
+        'ias': entry_ias,
+        'weight_lb': weight
+    })
 
     return (
         elements,
@@ -4725,6 +4790,16 @@ def draw_lazy_eight(
         bounds = [[min(lats), min(lons)], [max(lats), max(lons)]]
     else:
         bounds = None
+
+    # Track simulation run
+    log_feature('simulation_lazy_eight', {
+        'aircraft': selected_aircraft,
+        'bank_angle': bank,
+        'first_turn_direction': first_turn_direction,
+        'altitude_ft': altitude_ft,
+        'ias': entry_ias,
+        'weight_lb': weight
+    })
 
     return (
         elements,
