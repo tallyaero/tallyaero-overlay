@@ -66,6 +66,10 @@ app = dash.Dash(
 )
 server = app.server
 
+# Initialize usage tracking
+from aeroedge_tracker import init_tracking
+init_tracking(server)
+
 app.title = "Maneuver Overlay Tool | AeroEdge"
 
 def legal_banner_block():
