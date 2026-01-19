@@ -4285,10 +4285,10 @@ def draw_steep_turn(
 
     # Track simulation run
     log_feature('simulation_steep_turn', {
-        'aircraft': selected_aircraft,
+        'aircraft': aircraft_name,
         'bank_angle': bank_angle,
         'sequence': sequence,
-        'altitude_agl': entry_altitude,
+        'altitude_agl': altitude_ft,
         'ias': entry_ias,
         'weight_lb': weight_lbs
     })
@@ -4535,7 +4535,7 @@ def draw_chandelle(
 
     # Track simulation run
     log_feature('simulation_chandelle', {
-        'aircraft': selected_aircraft,
+        'aircraft': aircraft_name,
         'bank_angle': bank,
         'direction': direction,
         'altitude_ft': altitude_ft,
@@ -4793,7 +4793,7 @@ def draw_lazy_eight(
 
     # Track simulation run
     log_feature('simulation_lazy_eight', {
-        'aircraft': selected_aircraft,
+        'aircraft': aircraft_name,
         'bank_angle': bank,
         'first_turn_direction': first_turn_direction,
         'altitude_ft': altitude_ft,
