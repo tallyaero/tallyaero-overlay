@@ -72,6 +72,109 @@ init_tracking(server)
 
 app.title = "Maneuver Overlay Tool | AeroEdge"
 
+# Custom index string with heartbeat tracking
+app.index_string = """
+<!DOCTYPE html>
+<html>
+    <head>
+        {%metas%}
+        <title>{%title%}</title>
+        {%favicon%}
+        {%css%}
+        <script>
+        // AeroEdge Session Heartbeat Tracking
+        (function() {
+            const TRACKING_API = 'https://aeroedge-tracking-api.onrender.com';
+            const PROJECT_SLUG = 'overlay-tool';
+            const HEARTBEAT_INTERVAL = 30000; // 30 seconds
+
+            // Generate or retrieve session ID
+            function getSessionId() {
+                let sessionId = sessionStorage.getItem('aeroedge_session_id');
+                if (!sessionId) {
+                    sessionId = 'sess_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
+                    sessionStorage.setItem('aeroedge_session_id', sessionId);
+                }
+                return sessionId;
+            }
+
+            // Generate hashed identifier for privacy
+            async function getHashedId() {
+                const data = navigator.userAgent + screen.width + 'x' + screen.height + navigator.language;
+                const encoder = new TextEncoder();
+                const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode('aeroedge' + data));
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.slice(0, 8).map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            // Send heartbeat to API
+            async function sendHeartbeat() {
+                if (document.hidden) return; // Don't send if page not visible
+
+                try {
+                    const hashedIp = await getHashedId();
+                    const sessionId = getSessionId();
+                    const url = `${TRACKING_API}/track/heartbeat?project_slug=${PROJECT_SLUG}&session_id=${sessionId}&hashed_ip=${hashedIp}`;
+
+                    // Use sendBeacon for reliability, fall back to fetch
+                    if (navigator.sendBeacon) {
+                        navigator.sendBeacon(url);
+                    } else {
+                        fetch(url, { method: 'POST', keepalive: true }).catch(() => {});
+                    }
+                } catch (e) {
+                    // Silently fail - tracking should never break the app
+                }
+            }
+
+            // Start heartbeat when page loads
+            let heartbeatInterval = null;
+
+            function startHeartbeat() {
+                if (heartbeatInterval) return;
+                sendHeartbeat(); // Send initial heartbeat
+                heartbeatInterval = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
+            }
+
+            function stopHeartbeat() {
+                if (heartbeatInterval) {
+                    clearInterval(heartbeatInterval);
+                    heartbeatInterval = null;
+                }
+            }
+
+            // Handle visibility changes
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    stopHeartbeat();
+                } else {
+                    startHeartbeat();
+                }
+            });
+
+            // Start on page load
+            if (document.readyState === 'complete') {
+                startHeartbeat();
+            } else {
+                window.addEventListener('load', startHeartbeat);
+            }
+
+            // Send final heartbeat before page unload
+            window.addEventListener('beforeunload', sendHeartbeat);
+        })();
+        </script>
+    </head>
+    <body>
+        {%app_entry%}
+        <footer>
+            {%config%}
+            {%scripts%}
+            {%renderer%}
+        </footer>
+    </body>
+</html>
+"""
+
 def legal_banner_block():
     return html.Div(
         children=[
