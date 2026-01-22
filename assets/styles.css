@@ -4,7 +4,7 @@
   --orange-dark: #CC4A00;
   --blue-primary: #2980B9;
   --blue-dark: #1A5276;
-  --navy-bg: #0A1628;
+  --navy-bg: #0B1729;
 
   /* UI Colors */
   --gray-bg: #f7f9fc;
@@ -75,6 +75,17 @@ label {
   object-fit: contain;
   display: block;
   margin: 0 auto;
+  /* Blend all edges with header background using radial gradient mask */
+  -webkit-mask-image: radial-gradient(
+    ellipse 85% 80% at center,
+    black 50%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 85% 80% at center,
+    black 50%,
+    transparent 100%
+  );
 }
 
 /* === Disclaimer Banner + Legal Links === */
@@ -603,6 +614,23 @@ input[type="radio"] {
 }
 
 .blue-button:hover {
+  filter: brightness(0.92);
+}
+
+.orange-button {
+  background-color: #fd7e14;
+  color: #fff;
+  font-weight: 600;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+  margin-top: 3px;
+}
+
+.orange-button:hover {
   filter: brightness(0.92);
 }
 

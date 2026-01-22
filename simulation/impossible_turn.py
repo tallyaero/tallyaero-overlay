@@ -27,6 +27,56 @@ PHASE_STRAIGHT = "straight"
 PHASE_TURN2 = "turn2"
 PHASE_FINAL = "final"
 
+# === Slip Constants ===
+SLIP_GR_REDUCTION = 0.4  # Slip can reduce glide ratio by up to 40%
+SLIP_MIN_GR = 3.0  # Minimum effective glide ratio with slip
+
+
+def _calculate_slip_for_touchdown(
+    current_altitude_ft: float,
+    distance_to_touchdown_ft: float,
+    straight_glide_ratio: float,
+) -> tuple:
+    """
+    Calculate slip intensity needed to hit the touchdown point exactly.
+
+    Returns: (slip_intensity 0-1, effective_glide_ratio)
+
+    Key insight: We need to arrive at touchdown point with ~0 altitude.
+    - Required GR = distance / altitude (the GR we NEED to glide)
+    - If straight_gr > required_gr, we'd overshoot, so we need to slip
+    - Slip intensity proportional to how much we need to steepen descent
+    """
+    if current_altitude_ft <= 0 or distance_to_touchdown_ft <= 0:
+        return 0.0, straight_glide_ratio
+
+    # What GR do we need to exactly hit the touchdown point?
+    required_gr = distance_to_touchdown_ft / current_altitude_ft
+
+    # If we need better GR than we have, we can't make it (no slip needed)
+    if required_gr >= straight_glide_ratio:
+        return 0.0, straight_glide_ratio
+
+    # We're high - need to slip to reduce effective GR
+    min_slip_gr = straight_glide_ratio * (1.0 - SLIP_GR_REDUCTION)
+    min_slip_gr = max(SLIP_MIN_GR, min_slip_gr)
+
+    # If even full slip won't get us down, use full slip
+    if required_gr <= min_slip_gr:
+        return 1.0, min_slip_gr
+
+    # Calculate proportional slip intensity
+    gr_range = straight_glide_ratio - min_slip_gr
+    gr_reduction_needed = straight_glide_ratio - required_gr
+    slip_intensity = gr_reduction_needed / gr_range if gr_range > 0 else 0.0
+    slip_intensity = max(0.0, min(1.0, slip_intensity))
+
+    # Calculate effective GR
+    effective_gr = straight_glide_ratio * (1.0 - slip_intensity * SLIP_GR_REDUCTION)
+    effective_gr = max(SLIP_MIN_GR, effective_gr)
+
+    return slip_intensity, effective_gr
+
 
 def _get_stall_speed(ac: dict, weight_lbs: float, config: str = "clean") -> float:
     """Get stall speed adjusted for weight."""
@@ -498,6 +548,7 @@ def _run_impossible_turn_once(
     hover = []
 
     bank_state_deg = 0.0
+    max_slip_pct = 0.0  # Track maximum slip used
 
     def wind_corrected_heading_for_track(desired_track_deg: float, tas_fps: float) -> float:
         trk = math.radians(_wrap_360(desired_track_deg))
@@ -509,7 +560,7 @@ def _run_impossible_turn_once(
         hdg_out = _wrap_360(desired_track_deg + math.degrees(wca))
         return hdg_out
 
-    def record(gs_kt, aob_deg, vs_fpm, track_deg, drift_deg=None):
+    def record(gs_kt, aob_deg, vs_fpm, track_deg, drift_deg=None, slip_pct=0.0):
         hover.append({
             "time": float(t),
             "alt": float(max(0.0, alt)),
@@ -521,6 +572,7 @@ def _run_impossible_turn_once(
             "heading": float(hdg),
             "drift": float(drift_deg) if drift_deg is not None else None,
             "phase": phase,
+            "slip_pct": float(slip_pct),
         })
         path.append([cur.latitude, cur.longitude])
 
@@ -541,6 +593,8 @@ def _run_impossible_turn_once(
             "prop_config": str(prop_config),
             "centerline_xtol_ft": _centerline_xtol_ft,
             "align_window_deg": _align_window_deg,
+            "slip_used": max_slip_pct > 0,
+            "slip_intensity_pct": float(max_slip_pct),
         }
         if xtrack_ft is not None:
             m["final_xtrack_ft"] = float(xtrack_ft)
@@ -721,6 +775,31 @@ def _run_impossible_turn_once(
             glide_eff = straight_gr
         glide_eff = max(2.0, glide_eff)
 
+        # Calculate slip for energy management
+        # Distance to touchdown: use along_ft (negative = before threshold)
+        # When along_ft < 0, we're approaching; when >= 0, we're at/past threshold
+        dist_to_touchdown_ft = max(0.0, -along_ft) if along_ft < 0 else 0.0
+
+        # Also add lateral distance for more accurate energy calc
+        total_dist_to_touchdown_ft = math.hypot(dist_to_touchdown_ft, abs(xtrack_ft))
+
+        # Calculate slip based on altitude vs distance to touchdown
+        slip_intensity, slip_glide_ratio = _calculate_slip_for_touchdown(
+            current_altitude_ft=alt,
+            distance_to_touchdown_ft=total_dist_to_touchdown_ft,
+            straight_glide_ratio=glide_eff,
+        )
+
+        # Apply slip to glide ratio if we're high
+        if slip_intensity > 0.05:
+            glide_eff = slip_glide_ratio
+
+        slip_pct = round(slip_intensity * 100, 0)
+
+        # Track maximum slip used
+        if slip_pct > max_slip_pct:
+            max_slip_pct = slip_pct
+
         vs_fps = tas_fps / glide_eff
         alt -= vs_fps * dt
         vs_fpm = vs_fps * 60.0
@@ -731,6 +810,7 @@ def _run_impossible_turn_once(
             vs_fpm=vs_fpm,
             track_deg=track_deg,
             drift_deg=drift_deg,
+            slip_pct=slip_pct,
         )
 
         if phase in ["turn2", "straight", "final"] or (phase == "turn1" and total_turn_1 >= float(min_turn_deg_before_capture)):
@@ -792,6 +872,7 @@ def _run_impossible_turn_once(
                             "track": float(final_course_hdg),
                             "heading": float(hdg),
                             "phase": "rollout",
+                            "slip_pct": 0.0,
                         })
                     xtrack_ft = 0.0  # Now on centerline
                     # Update marker to end of rollout (on centerline)

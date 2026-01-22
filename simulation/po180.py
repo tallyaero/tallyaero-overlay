@@ -417,6 +417,16 @@ def simulate_power_off_180(
 
         # Record point
         path.append([lat, lon])
+
+        # Determine slip percentage for hover display
+        # Use actual slip_intensity if active, otherwise use slip_info when on final
+        if slip_active:
+            hover_slip_pct = round(slip_intensity * 100, 0)
+        elif segment == "final" and slip_info['slip_needed']:
+            hover_slip_pct = round(slip_info['slip_intensity'] * 100, 0)
+        else:
+            hover_slip_pct = 0
+
         hover.append({
             'time': round(time_s, 2),
             'segment': segment,
@@ -429,8 +439,9 @@ def simulate_power_off_180(
             'track': round(track_deg, 1),
             'drift': round(drift_deg, 1),
             'aob': round(current_bank, 1),
-            'slip_active': slip_active,
-            'slip_intensity': round(slip_intensity * 100, 0) if slip_active else 0,
+            'slip_active': slip_active or (segment == "final" and slip_info['slip_needed']),
+            'slip_intensity': hover_slip_pct,
+            'slip_pct': hover_slip_pct,
             'glide_ratio': round(current_gr, 1),
             'distance_to_touchdown_ft': round(dist_to_td_ft, 0),
         })
@@ -549,6 +560,7 @@ def simulate_power_off_180(
         'aob': 0.0,
         'slip_active': False,
         'slip_intensity': 0,
+        'slip_pct': 0,
         'glide_ratio': round(straight_gr, 1),
         'distance_to_touchdown_ft': 0,
     })
