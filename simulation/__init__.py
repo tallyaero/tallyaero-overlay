@@ -29,7 +29,8 @@ from .glide_path import find_required_aob_for_arc_fit
 
 from .engine_out import (
     simulate_engineout_glide,
-    simulate_tight_overhead_orbit
+    find_minimum_altitude,
+    compute_glide_envelope
 )
 
 from .impossible_turn import (
@@ -59,7 +60,8 @@ __all__ = [
     'simulate_glide_path_to_target',  # Legacy compatibility
     'find_required_aob_for_arc_fit',
     'simulate_engineout_glide',
-    'simulate_tight_overhead_orbit',
+    'find_minimum_altitude',
+    'compute_glide_envelope',
     'simulate_impossible_turn',
     'simulate_turns_around_point',
     'simulate_rectangular_course',
