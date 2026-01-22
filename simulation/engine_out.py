@@ -1637,9 +1637,6 @@ def run_simulation(
         target_bucket = buckets[min(current_bucket_idx, len(buckets) - 1)]
         target_pos = GeoPoint(target_bucket.lat, target_bucket.lon)
 
-        debug_transition_bucket = ""
-        debug_transition_alt_range = ""
-        debug_transition_check = ""
 
         if in_spiral:
             bearing_from_td = calculate_initial_compass_bearing(touchdown_point, cur_pos)
@@ -1695,10 +1692,6 @@ def run_simulation(
 
             heading_diff = abs(_angle_diff_deg(track, abeam_bucket.heading_deg))
             heading_aligned = heading_diff <= abeam_bucket.heading_tol_deg
-
-            debug_transition_bucket = abeam_bucket.name
-            debug_transition_alt_range = f"{abeam_bottom:.0f}-{abeam_top:.0f}"
-            debug_transition_check = f"X:{in_cross_track} A:{in_along_track} Alt:{in_altitude} Hdg:{heading_aligned}"
 
             if in_cross_track and in_along_track and in_altitude and heading_aligned:
                 in_spiral = False
@@ -1785,11 +1778,6 @@ def run_simulation(
                 # Check if we can glide to FINAL bucket now
                 # We need: (current_alt - dist_to_final/glide_ratio) ≈ final bucket altitude
                 arrival_alt_if_glide = alt_agl - (dist_to_final / straight_gr)
-
-                # Debug info for transition check
-                debug_transition_bucket = "FINAL"
-                debug_transition_alt_range = f"{final_bucket_fs.altitude_ft - final_bucket_fs.height_ft/2:.0f}-{final_top:.0f}"
-                debug_transition_check = f"ArrAlt:{arrival_alt_if_glide:.0f} Target:{final_center_alt:.0f}"
 
                 # Transition condition: can glide to FINAL at approximately correct altitude
                 # Allow some buffer since we can use slip to fine-tune
@@ -1998,10 +1986,6 @@ def run_simulation(
             heading_diff_check = abs(_angle_diff_deg(track, abeam_bucket.heading_deg))
             heading_aligned = heading_diff_check <= abeam_bucket.heading_tol_deg
 
-            debug_transition_bucket = abeam_bucket.name
-            debug_transition_alt_range = f"{abeam_bottom:.0f}-{abeam_top:.0f}"
-            debug_transition_check = f"X:{in_cross_track} A:{in_along_track} Alt:{in_altitude} Hdg:{heading_aligned}"
-
             # Transition to PO180 when we reach ABEAM bucket
             if in_cross_track and in_along_track and in_altitude and heading_aligned:
                 in_opposite_spiral = False
@@ -2206,52 +2190,9 @@ def run_simulation(
 
         path.append([lat, lon])
 
-        debug_xtrack = 0
-        debug_along = 0
-        debug_dist_to_abeam = 0
-        debug_in_xtrack_str = ""
-        debug_in_along_str = ""
-        debug_in_alt_str = ""
-        debug_alt_range = ""
-        debug_abeam_bucket = ""
-        debug_bucket_idx = current_bucket_idx
-        debug_bucket_chain = ",".join([b.name for b in buckets])
-        debug_pattern_side = pattern_side
-        debug_spiral_needed = spirals_needed if in_spiral else 0
-        debug_spiral_radius = target_radius if in_spiral else 0
-        debug_spiral_alt_to_lose = alt_to_lose if in_spiral else 0
-
-        abeam_bkt = None
-        for b in buckets:
-            if b.name == "ABEAM":
-                abeam_bkt = b
-                break
-
-        debug_in_hdg_str = ""
-        if abeam_bkt:
-            debug_abeam_bucket = f"ABEAM@({abeam_bkt.lat:.4f},{abeam_bkt.lon:.4f})"
-            debug_dist_to_abeam = geo_dist((lat, lon), (abeam_bkt.lat, abeam_bkt.lon)).feet
-            bearing_to_ac = calculate_initial_compass_bearing(
-                GeoPoint(abeam_bkt.lat, abeam_bkt.lon), cur_pos
-            )
-            angle_d = math.radians(_angle_diff_deg(bearing_to_ac, abeam_bkt.heading_deg))
-            debug_along = debug_dist_to_abeam * math.cos(angle_d)
-            debug_xtrack = abs(debug_dist_to_abeam * math.sin(angle_d))
-            half_w = abeam_bkt.width_ft / 2
-            half_d = abeam_bkt.depth_ft / 2
-            a_top = abeam_bkt.altitude_ft + abeam_bkt.height_ft / 2
-            a_bot = abeam_bkt.altitude_ft - abeam_bkt.height_ft / 2
-            debug_in_xtrack_str = "Y" if debug_xtrack <= half_w else f"N({debug_xtrack:.0f}>{half_w:.0f})"
-            debug_in_along_str = "Y" if abs(debug_along) <= half_d else f"N({abs(debug_along):.0f}>{half_d:.0f})"
-            debug_in_alt_str = "Y" if a_bot <= alt_agl <= a_top else f"N({alt_agl:.0f})"
-            debug_alt_range = f"{a_bot:.0f}-{a_top:.0f}"
-            hdg_diff = abs(_angle_diff_deg(track, abeam_bkt.heading_deg))
-            debug_in_hdg_str = "Y" if hdg_diff <= abeam_bkt.heading_tol_deg else f"N(trk{track:.0f} vs {abeam_bkt.heading_deg:.0f}±{abeam_bkt.heading_tol_deg:.0f})"
-
         hover_data.append({
             "time": round(time_sec, 2),
             "phase": phase_name,
-            "bucket": target_bucket.name,
             "alt": round(alt_agl, 1),
             "ias": round(ias, 1),
             "tas": round(tas_knots, 1),
@@ -2263,24 +2204,6 @@ def run_simulation(
             "vs": round(-vs_fpm, 0),
             "slip_pct": slip_pct,
             "glide_ratio": round(effective_gr, 1),
-            "dist_to_abeam": round(debug_dist_to_abeam, 0),
-            "xtrack_abeam": round(debug_xtrack, 0),
-            "along_abeam": round(debug_along, 0),
-            "in_xtrack": debug_in_xtrack_str,
-            "in_along": debug_in_along_str,
-            "in_alt": debug_in_alt_str,
-            "in_hdg": debug_in_hdg_str,
-            "alt_range": debug_alt_range,
-            "abeam_bucket": debug_abeam_bucket,
-            "bucket_idx": debug_bucket_idx,
-            "bucket_chain": debug_bucket_chain,
-            "pattern_side": debug_pattern_side,
-            "trans_bucket": debug_transition_bucket,
-            "trans_alt": debug_transition_alt_range,
-            "trans_check": debug_transition_check,
-            "spiral_n": debug_spiral_needed,
-            "spiral_r": round(debug_spiral_radius, 0),
-            "spiral_alt_lose": round(debug_spiral_alt_to_lose, 0),
         })
 
         if time_sec > MAX_SIM_TIME_SEC:
