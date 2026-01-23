@@ -131,6 +131,11 @@ BASE_TURN_DEGREES = 90.0
 ABEAM_TRIGGER_MAX_XTRACK_FACTOR = 2.0
 ABEAM_TRIGGER_MAX_ALONG_FT = 500.0
 
+# === Decision Tree Safety Margin ===
+# Favor Option C (full bucket progression) - the ideal flight path
+# Set to 1.0 for no margin since wind model is now consistent throughout
+DECISION_TREE_SAFETY_MARGIN = 1.0  # No margin - trust the wind model
+
 
 # =============================================================================
 # BUCKET-BASED NAVIGATION SYSTEM
@@ -561,6 +566,9 @@ def _can_arrive_at_bucket_altitude(
     target_bucket: Bucket,
     glide_ratio: float,
     tolerance_ft: float = 500.0,
+    tas_kt: float = 75.0,
+    wind_dir: float = 0.0,
+    wind_speed_kt: float = 0.0,
 ) -> bool:
     """Check if we'd arrive at the bucket at approximately the correct altitude."""
     dist_ft = geo_dist(
@@ -568,7 +576,15 @@ def _can_arrive_at_bucket_altitude(
         (target_bucket.lat, target_bucket.lon)
     ).feet
 
-    alt_at_arrival = current_alt - (dist_ft / glide_ratio)
+    # Wind-correct distance for consistent ground track model
+    bearing_to_bucket = calculate_initial_compass_bearing(
+        current_pos, GeoPoint(target_bucket.lat, target_bucket.lon)
+    )
+    dist_ft_wc = _wind_corrected_glide_distance(
+        dist_ft, bearing_to_bucket, tas_kt, wind_dir, wind_speed_kt
+    )
+
+    alt_at_arrival = current_alt - (dist_ft_wc / glide_ratio)
     alt_diff = abs(alt_at_arrival - target_bucket.altitude_ft)
 
     return alt_diff <= tolerance_ft
@@ -605,6 +621,70 @@ def _calculate_slip_for_bucket(
     return slip_intensity, effective_gr
 
 
+def _wind_corrected_glide_distance(
+    geometric_dist_ft: float,
+    track_deg: float,
+    tas_kt: float,
+    wind_dir: float,
+    wind_speed_kt: float,
+) -> float:
+    """
+    Calculate the effective glide distance accounting for wind using proper wind triangle.
+
+    Returns the distance that consumes the same altitude as the geometric
+    distance would in still air, but accounting for actual ground speed.
+
+    Uses the same wind triangle calculation as the simulation to ensure consistency:
+    - Aircraft crabs into crosswind to maintain track
+    - Ground speed accounts for both headwind component AND crab angle effect
+
+    For headwind: GS < TAS → ratio > 1 → effective distance LONGER (more altitude needed)
+    For tailwind: GS > TAS → ratio < 1 → effective distance SHORTER (less altitude needed)
+
+    Args:
+        geometric_dist_ft: The pure geometric distance in feet
+        track_deg: Direction of flight for this segment (degrees true)
+        tas_kt: True airspeed in knots
+        wind_dir: Wind FROM direction (degrees true)
+        wind_speed_kt: Wind speed in knots
+    """
+    if wind_speed_kt < 0.5:
+        return geometric_dist_ft
+
+    # Wind components (fps) - same as simulation
+    wn_fps, we_fps = _wind_components_from_dir(wind_dir, wind_speed_kt)
+    tas_fps = tas_kt * 1.68781  # knots to fps
+
+    # Solve wind triangle - MUST match _compute_wind_correction_angle exactly
+    track_rad = math.radians(_wrap_360(track_deg))
+
+    # Crosswind component (perpendicular to track)
+    w_cross = (-wn_fps * math.sin(track_rad)) + (we_fps * math.cos(track_rad))
+    # Headwind component (along track, positive = headwind)
+    w_head = (wn_fps * math.cos(track_rad)) + (we_fps * math.sin(track_rad))
+
+    # Wind correction angle (crab angle)
+    if tas_fps > 1.0:
+        wca_ratio = max(-1.0, min(1.0, w_cross / tas_fps))
+        wca_rad = math.asin(wca_ratio)
+    else:
+        wca_rad = 0.0
+
+    # Ground speed using proper wind triangle
+    # TAS component along track is reduced by cos(wca) due to crabbing
+    gs_fps = tas_fps * math.cos(wca_rad) + w_head
+    gs_fps = max(1.0, gs_fps)
+
+    # Effective distance = geometric × (TAS/GS)
+    # Headwind: GS < TAS → ratio > 1 → effective distance LONGER
+    # Tailwind: GS > TAS → ratio < 1 → effective distance SHORTER
+    if gs_fps > 10:
+        return geometric_dist_ft * (tas_fps / gs_fps)
+    else:
+        # Strong headwind - cap at 2x distance for safety
+        return geometric_dist_ft * 2.0
+
+
 def _build_bucket_chain(
     start_pos: GeoPoint,
     start_alt: float,
@@ -615,6 +695,9 @@ def _build_bucket_chain(
     pattern_alt_ft: float,
     glide_ratio: float,
     force_pattern_side: Optional[str] = None,
+    wind_dir: float = 0.0,
+    wind_speed_kt: float = 0.0,
+    tas_kt: float = 75.0,
 ) -> Tuple[List[Bucket], str, bool]:
     """
     Build the optimal bucket chain based on starting position.
@@ -669,7 +752,8 @@ def _build_bucket_chain(
     if on_final_side:
         # Option A: Straight to Final
         # Conditions: Can arrive at final bucket altitude AND roughly aligned AND near centerline
-        if _can_arrive_at_bucket_altitude(start_pos, start_alt, final_bucket, glide_ratio, 300):
+        if _can_arrive_at_bucket_altitude(start_pos, start_alt, final_bucket, glide_ratio, 300,
+                                          tas_kt, wind_dir, wind_speed_kt):
             if roughly_aligned and abs(xtrack_ft) < 1500:
                 return [final_bucket, touchdown_bucket], pattern_side, False
 
@@ -701,18 +785,66 @@ def _build_bucket_chain(
         half_oval_radius = pattern_offset_ft
         half_oval_arc = math.pi * half_oval_radius
 
-        # PO180 pattern from ABEAM: some downwind + 180° turn + final approach
+        # PO180 pattern from ABEAM: downwind leg + 180° turn + final approach
         po180_turn_radius = pattern_offset_ft / 2.0
         po180_turn_arc = math.pi * po180_turn_radius
+        po180_downwind_leg = pattern_offset_ft * 0.5  # Downwind travel before turn starts
         po180_final_leg = BUCKET_FINAL_DIST_NM * FT_PER_NM  # Distance from FINAL bucket to touchdown
 
-        # Total Option C ground track
-        option_c_ground_track = dist_start_to_opposite_spiral + half_oval_arc + po180_turn_arc + po180_final_leg
+        # ===================================================================
+        # WIND-CORRECTED DISTANCE CALCULATIONS
+        # Apply wind correction to each leg to get effective glide distances
+        # ===================================================================
+
+        # Leg 1: Start to OPPOSITE_SPIRAL
+        # Track direction: bearing from start to opposite spiral position
+        track_1 = calculate_initial_compass_bearing(start_pos, opposite_spiral_pos)
+        dist_1_corrected = _wind_corrected_glide_distance(
+            dist_start_to_opposite_spiral, track_1, tas_kt, wind_dir, wind_speed_kt
+        )
+
+        # Leg 2: Half-oval arc from OPPOSITE_SPIRAL to ABEAM
+        # Average track is roughly perpendicular to runway (crossing pattern)
+        if pattern_side == "left":
+            track_2_avg = _wrap_360(runway_heading - 90.0)  # Crossing right to left
+        else:
+            track_2_avg = _wrap_360(runway_heading + 90.0)  # Crossing left to right
+        dist_2_corrected = _wind_corrected_glide_distance(
+            half_oval_arc, track_2_avg, tas_kt, wind_dir, wind_speed_kt
+        )
+
+        # Leg 3: Downwind leg from ABEAM (opposite runway heading - tailwind typically)
+        track_3_downwind = _wrap_360(runway_heading + 180.0)
+        dist_3_corrected = _wind_corrected_glide_distance(
+            po180_downwind_leg, track_3_downwind, tas_kt, wind_dir, wind_speed_kt
+        )
+
+        # Leg 4: PO180 turn arc (downwind through base turn)
+        # Average track through 180° turn - use perpendicular as approximation
+        if pattern_side == "left":
+            track_4_avg = _wrap_360(runway_heading + 90.0)  # Left pattern base turn
+        else:
+            track_4_avg = _wrap_360(runway_heading - 90.0)  # Right pattern base turn
+        dist_4_corrected = _wind_corrected_glide_distance(
+            po180_turn_arc, track_4_avg, tas_kt, wind_dir, wind_speed_kt
+        )
+
+        # Leg 5: Final approach (aligned with runway heading - typically into wind)
+        track_5 = runway_heading
+        dist_5_corrected = _wind_corrected_glide_distance(
+            po180_final_leg, track_5, tas_kt, wind_dir, wind_speed_kt
+        )
+
+        # Total Option C ground track with wind correction
+        option_c_ground_track = (dist_1_corrected + dist_2_corrected + dist_3_corrected +
+                                 dist_4_corrected + dist_5_corrected)
 
         # Minimum altitude to complete Option C (must have enough glide distance)
         # Add ABEAM bucket altitude as the target arrival altitude at ABEAM
+        # Apply safety margin to account for turn inefficiencies and wind variations
         abeam_target_alt = abeam_bucket.altitude_ft
-        option_c_min_altitude = (option_c_ground_track / glide_ratio) + abeam_target_alt
+        option_c_min_altitude = ((option_c_ground_track / glide_ratio) * DECISION_TREE_SAFETY_MARGIN
+                                 + abeam_target_alt)
 
         # =======================================================================
         # DECISION
@@ -747,7 +879,8 @@ def _build_bucket_chain(
     # =========================================================================
     else:
         # Option A check for upwind side too (if aligned and can reach final)
-        if _can_arrive_at_bucket_altitude(start_pos, start_alt, final_bucket, glide_ratio, 300):
+        if _can_arrive_at_bucket_altitude(start_pos, start_alt, final_bucket, glide_ratio, 300,
+                                          tas_kt, wind_dir, wind_speed_kt):
             if roughly_aligned and abs(xtrack_ft) < 1500:
                 return [final_bucket, touchdown_bucket], pattern_side, False
 
@@ -761,17 +894,54 @@ def _build_bucket_chain(
             (abeam_bucket.lat, abeam_bucket.lon)
         ).feet
 
-        # PO180 pattern from ABEAM: 180° turn + final approach
+        # PO180 pattern from ABEAM: downwind leg + 180° turn + final approach
         po180_turn_radius = pattern_offset_ft / 2.0
         po180_turn_arc = math.pi * po180_turn_radius
+        po180_downwind_leg = pattern_offset_ft * 0.5  # Downwind travel before turn starts
         po180_final_leg = BUCKET_FINAL_DIST_NM * FT_PER_NM
 
-        # Total ground track for full spiral flow
-        spiral_flow_ground_track = dist_start_to_abeam + po180_turn_arc + po180_final_leg
+        # ===================================================================
+        # WIND-CORRECTED DISTANCE CALCULATIONS
+        # Apply wind correction to each leg to get effective glide distances
+        # ===================================================================
+
+        # Leg 1: Start to ABEAM/SPIRAL position
+        abeam_point = GeoPoint(abeam_bucket.lat, abeam_bucket.lon)
+        track_1 = calculate_initial_compass_bearing(start_pos, abeam_point)
+        dist_1_corrected = _wind_corrected_glide_distance(
+            dist_start_to_abeam, track_1, tas_kt, wind_dir, wind_speed_kt
+        )
+
+        # Leg 2: Downwind leg from ABEAM (opposite runway heading - tailwind typically)
+        track_2_downwind = _wrap_360(runway_heading + 180.0)
+        dist_2_corrected = _wind_corrected_glide_distance(
+            po180_downwind_leg, track_2_downwind, tas_kt, wind_dir, wind_speed_kt
+        )
+
+        # Leg 3: PO180 turn arc (180° turn through base)
+        # Average track through the 180° turn is roughly perpendicular to runway
+        if pattern_side == "left":
+            track_3_avg = _wrap_360(runway_heading + 90.0)  # Left pattern base turn direction
+        else:
+            track_3_avg = _wrap_360(runway_heading - 90.0)  # Right pattern base turn direction
+        dist_3_corrected = _wind_corrected_glide_distance(
+            po180_turn_arc, track_3_avg, tas_kt, wind_dir, wind_speed_kt
+        )
+
+        # Leg 4: Final approach (into wind - runway heading)
+        track_4 = runway_heading
+        dist_4_corrected = _wind_corrected_glide_distance(
+            po180_final_leg, track_4, tas_kt, wind_dir, wind_speed_kt
+        )
+
+        # Total ground track for full spiral flow with wind correction
+        spiral_flow_ground_track = dist_1_corrected + dist_2_corrected + dist_3_corrected + dist_4_corrected
 
         # Minimum altitude to complete full spiral flow
+        # Apply safety margin to account for turn inefficiencies and wind variations
         abeam_target_alt = abeam_bucket.altitude_ft
-        spiral_flow_min_altitude = (spiral_flow_ground_track / glide_ratio) + abeam_target_alt
+        spiral_flow_min_altitude = ((spiral_flow_ground_track / glide_ratio) * DECISION_TREE_SAFETY_MARGIN
+                                    + abeam_target_alt)
 
         # =======================================================================
         # DECISION
@@ -1268,6 +1438,9 @@ def run_simulation(
         touchdown_point, float(touchdown_heading),
         pattern_offset_ft, pattern_altitude_ft, straight_gr,
         force_pattern_side=force_pattern_side,
+        wind_dir=float(wind_dir),
+        wind_speed_kt=float(wind_speed),
+        tas_kt=tas_knots,
     )
 
     lat = start_point.latitude
@@ -1350,7 +1523,7 @@ def run_simulation(
 
     hover_data.append({
         "time": 0.0,
-        "phase": "reaction",
+        "phase": "Engine Failure",
         "bucket": buckets[0].name if buckets else "none",
         "alt": alt_agl,
         "ias": ias,
@@ -1457,10 +1630,20 @@ def run_simulation(
                     half_spiral_radius = dist_to_abeam / 2.0
                     half_spiral_arc_length = math.pi * half_spiral_radius
 
+                    # Determine turn direction: shortest path toward ABEAM
+                    bearing_to_abeam = calculate_initial_compass_bearing(cur_pos, opposite_spiral_target_point)
+
+                    # Wind-correct arc length using perpendicular to bearing as average track
+                    # (half-spiral sweeps 180° so average track is perpendicular to start/end bearing)
+                    avg_track_half_spiral = _wrap_360(bearing_to_abeam + 90.0)
+                    half_spiral_arc_wc = _wind_corrected_glide_distance(
+                        half_spiral_arc_length, avg_track_half_spiral, fps_to_knots(tas_fps), wind_dir, wind_speed
+                    )
+
                     # Calculate altitude loss with maximum slip
                     min_gr_with_slip = straight_gr * (1.0 - SLIP_GR_REDUCTION)
                     min_gr_with_slip = max(3.0, min_gr_with_slip)
-                    alt_loss_half_spiral_with_slip = half_spiral_arc_length / min_gr_with_slip
+                    alt_loss_half_spiral_with_slip = half_spiral_arc_wc / min_gr_with_slip
 
                     # Target altitude at ABEAM (middle of bucket)
                     abeam_target_alt = abeam_bucket.altitude_ft
@@ -1469,50 +1652,79 @@ def run_simulation(
 
                     # Altitude we'd arrive at after half-spiral with slip
                     arrival_alt = alt_agl - alt_loss_half_spiral_with_slip
-
-                    # Determine turn direction: shortest path toward ABEAM
-                    bearing_to_abeam = calculate_initial_compass_bearing(cur_pos, opposite_spiral_target_point)
                     turn_diff = _angle_diff_deg(bearing_to_abeam, track)
                     opposite_spiral_direction = 1 if turn_diff > 0 else -1
 
-                    if arrival_alt >= abeam_bottom and arrival_alt <= abeam_top + 500:
-                        # YES - Can make it in one half-spiral!
-                        # Use PO180-style geometry: outbound leg + 180° turn + inbound to ABEAM
+                    # Calculate EXTENDED half-spiral geometry (with outbound/inbound legs like PO180)
+                    # This allows burning excess altitude without requiring a full 360°
+
+                    # Current cross-track and along-track distances to ABEAM
+                    angle_off = abs(_angle_diff_deg(bearing_to_abeam, track))
+                    cross_track_to_abeam = dist_to_abeam * math.sin(math.radians(min(90.0, angle_off)))
+                    along_track_to_abeam = dist_to_abeam * math.cos(math.radians(min(90.0, angle_off)))
+
+                    # Minimum path (no outbound extension): turn arc + inbound
+                    min_turn_radius = max(100.0, cross_track_to_abeam / 2.0)
+                    min_turn_arc = math.pi * min_turn_radius
+                    min_path_length = min_turn_arc + along_track_to_abeam
+
+                    # Calculate altitude we'd arrive at if flying min_path with NORMAL GR
+                    # Use straight_gr (not slip GR) because actual execution may not use max slip
+                    # This is conservative - predicts less altitude loss, more likely to add extensions
+                    alt_loss_min_path = min_path_length / straight_gr
+                    expected_arrival_alt = alt_agl - alt_loss_min_path
+
+                    # If we'd arrive ABOVE target, we need outbound extension to burn excess altitude
+                    if expected_arrival_alt > abeam_target_alt:
+                        # Calculate how much more distance we need to fly (using normal GR)
+                        extra_alt_to_lose = expected_arrival_alt - abeam_target_alt
+                        extra_distance_needed = extra_alt_to_lose * straight_gr
+
+                        # Distribute extra distance as outbound extension
+                        # Path = outbound + turn_arc + inbound
+                        # With outbound D: total = D + π×(cross_track + D)/2 + along_track
+                        # Extra distance from D: D + π×D/2 = D×(1 + π/2)
+                        # So: D = extra_distance_needed / (1 + π/2)
+                        outbound_dist_needed = extra_distance_needed / (1.0 + math.pi / 2.0)
+
+                        # With outbound extension, recalculate geometry
+                        extended_cross_track = cross_track_to_abeam + outbound_dist_needed
+                        extended_turn_radius = max(100.0, extended_cross_track / 2.0)
+                    else:
+                        # No extension needed - min path loses enough altitude
+                        outbound_dist_needed = 0.0
+                        extended_turn_radius = min_turn_radius
+
+                    # Calculate required AOB for the (possibly extended) turn radius
+                    tan_bank_required = (tas_fps ** 2) / (G_FPS2 * extended_turn_radius)
+                    required_aob = math.degrees(math.atan(tan_bank_required))
+
+                    # Geometry is achievable if:
+                    # 1. AOB <= 45° (turn not too tight)
+                    # 2. Expected arrival altitude >= abeam_bottom (won't arrive too low with min path)
+                    # 3. Outbound extension is SLIGHT (like PO180 downwind adjustment, not massive)
+                    #    If more altitude needs burning, use full 360° spiral instead
+                    max_outbound_extension = min(2000.0, dist_to_abeam * 0.3)  # Max 2000ft or 30% of distance
+
+                    geometry_achievable = (
+                        required_aob <= 45.0 and
+                        expected_arrival_alt >= abeam_bottom and
+                        outbound_dist_needed <= max_outbound_extension
+                    )
+
+                    if geometry_achievable:
+                        # YES - Use half-spiral with slight extension (like PO180 downwind adjustment)
                         opposite_spiral_phase = "half_spiral_to_abeam"
 
-                        # Calculate glide distance needed
-                        abeam_target_alt = abeam_bucket.altitude_ft
-                        alt_to_lose = alt_agl - abeam_target_alt
-                        glide_distance = alt_to_lose * min_gr_with_slip
-
-                        # Direct distance to ABEAM
-                        direct_dist = dist_to_abeam
-
-                        # Calculate turn radius (comfortable 30° bank turn)
-                        half_spiral_turn_radius = (tas_fps ** 2) / (G_FPS2 * math.tan(math.radians(30.0)))
-                        turn_arc_length = math.pi * half_spiral_turn_radius  # 180° turn
-
-                        # The path is: outbound + turn_arc + inbound
-                        # inbound distance ≈ direct_dist (we end up at ABEAM)
-                        # So: glide_distance = outbound + turn_arc + inbound
-                        # outbound = (glide_distance - turn_arc - direct_dist) / 2
-                        # (divide by 2 because outbound creates offset that inbound must cover)
-
-                        # Actually, for half-oval geometry:
-                        # outbound leg parallel to runway (perpendicular to ABEAM bearing)
-                        # 180° turn
-                        # inbound leg to ABEAM
-                        # The outbound distance determines the turn's offset
-
-                        extra_distance = glide_distance - direct_dist - turn_arc_length
-                        half_spiral_outbound_dist_needed = max(500.0, extra_distance / 2.0)
+                        # Store geometry parameters
+                        half_spiral_turn_radius = extended_turn_radius
+                        half_spiral_outbound_dist_needed = outbound_dist_needed
 
                         # Outbound heading: perpendicular to bearing to ABEAM
-                        # Direction based on turn direction (so turn ends pointing at ABEAM)
                         abeam_point = GeoPoint(abeam_bucket.lat, abeam_bucket.lon)
                         bearing_to_abeam_init = calculate_initial_compass_bearing(cur_pos, abeam_point)
 
-                        # Outbound is perpendicular, direction depends on which way we'll turn
+                        # Outbound direction depends on turn direction
                         if opposite_spiral_direction > 0:
                             # Will turn right, so fly outbound to the left first
                             half_spiral_outbound_heading = _wrap_360(bearing_to_abeam_init - 90.0)
@@ -1524,10 +1736,19 @@ def run_simulation(
                         half_spiral_outbound_flown = 0.0
                         half_spiral_turn_accumulated = 0.0
                     else:
-                        # NO - Need to do full 360° spiral(s) first to lose altitude
+                        # NO - Extended half-spiral not achievable, need full 360° spiral first
                         opposite_spiral_phase = "full_spiral"
-                        # For full spiral, use a comfortable radius
-                        opposite_spiral_radius = max(1500.0, min(4000.0, half_spiral_radius))
+
+                        # Size the spiral to burn excess altitude in ~1 turn
+                        # This keeps the spiral compact, preserving glide for half spiral + PO180
+                        excess_alt = (expected_arrival_alt - abeam_target_alt) if expected_arrival_alt > abeam_target_alt else 500.0
+
+                        # circumference = excess_alt * straight_gr, radius = circumference / (2π)
+                        target_spiral_circumference = excess_alt * straight_gr
+                        target_spiral_radius = target_spiral_circumference / (2.0 * math.pi)
+
+                        # Clamp to reasonable bounds (500-2500 ft) - allow tight spirals when needed
+                        opposite_spiral_radius = max(500.0, min(2500.0, target_spiral_radius))
                 else:
                     current_bucket_idx += 1
                     if current_bucket_idx >= len(buckets):
@@ -1618,15 +1839,20 @@ def run_simulation(
         elif in_spiral:
             phase_name = "spiral"
         elif in_opposite_spiral:
-            phase_name = f"opposite_spiral_{opposite_spiral_phase}"
+            if opposite_spiral_phase == "full_spiral":
+                phase_name = "opposite_spiral"
+            elif opposite_spiral_phase == "half_spiral_to_abeam":
+                phase_name = "half_oval"
+            else:
+                phase_name = "opposite_spiral"
         elif in_final_spiral:
             phase_name = "final_spiral"
         elif in_half_spiral:
             phase_name = "half_spiral"
         elif in_po180:
-            phase_name = f"po180_{po180_phase}"
+            phase_name = po180_phase  # "downwind", "turn", or "final"
         else:
-            phase_name = f"glide_{current_bucket.name.lower()}"
+            phase_name = "direct"
 
         if phase_name not in phase_times:
             phase_times[phase_name] = 0.0
@@ -1775,17 +2001,22 @@ def run_simulation(
                 # Calculate distance to FINAL bucket
                 dist_to_final = geo_dist((lat, lon), (final_bucket_fs.lat, final_bucket_fs.lon)).feet
 
+                # Also check: are we roughly pointed toward touchdown?
+                bearing_to_final = calculate_initial_compass_bearing(cur_pos, GeoPoint(final_bucket_fs.lat, final_bucket_fs.lon))
+
+                # Wind-correct distance for consistent ground track model
+                dist_to_final_wc = _wind_corrected_glide_distance(
+                    dist_to_final, bearing_to_final, fps_to_knots(tas_fps), wind_dir, wind_speed
+                )
+
                 # Check if we can glide to FINAL bucket now
                 # We need: (current_alt - dist_to_final/glide_ratio) ≈ final bucket altitude
-                arrival_alt_if_glide = alt_agl - (dist_to_final / straight_gr)
+                arrival_alt_if_glide = alt_agl - (dist_to_final_wc / straight_gr)
 
                 # Transition condition: can glide to FINAL at approximately correct altitude
                 # Allow some buffer since we can use slip to fine-tune
                 can_transition = (arrival_alt_if_glide >= final_bucket_fs.altitude_ft - final_bucket_fs.height_ft / 2 and
                                   arrival_alt_if_glide <= final_top + 500)
-
-                # Also check: are we roughly pointed toward touchdown?
-                bearing_to_final = calculate_initial_compass_bearing(cur_pos, GeoPoint(final_bucket_fs.lat, final_bucket_fs.lon))
                 heading_error_to_final = abs(_angle_diff_deg(track, bearing_to_final))
                 roughly_facing_final = heading_error_to_final < 90.0
 
@@ -1844,10 +2075,10 @@ def run_simulation(
             if opposite_spiral_phase == "full_spiral":
                 # FULL SPIRAL PHASE: Do 360° turns until half-spiral to ABEAM is achievable
 
-                # Bank for the full spiral
+                # Bank for the full spiral - no minimum, let geometry dictate
                 tan_bank = (tas_fps * tas_fps) / (G_FPS2 * opposite_spiral_radius)
                 orbit_bank_deg = math.degrees(math.atan(tan_bank))
-                orbit_bank_deg = min(45.0, max(15.0, orbit_bank_deg))
+                orbit_bank_deg = min(45.0, orbit_bank_deg)  # Only cap max, no minimum
                 bank_target = opposite_spiral_direction * orbit_bank_deg
 
                 # Track turn progress
@@ -1864,38 +2095,73 @@ def run_simulation(
                     half_spiral_radius = dist_to_abeam / 2.0
                     half_spiral_arc_length = math.pi * half_spiral_radius
 
+                    # Wind-correct arc length using perpendicular to bearing as average track
+                    bearing_to_abeam_check = calculate_initial_compass_bearing(cur_pos, GeoPoint(abeam_bucket.lat, abeam_bucket.lon))
+                    avg_track_half_spiral = _wrap_360(bearing_to_abeam_check + 90.0)
+                    half_spiral_arc_wc = _wind_corrected_glide_distance(
+                        half_spiral_arc_length, avg_track_half_spiral, fps_to_knots(tas_fps), wind_dir, wind_speed
+                    )
+
                     # Calculate altitude loss with maximum slip
                     min_gr_with_slip = straight_gr * (1.0 - SLIP_GR_REDUCTION)
                     min_gr_with_slip = max(3.0, min_gr_with_slip)
-                    alt_loss_half_spiral_with_slip = half_spiral_arc_length / min_gr_with_slip
+                    alt_loss_half_spiral_with_slip = half_spiral_arc_wc / min_gr_with_slip
 
                     # Altitude we'd arrive at after half-spiral with slip
                     arrival_alt = alt_agl - alt_loss_half_spiral_with_slip
 
-                    if arrival_alt >= abeam_bottom and arrival_alt <= abeam_top + 500:
-                        # YES - Can make it now! Switch to half-spiral phase
-                        # Use PO180-style geometry: outbound leg + 180° turn + inbound to ABEAM
+                    # Calculate EXTENDED half-spiral geometry (with outbound/inbound legs)
+                    bearing_to_abeam = calculate_initial_compass_bearing(cur_pos, GeoPoint(abeam_bucket.lat, abeam_bucket.lon))
+                    turn_diff = _angle_diff_deg(bearing_to_abeam, track)
+                    opposite_spiral_direction = 1 if turn_diff > 0 else -1
+
+                    abeam_target_alt = abeam_bucket.altitude_ft
+
+                    # Current cross-track and along-track distances to ABEAM
+                    angle_off = abs(_angle_diff_deg(bearing_to_abeam, track))
+                    cross_track_to_abeam = dist_to_abeam * math.sin(math.radians(min(90.0, angle_off)))
+                    along_track_to_abeam = dist_to_abeam * math.cos(math.radians(min(90.0, angle_off)))
+
+                    # Minimum path (no outbound extension): turn arc + inbound
+                    min_turn_radius = max(100.0, cross_track_to_abeam / 2.0)
+                    min_turn_arc = math.pi * min_turn_radius
+                    min_path_length = min_turn_arc + along_track_to_abeam
+
+                    # Calculate altitude we'd arrive at if flying min_path with NORMAL GR
+                    # Use straight_gr (not slip GR) - conservative prediction
+                    alt_loss_min_path = min_path_length / straight_gr
+                    expected_arrival_alt = alt_agl - alt_loss_min_path
+
+                    # If we'd arrive ABOVE target, we need outbound extension
+                    if expected_arrival_alt > abeam_target_alt:
+                        extra_alt_to_lose = expected_arrival_alt - abeam_target_alt
+                        extra_distance_needed = extra_alt_to_lose * straight_gr
+                        outbound_dist_needed = extra_distance_needed / (1.0 + math.pi / 2.0)
+                        extended_cross_track = cross_track_to_abeam + outbound_dist_needed
+                        extended_turn_radius = max(100.0, extended_cross_track / 2.0)
+                    else:
+                        outbound_dist_needed = 0.0
+                        extended_turn_radius = min_turn_radius
+
+                    # Calculate required AOB for extended geometry
+                    tan_bank_required = (tas_fps ** 2) / (G_FPS2 * extended_turn_radius)
+                    required_aob = math.degrees(math.atan(tan_bank_required))
+
+                    # Check if geometry is achievable (extension must be slight, not massive)
+                    max_outbound_extension = min(2000.0, dist_to_abeam * 0.3)
+                    geometry_achievable = (
+                        required_aob <= 45.0 and
+                        expected_arrival_alt >= abeam_bottom and
+                        outbound_dist_needed <= max_outbound_extension
+                    )
+
+                    if geometry_achievable:
+                        # YES - Use extended half-spiral
                         opposite_spiral_phase = "half_spiral_to_abeam"
                         opposite_spiral_turns = 0.0
 
-                        # Recalculate turn direction for the half-spiral
-                        bearing_to_abeam = calculate_initial_compass_bearing(cur_pos, GeoPoint(abeam_bucket.lat, abeam_bucket.lon))
-                        turn_diff = _angle_diff_deg(bearing_to_abeam, track)
-                        opposite_spiral_direction = 1 if turn_diff > 0 else -1
-
-                        # Calculate glide distance needed
-                        abeam_target_alt = abeam_bucket.altitude_ft
-                        alt_to_lose = alt_agl - abeam_target_alt
-                        glide_distance = alt_to_lose * min_gr_with_slip
-
-                        direct_dist = dist_to_abeam
-
-                        # Calculate turn radius (comfortable 30° bank turn)
-                        half_spiral_turn_radius = (tas_fps ** 2) / (G_FPS2 * math.tan(math.radians(30.0)))
-                        turn_arc_length = math.pi * half_spiral_turn_radius
-
-                        extra_distance = glide_distance - direct_dist - turn_arc_length
-                        half_spiral_outbound_dist_needed = max(500.0, extra_distance / 2.0)
+                        half_spiral_turn_radius = extended_turn_radius
+                        half_spiral_outbound_dist_needed = outbound_dist_needed
 
                         # Outbound heading: perpendicular to bearing to ABEAM
                         if opposite_spiral_direction > 0:
@@ -1906,6 +2172,13 @@ def run_simulation(
                         half_spiral_phase = "outbound"
                         half_spiral_outbound_flown = 0.0
                         half_spiral_turn_accumulated = 0.0
+                    else:
+                        # Geometry not achievable, stay in full_spiral for another turn
+                        # RECALCULATE spiral radius based on current excess altitude
+                        excess_alt = (expected_arrival_alt - abeam_target_alt) if expected_arrival_alt > abeam_target_alt else 300.0
+                        target_spiral_circumference = excess_alt * straight_gr
+                        target_spiral_radius = target_spiral_circumference / (2.0 * math.pi)
+                        opposite_spiral_radius = max(500.0, min(2500.0, target_spiral_radius))
 
             elif opposite_spiral_phase == "half_spiral_to_abeam":
                 # HALF SPIRAL TO ABEAM: PO180-style geometry
@@ -1918,50 +2191,45 @@ def run_simulation(
                     track_error = _angle_diff_deg(half_spiral_outbound_heading, track)
                     bank_target = max(-20.0, min(20.0, track_error * 0.5))
 
-                    # Track distance flown on outbound leg
-                    gs_fps_estimate = tas_fps  # Approximate
-                    half_spiral_outbound_flown += gs_fps_estimate * dt
+                    # Track distance flown on outbound leg (use TAS for fixed ground track geometry)
+                    half_spiral_outbound_flown += tas_fps * dt
 
                     # Transition to turn when outbound distance reached
                     if half_spiral_outbound_flown >= half_spiral_outbound_dist_needed:
+                        # Calculate FINAL turn radius based on current geometry to ABEAM
+                        # This is the actual cross-track distance at the start of the turn
+                        abeam_point = GeoPoint(abeam_bucket.lat, abeam_bucket.lon)
+                        bearing_to_abeam_now = calculate_initial_compass_bearing(cur_pos, abeam_point)
+                        dist_to_abeam_now = geo_dist((lat, lon), (abeam_bucket.lat, abeam_bucket.lon)).feet
+                        angle_off_now = abs(_angle_diff_deg(bearing_to_abeam_now, track))
+                        cross_track_now = dist_to_abeam_now * math.sin(math.radians(min(90.0, angle_off_now)))
+
+                        # Turn radius = cross-track / 2 (for 180° turn to reach ABEAM)
+                        half_spiral_turn_radius = max(100.0, cross_track_now / 2.0)
+
                         half_spiral_phase = "turn"
                         half_spiral_turn_accumulated = 0.0
 
                 elif half_spiral_phase == "turn":
-                    # Execute 180° turn - bank angle based on geometry to reach ABEAM
-                    # The turn radius needed = cross-track distance to ABEAM / 2
-                    # (since 180° turn covers diameter = 2 × radius)
+                    # Execute 180° turn using FIXED radius calculated at turn start
+                    # No dynamic recalculation - that causes S-curves
 
-                    # Calculate cross-track offset from the line to ABEAM
-                    # This is how far we need to "come back" during the turn
-                    abeam_point = GeoPoint(abeam_bucket.lat, abeam_bucket.lon)
-                    bearing_to_abeam_now = calculate_initial_compass_bearing(cur_pos, abeam_point)
-
-                    # The perpendicular distance from current track to ABEAM
-                    # is what the turn diameter needs to cover
-                    angle_off = abs(_angle_diff_deg(bearing_to_abeam_now, track))
-
-                    # Required turn radius based on distance to ABEAM and geometry
-                    # For a 180° turn to end up pointing at ABEAM:
-                    # turn_diameter ≈ dist_to_abeam × sin(angle_off)
-                    cross_track_to_abeam = dist_to_abeam * math.sin(math.radians(min(90.0, angle_off)))
-                    required_turn_radius = max(500.0, cross_track_to_abeam / 2.0)
-
-                    # Calculate bank angle for this radius
-                    tan_bank = (tas_fps * tas_fps) / (G_FPS2 * required_turn_radius)
+                    # Calculate bank angle for the fixed radius
+                    # No minimum bank - could be a gentle 1° turn if winds are favorable
+                    tan_bank = (tas_fps * tas_fps) / (G_FPS2 * half_spiral_turn_radius)
                     turn_bank_deg = math.degrees(math.atan(tan_bank))
-                    turn_bank_deg = max(2.0, min(45.0, turn_bank_deg))  # Clamp to safe range
+                    turn_bank_deg = min(45.0, turn_bank_deg)  # Only cap at max, no minimum
 
                     # Turn direction
                     bank_target = opposite_spiral_direction * turn_bank_deg
 
                     # Track turn progress
-                    if abs(bank_deg) > 0.5:
+                    if abs(bank_deg) > 0.1:  # Lower threshold for gentle turns
                         turn_rate = (G_FPS2 * math.tan(math.radians(abs(bank_deg)))) / max(1.0, tas_fps)
                         half_spiral_turn_accumulated += math.degrees(turn_rate * dt)
 
-                    # Transition to inbound after 180° turn
-                    if half_spiral_turn_accumulated >= 175.0:
+                    # Transition to inbound after full 180° turn
+                    if half_spiral_turn_accumulated >= 180.0:
                         half_spiral_phase = "inbound"
 
                 else:  # inbound
@@ -2021,7 +2289,6 @@ def run_simulation(
 
         elif in_po180:
             dist_to_td = geo_dist((lat, lon), (touchdown_point.latitude, touchdown_point.longitude)).feet
-            remaining_glide = alt_agl * straight_gr
 
             if po180_phase == "downwind":
                 downwind_heading = _wrap_360(touchdown_heading + 180.0)
@@ -2036,10 +2303,27 @@ def run_simulation(
                 )
                 distance_past_abeam = abs(along_ft)
                 final_leg_if_turn_now = distance_past_abeam
-                required_glide = turn_arc_ft + final_leg_if_turn_now
 
-                turn_start_buffer_ft = 500
-                if remaining_glide <= required_glide + turn_start_buffer_ft:
+                # Wind-correct the turn arc (average track is perpendicular to runway)
+                if pattern_side == "left":
+                    turn_avg_track = _wrap_360(touchdown_heading + 90.0)
+                else:
+                    turn_avg_track = _wrap_360(touchdown_heading - 90.0)
+                turn_arc_wc = _wind_corrected_glide_distance(
+                    turn_arc_ft, turn_avg_track, fps_to_knots(tas_fps), wind_dir, wind_speed
+                )
+
+                # Wind-correct the final leg (into wind - runway heading)
+                final_leg_wc = _wind_corrected_glide_distance(
+                    final_leg_if_turn_now, touchdown_heading, fps_to_knots(tas_fps), wind_dir, wind_speed
+                )
+
+                # Total altitude needed for remaining path (wind-corrected)
+                required_altitude = (turn_arc_wc + final_leg_wc) / straight_gr
+
+                # Turn when we have just enough altitude for the remaining path
+                turn_start_buffer_ft = 50  # Small buffer for safety
+                if alt_agl <= required_altitude + turn_start_buffer_ft:
                     po180_phase = "turn"
                     po180_turn_accumulated = 0.0
 
@@ -2131,12 +2415,21 @@ def run_simulation(
             # No slip during final spiral - spiral is the altitude management
             slip_intensity = 0.0
             effective_gr = straight_gr
+        elif in_opposite_spiral and opposite_spiral_phase == "full_spiral":
+            # No slip during full 360° spirals - spiral geometry must handle altitude loss
+            slip_intensity = 0.0
+            effective_gr = straight_gr
         elif in_po180 and po180_phase != "final":
             slip_intensity = 0.0
             effective_gr = straight_gr
         elif in_po180 and po180_phase == "final":
+            # Wind-correct the distance for slip calculation
+            # On final, track is roughly touchdown_heading
+            dist_to_td_wind_corrected = _wind_corrected_glide_distance(
+                dist_to_target, touchdown_heading, fps_to_knots(tas_fps), wind_dir, wind_speed
+            )
             slip_intensity, effective_gr = _calculate_slip_for_bucket(
-                alt_agl, dist_to_target, target_bucket.altitude_ft, straight_gr
+                alt_agl, dist_to_td_wind_corrected, target_bucket.altitude_ft, straight_gr
             )
         else:
             abeam_bkt = None
@@ -2149,23 +2442,36 @@ def run_simulation(
                 dist_to_abeam = geo_dist((lat, lon), (abeam_bkt.lat, abeam_bkt.lon)).feet
                 abeam_top = abeam_bkt.altitude_ft + abeam_bkt.height_ft / 2
 
-                arrival_alt_no_slip = alt_agl - (dist_to_abeam / straight_gr)
+                # Wind-correct distance for consistent ground track model
+                bearing_to_abeam = calculate_initial_compass_bearing(
+                    cur_pos, GeoPoint(abeam_bkt.lat, abeam_bkt.lon)
+                )
+                dist_to_abeam_wc = _wind_corrected_glide_distance(
+                    dist_to_abeam, bearing_to_abeam, fps_to_knots(tas_fps), wind_dir, wind_speed
+                )
+
+                arrival_alt_no_slip = alt_agl - (dist_to_abeam_wc / straight_gr)
                 min_gr_with_slip = straight_gr * 0.6
-                arrival_alt_max_slip = alt_agl - (dist_to_abeam / min_gr_with_slip)
+                arrival_alt_max_slip = alt_agl - (dist_to_abeam_wc / min_gr_with_slip)
 
                 if arrival_alt_no_slip <= abeam_top:
                     slip_intensity = 0.0
                     effective_gr = straight_gr
                 elif arrival_alt_max_slip <= abeam_top:
                     slip_intensity, effective_gr = _calculate_slip_for_bucket(
-                        alt_agl, dist_to_abeam, abeam_bkt.altitude_ft, straight_gr
+                        alt_agl, dist_to_abeam_wc, abeam_bkt.altitude_ft, straight_gr
                     )
                 else:
                     slip_intensity = 0.0
                     effective_gr = straight_gr
             else:
+                # Wind-correct distance to target bucket
+                bearing_to_target = calculate_initial_compass_bearing(cur_pos, target_pos)
+                dist_to_target_wc = _wind_corrected_glide_distance(
+                    dist_to_target, bearing_to_target, fps_to_knots(tas_fps), wind_dir, wind_speed
+                )
                 slip_intensity, effective_gr = _calculate_slip_for_bucket(
-                    alt_agl, dist_to_target, target_bucket.altitude_ft, straight_gr
+                    alt_agl, dist_to_target_wc, target_bucket.altitude_ft, straight_gr
                 )
 
         if abs(bank_deg) > 0.5:
@@ -2176,17 +2482,25 @@ def run_simulation(
         slip_pct = round(slip_intensity * 100, 0)
         max_slip_used = max(max_slip_used, slip_pct)
 
+        # Fixed ground distance step (ground track is predetermined geometry)
+        # Use TAS-based reference distance for consistent path sampling
+        ds_ground_ft = tas_fps * dt
+
+        # Variable timestep based on groundspeed (how long to cover that ground distance)
+        actual_dt = ds_ground_ft / gs_fps if gs_fps > 1.0 else dt
+
+        # Altitude loss based on actual time in the air
         vs_fps = tas_fps / effective_gr
-        alt_agl = max(0.0, alt_agl - vs_fps * dt)
+        alt_agl = max(0.0, alt_agl - vs_fps * actual_dt)
         vs_fpm = vs_fps * 60.0
 
-        dist_ft = gs_fps * dt
-        dist_nm = dist_ft / FT_PER_NM
+        # Position update uses fixed ground distance (not wind-affected)
+        dist_nm = ds_ground_ft / FT_PER_NM
         new_pos = point_from(cur_pos, track, dist_nm)
         lat = new_pos.latitude
         lon = new_pos.longitude
 
-        time_sec += dt
+        time_sec += actual_dt
 
         path.append([lat, lon])
 
@@ -2363,34 +2677,80 @@ def find_minimum_altitude(
 
 
 def compute_glide_envelope(
-    ac: dict,
-    engine_option: str,
-    weight_lbs: float,
-    flap_config: str,
-    prop_config: str,
-    oat_c: float,
-    altimeter_inhg: float,
+    start_point: GeoPoint,
+    altitude_ft: float,
+    glide_ratio: float,
     wind_dir: float,
     wind_speed: float,
-    center_point: GeoPoint,
-    altitude_agl: float,
+    tas_knots: float,
+    num_points: int = 36,
 ) -> List[List[float]]:
-    """Compute the glide envelope (reachable area) from a given position."""
-    flap_config = _canon_flap_config(flap_config)
-    prop_config = _canon_prop_config(prop_config)
+    """
+    Compute the glide envelope (reachable area) from a given position.
 
-    best_glide_kias, straight_gr = _get_best_glide_and_ratio(
-        ac, engine_option, flap_config, prop_config
-    )
+    Wind-aware: the envelope is NOT a circle. It's elongated downwind
+    (can glide farther with tailwind) and compressed upwind (headwind
+    reduces ground distance covered).
 
-    # Simple circular envelope based on glide ratio
-    glide_distance_ft = altitude_agl * straight_gr
-    glide_distance_nm = glide_distance_ft / FT_PER_NM
+    Args:
+        start_point: Starting position (GeoPoint)
+        altitude_ft: Altitude AGL in feet
+        glide_ratio: Aircraft glide ratio (e.g., 9.0)
+        wind_dir: Wind FROM direction in degrees
+        wind_speed: Wind speed in knots
+        tas_knots: True airspeed in knots
+        num_points: Number of points around the envelope
 
-    # Generate circle points
+    Returns:
+        List of [lat, lon] points forming the envelope polygon
+    """
+    if altitude_ft <= 0 or glide_ratio <= 0 or tas_knots <= 0:
+        return []
+
+    # Convert wind FROM direction to wind TO direction (vector direction)
+    wind_to_deg = (wind_dir + 180.0) % 360.0
+    wind_to_rad = math.radians(wind_to_deg)
+
+    # Wind components (knots)
+    wind_north = wind_speed * math.cos(wind_to_rad)
+    wind_east = wind_speed * math.sin(wind_to_rad)
+
+    # Glide time = altitude / sink_rate = altitude / (TAS / GR)
+    # In consistent units: TAS in ft/s, altitude in ft
+    tas_fps = tas_knots * 1.68781
+    sink_rate_fps = tas_fps / glide_ratio
+    glide_time_sec = altitude_ft / sink_rate_fps
+
+    # Generate envelope points
     envelope = []
-    for bearing in range(0, 360, 10):
-        point = point_from(center_point, float(bearing), glide_distance_nm)
+    bearing_step = 360.0 / num_points
+
+    for i in range(num_points):
+        bearing_deg = i * bearing_step
+        bearing_rad = math.radians(bearing_deg)
+
+        # Aircraft flies with nose pointed to maintain track in this bearing
+        # TAS vector in this direction
+        tas_north = tas_knots * math.cos(bearing_rad)
+        tas_east = tas_knots * math.sin(bearing_rad)
+
+        # Groundspeed vector = TAS vector + wind vector
+        gs_north = tas_north + wind_north
+        gs_east = tas_east + wind_east
+        gs_knots = math.sqrt(gs_north**2 + gs_east**2)
+
+        # Ground distance covered in glide time
+        ground_distance_nm = (gs_knots * glide_time_sec) / 3600.0
+
+        # Actual ground track direction (may differ from bearing due to wind)
+        if gs_knots > 0.1:
+            track_rad = math.atan2(gs_east, gs_north)
+            track_deg = math.degrees(track_rad) % 360.0
+        else:
+            track_deg = bearing_deg
+
+        # Project point along actual ground track
+        point = point_from(start_point, track_deg, ground_distance_nm)
         envelope.append([point.latitude, point.longitude])
 
     # Close the polygon
