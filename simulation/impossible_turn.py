@@ -487,11 +487,20 @@ def _run_impossible_turn_once(
     xtrack_intercept_scale_ft: float = 800.0,  # Tighter intercept scaling
     intercept_max_deg: float = 45.0,
     runway_threshold_point=None,  # NEW: Reference point for centerline (runway threshold)
+    runway_length_ft: float = None,  # Runway length for success criteria
 ):
     """Internal function to run a single impossible turn simulation.
 
     If runway_threshold_point is provided, centerline calculations use it as reference
     (for returning to actual runway). Otherwise, uses start_point (legacy behavior).
+
+    Coordinate System:
+    - centerline_ref = user click point (departure threshold)
+    - final_course_hdg = runway_heading + 180° (direction aircraft flies on final approach)
+    - along_ft is measured in direction of final_course_hdg
+    - Arrival threshold is at along_ft ≈ -runway_length_ft (opposite end)
+    - Departure threshold is at along_ft ≈ 0
+    - Landing ON runway means: -runway_length_ft <= along_ft <= 0
     """
     dt = float(timestep_sec) if timestep_sec and timestep_sec > 0 else 0.5
 
@@ -834,11 +843,37 @@ def _run_impossible_turn_once(
                 }
 
         if alt <= 0.0:
-            # Check if close enough to centerline to count as success (within ~75 ft)
-            runway_success_tol_ft = 75.0
+            # Check success criteria for landing ON the runway surface
+            #
+            # Coordinate system:
+            # - centerline_ref = departure threshold (where user clicked)
+            # - along_ft measured in direction of final_course_hdg (runway_hdg + 180°)
+            # - Arrival threshold is at along_ft ≈ -runway_length_ft
+            # - Departure threshold is at along_ft ≈ 0
+            # - Landing ON runway: -runway_length_ft <= along_ft <= 0
+            #
+            # Tolerances:
+            runway_success_tol_ft = 75.0  # Lateral tolerance (within ~half runway width)
+            landing_zone_tolerance_ft = 200.0  # Allow landing slightly past arrival threshold
+
             close_enough = abs(xtrack_ft) <= runway_success_tol_ft
 
-            if captured or close_enough:
+            # Determine if aircraft landed on runway surface
+            if runway_length_ft and runway_length_ft > 0:
+                # Must be between arrival threshold and departure threshold
+                # along_ft <= 0 means at or before departure threshold (correct side)
+                # along_ft >= -runway_length_ft means at or past arrival threshold
+                min_along = -runway_length_ft - landing_zone_tolerance_ft
+                reached_runway = min_along <= along_ft <= 0
+                overshot_departure = along_ft > 0
+                landed_short = along_ft < min_along
+            else:
+                # Fallback when runway length unknown: just check didn't overshoot departure end
+                reached_runway = along_ft <= 0
+                overshot_departure = along_ft > 0
+                landed_short = False  # Can't determine without runway length
+
+            if reached_runway and (captured or close_enough):
                 # Use touchdown point as marker location (will update if rollout added)
                 marker_lat, marker_lon = cur.latitude, cur.longitude
 
@@ -886,9 +921,20 @@ def _run_impossible_turn_once(
                     along_ft=along_ft,
                     align_err_deg=align_err,
                 )
+
+            # Failure - determine specific reason
+            if overshot_departure:
+                failure_reason = "overshot"  # Flew past departure threshold
+            elif landed_short:
+                failure_reason = "landed_short"  # Ran out of altitude before arrival threshold
+            elif not close_enough:
+                failure_reason = "off_centerline"  # Missed the runway laterally
+            else:
+                failure_reason = "impact"  # Generic impact (shouldn't normally reach here)
+
             return path, hover, _finalize_meta(
                 success=False,
-                reason="impact",
+                reason=failure_reason,
                 impact_marker=(cur.latitude, cur.longitude),
                 xtrack_ft=xtrack_ft,
                 along_ft=along_ft,
@@ -1192,6 +1238,7 @@ def simulate_impossible_turn(
             jink_hdg_tol_deg=float(jink_hdg_tol_deg),
             jink_xtrack_tol_ft=float(jink_xtrack_tol_ft),
             runway_threshold_point=runway_threshold_geopoint,  # Pass threshold for centerline reference
+            runway_length_ft=runway_length_ft,  # Pass runway length for success criteria
         )
 
     def _turn1_time_sec(hover: list) -> float:
