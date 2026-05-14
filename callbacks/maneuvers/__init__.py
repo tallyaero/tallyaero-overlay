@@ -19,6 +19,7 @@ def register_maneuvers(app):
     from . import s_turn
     from . import engineout
     from . import impossible_turn
+    from . import rectangular_course
     poweroff180.register(app)
     steep_turn.register(app)
     chandelle.register(app)
@@ -29,3 +30,4 @@ def register_maneuvers(app):
     s_turn.register(app)
     engineout.register(app)
     impossible_turn.register(app)
+    rectangular_course.register(app)
