@@ -26,20 +26,20 @@ def register_all(app):
 
     Sub-phases will uncomment the imports + calls below as each module lands.
     """
-    # from . import navigation       # Phase 1d
+    from . import navigation       # Phase 1i
     from . import environment      # Phase 1d
     from . import aircraft         # Phase 1e
     from . import map as map_      # Phase 1f
     from . import edit_aircraft    # Phase 1g
     from .maneuvers import register_maneuvers   # Phase 1c
 
-    # navigation.register(app)
+    navigation.register(app)
     environment.register(app)
     aircraft.register(app)
     map_.register(app)
     edit_aircraft.register(app)
     register_maneuvers(app)
 
-    # Phase 1a-1f + 1c (partial): environment + aircraft + map +
-    # edit_aircraft + maneuvers (partial) are wired. app.py still owns
-    # remaining draw_* callbacks and navigation (Phase 1i).
+    # Phase 1 complete: every callback module is wired. app.py retains
+    # only the Dash() instantiation, the layout shell, and the __main__
+    # entry point.
