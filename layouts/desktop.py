@@ -20,6 +20,8 @@ from dash import dcc, html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dl
 
+from core.data_loader import available_aircraft
+
 
 def legal_banner_block():
     return html.Div(
@@ -154,11 +156,6 @@ def _reset_buttons_row():
 
 def desktop_layout():
     """Desktop layout with resizable sidebar"""
-    # Lazy import — `available_aircraft` is a module-level list in app.py
-    # that's populated by init_data() at startup. Read at call time so we
-    # capture the current value (not an empty snapshot from import time).
-    from app import available_aircraft
-
     return html.Div(className="full-height-container", children=[
         # Header
         html.Div(className="banner-header", children=[

@@ -7,7 +7,7 @@ from __future__ import annotations
 from dash import html, Input, Output, State, ALL, ctx
 from dash.exceptions import PreventUpdate
 
-import app as app_module
+from core.data_loader import aircraft_data, airport_data
 
 
 def register(app):
@@ -22,7 +22,6 @@ def register(app):
         Input("fuel-load", "value"),
     )
     def update_total_weight_display(ac_name, occupants, occupant_wt, fuel_gal):
-        aircraft_data = app_module.aircraft_data
         if not ac_name or ac_name not in aircraft_data:
             return "", None
 
@@ -59,7 +58,6 @@ def register(app):
             raise PreventUpdate
 
         airport_id = ctx.triggered_id.get("index")
-        airport_data = app_module.airport_data
         ap = next((a for a in airport_data if a.get("id") == airport_id), None)
         if not ap:
             raise PreventUpdate
@@ -95,7 +93,6 @@ def register(app):
         q = query.strip().lower()
 
         # Find matching airports
-        airport_data = app_module.airport_data
         matches = []
         for ap in airport_data:
             ap_id = ap.get("id", "").lower()
@@ -142,7 +139,6 @@ def register(app):
         if not airport_id:
             return "", hidden_style, "--- ft"
 
-        airport_data = app_module.airport_data
         ap = next((a for a in airport_data if a.get("id") == airport_id), None)
         if not ap:
             return "", hidden_style, "--- ft"
@@ -173,7 +169,6 @@ def register(app):
         if not n_clicks or not selected_id:
             raise PreventUpdate
 
-        airport_data = app_module.airport_data
         ap = next((a for a in airport_data if a.get("id") == selected_id), None)
         if not ap:
             raise PreventUpdate

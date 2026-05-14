@@ -25,7 +25,7 @@ from utility import (
 
 from callbacks.map import create_airplane_marker
 
-import app as app_module
+from core.data_loader import aircraft_data, airport_data
 
 log = get_logger(__name__)
 
@@ -104,9 +104,6 @@ def register(app):
         selected_airport_id,
         runtime_weight
     ):
-        aircraft_data = app_module.aircraft_data
-        airport_data = app_module.airport_data
-
         if not n_clicks:
             raise PreventUpdate
 

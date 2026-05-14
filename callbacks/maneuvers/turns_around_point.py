@@ -15,7 +15,7 @@ import dash_leaflet as dl
 
 from callbacks.map import create_airplane_marker
 
-import app as app_module
+from core.data_loader import aircraft_data, airport_data
 
 
 def register(app):
@@ -70,9 +70,6 @@ def register(app):
         power_setting,
         cg_position,
     ):
-        aircraft_data = app_module.aircraft_data
-        airport_data = app_module.airport_data
-
         if not n_clicks or not center_point:
             raise PreventUpdate
 

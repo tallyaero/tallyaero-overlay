@@ -14,7 +14,7 @@ from core.log import get_logger
 
 from callbacks.map import create_airplane_marker
 
-import app as app_module
+from core.data_loader import aircraft_data, airport_data
 
 log = get_logger(__name__)
 
@@ -73,9 +73,6 @@ def register(app):
     ):
         """Draw Power-Off 180 accuracy approach using energy-based simulation."""
         from simulation import simulate_power_off_180
-
-        aircraft_data = app_module.aircraft_data
-        airport_data = app_module.airport_data
 
         if not n_clicks:
             return [], None, "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""

@@ -16,7 +16,7 @@ import dash_leaflet as dl
 
 from callbacks.map import create_airplane_marker
 
-import app as app_module
+from core.data_loader import aircraft_data, airport_data
 
 
 def register(app):
@@ -234,9 +234,6 @@ def register(app):
         cg_position,
         layer_children,
     ):
-        aircraft_data = app_module.aircraft_data
-        airport_data = app_module.airport_data
-
         # Check we have the edge data from the two-click selection
         if not n_clicks or not edge_data or not edge_data.get('start_lat'):
             raise PreventUpdate

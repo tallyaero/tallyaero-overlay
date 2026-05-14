@@ -16,14 +16,11 @@ from dash import dcc, html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dl
 
+from core.data_loader import available_aircraft
+
 
 def mobile_layout():
     """Mobile layout with collapsible settings"""
-    # Lazy import — `available_aircraft` is a module-level list in app.py
-    # that's populated by init_data() at startup. Read at call time so we
-    # capture the current value (not an empty snapshot from import time).
-    from app import available_aircraft
-
     return html.Div(className="mobile-container", children=[
         # Header (smaller)
         html.Div(className="mobile-header", children=[

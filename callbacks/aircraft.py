@@ -22,7 +22,7 @@ from layouts.maneuvers.turns_around_point import turns_point_layout
 from layouts.maneuvers.rectangular_course import rect_course_layout
 from layouts.maneuvers.eights_on_pylons import pylons_layout
 
-import app as app_module
+from core.data_loader import aircraft_data, airport_data
 
 
 def register(app):
@@ -34,7 +34,6 @@ def register(app):
         State("selected-airport-id", "data")
     )
     def render_maneuver_layout(maneuver, airport_id):
-        airport_data = app_module.airport_data
         elev_ft = None
         if airport_id:
             ap = next((a for a in airport_data if a["id"] == airport_id), None)
@@ -95,7 +94,6 @@ def register(app):
         State("engine-select", "value"),
     )
     def update_aircraft_fields(selected_aircraft, maneuver, current_engine):
-        aircraft_data = app_module.aircraft_data
         if not selected_aircraft or selected_aircraft not in aircraft_data:
             return (
                 [], None, 1, 180,
@@ -144,7 +142,6 @@ def register(app):
     )
     def update_climb_speed_from_vy(selected_aircraft):
         """Auto-fill the Impossible Turn climb speed from aircraft Vy."""
-        aircraft_data = app_module.aircraft_data
         if not selected_aircraft or selected_aircraft not in aircraft_data:
             return 75  # Default fallback
         ac = aircraft_data[selected_aircraft]
@@ -169,7 +166,6 @@ def register(app):
             return [], None, "Select airport first...", "", {"display": "block"}
 
         # Find airport in data
-        airport_data = app_module.airport_data
         airport = next((a for a in airport_data if a.get("id") == airport_id), None)
         if not airport:
             return [], None, "Airport not found", "", {"display": "block"}
@@ -230,7 +226,6 @@ def register(app):
             return [], None, "Select airport for runway heading...", "Or use manual heading below", {"display": "block"}
 
         # Find airport in data
-        airport_data = app_module.airport_data
         airport = next((a for a in airport_data if a.get("id") == airport_id), None)
         if not airport:
             return [], None, "Airport not found", "Use manual heading below", {"display": "block"}
@@ -291,7 +286,6 @@ def register(app):
             return [], None, "Select airport for runway...", "Or use manual heading below", {"display": "block"}
 
         # Find airport in data
-        airport_data = app_module.airport_data
         airport = next((a for a in airport_data if a.get("id") == airport_id), None)
         if not airport:
             return [], None, "Airport not found", "Use manual heading below", {"display": "block"}
