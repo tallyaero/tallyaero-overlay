@@ -405,12 +405,19 @@ def simulate_power_off_180(
         )
         gs_fps = knots_to_fps(gs_knots)
 
-        # Distance and altitude step
-        ds_ft = tas_fps * dt
-        dh_ft = ds_ft / current_gr
+        # Fixed ground distance step (ground track is predetermined)
+        # Use TAS-based reference distance for consistent path sampling
+        ds_ground_ft = tas_fps * dt
+
+        # Variable timestep based on groundspeed (how long to cover that ground distance)
+        actual_dt = ds_ground_ft / gs_fps if gs_fps > 1.0 else dt
+
+        # Altitude loss based on actual time in the air
+        air_ds_ft = tas_fps * actual_dt
+        dh_ft = air_ds_ft / current_gr
         alt_ft = max(0.0, alt_ft - dh_ft)
 
-        vs_fpm = -(dh_ft / dt) * 60.0 if dt > 0.001 else 0.0
+        vs_fpm = -(dh_ft / actual_dt) * 60.0 if actual_dt > 0.001 else 0.0
 
         # Distance to touchdown
         dist_to_td_ft = geo_dist(current_latlon, (touchdown_pt.latitude, touchdown_pt.longitude)).feet
@@ -446,28 +453,28 @@ def simulate_power_off_180(
             'distance_to_touchdown_ft': round(dist_to_td_ft, 0),
         })
 
-        # Update position based on segment
+        # Update position based on segment (fixed ground distance for consistent track)
         if segment == "downwind":
-            # Move along downwind track
-            ds_nm = ds_ft / FT_PER_NM
+            # Move along downwind track (fixed ground distance step)
+            ds_nm = ds_ground_ft / FT_PER_NM
             new_pt = point_from(GeoPoint(lat, lon), track_deg, ds_nm)
             lat, lon = new_pt.latitude, new_pt.longitude
-            segment_distance_ft += ds_ft
+            segment_distance_ft += ds_ground_ft
 
             # Check for turn start
             dist_to_turn_start = geo_dist(
                 (lat, lon), turn_start_latlon
             ).feet
 
-            if dist_to_turn_start < ds_ft * 1.5 or segment_distance_ft >= actual_downwind_dist:
+            if dist_to_turn_start < ds_ground_ft * 1.5 or segment_distance_ft >= actual_downwind_dist:
                 segment = "turn"
                 segment_distance_ft = 0.0
                 turn_progress_deg = 0.0
                 # Smooth transition - don't snap, just continue from current position
 
         elif segment == "turn":
-            # Move along arc - calculate position on circle
-            d_angle = math.degrees(ds_ft / R_ft)
+            # Move along arc - calculate position on circle (fixed ground distance step)
+            d_angle = math.degrees(ds_ground_ft / R_ft)
             turn_progress_deg += d_angle
 
             # Calculate position on arc relative to turn center
@@ -508,13 +515,13 @@ def simulate_power_off_180(
                     slip_intensity = actual_slip['slip_intensity']
 
         else:  # final
-            # Move along final approach track
-            ds_nm = ds_ft / FT_PER_NM
+            # Move along final approach track (fixed ground distance step)
+            ds_nm = ds_ground_ft / FT_PER_NM
             new_pt = point_from(GeoPoint(lat, lon), track_deg, ds_nm)
             lat, lon = new_pt.latitude, new_pt.longitude
-            segment_distance_ft += ds_ft
+            segment_distance_ft += ds_ground_ft
 
-        time_s += dt
+        time_s += actual_dt
 
         # Check for touchdown
         if dist_to_td_ft <= 30.0 or alt_ft <= 0.0:
