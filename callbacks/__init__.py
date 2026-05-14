@@ -30,16 +30,15 @@ def register_all(app):
     # from . import environment      # Phase 1d
     # from . import aircraft         # Phase 1e
     # from . import map as map_      # Phase 1f
-    # from . import edit_aircraft    # Phase 1g
+    from . import edit_aircraft    # Phase 1g
     # from .maneuvers import register_maneuvers   # Phase 1c
 
     # navigation.register(app)
     # environment.register(app)
     # aircraft.register(app)
     # map_.register(app)
-    # edit_aircraft.register(app)
+    edit_aircraft.register(app)
     # register_maneuvers(app)
 
-    # Phase 1a: skeleton only. app.py still owns all callbacks until
-    # later sub-phases relocate them. This function is a no-op for now.
-    pass
+    # Phase 1a-1g: only edit_aircraft is wired so far. app.py still owns
+    # all other callbacks until later sub-phases relocate them.
