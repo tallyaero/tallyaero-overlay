@@ -565,7 +565,7 @@ def desktop_layout():
             html.Div(id="rectcourse-edge-info-display", style={"display": "none"}),
 
             html.Div([
-                html.Div("© 2026 Nicholas Len, AEROEDGE. All rights reserved.",
+                html.Div("© 2026 Nicholas Len, TALLYAERO. All rights reserved.",
                          style={"fontSize": "11px", "color": "#666"}),
                 html.Div([
                     html.A("Full Legal Disclaimer", href="#", id="open-disclaimer", className="legal-link", style={"fontSize": "10px"}),
