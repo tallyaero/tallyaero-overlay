@@ -17,9 +17,9 @@ from .steep_spiral import steep_spiral_layout
 from .s_turn import s_turn_layout
 from .turns_around_point import turns_point_layout
 from .rectangular_course import rect_course_layout
+from .eights_on_pylons import pylons_layout
 
-# Filled in as Phase 1b lands. The re-export here lets app.py write a
-# single `from layouts.maneuvers import *` once Task 13 ships.
+# All 11 maneuver layouts now extracted. Phase 1b complete.
 __all__: list[str] = [
     "impossible_turn_layout",
     "poweroff180_layout",
@@ -31,4 +31,5 @@ __all__: list[str] = [
     "s_turn_layout",
     "turns_point_layout",
     "rect_course_layout",
+    "pylons_layout",
 ]
