@@ -172,3 +172,16 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# macOS
+.DS_Store
+
+# Local-only authoring context (not pushed)
+CLAUDE_CONTEXT.md
+Master prompt and context.md
+energy and maneuverability.pdf
+airports/*.bak-pre-*
+
+# Build artefacts
+dist/
+build/
