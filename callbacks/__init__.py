@@ -28,17 +28,18 @@ def register_all(app):
     """
     # from . import navigation       # Phase 1d
     from . import environment      # Phase 1d
-    # from . import aircraft         # Phase 1e
+    from . import aircraft         # Phase 1e
     # from . import map as map_      # Phase 1f
     from . import edit_aircraft    # Phase 1g
     # from .maneuvers import register_maneuvers   # Phase 1c
 
     # navigation.register(app)
     environment.register(app)
-    # aircraft.register(app)
+    aircraft.register(app)
     # map_.register(app)
     edit_aircraft.register(app)
     # register_maneuvers(app)
 
-    # Phase 1a-1g: only edit_aircraft is wired so far. app.py still owns
-    # all other callbacks until later sub-phases relocate them.
+    # Phase 1a-1g: environment + aircraft + edit_aircraft are wired so far.
+    # app.py still owns the remaining callbacks until later sub-phases
+    # relocate them.
