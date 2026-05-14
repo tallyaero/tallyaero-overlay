@@ -13,15 +13,11 @@ from __future__ import annotations
 from dash import dcc, html
 import dash_bootstrap_components as dbc
 
+from layouts.desktop import _reset_buttons_row
+
 
 def s_turn_layout():
     """S-Turns across a reference line - ground reference maneuver."""
-    # Temporary coupling — `_reset_buttons_row` still lives in app.py until
-    # Phase 1h moves shared layout helpers out. Imported lazily here to
-    # avoid a circular import at module load time (app.py imports this
-    # function at top level).
-    from app import _reset_buttons_row
-
     return [
         dbc.Accordion([
             dbc.AccordionItem([
