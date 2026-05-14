@@ -1,9 +1,9 @@
  Prompt for Claude Code - Maneuver Overlay Tool:
 
-  I'm building an AeroEdge Maneuver Overlay Tool that needs to follow the same patterns established in our EM Diagram app. This is a reference guide for architecture, UI/UX patterns, and lessons learned.
+  I'm building an TallyAero Maneuver Overlay Tool that needs to follow the same patterns established in our EM Diagram app. This is a reference guide for architecture, UI/UX patterns, and lessons learned.
 
   ## DESIGN SYSTEM
-  Reference our shared style guide in AEROEDGE_STYLE_GUIDE.md (or read from the EM Diagram's assets/styles.css). Key brand elements:
+  Reference our shared style guide in TALLYAERO_STYLE_GUIDE.md (or read from the EM Diagram's assets/styles.css). Key brand elements:
   - Primary Orange: #E65C00 (buttons, accents, active states)
   - Primary Blue: #2980B9 (links, secondary actions)
   - Navy Background: #0A1628 (header banner)
@@ -294,7 +294,7 @@
   maneuver-overlay-tool/
   ├── app.py                 # Main Dash app, callbacks
   ├── assets/
-  │   └── styles.css         # Shared AeroEdge styles
+  │   └── styles.css         # Shared TallyAero styles
   ├── layouts/
   │   ├── desktop.py         # Desktop layout
   │   ├── mobile.py          # Mobile layout

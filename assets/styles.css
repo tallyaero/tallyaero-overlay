@@ -1,5 +1,5 @@
 :root {
-  /* AeroEdge Brand Colors */
+  /* TallyAero Brand Colors */
   --orange-primary: #E65C00;
   --orange-dark: #CC4A00;
   --blue-primary: #2980B9;
@@ -126,18 +126,18 @@ label {
 }
 
 /* === Modal Styling === */
-.modal-dialog.aeroedge-modal {
+.modal-dialog.tallyaero-modal {
   max-width: 900px;
 }
 
-.modal .modal-dialog.aeroedge-modal {
+.modal .modal-dialog.tallyaero-modal {
   margin-left: auto;
   margin-right: auto;
   padding-left: 16px;
   padding-right: 16px;
 }
 
-.modal-dialog.aeroedge-modal .modal-body {
+.modal-dialog.tallyaero-modal .modal-body {
   padding: 24px 28px;
 }
 

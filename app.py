@@ -9,6 +9,9 @@ import dash_leaflet as dl
 from geopy.point import Point as GeoPoint
 from geopy.distance import distance as geo_distance
 from dash.exceptions import PreventUpdate
+from core.log import get_logger
+
+log = get_logger(__name__)
 from utility import (
     compute_density_altitude,
     compute_pressure_altitude,
@@ -48,16 +51,38 @@ def load_aircraft_data(folder="aircraft_data"):
                 data[name] = json.load(f)
     return data
 
-aircraft_data = load_aircraft_data()
-available_aircraft = sorted(aircraft_data.keys())
-
 # === Load airport data ===
 def load_airport_data():
     base = os.path.dirname(__file__)
     path = os.path.join(base, "airports", "airports.json")
     with open(path, "r") as f:
         return json.load(f)
-airport_data = load_airport_data()
+
+
+# Module-level placeholders — populated by init_data().
+aircraft_data: dict = {}
+available_aircraft: list = []
+airport_data: list = []
+
+
+def init_data() -> None:
+    """Load aircraft and airport data from disk into module-level caches.
+
+    Idempotent. Called automatically at import time unless
+    TALLYAERO_NO_AUTO_INIT is set (used by tests that want to load curated
+    subsets).
+    """
+    global aircraft_data, available_aircraft, airport_data
+    if aircraft_data:
+        return  # already populated; respect idempotency
+    aircraft_data = load_aircraft_data()
+    available_aircraft = sorted(aircraft_data.keys())
+    airport_data = load_airport_data()
+
+
+# Default: auto-init unless explicitly disabled.
+if not os.environ.get("TALLYAERO_NO_AUTO_INIT"):
+    init_data()
 
 # === Dash App ===
 app = dash.Dash(
@@ -68,13 +93,8 @@ app = dash.Dash(
 )
 server = app.server
 
-# Initialize usage tracking
-from aeroedge_tracker import init_tracking, log_feature
-init_tracking(server)
+app.title = "Maneuver Overlay Tool | TallyAero"
 
-app.title = "Maneuver Overlay Tool | AeroEdge"
-
-# Custom index string with heartbeat tracking
 app.index_string = """
 <!DOCTYPE html>
 <html>
@@ -83,88 +103,6 @@ app.index_string = """
         <title>{%title%}</title>
         {%favicon%}
         {%css%}
-        <script>
-        // AeroEdge Session Heartbeat Tracking
-        (function() {
-            const TRACKING_API = 'https://aeroedge-tracking-api.onrender.com';
-            const PROJECT_SLUG = 'overlay-tool';
-            const HEARTBEAT_INTERVAL = 30000; // 30 seconds
-
-            // Generate or retrieve session ID
-            function getSessionId() {
-                let sessionId = sessionStorage.getItem('aeroedge_session_id');
-                if (!sessionId) {
-                    sessionId = 'sess_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
-                    sessionStorage.setItem('aeroedge_session_id', sessionId);
-                }
-                return sessionId;
-            }
-
-            // Generate hashed identifier for privacy
-            async function getHashedId() {
-                const data = navigator.userAgent + screen.width + 'x' + screen.height + navigator.language;
-                const encoder = new TextEncoder();
-                const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode('aeroedge' + data));
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                return hashArray.slice(0, 8).map(b => b.toString(16).padStart(2, '0')).join('');
-            }
-
-            // Send heartbeat to API
-            async function sendHeartbeat() {
-                if (document.hidden) return; // Don't send if page not visible
-
-                try {
-                    const hashedIp = await getHashedId();
-                    const sessionId = getSessionId();
-                    const url = `${TRACKING_API}/track/heartbeat?project_slug=${PROJECT_SLUG}&session_id=${sessionId}&hashed_ip=${hashedIp}`;
-
-                    // Use sendBeacon for reliability, fall back to fetch
-                    if (navigator.sendBeacon) {
-                        navigator.sendBeacon(url);
-                    } else {
-                        fetch(url, { method: 'POST', keepalive: true }).catch(() => {});
-                    }
-                } catch (e) {
-                    // Silently fail - tracking should never break the app
-                }
-            }
-
-            // Start heartbeat when page loads
-            let heartbeatInterval = null;
-
-            function startHeartbeat() {
-                if (heartbeatInterval) return;
-                sendHeartbeat(); // Send initial heartbeat
-                heartbeatInterval = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
-            }
-
-            function stopHeartbeat() {
-                if (heartbeatInterval) {
-                    clearInterval(heartbeatInterval);
-                    heartbeatInterval = null;
-                }
-            }
-
-            // Handle visibility changes
-            document.addEventListener('visibilitychange', function() {
-                if (document.hidden) {
-                    stopHeartbeat();
-                } else {
-                    startHeartbeat();
-                }
-            });
-
-            // Start on page load
-            if (document.readyState === 'complete') {
-                startHeartbeat();
-            } else {
-                window.addEventListener('load', startHeartbeat);
-            }
-
-            // Send final heartbeat before page unload
-            window.addEventListener('beforeunload', sendHeartbeat);
-        })();
-        </script>
     </head>
     <body>
         {%app_entry%}
@@ -193,7 +131,7 @@ def legal_banner_block():
                     html.Span(" | ", className="legal-separator"),
                     html.A("Report an Error", href="https://forms.gle/VX6CA1ugifAtmBM79", target="_blank", className="legal-link", style={"color": "#dc3545"}),
                     html.Span(" | ", className="legal-separator"),
-                    html.A("Contact AeroEdge", href="https://forms.gle/nDahQbhYDNYh6P129", target="_blank", className="legal-link"),
+                    html.A("Contact TallyAero", href="https://forms.gle/nDahQbhYDNYh6P129", target="_blank", className="legal-link"),
                 ],
                 className="legal-links-row",
             ),
@@ -244,13 +182,13 @@ def legal_banner_block():
                 is_open=False,
                 centered=True,
                 size="lg",
-                dialogClassName="aeroedge-modal",
+                dialogClassName="tallyaero-modal",
                 scrollable=True,
             ),
 
             dbc.Modal(
                 [
-                    dbc.ModalHeader("AeroEdge Disclaimer", close_button=True),
+                    dbc.ModalHeader("TallyAero Disclaimer", close_button=True),
                     dbc.ModalBody(
                         [
                             html.P("This tool supplements, not replaces, FAA published documentation."),
@@ -258,7 +196,7 @@ def legal_banner_block():
                             html.P("Do not use this tool for flight planning, aircraft operation, or regulatory compliance decisions."),
                             html.P("Outputs may be incomplete, inaccurate, outdated, or derived from public or user-provided inputs. No warranties are made regarding accuracy, completeness, or fitness for purpose."),
                             html.P("If any information conflicts with the aircraft FAA-approved AFM or POH, the official documentation shall govern."),
-                            html.P("AeroEdge disclaims liability for errors, omissions, injuries, damages, or losses resulting from use of this application."),
+                            html.P("TallyAero disclaims liability for errors, omissions, injuries, damages, or losses resulting from use of this application."),
                         ]
                     ),
                     dbc.ModalFooter(dbc.Button("Close", id="close-disclaimer", className="green-button")),
@@ -267,7 +205,7 @@ def legal_banner_block():
                 is_open=False,
                 centered=True,
                 size="lg",
-                dialogClassName="aeroedge-modal",
+                dialogClassName="tallyaero-modal",
                 backdrop="static",
                 scrollable=True,
             ),
@@ -291,7 +229,7 @@ def legal_banner_block():
                 is_open=False,
                 centered=True,
                 size="lg",
-                dialogClassName="aeroedge-modal",
+                dialogClassName="tallyaero-modal",
                 backdrop="static",
                 scrollable=True,
             ),
@@ -652,7 +590,7 @@ def desktop_layout():
             html.Div(id="rectcourse-edge-info-display", style={"display": "none"}),
 
             html.Div([
-                html.Div("© 2026 Nicholas Len, AEROEDGE. All rights reserved.",
+                html.Div("© 2026 Nicholas Len, TALLYAERO. All rights reserved.",
                          style={"fontSize": "11px", "color": "#666"}),
                 html.Div([
                     html.A("Full Legal Disclaimer", href="#", id="open-disclaimer", className="legal-link", style={"fontSize": "10px"}),
@@ -691,7 +629,7 @@ def mobile_layout():
             html.Span(" | ", className="legal-separator"),
             html.A("Report Error", href="mailto:support@flyaeroedge.com?subject=Overlay%20Tool%20Error", className="legal-link"),
             html.Span(" | ", className="legal-separator"),
-            html.A("Contact AeroEdge", href="https://www.flyaeroedge.com/contact", target="_blank", className="legal-link"),
+            html.A("Contact TallyAero", href="https://www.flyaeroedge.com/contact", target="_blank", className="legal-link"),
         ]),
 
         # Config toggle bar
@@ -880,7 +818,7 @@ def mobile_layout():
         ]),
 
         # Footer
-        html.Div("© 2026 AeroEdge", className="mobile-footer"),
+        html.Div("© 2026 TallyAero", className="mobile-footer"),
 
         # Hidden stores and placeholders needed for callbacks
         html.Div(style={"display": "none"}, children=[
@@ -2535,13 +2473,6 @@ def render_maneuver_layout(maneuver, airport_id):
         ap = next((a for a in airport_data if a["id"] == airport_id), None)
         elev_ft = ap.get("elevation_ft", None) if ap else None
 
-    # Track maneuver selection
-    if maneuver:
-        log_feature('maneuver_select', {
-            'maneuver': maneuver,
-            'airport': airport_id
-        })
-
     if maneuver == "impossible_turn":
         return impossible_turn_layout()
     elif maneuver == "poweroff180":
@@ -2612,13 +2543,6 @@ def update_aircraft_fields(selected_aircraft, maneuver, current_engine):
 
     ac = aircraft_data[selected_aircraft]
 
-    # Track aircraft selection
-    log_feature('aircraft_select', {
-        'aircraft': selected_aircraft,
-        'type': ac.get('type', 'unknown'),
-        'category': ac.get('category', 'unknown'),
-        'seats': ac.get('seats', 0)
-    })
     engine_options = [{"label": k, "value": k} for k in ac.get("engine_options", {}).keys()]
     engine_values = [opt["value"] for opt in engine_options]
     # Preserve current engine if it's valid for this aircraft, otherwise use default
@@ -3205,7 +3129,7 @@ def get_elevation(lat, lon):
 
         return int(round(float(elev_m) * 3.28084))
     except Exception as e:
-        print(f"❌ Open-Meteo elevation lookup failed: {e}")
+        log.error(f"Open-Meteo elevation lookup failed: {e}")
         return None
 
 @app.callback(
@@ -3667,7 +3591,7 @@ def draw_impossible_turn(
                                 weight=6,
                             ))
                 except Exception as e:
-                    print(f"Warning: Could not draw runway overlay: {e}")
+                    log.warning(f"Could not draw runway overlay: {e}")
         else:
             # Legacy single-color visualization
             start_marker = dl.CircleMarker(
@@ -3808,21 +3732,10 @@ def draw_impossible_turn(
             ], title="Simulation Results", style={"fontSize": "12px"}),
         ], start_collapsed=False, style={"marginTop": "8px"})
 
-        # Track simulation run
-        log_feature('simulation_impossible_turn', {
-            'aircraft': ac_name,
-            'engine': engine_key,
-            'altitude_agl': failure_alt_agl,
-            'turn_direction': turn_dir,
-            'success': made_it,
-            'wind_speed': wind_speed,
-            'weight_lb': total_wt
-        })
-
         return elements, bounds, status, result, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content
 
     except Exception as e:
-        print(f"❌ EXCEPTION in draw_impossible_turn(): {e}")
+        log.error(f"EXCEPTION in draw_impossible_turn(): {e}")
         return [], None, f"⚠️ Error: {str(e)}", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
 # === Power-Off 180 Rendering Callback ===
@@ -4106,21 +4019,11 @@ def draw_poweroff180(
             ], title="Simulation Results", style={"fontSize": "12px"}),
         ], start_collapsed=False, style={"marginTop": "8px"})
 
-        # Track simulation run
-        log_feature('simulation_poweroff180', {
-            'aircraft': ac_name,
-            'engine': engine_key,
-            'altitude_agl': pattern_alt,
-            'pattern_direction': pattern_dir,
-            'flap_setting': flap_setting,
-            'wind_speed': wind_speed_val
-        })
-
         return elements, bounds, msg, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content
 
     except Exception as e:
         import traceback
-        print(f"❌ EXCEPTION in draw_poweroff180(): {e}")
+        log.error(f"EXCEPTION in draw_poweroff180(): {e}")
         traceback.print_exc()
         return [], None, f"⚠️ Error: {str(e)}", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
@@ -4340,7 +4243,7 @@ def draw_engineout(
             )
             min_alt_display = f"📐 Minimum Altitude Required: {min_alt:.0f} ft AGL"
         except Exception as min_err:
-            print(f"Min altitude calc error: {min_err}")
+            log.warning(f"Min altitude calc error: {min_err}")
             min_alt_display = "⚠️ Could not calculate minimum altitude"
 
         # ---------- Core visuals: full glide track ----------
@@ -4539,22 +4442,11 @@ def draw_engineout(
             ], title="Simulation Results", style={"fontSize": "12px"}),
         ], start_collapsed=False, style={"marginTop": "8px"})
 
-        # Track simulation run
-        log_feature('simulation_engineout', {
-            'aircraft': ac_name,
-            'engine': engine_key,
-            'altitude_agl': start_alt_agl,
-            'flap_setting': flap_setting,
-            'wind_speed': wind_speed,
-            'success': success,
-            'reaction_time': reaction_time,
-        })
-
         return elements, bounds, msg, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content, envelope_data, min_alt_display
 
     except Exception as e:
         import traceback
-        print(f"❌ EXCEPTION in draw_engineout(): {e}")
+        log.error(f"EXCEPTION in draw_engineout(): {e}")
         traceback.print_exc()
         return [], None, f"⚠️ Error generating path: {str(e)}", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
 
@@ -4762,16 +4654,6 @@ def draw_steep_turn(
         bounds = [[min(lats), min(lons)], [max(lats), max(lons)]]
     else:
         bounds = None
-
-    # Track simulation run
-    log_feature('simulation_steep_turn', {
-        'aircraft': aircraft_name,
-        'bank_angle': bank_angle,
-        'sequence': sequence,
-        'altitude_agl': altitude_ft,
-        'ias': entry_ias,
-        'weight_lb': weight_lbs
-    })
 
     return (
         elements,
@@ -5012,16 +4894,6 @@ def draw_chandelle(
         bounds = [[min(lats), min(lons)], [max(lats), max(lons)]]
     else:
         bounds = None
-
-    # Track simulation run
-    log_feature('simulation_chandelle', {
-        'aircraft': aircraft_name,
-        'bank_angle': bank,
-        'direction': direction,
-        'altitude_ft': altitude_ft,
-        'ias': entry_ias,
-        'weight_lb': weight
-    })
 
     return (
         elements,
@@ -5270,16 +5142,6 @@ def draw_lazy_eight(
         bounds = [[min(lats), min(lons)], [max(lats), max(lons)]]
     else:
         bounds = None
-
-    # Track simulation run
-    log_feature('simulation_lazy_eight', {
-        'aircraft': aircraft_name,
-        'bank_angle': bank,
-        'first_turn_direction': first_turn_direction,
-        'altitude_ft': altitude_ft,
-        'ias': entry_ias,
-        'weight_lb': weight
-    })
 
     return (
         elements,

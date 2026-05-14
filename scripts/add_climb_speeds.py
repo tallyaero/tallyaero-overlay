@@ -10,10 +10,17 @@ Data sources: POH documents, Quizlet flashcards, aviation forums, manufacturer s
 
 import json
 import os
+import sys
 from pathlib import Path
 
 PROJECT_DIR = Path(__file__).parent.parent
 AIRCRAFT_DIR = PROJECT_DIR / "aircraft_data"
+
+# Make the repo root importable so we can use core.log from this CLI script.
+sys.path.insert(0, str(PROJECT_DIR))
+from core.log import get_logger  # noqa: E402
+
+log = get_logger(__name__)
 
 # Vx/Vy data from research (KIAS)
 # Format: "filename": {"Vx": value, "Vy": value}
@@ -224,8 +231,8 @@ def update_aircraft_json(filepath, vx, vy):
 
 
 def main():
-    print("Adding Vx/Vy climb speeds to aircraft JSON files...")
-    print("=" * 60)
+    log.info("Adding Vx/Vy climb speeds to aircraft JSON files...")
+    log.info("=" * 60)
 
     updated = 0
     skipped = 0
@@ -242,22 +249,22 @@ def main():
             vy = CLIMB_DATA[filename].get("Vy")
 
             if update_aircraft_json(filepath, vx, vy):
-                print(f"  Updated: {filename} (Vx={vx}, Vy={vy})")
+                log.info(f"  Updated: {filename} (Vx={vx}, Vy={vy})")
                 updated += 1
             else:
-                print(f"  Skipped: {filename} (already has Vx/Vy)")
+                log.info(f"  Skipped: {filename} (already has Vx/Vy)")
                 skipped += 1
         else:
             not_found.append(filename)
 
-    print("=" * 60)
-    print(f"Updated: {updated} aircraft")
-    print(f"Skipped: {skipped} aircraft (already had data)")
+    log.info("=" * 60)
+    log.info(f"Updated: {updated} aircraft")
+    log.info(f"Skipped: {skipped} aircraft (already had data)")
 
     if not_found:
-        print(f"\nAircraft without Vx/Vy data ({len(not_found)}):")
+        log.info(f"Aircraft without Vx/Vy data ({len(not_found)}):")
         for f in not_found:
-            print(f"  - {f}")
+            log.info(f"  - {f}")
 
 
 if __name__ == "__main__":

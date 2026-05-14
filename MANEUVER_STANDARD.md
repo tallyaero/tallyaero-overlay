@@ -1,6 +1,6 @@
-# AeroEdge Maneuver Overlay Tool - Standardization Guide
+# TallyAero Maneuver Overlay Tool - Standardization Guide
 
-This document defines the standard implementation pattern for all flight maneuvers in the AeroEdge Overlay Tool. Every maneuver should follow these guidelines to ensure consistency, accuracy, and maximum training value.
+This document defines the standard implementation pattern for all flight maneuvers in the TallyAero Overlay Tool. Every maneuver should follow these guidelines to ensure consistency, accuracy, and maximum training value.
 
 ---
 
@@ -608,7 +608,7 @@ simulation/
 
 ## Summary
 
-By following this standard, every maneuver in the AeroEdge Overlay Tool will:
+By following this standard, every maneuver in the TallyAero Overlay Tool will:
 
 1. **Be physics-accurate** - Using real aerodynamic relationships
 2. **Be environmentally aware** - Accounting for wind, temperature, pressure

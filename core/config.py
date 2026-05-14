@@ -3,7 +3,7 @@ Application configuration constants.
 """
 
 # App settings
-APP_TITLE = "Maneuver Overlay Tool | AeroEdge"
+APP_TITLE = "Maneuver Overlay Tool | TallyAero"
 
 # Default map center (approx central US)
 DEFAULT_MAP_CENTER = [39.8283, -98.5795]

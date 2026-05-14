@@ -17,7 +17,7 @@ Working plan for the Maneuver Overlay Tool's audit + polish + merge-features spr
 | # | Phase | Status | Sub-phases |
 |---|---|---|---|
 | Setup | Port local-only deltas from `reference/overlay_tools/` snapshot | pending | po180.py, CLAUDE_CONTEXT.md, engine_out_buckets.md |
-| **0** | Test infra + telemetry removal + dev ergonomics | pending | 0a–0i |
+| **0** | Test infra + telemetry removal + dev ergonomics | **complete** | 0a–0i |
 | **1** | Decompose app.py (7,784 lines → ≤200) | pending | 1a–1i |
 | **2** | Aircraft data hardening (port from EM Diagram) | pending | 2a–2e |
 | **3** | Airport data overhaul (OurAirports+NASR port) | pending | 3a–3d |
@@ -193,4 +193,19 @@ Working plan for the Maneuver Overlay Tool's audit + polish + merge-features spr
 Append-only. One entry per shipped sub-phase or significant decision. Mirrors the EM Diagram pattern.
 
 - 2026-05-13 — **Design approved.** Audit plan (Phases 0–4) + Merge plan (Phases 5–12) approved by user. Working repo at `~/Desktop/tallyaero_overlay_archives/` (clone of `github.com/tallyaero/tallyaero-overlay`). Snapshot of original design archived at `docs/plans/2026-05-13-audit-and-merge-design.md`. Next: pre-Phase-0 setup (port local-only deltas from `reference/overlay_tools/`) then begin Phase 0.
+- 2026-05-13 — **Pre-Phase-0 setup commit `be0965c` landed.** Ingested three local-only deltas from `reference/overlay_tools/`: newer variable-timestep `simulation/po180.py`, `CLAUDE_CONTEXT.md`, `simulation/engine_out_buckets.md`. Added `.gitignore` covering `__pycache__/`, `*.pyc`, `.DS_Store`, venvs, cache dirs.
+- 2026-05-14 — **Phase 0 shipped.** Test infrastructure + telemetry removal + dev ergonomics complete. Branch `phase-0-foundation` is 19 commits ahead of `main`, ready to merge.
+  - **0a** — `pyproject.toml` with [build-system], [project], [tool.setuptools.packages.find], [tool.pytest.ini_options]. Editable install via `pip install -e ".[dev]"`. (commit `21a8a90`)
+  - **0g** — Telemetry removal per D3. Deleted `aeroedge_tracker.py` (297 lines), stripped 8 `log_feature(...)` call sites + `init_tracking(server)` + the heartbeat `<script>` block from `app.index_string`. Documented D3 in `CLAUDE_CONTEXT.md`. (commits `7c3574e`, `6027674`)
+  - **0i** — Project-wide `aeroedge` → `tallyaero` rename per D6. .py / .md / .toml / .html / .css. Preserved 8 `flyaeroedge.com` URLs in `app.py` (live external domain) and the historical-reference sections in `docs/plans/`. Fixed up collateral damage to root-level `OVERLAY_TOOL_EXECUTION_PLAN.md` (rename had overwritten the 0g description). (commits `ff6710c`, `34db5fd`, `239ab9c`, `810387f`)
+  - **0d** — Structured logging via `core/log.py` (`TALLYAERO_OVERLAY_LOG` env var, defaults INFO). Replaced 27 `print`/`dprint` call sites across `app.py` (6), `edit_aircraft_page.py` (1), `scripts/merge_runway_data.py` (11), `scripts/add_climb_speeds.py` (8). `simulation/` had zero print calls; that Task 15 commit was correctly skipped. Left `traceback.print_exc()` alone (stdlib stderr, not generic print). (commits `6796a4c`, `583569e`, `299f666`)
+  - **0f** — Extracted `init_data()` so module import has no side effects. Auto-init guarded by `TALLYAERO_NO_AUTO_INIT` env var. Tests can opt out to load curated subsets. 112 aircraft + 16,128 airports load by default. (commit `48dd2bf`)
+  - **0b** — pytest infrastructure. **32 tests passing** in 0.84s: 15 import-smoke tests for every simulation module, 13 physics hand-calcs (turn radius, stall speed at bank, glide range, atmosphere PA + DA, plus utility.py cross-check), 3 maneuver-end-to-end tests (engine-out glide, steep turn hover schema, impossible turn 1000 ft AGL). Notable finding: plan's turn-radius reference value at 120 kt/25° was wrong (1,910 → actual 2,734 ft); plan was wrong, physics right. Notable finding: `simulation/steep_turn.py` hover dict missing `ias` + `load_factor` keys per MANEUVER_STANDARD.md — flagged for Phase 4b compliance fix. (commits `97c28bd`, `356a3c9`, `7c0d2fa`, `556ae0d`, `2b4e41f`)
+  - **0c** — Snapshot testing via syrupy. 3 tests producing 9 snapshots locked to `tests/__snapshots__/test_snapshots.ambr`. Deterministic via `_round_hover(hover, digits=1)` helper. Real `simulate_*` signatures used (not the plan's idealized ones). (commit `ecd65c0`)
+  - **0e** — `prevent_initial_call` audit found **zero work needed**. 47 callbacks audited: 40 already had `prevent_initial_call=True`, 3 explicitly `False` with "Run on page load" comments, 4 unguarded but intentionally fire-on-load (`display_page`, `search_airport_database`, `render_maneuver_layout`, `update_aircraft_fields`). Sub-agent correctly refused to add spurious `True` where it would have broken initial UI population. No commit; documented here.
+  - **0h** — `Makefile` with 10 targets (help / install / install-dev / run / test / test-v / snapshot-update / lint / clean / kill-server). Untracked 29 previously-committed junk files (`__pycache__/*.pyc`, `.DS_Store`). `make lint` flagged 124 ruff errors (56 F401 unused imports, 32 F841 unused locals, 17 F811 redefinition, 17 E402 import-order, 1 F821, 1 E722) — concentrated in legacy `app.py`. **Not addressed in 0h; Phase 1 decomposition will naturally clean most of these.** (commits `ce62fe3`, `fb79240`)
+  - **Open items deferred to later phases:**
+    - 124 ruff warnings in `app.py` — Phase 1 decomposition addresses naturally
+    - `flyaeroedge.com` URLs (8 sites in `app.py`) — pending user decision on rebrand to `tallyaero.app` or `tallyaero.com`
+    - `simulation/steep_turn.py` hover dict missing `ias` + `load_factor` keys — Phase 4b MANEUVER_STANDARD compliance fix
 - _<next entries appended here as phases ship>_
