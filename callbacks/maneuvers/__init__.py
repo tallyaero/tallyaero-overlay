@@ -17,6 +17,7 @@ def register_maneuvers(app):
     from . import turns_around_point
     from . import eights_on_pylons
     from . import s_turn
+    from . import engineout
     poweroff180.register(app)
     steep_turn.register(app)
     chandelle.register(app)
@@ -25,3 +26,4 @@ def register_maneuvers(app):
     turns_around_point.register(app)
     eights_on_pylons.register(app)
     s_turn.register(app)
+    engineout.register(app)
