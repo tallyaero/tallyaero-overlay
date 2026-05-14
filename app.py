@@ -7141,5 +7141,8 @@ def update_windsock(wind_dir, wind_speed, _pathname):
 
 
 if __name__ == "__main__":
-    # host="0.0.0.0" allows access from other devices on the network
-    app.run(debug=True, host="0.0.0.0", port=8050)
+    # host="0.0.0.0" allows access from other devices on the network.
+    # Port is overridable via CLI arg (used by `make run PORT=8052`).
+    import sys
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8050
+    app.run(debug=True, host="0.0.0.0", port=port)
