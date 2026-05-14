@@ -92,14 +92,16 @@ Working plan for the Maneuver Overlay Tool's audit + polish + merge-features spr
 
 ## Phase 4 — Maneuver-tool polish
 
-- **4a** Steep-turn fixes from `NEXT_TASK.md` (drift_corrected port, snap-elimination, hover-data alignment).
+**MIRROR DIRECTIVE (locked 2026-05-14):** every visible UI element in Phase 4 must mirror the EM Diagram archive's finished state (`~/Desktop/tallyaero_archives/aeroedge_em_diagram/`, all 5L–5R + 5T–5Z shipped). Direct port wherever possible; design from scratch only for genuinely overlay-specific surfaces (the map vs the chart, wind chip, drawer-accordion contents). See `[[overlay-phase4-mirrors-em-diagram]]` in session memory for the canonical port checklist.
+
+- **4a** Steep-turn fixes from `NEXT_TASK.md` (drift_corrected port, snap-elimination, hover-data alignment). Also fix `simulation/steep_turn.py` missing `ias` + `load_factor` hover keys per MANEUVER_STANDARD.md (carried over from Phase 0b finding).
 - **4b** MANEUVER_STANDARD.md compliance audit for each of 11 maneuvers.
-- **4c** Design-token system port — `assets/tokens.css`, `--ta-*` everywhere.
-- **4d** Dark mode + light-mode default + early-paint script + `data-theme` Store.
-- **4e** UI shell rebuild — Option A pattern from EM Diagram (top strip + map-as-hero + right rail state panel + settings drawer).
-- **4f** Mobile layout — stacked single-column with sliding settings panel.
+- **4c** Design-token system port — `assets/tokens.css`, `--ta-*` everywhere. **Direct port from EM Diagram.**
+- **4d** Dark mode + light-mode default + early-paint script + `data-theme` Store + `syncThemeFromStorage` clientside callback. **Direct port from EM Diagram.**
+- **4e** UI shell rebuild — Option A pattern from EM Diagram (top strip 56px + map-as-hero + right rail 280px state panel + settings drawer). 4 env chips (APT/ALT/OAT/BARO) + 5th chip for wind. **Direct port of the shell; overlay-specific contents differ.**
+- **4f** Mobile layout — stacked single-column with sliding settings panel. **Direct port from EM Diagram.**
 - **4g** Export polish — PNG/PDF of map + maneuver + info-panel.
-- **4h** Edit-aircraft page polish — chip-style buttons, theme tokens, dropdown overrides.
+- **4h** Edit-aircraft page polish — chip-style buttons, theme tokens, dropdown overrides (kill the react-select blue pill, hide single-select × buttons). **Direct port of Phase 5T from EM Diagram.**
 
 ---
 
