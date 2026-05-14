@@ -11,5 +11,7 @@ def register_maneuvers(app):
     """Register every maneuver callback. Populated as Phase 1c lands."""
     from . import poweroff180
     from . import steep_turn
+    from . import chandelle
     poweroff180.register(app)
     steep_turn.register(app)
+    chandelle.register(app)
