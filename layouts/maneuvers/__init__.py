@@ -13,6 +13,7 @@ from .engineout import engineout_layout
 from .steep_turn import steep_turn_layout
 from .chandelle import chandelle_layout
 from .lazy_eight import lazy8_layout
+from .steep_spiral import steep_spiral_layout
 
 # Filled in as Phase 1b lands. The re-export here lets app.py write a
 # single `from layouts.maneuvers import *` once Task 13 ships.
@@ -23,4 +24,5 @@ __all__: list[str] = [
     "steep_turn_layout",
     "chandelle_layout",
     "lazy8_layout",
+    "steep_spiral_layout",
 ]
