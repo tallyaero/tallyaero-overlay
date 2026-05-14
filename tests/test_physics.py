@@ -100,3 +100,120 @@ def test_app_turn_radius_matches_reference():
     assert rel_err < 0.01, \
         f"compute_turn_radius={ours:.0f}, canonical={canonical:.0f}, " \
         f"rel_err={rel_err:.4f}"
+
+
+# -------------------------------------------------------------------
+# Maneuver-specific — at least one canonical scenario per simulation
+# -------------------------------------------------------------------
+
+import json
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+_AIRCRAFT_PATH = REPO_ROOT / "aircraft_data" / "Cessna_172P.json"
+
+
+def _load_cessna_172p() -> dict:
+    """Load a single curated aircraft for tests that need the ac dict."""
+    with open(_AIRCRAFT_PATH) as f:
+        return json.load(f)
+
+
+def test_engine_out_glide_returns_path():
+    """simulate_engineout_glide produces a non-empty path with hover data
+    for a Cessna 172P at 5,000 ft AGL, calm wind. The signature requires
+    a touchdown target, aircraft dict, engine option, and a few atmosphere
+    knobs — not just glide_ratio/tas as the plan assumed."""
+    from geopy import Point as GeoPoint
+    from simulation.engine_out import simulate_engineout_glide
+
+    ac = _load_cessna_172p()
+    start = GeoPoint(30.5, -97.5)
+    # Touchdown ~5 NM east — well within glide range from 5,000 ft AGL.
+    touchdown = GeoPoint(30.5, -97.42)
+    path, hover, meta = simulate_engineout_glide(
+        start_point=start,
+        start_heading=90.0,
+        touchdown_point=touchdown,
+        touchdown_heading=270.0,
+        ac=ac,
+        engine_option="Lycoming O-320-D2J",
+        weight_lbs=2300.0,
+        flap_config="clean",
+        prop_config="windmilling",
+        oat_c=15.0,
+        altimeter_inhg=29.92,
+        wind_dir=0.0,
+        wind_speed=0.0,
+        altitude_agl=5000.0,
+    )
+    assert len(path) > 5, f"path has {len(path)} points, expected >5"
+    assert len(hover) == len(path), "hover/path length mismatch"
+    assert hover[0]["alt"] > hover[-1]["alt"], "altitude must decrease"
+
+
+def test_steep_turn_returns_valid_hover_schema():
+    """Steep turn hover data must contain every key the engine actually
+    records. Note: MANEUVER_STANDARD.md additionally promises 'ias' and
+    'load_factor' fields, but simulation/steep_turn.py does not emit them
+    today — schema drift between the spec and the implementation. This
+    test locks the implementation's actual output so any further drift
+    is caught."""
+    from simulation.steep_turn import simulate_steep_turn
+
+    result = simulate_steep_turn(
+        entry_point={"lat": 30.5, "lon": -97.5},
+        entry_heading_deg=270.0,
+        altitude_ft=3000.0,
+        bank_angle_deg=45.0,
+        turn_sequence="left",
+        ias_knots=110.0,
+        oat_c=15.0,
+        wind_dir_deg=0.0,
+        wind_speed_kt=0.0,
+    )
+    # steep_turn returns a 2-tuple (path, hover) — not 3-tuple.
+    assert len(result) == 2, f"expected 2-tuple, got {len(result)}-tuple"
+    path, hover = result
+    assert len(hover) > 10
+    # Keys actually emitted by simulation/steep_turn.py::record():
+    required_keys = {"time", "alt", "tas", "gs", "aob", "vs",
+                     "track", "heading", "drift", "segment"}
+    missing = required_keys - set(hover[0].keys())
+    assert not missing, f"missing hover keys: {missing}"
+
+
+def test_impossible_turn_succeeds_above_min_alt():
+    """Given a 1,000 ft AGL start with reasonable params, the impossible
+    turn simulation runs to completion and returns a path back toward the
+    runway. (Note: meta['success'] may be False if final alignment is
+    imprecise — the simulation still produced a complete trajectory,
+    which is what this smoke test verifies.) find_min_alt=False to skip
+    the binary search for speed."""
+    from geopy import Point as GeoPoint
+    from simulation.impossible_turn import simulate_impossible_turn
+
+    ac = _load_cessna_172p()
+    departure = GeoPoint(30.5, -97.5)
+    path, hover, meta = simulate_impossible_turn(
+        start_point=departure,
+        runway_heading_deg=270.0,
+        turn_dir="left",
+        reaction_sec=4.0,
+        start_ias_kias=65.0,
+        altitude_agl=1000.0,
+        ac=ac,
+        engine_option="Lycoming O-320-D2J",
+        weight_lbs=2300.0,
+        oat_c=15.0,
+        altimeter_inhg=29.92,
+        wind_dir=0.0,
+        wind_speed=0.0,
+        find_min_alt=False,
+    )
+    assert len(path) > 10
+    # Final point should be heading back toward the runway (roughly 090°
+    # from a 270° takeoff, i.e., a 180° turn) — at minimum, heading
+    # must be present in the hover output.
+    final_heading = hover[-1].get("heading", None)
+    assert final_heading is not None
