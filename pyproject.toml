@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tallyaero-overlay"
+version = "0.1.0-dev"
+description = "TallyAero Maneuver Overlay Tool — interactive maneuver visualization on real-world maps."
+readme = "CLAUDE_CONTEXT.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+authors = [
+    { name = "Nicholas Len, TallyAero" }
+]
+keywords = [
+    "aviation",
+    "flight-training",
+    "maneuver-overlay",
+    "engine-out",
+    "glide-corridor",
+    "dash",
+    "leaflet",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Education",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Aerospace",
+]
+# Runtime deps live in requirements.txt to keep the PyInstaller spec single-source.
+# pyproject.toml is for editable installs and test discovery, not for distribution.
+dependencies = []
+
+[project.optional-dependencies]
+dev = []
+
+[tool.setuptools]
+package-dir = { "" = "." }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["core*", "callbacks*", "layouts*", "components*", "simulation*", "physics*", "rendering*", "data*", "utils*", "services*"]
+exclude = ["venv*", "tests*", "_ecosystem*", "build*", "dist*", "aircraft_data*", "airports*"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning:plotly.*",
+    "ignore::DeprecationWarning:dash.*",
+]
