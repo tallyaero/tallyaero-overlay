@@ -27,14 +27,14 @@ def register_all(app):
     Sub-phases will uncomment the imports + calls below as each module lands.
     """
     # from . import navigation       # Phase 1d
-    # from . import environment      # Phase 1d
+    from . import environment      # Phase 1d
     # from . import aircraft         # Phase 1e
     # from . import map as map_      # Phase 1f
     from . import edit_aircraft    # Phase 1g
     # from .maneuvers import register_maneuvers   # Phase 1c
 
     # navigation.register(app)
-    # environment.register(app)
+    environment.register(app)
     # aircraft.register(app)
     # map_.register(app)
     edit_aircraft.register(app)
