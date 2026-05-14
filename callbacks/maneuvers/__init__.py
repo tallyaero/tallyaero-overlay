@@ -13,7 +13,9 @@ def register_maneuvers(app):
     from . import steep_turn
     from . import chandelle
     from . import lazy_eight
+    from . import steep_spiral
     poweroff180.register(app)
     steep_turn.register(app)
     chandelle.register(app)
     lazy_eight.register(app)
+    steep_spiral.register(app)
