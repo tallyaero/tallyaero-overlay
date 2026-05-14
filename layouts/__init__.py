@@ -12,11 +12,9 @@ inside callbacks/ is what wires interactivity.
 from __future__ import annotations
 
 from .desktop import desktop_layout
-
-# Phase 1h Task 15 will populate the mobile_layout re-export.
-# from .mobile import mobile_layout
+from .mobile import mobile_layout
 
 __all__ = [
     "desktop_layout",
-    # "mobile_layout",
+    "mobile_layout",
 ]
