@@ -9,6 +9,9 @@ import dash_leaflet as dl
 from geopy.point import Point as GeoPoint
 from geopy.distance import distance as geo_distance
 from dash.exceptions import PreventUpdate
+from core.log import get_logger
+
+log = get_logger(__name__)
 from utility import (
     compute_density_altitude,
     compute_pressure_altitude,
@@ -3104,7 +3107,7 @@ def get_elevation(lat, lon):
 
         return int(round(float(elev_m) * 3.28084))
     except Exception as e:
-        print(f"❌ Open-Meteo elevation lookup failed: {e}")
+        log.error(f"Open-Meteo elevation lookup failed: {e}")
         return None
 
 @app.callback(
@@ -3566,7 +3569,7 @@ def draw_impossible_turn(
                                 weight=6,
                             ))
                 except Exception as e:
-                    print(f"Warning: Could not draw runway overlay: {e}")
+                    log.warning(f"Could not draw runway overlay: {e}")
         else:
             # Legacy single-color visualization
             start_marker = dl.CircleMarker(
@@ -3710,7 +3713,7 @@ def draw_impossible_turn(
         return elements, bounds, status, result, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content
 
     except Exception as e:
-        print(f"❌ EXCEPTION in draw_impossible_turn(): {e}")
+        log.error(f"EXCEPTION in draw_impossible_turn(): {e}")
         return [], None, f"⚠️ Error: {str(e)}", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
 # === Power-Off 180 Rendering Callback ===
@@ -3998,7 +4001,7 @@ def draw_poweroff180(
 
     except Exception as e:
         import traceback
-        print(f"❌ EXCEPTION in draw_poweroff180(): {e}")
+        log.error(f"EXCEPTION in draw_poweroff180(): {e}")
         traceback.print_exc()
         return [], None, f"⚠️ Error: {str(e)}", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
@@ -4218,7 +4221,7 @@ def draw_engineout(
             )
             min_alt_display = f"📐 Minimum Altitude Required: {min_alt:.0f} ft AGL"
         except Exception as min_err:
-            print(f"Min altitude calc error: {min_err}")
+            log.warning(f"Min altitude calc error: {min_err}")
             min_alt_display = "⚠️ Could not calculate minimum altitude"
 
         # ---------- Core visuals: full glide track ----------
@@ -4421,7 +4424,7 @@ def draw_engineout(
 
     except Exception as e:
         import traceback
-        print(f"❌ EXCEPTION in draw_engineout(): {e}")
+        log.error(f"EXCEPTION in draw_engineout(): {e}")
         traceback.print_exc()
         return [], None, f"⚠️ Error generating path: {str(e)}", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
 
