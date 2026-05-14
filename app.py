@@ -64,48 +64,11 @@ from callbacks.map import (
     create_airplane_marker,
 )
 
-# === Load aircraft data ===
-def load_aircraft_data(folder="aircraft_data"):
-    data = {}
-    for filename in os.listdir(folder):
-        if filename.endswith(".json"):
-            with open(os.path.join(folder, filename)) as f:
-                name = filename.replace(".json", "")
-                data[name] = json.load(f)
-    return data
-
-# === Load airport data ===
-def load_airport_data():
-    base = os.path.dirname(__file__)
-    path = os.path.join(base, "airports", "airports.json")
-    with open(path, "r") as f:
-        return json.load(f)
-
-
-# Module-level placeholders — populated by init_data().
-aircraft_data: dict = {}
-available_aircraft: list = []
-airport_data: list = []
-
-
-def init_data() -> None:
-    """Load aircraft and airport data from disk into module-level caches.
-
-    Idempotent. Called automatically at import time unless
-    TALLYAERO_NO_AUTO_INIT is set (used by tests that want to load curated
-    subsets).
-    """
-    global aircraft_data, available_aircraft, airport_data
-    if aircraft_data:
-        return  # already populated; respect idempotency
-    aircraft_data = load_aircraft_data()
-    available_aircraft = sorted(aircraft_data.keys())
-    airport_data = load_airport_data()
-
-
-# Default: auto-init unless explicitly disabled.
-if not os.environ.get("TALLYAERO_NO_AUTO_INIT"):
-    init_data()
+# Aircraft + airport data live in core/data_loader.py (Phase 1i-pre) to
+# avoid the circular re-import that `import app as app_module` caused
+# when app.py was the __main__ entry point. Auto-init runs at import
+# time inside the loader module.
+from core.data_loader import aircraft_data, available_aircraft, airport_data, init_data
 
 # === Dash App ===
 app = dash.Dash(
@@ -115,6 +78,10 @@ app = dash.Dash(
     prevent_initial_callbacks="initial_duplicate"
 )
 server = app.server
+
+# Wire callbacks decomposed out of this file during Phase 1.
+from callbacks import register_all
+register_all(app)
 
 app.title = "Maneuver Overlay Tool | TallyAero"
 
