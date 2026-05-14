@@ -183,6 +183,46 @@ def test_steep_turn_returns_valid_hover_schema():
     assert not missing, f"missing hover keys: {missing}"
 
 
+# -------------------------------------------------------------------
+# Atmosphere — pressure altitude + density altitude
+# -------------------------------------------------------------------
+
+def test_pressure_altitude_standard_day():
+    """Indicated 5,000 ft with altimeter 29.92 inHg → PA = 5,000 ft.
+    PA = indicated + (29.92 - altim) * 1000 (PHAK Ch. 4)."""
+    from physics.atmosphere import compute_pressure_altitude
+
+    pa = compute_pressure_altitude(5000.0, 29.92)
+    assert abs(pa - 5000.0) < 0.5, f"got {pa:.1f} ft, expected 5000.0"
+
+
+def test_pressure_altitude_low_pressure_day():
+    """Indicated 3,000 ft with altimeter 29.42 inHg (lower than standard) →
+    PA = 3,000 + (29.92 - 29.42) * 1000 = 3,500 ft. Low pressure → higher PA."""
+    from physics.atmosphere import compute_pressure_altitude
+
+    pa = compute_pressure_altitude(3000.0, 29.42)
+    assert abs(pa - 3500.0) < 0.5, f"got {pa:.1f} ft, expected 3500.0"
+
+
+def test_density_altitude_isa_returns_pa():
+    """ISA temperature at PA → DA = PA. At PA=3000 ft, ISA = 15 − 2·3 = 9 °C.
+    With OAT=9, density_alt = 3000 + 120·(9−9) = 3000."""
+    from physics.atmosphere import compute_density_altitude
+
+    da = compute_density_altitude(9.0, 3000.0)
+    assert abs(da - 3000.0) < 0.5, f"got {da:.1f} ft, expected 3000.0"
+
+
+def test_density_altitude_hot_day():
+    """Hot day at SL: PA=0 ft, OAT=35 °C (20° hotter than ISA 15 °C).
+    DA = 0 + 120·(35−15) = 2,400 ft. Hot day → higher DA → degraded perf."""
+    from physics.atmosphere import compute_density_altitude
+
+    da = compute_density_altitude(35.0, 0.0)
+    assert abs(da - 2400.0) < 0.5, f"got {da:.1f} ft, expected 2400.0"
+
+
 def test_impossible_turn_succeeds_above_min_alt():
     """Given a 1,000 ft AGL start with reasonable params, the impossible
     turn simulation runs to completion and returns a path back toward the
