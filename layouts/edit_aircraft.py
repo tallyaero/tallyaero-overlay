@@ -1,15 +1,31 @@
-import dash
-from dash import dcc, html
+"""Edit-Aircraft page layout.
+
+Standalone page used to create or modify aircraft JSON profiles. Pure
+layout function with no Dash callbacks - callbacks/edit_aircraft.py owns
+all wiring. Currently no callbacks exist for this page in the overlay
+codebase (the editor is hosted externally at app.flyaeroedge.com); the
+companion register(app) stub keeps the package symmetry for when the
+modal/route is wired up.
+
+The `aircraft_data` dropdown population still happens at import time via
+the local loader. We keep that behaviour identical to the original
+edit_aircraft_page.py during this rename.
+"""
+
+from __future__ import annotations
+
 import json
 import os
-from dash.exceptions import PreventUpdate
+
+from dash import dcc, html
+
 from core.log import get_logger
 
 log = get_logger(__name__)
 
 
 def load_aircraft_data_from_folder():
-    folder_path = os.path.join(os.path.dirname(__file__), "aircraft_data")
+    folder_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "aircraft_data")
     aircraft_data = {}
     for filename in os.listdir(folder_path):
         if filename.endswith(".json"):
@@ -23,7 +39,7 @@ def load_aircraft_data_from_folder():
                     log.error(f"Failed to load {filename}: {e}")
     return aircraft_data
 
-# ✅ Load it once for this page
+# Load it once for this page
 aircraft_data = load_aircraft_data_from_folder()
 
 # --- Full Edit Aircraft Page Layout ---
@@ -42,11 +58,11 @@ def edit_aircraft_layout():
                 html.Img(src="/assets/logo.png", className="banner-logo")
             ], className="banner-inner")
         ], className="banner-header"),
-        
+
         html.Div([
             html.Button("⬅️ Back to EM Diagram", id="back-button", n_clicks=0, className="green-button")
         ], style={"marginBottom": "20px"}),
-        
+
         html.Div([
             html.Div([
                 html.Label("Search Aircraft", className="input-label"),
@@ -195,7 +211,7 @@ def edit_aircraft_layout():
 
     html.Div([
         html.Label("🛫 Airspeed Arcs", className="input-label"),
-        
+
         html.Div([
             html.Label("White Arc", className="inline-label"),
             dcc.Input(id="arc-white-bottom", type="number", placeholder="Bottom", className="input-small", style={"marginRight": "10px"}),

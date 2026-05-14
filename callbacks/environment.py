@@ -1,0 +1,176 @@
+"""Environment input callbacks - airport search, selection, recenter,
+weight display. Owns inputs the pilot adjusts to set environmental
+context for a maneuver."""
+
+from __future__ import annotations
+
+from dash import html, Input, Output, State, ALL, ctx
+from dash.exceptions import PreventUpdate
+
+from core.data_loader import aircraft_data, airport_data
+
+
+def register(app):
+    """Install every environment callback against the given Dash app."""
+
+    @app.callback(
+        Output("total-weight-display", "value"),
+        Output("runtime-total-weight-lb", "data"),
+        Input("aircraft-select", "value"),
+        Input("occupants", "value"),
+        Input("occupant-weight", "value"),
+        Input("fuel-load", "value"),
+    )
+    def update_total_weight_display(ac_name, occupants, occupant_wt, fuel_gal):
+        if not ac_name or ac_name not in aircraft_data:
+            return "", None
+
+        ac = aircraft_data[ac_name]
+        empty_wt = float(ac.get("empty_weight", 0.0))
+        fuel_per_gal = float(ac.get("fuel_weight_per_gal", 6.0))
+
+        occ = float(occupants or 0)
+        occ_wt = float(occupant_wt or 0)
+        fuel = float(fuel_gal or 0)
+
+        total = empty_wt + (occ * occ_wt) + (fuel * fuel_per_gal)
+        total_round = int(round(total))
+
+        return f"{total_round}", total
+
+    @app.callback(
+        Output("map", "center"),
+        Output("env-airport-agl", "children"),
+        Output("selected-airport-id", "data"),
+        Output("airport-search-input", "value"),
+        Output("selected-airport-display", "children"),
+        Output("selected-airport-display", "style"),
+        Output("airport-search-results", "children", allow_duplicate=True),  # Clear results after selection
+        Input({"type": "airport-result", "index": ALL}, "n_clicks"),
+        prevent_initial_call=True
+    )
+    def handle_airport_result_click(n_clicks_list):
+        # Only process if there was an actual click (not just element creation)
+        if not n_clicks_list or all(n is None or n == 0 for n in n_clicks_list):
+            raise PreventUpdate
+
+        if not ctx.triggered_id or not isinstance(ctx.triggered_id, dict):
+            raise PreventUpdate
+
+        airport_id = ctx.triggered_id.get("index")
+        ap = next((a for a in airport_data if a.get("id") == airport_id), None)
+        if not ap:
+            raise PreventUpdate
+
+        lat, lon = ap["lat"], ap["lon"]
+        elev = ap.get("elevation_ft", "---")
+        name = ap.get("name", airport_id)
+
+        # Display style (visible)
+        display_style = {
+            "fontSize": "12px",
+            "color": "#28a745",
+            "fontWeight": "500",
+            "marginTop": "4px",
+            "marginBottom": "4px",
+            "display": "block"
+        }
+
+        # Clear the search input, show display, and clear search results
+        return [lat, lon], f"{elev} ft", airport_id, "", f"Selected: {name} ({airport_id})", display_style, []
+
+    @app.callback(
+        Output("airport-search-results", "children"),
+        Output("airport-search-matches", "data"),
+        Output("airport-highlight-index", "data"),
+        Input("airport-search-input", "value"),
+    )
+    def search_airport_database(query):
+        """Search airports as user types. Results appear below input."""
+        if not query or len(query.strip()) < 2:
+            return [], [], 0
+
+        q = query.strip().lower()
+
+        # Find matching airports
+        matches = []
+        for ap in airport_data:
+            ap_id = ap.get("id", "").lower()
+            ap_name = ap.get("name", "").lower()
+            if q in ap_id or q in ap_name:
+                matches.append({"id": ap["id"], "name": ap["name"]})
+            if len(matches) >= 10:
+                break
+
+        # Store match IDs
+        match_ids = [m["id"] for m in matches]
+
+        # Build simple results list - click to select
+        results = [
+            html.Div(
+                f"{m['name']} ({m['id']})",
+                className="airport-result",
+                id={"type": "airport-result", "index": m["id"]},
+                n_clicks=0,
+            )
+            for m in matches
+        ]
+
+        return results, match_ids, 0
+
+    @app.callback(
+        Output("selected-airport-display", "children", allow_duplicate=True),
+        Output("selected-airport-display", "style", allow_duplicate=True),
+        Output("env-airport-agl", "children", allow_duplicate=True),
+        Input("selected-airport-id", "data"),
+        prevent_initial_call=False  # Run on page load
+    )
+    def restore_airport_display_on_load(airport_id):
+        """Restore the airport display when page loads with persisted airport."""
+        hidden_style = {
+            "fontSize": "12px",
+            "color": "#28a745",
+            "fontWeight": "500",
+            "marginTop": "4px",
+            "marginBottom": "4px",
+            "display": "none"
+        }
+
+        if not airport_id:
+            return "", hidden_style, "--- ft"
+
+        ap = next((a for a in airport_data if a.get("id") == airport_id), None)
+        if not ap:
+            return "", hidden_style, "--- ft"
+
+        name = ap.get("name", airport_id)
+        elev = ap.get("elevation_ft", "---")
+
+        display_style = {
+            "fontSize": "12px",
+            "color": "#28a745",
+            "fontWeight": "500",
+            "marginTop": "4px",
+            "marginBottom": "4px",
+            "display": "block"
+        }
+
+        # Only update the display - don't touch the search input
+        return f"Selected: {name} ({airport_id})", display_style, f"{elev} ft"
+
+    @app.callback(
+        Output("map", "center", allow_duplicate=True),
+        Input("recenter-airport-btn", "n_clicks"),
+        State("selected-airport-id", "data"),
+        prevent_initial_call=True
+    )
+    def recenter_to_airport(n_clicks, selected_id):
+        """Recenter map to the selected airport."""
+        if not n_clicks or not selected_id:
+            raise PreventUpdate
+
+        ap = next((a for a in airport_data if a.get("id") == selected_id), None)
+        if not ap:
+            raise PreventUpdate
+
+        return [ap["lat"], ap["lon"]]
