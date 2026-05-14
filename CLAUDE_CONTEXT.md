@@ -82,3 +82,10 @@ python app.py
 - See `Master prompt and context.md` for detailed context
 - See `Lessons_learned.md` for development history
 - Physics engine in `physics/` and `simulation/`
+
+## Locked decisions
+
+- **D3 — No telemetry.** This tool makes no analytics or tracking HTTP calls.
+  Functional network calls (NOAA AWC, Open-Meteo) are explicit user-initiated
+  features. `aeroedge_tracker.py` and its heartbeat script were removed in
+  Phase 0g.
