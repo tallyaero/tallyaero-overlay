@@ -7,6 +7,8 @@ Phase 1b populates this package one maneuver at a time.
 
 from __future__ import annotations
 
+from .impossible_turn import impossible_turn_layout
+
 # Filled in as Phase 1b lands. The re-export here lets app.py write a
 # single `from layouts.maneuvers import *` once Task 13 ships.
-__all__: list[str] = []
+__all__: list[str] = ["impossible_turn_layout"]
