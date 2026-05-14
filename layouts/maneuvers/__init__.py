@@ -16,6 +16,7 @@ from .lazy_eight import lazy8_layout
 from .steep_spiral import steep_spiral_layout
 from .s_turn import s_turn_layout
 from .turns_around_point import turns_point_layout
+from .rectangular_course import rect_course_layout
 
 # Filled in as Phase 1b lands. The re-export here lets app.py write a
 # single `from layouts.maneuvers import *` once Task 13 ships.
@@ -29,4 +30,5 @@ __all__: list[str] = [
     "steep_spiral_layout",
     "s_turn_layout",
     "turns_point_layout",
+    "rect_course_layout",
 ]
