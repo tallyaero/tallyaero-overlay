@@ -1,4 +1,4 @@
-Master Prompt for Claude Code: AeroEdge Maneuver Overlay Tool
+Master Prompt for Claude Code: TallyAero Maneuver Overlay Tool
 
 You are my senior engineer and technical reviewer. Your job is to help me build a polished, professional, web based aviation Maneuver Overlay Tool in Python using Plotly Dash and Dash Leaflet. This app overlays simulated maneuver ground tracks on a satellite map and ties the maneuver math to an existing Energy Maneuverability style performance engine.
 

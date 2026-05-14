@@ -1,4 +1,4 @@
-# Claude Context: aeroedge_overlay_tools
+# Claude Context: tallyaero_overlay_tools
 
 ## App Purpose
 
@@ -20,19 +20,19 @@ The Overlay Tools app generates visual maneuver overlays for flight training. It
 ## Ecosystem Position
 
 This is a **standalone app** for generating training materials. Could integrate with:
-- `aeroedge_logbook` - Attach overlays to flight records
-- `aeroedge_website` - Embed interactive tool
+- `tallyaero_logbook` - Attach overlays to flight records
+- `tallyaero_website` - Embed interactive tool
 - Syllabus node - Visual aids for lesson plans
 
 ## Key Files
 
 ```
-aeroedge_overlay_tools/
+tallyaero_overlay_tools/
 ├── _ecosystem/              # Synced from master
 │   └── docs/
 ├── CLAUDE_CONTEXT.md        # This file
 ├── app.py                   # Main Dash application
-├── aeroedge_tracker.py      # Analytics/tracking
+├── tallyaero_tracker.py      # Analytics/tracking
 ├── aircraft_data/           # Aircraft profiles
 ├── airports/                # Airport data
 ├── assets/                  # Static assets
@@ -87,5 +87,5 @@ python app.py
 
 - **D3 — No telemetry.** This tool makes no analytics or tracking HTTP calls.
   Functional network calls (NOAA AWC, Open-Meteo) are explicit user-initiated
-  features. `aeroedge_tracker.py` and its heartbeat script were removed in
+  features. `tallyaero_tracker.py` and its heartbeat script were removed in
   Phase 0g.

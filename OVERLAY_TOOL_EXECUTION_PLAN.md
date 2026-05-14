@@ -43,11 +43,11 @@ Working plan for the Maneuver Overlay Tool's audit + polish + merge-features spr
 - **0d** Replace `print` / `dprint` with structured `logging`. Configurable via `TALLYAERO_OVERLAY_LOG` env var.
 - **0e** Audit `prevent_initial_call` across all callbacks.
 - **0f** Move data loading out of module-import side effects into explicit `init_data()`.
-- **0g** **Telemetry removal.** Delete `aeroedge_tracker.py`, strip the heartbeat `<script>` from `app.index_string`. Decision D3 enforcement.
+- **0g** **Telemetry removal.** Delete `tallyaero_tracker.py`, strip the heartbeat `<script>` from `app.index_string`. Decision D3 enforcement.
 - **0h** `Makefile` — `make run`, `make test`, `make snapshot-update`, `make lint`.
-- **0i** Project-wide `aeroedge` → `tallyaero` rename.
+- **0i** Project-wide `tallyaero` → `tallyaero` rename.
 
-**Acceptance.** `make test` passes with ≥30 tests. `make run` boots clean at 8050. `grep -r aeroedge_tracker` returns nothing. No telemetry HTTP calls observable in DevTools.
+**Acceptance.** `make test` passes with ≥30 tests. `make run` boots clean at 8050. `grep -r tallyaero_tracker` returns nothing. No telemetry HTTP calls observable in DevTools.
 
 ---
 
