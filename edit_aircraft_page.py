@@ -3,6 +3,10 @@ from dash import dcc, html
 import json
 import os
 from dash.exceptions import PreventUpdate
+from core.log import get_logger
+
+log = get_logger(__name__)
+
 
 def load_aircraft_data_from_folder():
     folder_path = os.path.join(os.path.dirname(__file__), "aircraft_data")
@@ -16,7 +20,7 @@ def load_aircraft_data_from_folder():
                     name = os.path.splitext(filename)[0].replace("_", " ")
                     aircraft_data[name] = data
                 except Exception as e:
-                    print(f"[ERROR] Failed to load {filename}: {e}")
+                    log.error(f"Failed to load {filename}: {e}")
     return aircraft_data
 
 # ✅ Load it once for this page

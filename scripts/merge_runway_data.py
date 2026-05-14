@@ -20,6 +20,7 @@ Runway data structure added:
 import csv
 import json
 import os
+import sys
 from pathlib import Path
 
 # Paths
@@ -27,6 +28,12 @@ SCRIPT_DIR = Path(__file__).parent
 PROJECT_DIR = SCRIPT_DIR.parent
 AIRPORTS_JSON = PROJECT_DIR / "airports" / "airports.json"
 OURAIRPORTS_RUNWAYS = Path("/tmp/ourairports_runways.csv")
+
+# Make the repo root importable so we can use core.log from this CLI script.
+sys.path.insert(0, str(PROJECT_DIR))
+from core.log import get_logger  # noqa: E402
+
+log = get_logger(__name__)
 
 
 def load_existing_airports():
@@ -239,27 +246,27 @@ def save_airports(airports):
 
 
 def main():
-    print("Loading existing airports.json...")
+    log.info("Loading existing airports.json...")
     airports = load_existing_airports()
-    print(f"  Found {len(airports)} airports")
+    log.info(f"  Found {len(airports)} airports")
 
-    print("\nParsing OurAirports runways.csv...")
+    log.info("Parsing OurAirports runways.csv...")
     runways_by_airport = parse_runways_csv()
-    print(f"  Found runways for {len(runways_by_airport)} airports")
+    log.info(f"  Found runways for {len(runways_by_airport)} airports")
 
-    print("\nMerging runway data...")
+    log.info("Merging runway data...")
     airports, updated, runways_added = merge_runway_data(airports, runways_by_airport)
-    print(f"  Updated {updated} airports with {runways_added} total runways")
+    log.info(f"  Updated {updated} airports with {runways_added} total runways")
 
-    print("\nSaving updated airports.json...")
+    log.info("Saving updated airports.json...")
     save_airports(airports)
-    print("  Done!")
+    log.info("  Done!")
 
     # Show sample
-    print("\nSample airport with runway data:")
+    log.info("Sample airport with runway data:")
     for airport in airports:
         if "runways" in airport and len(airport.get("runways", [])) >= 2:
-            print(json.dumps(airport, indent=2))
+            log.info(json.dumps(airport, indent=2))
             break
 
 
