@@ -35,7 +35,11 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
-dev = []
+dev = [
+    "pytest>=8.0",
+    "syrupy>=4.6",
+    "ruff>=0.5",
+]
 
 [tool.setuptools]
 package-dir = { "" = "." }
