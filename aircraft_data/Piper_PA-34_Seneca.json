@@ -1,6 +1,7 @@
 {
   "name": "Piper PA-34 Seneca",
   "type": "multi_engine",
+  "gear_type": "retractable",
   "engine_count": 2,
   "wing_area": 199.0,
   "aspect_ratio": 7.0,
