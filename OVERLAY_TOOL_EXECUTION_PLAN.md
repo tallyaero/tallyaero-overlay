@@ -18,7 +18,7 @@ Working plan for the Maneuver Overlay Tool's audit + polish + merge-features spr
 |---|---|---|---|
 | Setup | Port local-only deltas from `reference/overlay_tools/` snapshot | pending | po180.py, CLAUDE_CONTEXT.md, engine_out_buckets.md |
 | **0** | Test infra + telemetry removal + dev ergonomics | **complete** | 0a–0i |
-| **1** | Decompose app.py (7,784 lines → ≤200) | pending | 1a–1i |
+| **1** | Decompose app.py (7,784 lines → ≤200) | **complete** | 1a–1i |
 | **2** | Aircraft data hardening (port from EM Diagram) | pending | 2a–2e |
 | **3** | Airport data overhaul (OurAirports+NASR port) | pending | 3a–3d |
 | **4** | Maneuver-tool polish + theme + UI shell | pending | 4a–4h |
@@ -210,4 +210,17 @@ Append-only. One entry per shipped sub-phase or significant decision. Mirrors th
     - 124 ruff warnings in `app.py` — Phase 1 decomposition addresses naturally
     - `flyaeroedge.com` URLs (8 sites in `app.py`) — pending user decision on rebrand to `tallyaero.app` or `tallyaero.com`
     - `simulation/steep_turn.py` hover dict missing `ias` + `load_factor` keys — Phase 4b MANEUVER_STANDARD compliance fix
+- 2026-05-14 — **Phase 1 shipped.** Decomposition complete. app.py 7,646 → 81 lines (~99% reduction). Branch `phase-1-decompose` is 37+ commits ahead of main, ready to merge.
+  - **1a** Skeleton — `callbacks/` + `layouts/` aggregator packages.
+  - **1b** 11 maneuver layouts → `layouts/maneuvers/`. (11 commits + port-arg fix + Phase 4 mirror-directive doc.)
+  - **1h** `desktop_layout` + `mobile_layout` + `legal_banner_block` + `_reset_buttons_row` → `layouts/desktop.py` + `layouts/mobile.py`. (2 commits.)
+  - **1g** `edit_aircraft_page.py` split into `layouts/edit_aircraft.py` + `callbacks/edit_aircraft.py`. Discovered original had ZERO callbacks (editing lives at external URL); resulting `callbacks/edit_aircraft.py` is a no-op stub for future expansion. (1 commit.)
+  - **1d** 5 environment callbacks → `callbacks/environment.py`.
+  - **1e** Aircraft cascade + 4 runway-options callbacks → `callbacks/aircraft.py`.
+  - **1f** 7 map-interaction callbacks + 3 helpers → `callbacks/map.py`.
+  - **1c** 9 maneuver draw callbacks + scrubber callbacks (some maneuvers have 2-4 callbacks each) → `callbacks/maneuvers/*.py`. 11 commits, biggest sub-phase by volume.
+  - **1i-pre** (out-of-order critical fix) — `core/data_loader.py` extracted. Broke the `import app as app_module` circular-import deadlock that Phase 1c exposed. 13 callback files + 2 layouts switched to import data from `core.data_loader` instead. `register_all(app)` now actively wires every relocated callback.
+  - **1i** `navigation` callbacks (display_page, mobile_settings, handle_resets, legal_modals, windsock + 2 clientside) → `callbacks/navigation.py`. Removed dead `click_target_registry`. **app.py final size: 81 lines.**
+  - **Tests:** 32 passing throughout (every commit, including the riskiest 1c moves).
+  - **Server:** HTTP 200 boot held across the entire phase; live dev server on port 8052 stayed up the whole time (auto-reloading through each commit).
 - _<next entries appended here as phases ship>_
