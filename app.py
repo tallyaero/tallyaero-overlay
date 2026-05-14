@@ -68,7 +68,7 @@ app = dash.Dash(
 )
 server = app.server
 
-app.title = "Maneuver Overlay Tool | AeroEdge"
+app.title = "Maneuver Overlay Tool | TallyAero"
 
 app.index_string = """
 <!DOCTYPE html>
@@ -106,7 +106,7 @@ def legal_banner_block():
                     html.Span(" | ", className="legal-separator"),
                     html.A("Report an Error", href="https://forms.gle/VX6CA1ugifAtmBM79", target="_blank", className="legal-link", style={"color": "#dc3545"}),
                     html.Span(" | ", className="legal-separator"),
-                    html.A("Contact AeroEdge", href="https://forms.gle/nDahQbhYDNYh6P129", target="_blank", className="legal-link"),
+                    html.A("Contact TallyAero", href="https://forms.gle/nDahQbhYDNYh6P129", target="_blank", className="legal-link"),
                 ],
                 className="legal-links-row",
             ),
@@ -157,13 +157,13 @@ def legal_banner_block():
                 is_open=False,
                 centered=True,
                 size="lg",
-                dialogClassName="aeroedge-modal",
+                dialogClassName="tallyaero-modal",
                 scrollable=True,
             ),
 
             dbc.Modal(
                 [
-                    dbc.ModalHeader("AeroEdge Disclaimer", close_button=True),
+                    dbc.ModalHeader("TallyAero Disclaimer", close_button=True),
                     dbc.ModalBody(
                         [
                             html.P("This tool supplements, not replaces, FAA published documentation."),
@@ -171,7 +171,7 @@ def legal_banner_block():
                             html.P("Do not use this tool for flight planning, aircraft operation, or regulatory compliance decisions."),
                             html.P("Outputs may be incomplete, inaccurate, outdated, or derived from public or user-provided inputs. No warranties are made regarding accuracy, completeness, or fitness for purpose."),
                             html.P("If any information conflicts with the aircraft FAA-approved AFM or POH, the official documentation shall govern."),
-                            html.P("AeroEdge disclaims liability for errors, omissions, injuries, damages, or losses resulting from use of this application."),
+                            html.P("TallyAero disclaims liability for errors, omissions, injuries, damages, or losses resulting from use of this application."),
                         ]
                     ),
                     dbc.ModalFooter(dbc.Button("Close", id="close-disclaimer", className="green-button")),
@@ -180,7 +180,7 @@ def legal_banner_block():
                 is_open=False,
                 centered=True,
                 size="lg",
-                dialogClassName="aeroedge-modal",
+                dialogClassName="tallyaero-modal",
                 backdrop="static",
                 scrollable=True,
             ),
@@ -204,7 +204,7 @@ def legal_banner_block():
                 is_open=False,
                 centered=True,
                 size="lg",
-                dialogClassName="aeroedge-modal",
+                dialogClassName="tallyaero-modal",
                 backdrop="static",
                 scrollable=True,
             ),
@@ -604,7 +604,7 @@ def mobile_layout():
             html.Span(" | ", className="legal-separator"),
             html.A("Report Error", href="mailto:support@flyaeroedge.com?subject=Overlay%20Tool%20Error", className="legal-link"),
             html.Span(" | ", className="legal-separator"),
-            html.A("Contact AeroEdge", href="https://www.flyaeroedge.com/contact", target="_blank", className="legal-link"),
+            html.A("Contact TallyAero", href="https://www.flyaeroedge.com/contact", target="_blank", className="legal-link"),
         ]),
 
         # Config toggle bar
@@ -793,7 +793,7 @@ def mobile_layout():
         ]),
 
         # Footer
-        html.Div("© 2026 AeroEdge", className="mobile-footer"),
+        html.Div("© 2026 TallyAero", className="mobile-footer"),
 
         # Hidden stores and placeholders needed for callbacks
         html.Div(style={"display": "none"}, children=[
