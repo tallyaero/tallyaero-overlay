@@ -77,6 +77,7 @@ def _top_strip():
                             className="chip-dropdown",
                             placeholder="Select maneuver",
                             options=[
+                                {"label": "Route Planner", "value": "route"},
                                 {"label": "Impossible Turn", "value": "impossible_turn"},
                                 {"label": "Power-Off 180", "value": "poweroff180"},
                                 {"label": "Engine-Out Glide", "value": "engineout"},
@@ -95,60 +96,7 @@ def _top_strip():
                         html.Button("?", id="open-maneuver-info", n_clicks=0,
                                     className="shelf-info-btn",
                                     title="What is this maneuver?"),
-                        html.Button("Plan Route", id="open-route-btn", n_clicks=0,
-                                    className="shelf-btn shelf-btn-route",
-                                    title="Plan a route between two airports"),
                     ], className="maneuver-shelf-picker"),
-
-                    # Plan Route modal — minimum-viable: ICAO inputs +
-                    # cruise alt + TAS. Submit → renders polyline on the
-                    # map + populates the summary inside the modal.
-                    dbc.Modal(
-                        [
-                            dbc.ModalHeader(dbc.ModalTitle("Plan Route"), close_button=True),
-                            dbc.ModalBody([
-                                html.Div(className="route-modal-row", children=[
-                                    html.Label("From (ICAO)", className="input-label-sm"),
-                                    dcc.Input(id="route-origin-input", type="text",
-                                              placeholder="KJFK", className="input-small",
-                                              style={"textTransform": "uppercase"}),
-                                ]),
-                                html.Div(className="route-modal-row", children=[
-                                    html.Label("To (ICAO)", className="input-label-sm"),
-                                    dcc.Input(id="route-dest-input", type="text",
-                                              placeholder="KLAX", className="input-small",
-                                              style={"textTransform": "uppercase"}),
-                                ]),
-                                html.Div(className="route-modal-row", children=[
-                                    html.Label("Cruise Alt (ft MSL)", className="input-label-sm"),
-                                    dcc.Input(id="route-cruise-alt", type="number",
-                                              value=5500, min=0, max=60000, step=500,
-                                              className="input-small"),
-                                ]),
-                                html.Div(className="route-modal-row", children=[
-                                    html.Label("TAS (kt)", className="input-label-sm"),
-                                    dcc.Input(id="route-tas", type="number",
-                                              value=110, min=40, max=600,
-                                              className="input-small"),
-                                ]),
-                                html.Div(
-                                    "Wind is pulled from the sidebar Environment section.",
-                                    className="route-modal-hint",
-                                ),
-                                html.Div(id="route-summary-container",
-                                         style={"marginTop": "16px"}),
-                            ]),
-                            dbc.ModalFooter([
-                                html.Button("Compute Route", id="compute-route-btn",
-                                            className="green-button"),
-                                html.Button("Close", id="close-route-btn",
-                                            className="reset-btn-small"),
-                            ]),
-                        ],
-                        id="route-modal",
-                        is_open=False, centered=True, size="md",
-                        dialogClassName="tallyaero-modal",
-                    ),
 
                     # Stores the latest computed route for later use
                     dcc.Store(id="route-result-store", data=None),
@@ -506,6 +454,11 @@ def desktop_layout():
                         html.Button("Reset Clicks", id="reset-clicks", className="map-overlay-btn"),
                         html.Button("Undo", id="undo-last-click", className="map-overlay-btn map-overlay-btn-undo"),
                     ]),
+
+                    # Route summary overlay — top-left of the map. Populated
+                    # by the route compute callback; empty until a route is
+                    # computed.
+                    html.Div(id="route-summary-overlay"),
 
                     dl.Map(
                         id="map",

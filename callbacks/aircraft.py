@@ -21,6 +21,7 @@ from layouts.maneuvers.s_turn import s_turn_layout
 from layouts.maneuvers.turns_around_point import turns_point_layout
 from layouts.maneuvers.rectangular_course import rect_course_layout
 from layouts.maneuvers.eights_on_pylons import pylons_layout
+from layouts.maneuvers.route import route_layout
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -39,6 +40,8 @@ def register(app):
             ap = next((a for a in airport_data if a["id"] == airport_id), None)
             elev_ft = ap.get("elevation_ft", None) if ap else None
 
+        if maneuver == "route":
+            return route_layout()
         if maneuver == "impossible_turn":
             return impossible_turn_layout()
         elif maneuver == "poweroff180":
