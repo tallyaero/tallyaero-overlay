@@ -20,7 +20,7 @@
   --accordion-active-bg: #e9ecef;
 
   /* Layout */
-  --sidebar-width: 360px;
+  --sidebar-width: 290px;
 }
 
 /* === Global Reset === */
@@ -1955,4 +1955,38 @@ input[type="radio"] {
 [data-theme="dark"] .sidebar-section-bottom {
   border-top-color: #334155;
   background: rgba(15, 23, 42, 0.5);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Final polish — sidebar narrower, selected-airport hidden,
+   shelf labels inline with their fields.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Narrower sidebar — minimum width drops with the default */
+.resizable-sidebar {
+  min-width: 220px !important;
+}
+
+/* Force-hide the redundant selected-airport label. The callback
+   sets a `style.display` value each time an airport is picked; the
+   !important rule wins. */
+#selected-airport-display {
+  display: none !important;
+}
+
+/* Inline labels for shelf fields — label on the left, control on
+   the right, side-by-side. Sliders keep column layout (labels
+   above) since their marks need full width. */
+.shelf-field {
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+.shelf-field-slider {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
+}
+.shelf-field-label {
+  white-space: nowrap;
 }
