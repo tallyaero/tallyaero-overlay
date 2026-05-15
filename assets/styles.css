@@ -1573,459 +1573,191 @@ input[type="radio"] {
 [data-theme="dark"] .legal-links .legal-copyright { color: #94a3b8; }
 
 /* ══════════════════════════════════════════════════════════════
-   Phase 4 chip-strip — second row below the top-strip, above the map.
-   Horizontal scroll on overflow so narrow desktops still see everything.
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 4 — horizontal-native maneuver shelf.
+   Each per-maneuver layout returns a flex row of `.shelf-field`
+   columns (label-on-top, input-below, tight gap). Action buttons
+   sit on the right. No vertical stacking, no oversized buttons,
+   no stretched sliders.
    ══════════════════════════════════════════════════════════════ */
 
-.env-chips-strip {
+.maneuver-shelf-params {
   display: flex;
-  flex-wrap: nowrap;
-  gap: 6px;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 6px 12px;
   padding: 8px 16px;
   background: var(--ta-surface-secondary, #ffffff);
   border-bottom: 1px solid var(--ta-border-primary, #e2e8f0);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
   flex-shrink: 0;
 }
+.maneuver-shelf-params:empty { display: none; }
 
-/* Tappable variant — visually distinct from the static env-chip */
-.env-chip-tappable {
-  flex-shrink: 0;
+/* Each labeled control is a tight column */
+.shelf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
-.env-chip-tappable:hover {
-  background: rgba(13, 89, 242, 0.06);
-  border-color: var(--ta-brand-blue, #0d59f2);
-}
-
-/* Popover bodies — give each one breathing room */
-.env-popover {
-  min-width: 260px;
-  max-width: 360px;
-  z-index: 1100;
-}
-.env-popover.env-popover-apt {
-  min-width: 340px;
-}
-.env-popover.env-popover-weight {
-  min-width: 320px;
-}
-.env-popover.env-popover-maneuver {
-  min-width: 280px;
-}
-.env-popover .popover-header {
-  font-family: var(--ta-font-sans, system-ui);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+.shelf-field-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--ta-text-secondary, #64748b);
-  background: var(--ta-surface-elevated, #ffffff);
-  padding: 8px 12px;
+  color: var(--ta-text-tertiary, #94a3b8);
+  white-space: nowrap;
 }
-.env-popover .popover-body {
-  padding: 12px;
-}
-.input-label-sm {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ta-text-secondary, #64748b);
-  margin-bottom: 4px;
-  display: block;
-}
-
-[data-theme="dark"] .env-chips-strip {
-  background: #1e293b;
-  border-bottom-color: #334155;
-}
-[data-theme="dark"] .env-chip-tappable:hover {
-  background: rgba(96, 165, 250, 0.12);
-}
-[data-theme="dark"] .env-popover .popover {
-  background: #0f172a;
-  border-color: #334155;
-}
-[data-theme="dark"] .env-popover .popover-header {
-  background: #1e293b;
-  color: #cbd5e1;
-  border-bottom-color: #334155;
-}
-[data-theme="dark"] .env-popover .popover-body {
-  background: #0f172a;
-  color: #e2e8f0;
-}
-[data-theme="dark"] .input-label-sm {
-  color: #cbd5e1;
-}
-
-/* Phase 4 chip-strip — inline input sizing inside chips */
-.env-chip-inline {
-  padding: 0 8px;
-  gap: 4px;
-}
-.env-chip-inline .chip-prefix {
-  margin-right: 2px;
-}
-.env-chip-inline .chip-input {
-  height: 22px;
-  padding: 0 4px;
+/* Numeric / text input inside a shelf-field */
+.shelf-field input[type="number"],
+.shelf-field input[type="text"] {
+  width: 64px;
+  height: 26px;
+  padding: 0 6px;
+  font-size: 12px;
+  text-align: center;
   border: 1px solid var(--ta-border-primary, #e2e8f0);
   border-radius: 3px;
   background: var(--ta-surface-elevated, #ffffff);
   color: var(--ta-text-primary, #0f172a);
-  font-size: 12px;
   font-variant-numeric: tabular-nums;
-  text-align: center;
-  margin: 0;
-  box-sizing: border-box;
 }
-.env-chip-inline .chip-input:focus {
-  outline: none;
-  border-color: var(--ta-brand-blue, #0d59f2);
-  box-shadow: 0 0 0 2px rgba(13, 89, 242, 0.18);
-}
-.env-chip-inline .chip-input-num {
-  width: 48px;
-}
-.env-chip-inline .chip-input-num[id="env-altimeter"] {
-  width: 62px;
-}
-.env-chip-inline .chip-input-text {
+/* Dropdowns inside a shelf-field */
+.shelf-field .Select,
+.shelf-field .dash-dropdown {
   width: 120px;
-  text-align: left;
-}
-.env-chip-inline .chip-input-readout {
-  width: 70px;
-  background: transparent;
-  border-color: transparent;
-  cursor: default;
-}
-.env-chip-inline .chip-sep {
-  color: var(--ta-text-tertiary, #94a3b8);
   font-size: 12px;
-  margin: 0 1px;
 }
-.env-chip-inline .chip-unit {
-  color: var(--ta-text-tertiary, #94a3b8);
-  font-size: 10px;
-  letter-spacing: 0.02em;
-  margin-left: 2px;
-}
-.env-chip-inline .chip-action-mini {
-  height: 22px;
-  padding: 0 8px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  background: #6c757d;
-  color: #ffffff;
-  border: none;
+.shelf-field .Select-control,
+.shelf-field > div .Select-control {
+  min-height: 26px;
   border-radius: 3px;
-  cursor: pointer;
-  margin-left: 4px;
-}
-.env-chip-inline .chip-action-mini:hover {
-  background: #5a6268;
-}
-
-/* MANEUVER dropdown — needs more width than the numeric chips */
-.env-chip-maneuver { padding-right: 4px; }
-.env-chip-maneuver .chip-dropdown { min-width: 170px; }
-.env-chip-maneuver .Select-control,
-.env-chip-maneuver .css-control,
-.env-chip-maneuver > div > div:first-child {
-  min-height: 24px;
   font-size: 12px;
-  border-radius: 3px;
 }
-
-/* APT chip — floating search results below the chip */
-.chip-floating.search-results-box {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 1100;
-  width: 320px;
-  max-height: 280px;
-  overflow-y: auto;
-  background: var(--ta-surface-elevated, #ffffff);
-  border: 1px solid var(--ta-border-primary, #e2e8f0);
-  border-radius: 4px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-  margin-top: 2px;
+/* Sliders inside a shelf-field — clamp width via a fixed-width wrapper */
+.shelf-field-slider {
+  width: 160px;
+  padding: 4px 4px 0;
 }
-.env-chip-apt {
-  position: relative;
+.shelf-field-slider .rc-slider {
+  width: 100%;
+  margin: 4px 0;
 }
-
-/* Sidebar sections */
-.sidebar-section {
-  padding: 12px 12px;
-  border-bottom: 1px solid var(--gray-border);
+.shelf-field-slider .rc-slider-mark-text {
+  font-size: 9px;
 }
-.sidebar-section:last-child { border-bottom: none; }
-.sidebar-section-title {
-  font-family: var(--ta-font-sans, system-ui);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ta-text-tertiary, #94a3b8);
-  margin-bottom: 8px;
-}
-
-[data-theme="dark"] .env-chip-inline .chip-input {
-  background: #0f172a;
-  color: #e2e8f0;
-  border-color: #334155;
-}
-[data-theme="dark"] .env-chip-inline .chip-input-readout {
-  background: transparent;
-  border-color: transparent;
-}
-[data-theme="dark"] .chip-floating.search-results-box {
-  background: #0f172a;
-  border-color: #334155;
-}
-[data-theme="dark"] .sidebar-section { border-bottom-color: #334155; }
-[data-theme="dark"] .sidebar-section-title { color: #94a3b8; }
-
-/* ══════════════════════════════════════════════════════════════
-   Maneuver action shelf — sits between top-strip and main-grid.
-   Holds per-maneuver Set Point / Draw / Erase buttons (left), the
-   global Reset / Undo buttons (center) and a status text area (right).
-   ══════════════════════════════════════════════════════════════ */
-
-.maneuver-shelf {
-  display: flex;
+/* Radio rows */
+.shelf-field-radio {
+  display: inline-flex;
+  gap: 8px;
   align-items: center;
-  gap: 12px;
-  padding: 8px 16px;
-  background: var(--ta-surface-secondary, #ffffff);
-  border-bottom: 1px solid var(--ta-border-primary, #e2e8f0);
-  flex-shrink: 0;
-  min-height: 44px;
+  padding-bottom: 2px;
 }
-.maneuver-actions-slot {
-  display: flex;
+.shelf-field-radio label {
+  font-size: 11px;
+  display: inline-flex;
+  gap: 3px;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  min-width: 0;
+  margin: 0;
 }
-.maneuver-actions-slot:empty::before {
-  content: "Pick a maneuver to see its controls";
-  color: var(--ta-text-tertiary, #94a3b8);
-  font-size: 11px;
-  font-style: italic;
-}
-.maneuver-shelf-globals {
-  display: flex;
-  gap: 6px;
-  margin-left: auto;
-}
-.maneuver-shelf-status {
-  font-size: 11px;
-  color: var(--ta-text-secondary, #64748b);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.shelf-btn {
+
+/* Action buttons in the shelf */
+.shelf-action {
   height: 28px;
   padding: 0 12px;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  border: 1px solid var(--ta-border-primary, #e2e8f0);
-  border-radius: 4px;
-  background: var(--ta-surface-elevated, #ffffff);
-  color: var(--ta-text-primary, #0f172a);
+  border-radius: 3px;
+  border: none;
   cursor: pointer;
-  transition: background-color 0.12s ease, border-color 0.12s ease;
+  white-space: nowrap;
 }
-.shelf-btn:hover {
-  background: var(--ta-surface-tertiary, #f1f5f9);
-  border-color: var(--ta-brand-blue, #0d59f2);
+.shelf-action-set {
+  background: var(--ta-brand-orange, #f27b0d);
+  color: #ffffff;
 }
-.shelf-btn-reset { color: #6c757d; }
-.shelf-btn-undo  { color: #17a2b8; border-color: #17a2b8; }
+.shelf-action-set:hover { background: var(--ta-brand-orange-dark, #c2410c); }
+.shelf-action-draw {
+  background: var(--ta-brand-blue, #0d59f2);
+  color: #ffffff;
+}
+.shelf-action-draw:hover { background: var(--ta-brand-blue-dark, #0a47c9); }
 
-[data-theme="dark"] .maneuver-shelf {
+/* Push action buttons to the right side of the row */
+.shelf-spacer { flex: 1 1 auto; min-width: 0; }
+
+[data-theme="dark"] .maneuver-shelf-params {
   background: #1e293b;
   border-bottom-color: #334155;
 }
-[data-theme="dark"] .shelf-btn {
+[data-theme="dark"] .shelf-field-label { color: #94a3b8; }
+[data-theme="dark"] .shelf-field input[type="number"],
+[data-theme="dark"] .shelf-field input[type="text"] {
   background: #0f172a;
   color: #e2e8f0;
   border-color: #334155;
 }
-[data-theme="dark"] .shelf-btn:hover {
-  background: #1e293b;
-  border-color: var(--ta-brand-blue, #60a5fa);
-}
-[data-theme="dark"] .shelf-btn-reset { color: #94a3b8; }
-[data-theme="dark"] .shelf-btn-undo  { color: #5bc0de; border-color: #5bc0de; }
-[data-theme="dark"] .maneuver-shelf-status { color: #cbd5e1; }
 
-/* Shelf rows — row 1 (picker + globals + status) is the toolbar;
-   row 2 (params + Set Point / Draw / Erase) is the per-maneuver form. */
-.maneuver-shelf { flex-direction: column; align-items: stretch; padding: 8px 16px 10px; }
-.maneuver-shelf-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.maneuver-shelf-row-top {
-  border-bottom: 1px dashed var(--ta-border-primary, #e2e8f0);
-  padding-bottom: 8px;
-  margin-bottom: 8px;
-}
+/* Top strip — picker layouts (MANEUVER picker + info button) */
 .maneuver-shelf-picker {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
+  margin-left: 16px;
+}
+.maneuver-shelf-picker .chip-prefix {
+  font-size: 10px;
 }
 .maneuver-shelf-picker .chip-dropdown {
   min-width: 200px;
-  font-size: 13px;
+  font-size: 12px;
 }
-.maneuver-shelf-picker .chip-prefix { font-size: 10px; }
-
-.maneuver-shelf-params {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-.maneuver-shelf-params:empty { display: none; }
-
-/* The per-maneuver forms originally render as a vertical Div of
-   labeled inputs + buttons. Inside the shelf we let them flow
-   horizontally; their internal styles still drive widths. */
-.maneuver-shelf-params > div { display: inline-block; }
-
-[data-theme="dark"] .maneuver-shelf-row-top {
-  border-bottom-color: #334155;
+.maneuver-shelf-picker .chip-dropdown .Select-control,
+.maneuver-shelf-picker > div .Select-control {
+  min-height: 28px;
+  font-size: 12px;
 }
 
-/* ══════════════════════════════════════════════════════════════
-   Maneuver shelf — tight horizontal compression for the per-maneuver
-   form. Existing maneuver layouts were designed for a vertical
-   sidebar; this overrides them to display as a single horizontal
-   row of compact labeled controls.
-   ══════════════════════════════════════════════════════════════ */
-
-/* Hide the verbose Description accordions — content now lives in
-   the Info modal triggered from the shelf. */
-.maneuver-shelf-params .accordion,
-.maneuver-shelf-params .sidebar-accordion {
-  display: none !important;
-}
-
-/* Compact controls — strip vertical margins, shrink labels/inputs */
-.maneuver-shelf-params,
-.maneuver-shelf-params * {
-  font-size: 11px !important;
-  box-sizing: border-box;
-}
-.maneuver-shelf-params {
+/* Status text + global reset/undo cluster on right side of top strip */
+.top-strip-right .maneuver-shelf-status {
+  max-width: 220px;
   font-size: 11px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  align-items: center;
-  padding-top: 4px;
+  color: var(--ta-text-secondary, #64748b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-style: italic;
 }
-.maneuver-shelf-params label {
-  display: inline-flex !important;
-  align-items: center;
-  font-size: 10px !important;
+.top-strip-right .maneuver-shelf-globals {
+  display: inline-flex;
+  gap: 4px;
+}
+.top-strip-right .shelf-btn {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--ta-text-secondary, #64748b);
-  margin: 0 4px 0 0 !important;
-  padding: 0 !important;
+  border-radius: 3px;
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  background: var(--ta-surface-elevated, #ffffff);
+  color: var(--ta-text-primary, #0f172a);
+  cursor: pointer;
 }
-.maneuver-shelf-params .input-label,
-.maneuver-shelf-params .input-label-sm {
-  display: inline-flex !important;
-  margin: 0 4px 0 0 !important;
+.top-strip-right .shelf-btn:hover {
+  background: var(--ta-surface-tertiary, #f1f5f9);
+  border-color: var(--ta-brand-blue, #0d59f2);
 }
-.maneuver-shelf-params input[type="text"],
-.maneuver-shelf-params input[type="number"] {
-  height: 24px !important;
-  width: 64px !important;
-  padding: 0 6px !important;
-  font-size: 11px !important;
-  text-align: center;
-  margin: 0 !important;
-}
-.maneuver-shelf-params .Select-control,
-.maneuver-shelf-params .css-control,
-.maneuver-shelf-params > div .Select-control {
-  min-height: 26px !important;
-  font-size: 11px !important;
-}
-.maneuver-shelf-params .Select,
-.maneuver-shelf-params .dropdown,
-.maneuver-shelf-params .dash-dropdown {
-  min-width: 100px !important;
-  max-width: 180px !important;
-  margin: 0 !important;
-}
-.maneuver-shelf-params .dcc-slider,
-.maneuver-shelf-params [class*="rc-slider"] {
-  width: 140px !important;
-  display: inline-block !important;
-  margin: 0 4px !important;
-}
-.maneuver-shelf-params button {
-  height: 24px !important;
-  padding: 0 10px !important;
-  font-size: 10px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin: 0 !important;
-  white-space: nowrap;
-}
-.maneuver-shelf-params .btn-action-orange {
-  height: 24px !important;
-  padding: 0 10px !important;
-}
-/* The "Draw <maneuver>" button is the primary action — accent it */
-.maneuver-shelf-params [id*="-draw-btn"],
-.maneuver-shelf-params [id^="draw-"] {
-  background: var(--ta-brand-blue, #0d59f2) !important;
-  color: #ffffff !important;
-  border: none !important;
-}
-/* "Click on the runway where you intend to touch down" instruction text */
-.maneuver-shelf-params .help-text,
-.maneuver-shelf-params [class*="instruction"] {
-  display: none !important;  /* covered by the Info modal */
+.top-strip-right .shelf-btn-undo {
+  border-color: #17a2b8;
+  color: #17a2b8;
 }
 
-/* Drop the maneuver-shelf-params border/padding bottom so the row
-   flows tight against the map */
-.maneuver-shelf-params:empty { padding-top: 0; }
-
-/* RadioItems (Left/Right pattern direction) — inline tight */
-.maneuver-shelf-params .dash-radio-items,
-.maneuver-shelf-params [class*="radio-items"] {
-  display: inline-flex !important;
-  gap: 8px;
-  margin: 0 6px !important;
-}
-.maneuver-shelf-params input[type="radio"] { margin: 0 2px 0 0 !important; }
-
-/* Info "?" button next to the MANEUVER picker */
+/* "?" info button (small circle next to picker) */
 .shelf-info-btn {
   width: 22px;
   height: 22px;
@@ -2040,133 +1772,64 @@ input[type="radio"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.12s ease, color 0.12s ease;
 }
 .shelf-info-btn:hover {
   background: var(--ta-brand-blue, #0d59f2);
   color: #ffffff;
   border-color: var(--ta-brand-blue, #0d59f2);
 }
+
+[data-theme="dark"] .top-strip-right .shelf-btn {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+[data-theme="dark"] .top-strip-right .shelf-btn:hover {
+  background: #1e293b;
+}
+[data-theme="dark"] .top-strip-right .maneuver-shelf-status { color: #cbd5e1; }
 [data-theme="dark"] .shelf-info-btn {
   background: #0f172a;
   color: #cbd5e1;
   border-color: #334155;
 }
 
-/* Stronger overrides for shelf compression — beat inline width:100% */
-.maneuver-shelf-params button {
-  width: auto !important;
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
+/* Sidebar sections (re-added — were in earlier batch but may have been lost) */
+.sidebar-section {
+  padding: 12px;
+  border-bottom: 1px solid var(--gray-border);
 }
-/* Top-level wrapper divs that the maneuver layouts use for button groups
-   sometimes carry inline width: 100%. Force inline flow. */
-.maneuver-shelf-params > div {
-  display: inline-block !important;
-  width: auto !important;
-  vertical-align: middle;
-}
-.maneuver-shelf-params .green-button,
-.maneuver-shelf-params .blue-button,
-.maneuver-shelf-params .btn-action-orange {
-  width: auto !important;
-  height: 26px !important;
-  padding: 0 12px !important;
-  font-size: 11px !important;
-  margin: 0 4px 0 0 !important;
-}
-
-/* Slider — clamp width inside the shelf */
-.maneuver-shelf-params .rc-slider,
-.maneuver-shelf-params [class*="rc-slider"]:not([class*="handle"]):not([class*="track"]):not([class*="rail"]):not([class*="step"]) {
-  width: 140px !important;
-  margin: 0 6px !important;
-  display: inline-block !important;
-  vertical-align: middle;
-}
-/* Slider tooltip — keep close, smaller */
-.maneuver-shelf-params .rc-slider-tooltip {
-  font-size: 10px !important;
-}
-.maneuver-shelf-params .rc-slider-mark-text {
-  font-size: 9px !important;
-}
-
-/* Hide inline help text rendered by the maneuver layouts (these used
-   to live next to each button as a one-line instruction). The Info
-   modal now carries this content. */
-.maneuver-shelf-params [style*="color: #666"]:not(input):not(select):not(label) {
-  display: none !important;
-}
-.maneuver-shelf-params [style*="fontStyle: italic"] {
-  display: none !important;
-}
-
-/* Horizontal hr separators inside the per-maneuver layouts — drop */
-.maneuver-shelf-params hr {
-  display: none !important;
-}
-
-/* ══════════════════════════════════════════════════════════════
-   Slider clamping inside the shelf — beat Dash's _dash-undo-redo
-   wrapper. Slider parent + slider both get clamped to a tight width.
-   ══════════════════════════════════════════════════════════════ */
-.maneuver-shelf-params [id$="-abeam-distance-nm"],
-.maneuver-shelf-params [id$="-time-slider"],
-.maneuver-shelf-params [id$="-power-setting"] {
-  width: 140px !important;
-  display: inline-block !important;
-}
-/* Any direct child of params that contains a slider — clamp */
-.maneuver-shelf-params > div:has(.rc-slider) {
-  width: 160px !important;
-  display: inline-block !important;
-  vertical-align: middle;
-  flex: 0 0 auto !important;
-}
-.maneuver-shelf-params .rc-slider {
-  width: 140px !important;
-  margin: 6px 4px !important;
-}
-.maneuver-shelf-params .rc-slider-rail,
-.maneuver-shelf-params .rc-slider-track,
-.maneuver-shelf-params .rc-slider-step {
-  width: 100% !important;
-}
-/* Cap parent containers — the maneuver layouts wrap sliders in <div>
-   that inherits 100% of the shelf width. Clamp any flex parent. */
-.maneuver-shelf-params,
-.maneuver-shelf-params * {
-  max-width: 100%;
-}
-.maneuver-shelf-params > * {
-  flex: 0 0 auto !important;
-  max-width: 280px;
-}
-
-/* Top-strip now has more on the right side — keep status from
-   pushing other items off */
-.top-strip .maneuver-shelf-status {
-  max-width: 200px;
-  font-size: 11px;
-  color: var(--ta-text-secondary, #64748b);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.top-strip .maneuver-shelf-globals {
-  display: inline-flex;
-  gap: 4px;
-}
-.top-strip .shelf-btn {
-  height: 26px;
-  padding: 0 10px;
+.sidebar-section:last-child { border-bottom: none; }
+.sidebar-section-title {
+  font-family: var(--ta-font-sans, system-ui);
   font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ta-text-tertiary, #94a3b8);
+  margin-bottom: 8px;
 }
+[data-theme="dark"] .sidebar-section { border-bottom-color: #334155; }
+[data-theme="dark"] .sidebar-section-title { color: #94a3b8; }
 
-/* Empty maneuver-shelf-params row should collapse — Dash sets
-   children=[] when no maneuver picked. */
-.maneuver-shelf-params:empty {
-  display: none !important;
+.input-label-sm {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ta-text-secondary, #64748b);
+  margin-bottom: 4px;
+  display: block;
+}
+[data-theme="dark"] .input-label-sm { color: #cbd5e1; }
+
+/* Aircraft picker wrap (top strip) */
+.aircraft-picker-wrap {
+  width: 280px;
+  min-width: 200px;
+  max-width: 28vw;
+}
+.aircraft-picker-wrap .aircraft-dropdown,
+.aircraft-picker-wrap .Select-control,
+.aircraft-picker-wrap > div .Select-control {
+  min-height: 32px;
+  font-size: 13px;
 }
