@@ -10,6 +10,42 @@ from dash.exceptions import PreventUpdate
 from core.data_loader import aircraft_data, airport_data
 
 
+_AP_SEARCH_FIELDS = ("id", "name", "icao", "iata", "local", "municipality", "state")
+
+
+def _airport_matches(ap: dict, q: str) -> bool:
+    """Case-insensitive substring match across ID, name, ICAO, IATA, FAA LID,
+    municipality, and US state. Empty/None fields skipped automatically."""
+    for f in _AP_SEARCH_FIELDS:
+        v = ap.get(f)
+        if v and q in v.lower():
+            return True
+    return False
+
+
+def _airport_label(ap: dict) -> str:
+    """Format a search-result label: short-code · name — locality.
+
+    short-code prefers IATA, then ICAO, then ID. Locality prefers
+    "city, state" (US) → "city, country" → country → empty.
+    """
+    short = ap.get("iata") or ap.get("icao") or ap.get("id", "")
+    name = ap.get("name", "")
+    city = ap.get("municipality") or ""
+    state = ap.get("state") or ""
+    country = ap.get("country") or ""
+    if city and state:
+        locality = f"{city}, {state}"
+    elif city and country:
+        locality = f"{city}, {country}"
+    elif country:
+        locality = country
+    else:
+        locality = ""
+    prefix = f"{short} · {name}" if short and short != ap.get("id") else f"{name} ({ap.get('id','')})"
+    return f"{prefix} — {locality}" if locality else prefix
+
+
 def register(app):
     """Install every environment callback against the given Dash app."""
 
@@ -92,30 +128,23 @@ def register(app):
 
         q = query.strip().lower()
 
-        # Find matching airports
         matches = []
         for ap in airport_data:
-            ap_id = ap.get("id", "").lower()
-            ap_name = ap.get("name", "").lower()
-            if q in ap_id or q in ap_name:
-                matches.append({"id": ap["id"], "name": ap["name"]})
+            if _airport_matches(ap, q):
+                matches.append({"id": ap["id"], "label": _airport_label(ap)})
             if len(matches) >= 10:
                 break
 
-        # Store match IDs
         match_ids = [m["id"] for m in matches]
-
-        # Build simple results list - click to select
         results = [
             html.Div(
-                f"{m['name']} ({m['id']})",
+                m["label"],
                 className="airport-result",
                 id={"type": "airport-result", "index": m["id"]},
                 n_clicks=0,
             )
             for m in matches
         ]
-
         return results, match_ids, 0
 
     @app.callback(
