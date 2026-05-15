@@ -1870,3 +1870,45 @@ input[type="radio"] {
 [data-theme="dark"] .shelf-btn-reset { color: #94a3b8; }
 [data-theme="dark"] .shelf-btn-undo  { color: #5bc0de; border-color: #5bc0de; }
 [data-theme="dark"] .maneuver-shelf-status { color: #cbd5e1; }
+
+/* Shelf rows — row 1 (picker + globals + status) is the toolbar;
+   row 2 (params + Set Point / Draw / Erase) is the per-maneuver form. */
+.maneuver-shelf { flex-direction: column; align-items: stretch; padding: 8px 16px 10px; }
+.maneuver-shelf-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.maneuver-shelf-row-top {
+  border-bottom: 1px dashed var(--ta-border-primary, #e2e8f0);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+.maneuver-shelf-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.maneuver-shelf-picker .chip-dropdown {
+  min-width: 200px;
+  font-size: 13px;
+}
+.maneuver-shelf-picker .chip-prefix { font-size: 10px; }
+
+.maneuver-shelf-params {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.maneuver-shelf-params:empty { display: none; }
+
+/* The per-maneuver forms originally render as a vertical Div of
+   labeled inputs + buttons. Inside the shelf we let them flow
+   horizontally; their internal styles still drive widths. */
+.maneuver-shelf-params > div { display: inline-block; }
+
+[data-theme="dark"] .maneuver-shelf-row-top {
+  border-bottom-color: #334155;
+}

@@ -206,27 +206,52 @@ def _theme_toggle():
 
 
 def _maneuver_action_shelf():
-    """Phase 4 — top shelf for the active maneuver's controls. Holds
-    the global Reset / Undo buttons (always available) plus a slot for
-    per-maneuver Set-Point / Draw / Erase buttons that future callbacks
-    will populate based on the selected maneuver. Status indicators
-    (e.g. "Set start point first…") also land here."""
+    """Phase 4 — top shelf is the maneuver workbench. Holds the
+    maneuver picker, the per-maneuver params + Set Point / Draw /
+    Erase buttons (rendered by maneuver-params-container), the global
+    Reset / Undo controls, and a status text area. The left sidebar
+    no longer carries any maneuver-specific content."""
     return html.Div(
         className="maneuver-shelf",
         children=[
-            # Per-maneuver action buttons (populated by callback per maneuver)
-            html.Div(id="maneuver-actions-container", className="maneuver-actions-slot"),
+            # Row 1 — maneuver picker · global reset / undo · status
+            html.Div(className="maneuver-shelf-row maneuver-shelf-row-top", children=[
+                html.Div([
+                    html.Span("MANEUVER", className="chip-prefix"),
+                    dcc.Dropdown(
+                        id="maneuver-select",
+                        className="chip-dropdown",
+                        placeholder="Select maneuver",
+                        options=[
+                            {"label": "Impossible Turn", "value": "impossible_turn"},
+                            {"label": "Power-Off 180", "value": "poweroff180"},
+                            {"label": "Engine-Out Glide", "value": "engineout"},
+                            {"label": "Steep Turns", "value": "steep_turn"},
+                            {"label": "Chandelle", "value": "chandelle"},
+                            {"label": "Lazy Eight", "value": "lazy8"},
+                            {"label": "Steep Spiral", "value": "steep_spiral"},
+                            {"label": "S-Turns", "value": "s_turn"},
+                            {"label": "Turns Around a Point", "value": "turns_point"},
+                            {"label": "Rectangular Course", "value": "rect_course"},
+                            {"label": "Eights on Pylons", "value": "pylons"},
+                        ],
+                        clearable=False,
+                        persistence=True, persistence_type="local",
+                    ),
+                ], className="maneuver-shelf-picker"),
 
-            # Global Reset / Undo (always available)
-            html.Div(className="maneuver-shelf-globals", children=[
-                html.Button("Reset All", id="reset-all", className="shelf-btn shelf-btn-reset"),
-                html.Button("Reset Clicks", id="reset-clicks", className="shelf-btn shelf-btn-reset"),
-                html.Button("Undo Click", id="undo-last-click", className="shelf-btn shelf-btn-undo"),
+                html.Div(className="maneuver-shelf-globals", children=[
+                    html.Button("Reset All", id="reset-all", className="shelf-btn shelf-btn-reset"),
+                    html.Button("Reset Clicks", id="reset-clicks", className="shelf-btn shelf-btn-reset"),
+                    html.Button("Undo Click", id="undo-last-click", className="shelf-btn shelf-btn-undo"),
+                ]),
+
+                html.Div(id="maneuver-shelf-status", className="maneuver-shelf-status"),
             ]),
 
-            # Status / hint area (populated by the engineout / impossible-turn
-            # callbacks as users click)
-            html.Div(id="maneuver-shelf-status", className="maneuver-shelf-status"),
+            # Row 2 — per-maneuver params + Set Point / Draw / Erase buttons.
+            # Populated by render_maneuver_layout against the selected maneuver.
+            html.Div(id="maneuver-params-container", className="maneuver-shelf-row maneuver-shelf-params"),
         ],
     )
 
@@ -373,29 +398,7 @@ def desktop_layout():
                               className="input-small", style={"width": "100%"}),
                 ]),
 
-                # === Maneuver picker ===
-                html.Div(className="sidebar-section", children=[
-                    html.Div("Maneuver", className="sidebar-section-title"),
-                    dcc.Dropdown(
-                        id="maneuver-select",
-                        className="dropdown",
-                        placeholder="Select maneuver",
-                        options=[
-                            {"label": "Impossible Turn", "value": "impossible_turn"},
-                            {"label": "Power-Off 180", "value": "poweroff180"},
-                            {"label": "Engine-Out Glide", "value": "engineout"},
-                            {"label": "Steep Turns", "value": "steep_turn"},
-                            {"label": "Chandelle", "value": "chandelle"},
-                            {"label": "Lazy Eight", "value": "lazy8"},
-                            {"label": "Steep Spiral", "value": "steep_spiral"},
-                            {"label": "S-Turns", "value": "s_turn"},
-                            {"label": "Turns Around a Point", "value": "turns_point"},
-                            {"label": "Rectangular Course", "value": "rect_course"},
-                            {"label": "Eights on Pylons", "value": "pylons"},
-                        ],
-                        persistence=True, persistence_type="local",
-                    ),
-                ]),
+                # === Maneuver picker + params moved to the top shelf ===
 
                 # === Power section ===
                 html.Div(className="sidebar-section", children=[
@@ -409,8 +412,7 @@ def desktop_layout():
                     ),
                 ]),
 
-                # --- Conditionally Shown Based on Maneuver ---
-                html.Div(id="maneuver-params-container", children=[], style={"marginTop": "15px"}),
+                # --- Maneuver params moved to the top shelf ---
 
                 # Store for tracking last clicked point (for undo)
                 dcc.Store(id="last-click-info", data=None),
