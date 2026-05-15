@@ -2107,3 +2107,66 @@ input[type="radio"] {
 .maneuver-shelf-params hr {
   display: none !important;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Slider clamping inside the shelf — beat Dash's _dash-undo-redo
+   wrapper. Slider parent + slider both get clamped to a tight width.
+   ══════════════════════════════════════════════════════════════ */
+.maneuver-shelf-params [id$="-abeam-distance-nm"],
+.maneuver-shelf-params [id$="-time-slider"],
+.maneuver-shelf-params [id$="-power-setting"] {
+  width: 140px !important;
+  display: inline-block !important;
+}
+/* Any direct child of params that contains a slider — clamp */
+.maneuver-shelf-params > div:has(.rc-slider) {
+  width: 160px !important;
+  display: inline-block !important;
+  vertical-align: middle;
+  flex: 0 0 auto !important;
+}
+.maneuver-shelf-params .rc-slider {
+  width: 140px !important;
+  margin: 6px 4px !important;
+}
+.maneuver-shelf-params .rc-slider-rail,
+.maneuver-shelf-params .rc-slider-track,
+.maneuver-shelf-params .rc-slider-step {
+  width: 100% !important;
+}
+/* Cap parent containers — the maneuver layouts wrap sliders in <div>
+   that inherits 100% of the shelf width. Clamp any flex parent. */
+.maneuver-shelf-params,
+.maneuver-shelf-params * {
+  max-width: 100%;
+}
+.maneuver-shelf-params > * {
+  flex: 0 0 auto !important;
+  max-width: 280px;
+}
+
+/* Top-strip now has more on the right side — keep status from
+   pushing other items off */
+.top-strip .maneuver-shelf-status {
+  max-width: 200px;
+  font-size: 11px;
+  color: var(--ta-text-secondary, #64748b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.top-strip .maneuver-shelf-globals {
+  display: inline-flex;
+  gap: 4px;
+}
+.top-strip .shelf-btn {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 10px;
+}
+
+/* Empty maneuver-shelf-params row should collapse — Dash sets
+   children=[] when no maneuver picked. */
+.maneuver-shelf-params:empty {
+  display: none !important;
+}

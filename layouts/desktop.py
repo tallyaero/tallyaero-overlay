@@ -24,10 +24,11 @@ from core.data_loader import available_aircraft
 
 
 def _top_strip():
-    """Phase 4 — brand + aircraft picker on the left (most-persistent
-    selection), quick-links + theme on the right. The maneuver action
-    shelf below this row holds the Set Point / Draw / Erase / Undo
-    controls + status indicators."""
+    """Phase 4 — single consolidated top bar.
+
+    LEFT  : brand · aircraft picker · MANEUVER picker · ? info button.
+    RIGHT : status text · Reset / Undo · Quick Start · Contact · theme.
+    """
     return html.Div(
         [
             html.Div(
@@ -45,11 +46,59 @@ def _top_strip():
                         ),
                         className="aircraft-picker-wrap",
                     ),
+
+                    # Maneuver picker + Info button — moved up from the shelf
+                    html.Div([
+                        html.Span("MANEUVER", className="chip-prefix"),
+                        dcc.Dropdown(
+                            id="maneuver-select",
+                            className="chip-dropdown",
+                            placeholder="Select maneuver",
+                            options=[
+                                {"label": "Impossible Turn", "value": "impossible_turn"},
+                                {"label": "Power-Off 180", "value": "poweroff180"},
+                                {"label": "Engine-Out Glide", "value": "engineout"},
+                                {"label": "Steep Turns", "value": "steep_turn"},
+                                {"label": "Chandelle", "value": "chandelle"},
+                                {"label": "Lazy Eight", "value": "lazy8"},
+                                {"label": "Steep Spiral", "value": "steep_spiral"},
+                                {"label": "S-Turns", "value": "s_turn"},
+                                {"label": "Turns Around a Point", "value": "turns_point"},
+                                {"label": "Rectangular Course", "value": "rect_course"},
+                                {"label": "Eights on Pylons", "value": "pylons"},
+                            ],
+                            clearable=False,
+                            persistence=True, persistence_type="local",
+                        ),
+                        html.Button("?", id="open-maneuver-info", n_clicks=0,
+                                    className="shelf-info-btn",
+                                    title="What is this maneuver?"),
+                    ], className="maneuver-shelf-picker"),
+
+                    # Maneuver info modal stays mounted (toggled by callback)
+                    dbc.Modal(
+                        [
+                            dbc.ModalHeader(dbc.ModalTitle(id="maneuver-info-title"), close_button=True),
+                            dbc.ModalBody(id="maneuver-info-body"),
+                            dbc.ModalFooter(dbc.Button("Close", id="close-maneuver-info", className="green-button")),
+                        ],
+                        id="maneuver-info-modal",
+                        is_open=False,
+                        centered=True,
+                        size="md",
+                        dialogClassName="tallyaero-modal",
+                    ),
                 ],
                 className="top-strip-left",
             ),
             html.Div(
                 [
+                    html.Div(id="maneuver-shelf-status", className="maneuver-shelf-status"),
+                    html.Div(className="maneuver-shelf-globals", children=[
+                        html.Button("Reset All", id="reset-all", className="shelf-btn shelf-btn-reset"),
+                        html.Button("Reset Clicks", id="reset-clicks", className="shelf-btn shelf-btn-reset"),
+                        html.Button("Undo", id="undo-last-click", className="shelf-btn shelf-btn-undo"),
+                    ]),
                     html.Div(
                         [
                             html.A("Quick Start", href="#", id="open-quickstart", className="quick-link", style={"color": "#E65C00", "fontWeight": "bold"}),
@@ -206,71 +255,13 @@ def _theme_toggle():
 
 
 def _maneuver_action_shelf():
-    """Phase 4 — top shelf is the maneuver workbench. Holds the
-    maneuver picker, the per-maneuver params + Set Point / Draw /
-    Erase buttons (rendered by maneuver-params-container), the global
-    Reset / Undo controls, and a status text area. The left sidebar
-    no longer carries any maneuver-specific content."""
+    """Single thin row that only appears when a maneuver is selected —
+    holds the per-maneuver params + Set Point / Draw / Erase buttons.
+    The picker, info button, reset/undo controls, and status text all
+    live in the consolidated top strip above this."""
     return html.Div(
-        className="maneuver-shelf",
-        children=[
-            # Row 1 — maneuver picker · global reset / undo · status
-            html.Div(className="maneuver-shelf-row maneuver-shelf-row-top", children=[
-                html.Div([
-                    html.Span("MANEUVER", className="chip-prefix"),
-                    dcc.Dropdown(
-                        id="maneuver-select",
-                        className="chip-dropdown",
-                        placeholder="Select maneuver",
-                        options=[
-                            {"label": "Impossible Turn", "value": "impossible_turn"},
-                            {"label": "Power-Off 180", "value": "poweroff180"},
-                            {"label": "Engine-Out Glide", "value": "engineout"},
-                            {"label": "Steep Turns", "value": "steep_turn"},
-                            {"label": "Chandelle", "value": "chandelle"},
-                            {"label": "Lazy Eight", "value": "lazy8"},
-                            {"label": "Steep Spiral", "value": "steep_spiral"},
-                            {"label": "S-Turns", "value": "s_turn"},
-                            {"label": "Turns Around a Point", "value": "turns_point"},
-                            {"label": "Rectangular Course", "value": "rect_course"},
-                            {"label": "Eights on Pylons", "value": "pylons"},
-                        ],
-                        clearable=False,
-                        persistence=True, persistence_type="local",
-                    ),
-                    html.Button("?", id="open-maneuver-info", n_clicks=0,
-                                className="shelf-info-btn",
-                                title="What is this maneuver?"),
-                ], className="maneuver-shelf-picker"),
-
-                # Maneuver info modal — description content is set per
-                # maneuver by the toggle_maneuver_info callback.
-                dbc.Modal(
-                    [
-                        dbc.ModalHeader(dbc.ModalTitle(id="maneuver-info-title"), close_button=True),
-                        dbc.ModalBody(id="maneuver-info-body"),
-                        dbc.ModalFooter(dbc.Button("Close", id="close-maneuver-info", className="green-button")),
-                    ],
-                    id="maneuver-info-modal",
-                    is_open=False,
-                    centered=True,
-                    size="md",
-                    dialogClassName="tallyaero-modal",
-                ),
-
-                html.Div(className="maneuver-shelf-globals", children=[
-                    html.Button("Reset All", id="reset-all", className="shelf-btn shelf-btn-reset"),
-                    html.Button("Reset Clicks", id="reset-clicks", className="shelf-btn shelf-btn-reset"),
-                    html.Button("Undo Click", id="undo-last-click", className="shelf-btn shelf-btn-undo"),
-                ]),
-
-                html.Div(id="maneuver-shelf-status", className="maneuver-shelf-status"),
-            ]),
-
-            # Row 2 — per-maneuver params + Set Point / Draw / Erase buttons.
-            # Populated by render_maneuver_layout against the selected maneuver.
-            html.Div(id="maneuver-params-container", className="maneuver-shelf-row maneuver-shelf-params"),
-        ],
+        id="maneuver-params-container",
+        className="maneuver-shelf maneuver-shelf-params",
     )
 
 
