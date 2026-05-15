@@ -1438,3 +1438,22 @@ input[type="radio"] {
 [data-theme="dark"] .sidebar-header.sidebar-header-slim {
   border-bottom-color: #334155;
 }
+
+/* Phase 4 polish — dark-mode override for inline gray text used across
+   maneuver layouts (helper text + warnings rendered with style="color:#666"
+   from when the project assumed light-only). Bumps to a lighter slate so
+   text stays readable on the dark surface. */
+[data-theme="dark"] [style*="color: #666"],
+[data-theme="dark"] [style*="color:#666"],
+[data-theme="dark"] [style*="color: #555"],
+[data-theme="dark"] [style*="color:#555"],
+[data-theme="dark"] [style*="color: #999"] {
+  color: #94a3b8 !important;
+}
+
+/* Mid-orange brand text in modals stays orange in both modes — readable
+   on both surfaces, no override needed. */
+
+/* Dead .disclaimer-banner / .legal-links-row .disclaimer rules are now
+   unreferenced (banner removed in Phase 4 Batch 1) but harmless; CSS-only
+   cleanup pass deferred. */
