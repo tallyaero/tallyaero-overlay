@@ -95,22 +95,36 @@ def register(app):
         prevent_initial_call=True,
     )
     def update_waypoint_options(query, current_value):
-        # Always keep already-selected pills visible so the user can
-        # remove them — Dash drops pills whose value isn't in options.
+        # Two-tier labeling:
+        #   - SELECTED items use the short ID as label, so the pill in
+        #     the dropdown shows just "KDYB" (clean, identifier-only).
+        #   - SEARCH HITS use the rich label "KDYB · Summerville Airport
+        #     — Summerville, SC" so the user can disambiguate while
+        #     typing.
+        # Dash picks the pill text from whichever option matches the
+        # selected value, so re-labeling already-selected entries to
+        # the short form auto-shortens the pills.
         kept: list[dict] = []
         for v in current_value or []:
             ap = resolve_waypoint(airport_data, v)
             if ap:
-                kept.append({"label": airport_label(ap), "value": ap.get("id") or v})
+                kept.append({
+                    "label": ap.get("id") or v,
+                    "value": ap.get("id") or v,
+                    "title": airport_label(ap),
+                })
         if not query or len(query.strip()) < 2:
-            # No new search — just return the kept pills so they stay.
             return kept
         hits = search_airports(airport_data, query, limit=20)
         existing_ids = {o["value"] for o in kept}
         for ap in hits:
             wid = ap.get("id")
             if wid and wid not in existing_ids:
-                kept.append({"label": airport_label(ap), "value": wid})
+                kept.append({
+                    "label": airport_label(ap),
+                    "value": wid,
+                    "title": airport_label(ap),
+                })
                 existing_ids.add(wid)
         return kept
 

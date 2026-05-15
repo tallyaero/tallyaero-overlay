@@ -2217,25 +2217,65 @@ input[type="radio"] {
 .route-summary-warn { color: #dc2626; font-weight: 600; }
 [data-theme="dark"] .route-summary-warn { color: #f87171; }
 
-/* Route waypoint multi-select — wider than other shelf fields so the
-   pills + search input have breathing room. */
-.shelf-field.shelf-field-route { min-width: 360px; flex-grow: 1; }
-.shelf-field .route-waypoint-dropdown .Select-control,
-.shelf-field .route-waypoint-dropdown .Select-multi-value-wrapper {
+/* Route waypoint multi-select — needs to dominate the shelf row so
+   pills lay out horizontally. flex-grow:9 beats .shelf-spacer's
+   flex-grow:1 so essentially all extra row space goes here. */
+.shelf-field.shelf-field-route {
+  flex: 9 1 520px;
+  min-width: 360px;
+  max-width: none;
+}
+.shelf-field .route-waypoint-dropdown,
+.shelf-field .route-waypoint-dropdown .Select,
+.shelf-field .route-waypoint-dropdown .Select-control {
+  width: 100%;
   min-height: 30px;
 }
+.shelf-field .route-waypoint-dropdown .Select-multi-value-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+  min-height: 30px;
+}
+/* Pill: short identifier, never wrap onto multiple lines */
 .shelf-field .route-waypoint-dropdown .Select-value {
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
   background: rgba(13, 89, 242, 0.08);
   border: 1px solid rgba(13, 89, 242, 0.35);
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: 1px 4px 1px 2px;
+  line-height: 1.4;
+  height: 22px;
+  max-width: none;
+}
+.shelf-field .route-waypoint-dropdown .Select-value-label {
+  padding: 0 4px;
+  white-space: nowrap;
+}
+.shelf-field .route-waypoint-dropdown .Select-value-icon {
+  border-right: none;
+  padding: 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+/* Menu items — keep the rich descriptive label readable */
+.shelf-field .route-waypoint-dropdown .VirtualizedSelectOption,
+.shelf-field .route-waypoint-dropdown .Select-option {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 [data-theme="dark"] .shelf-field .route-waypoint-dropdown .Select-value {
-  background: rgba(96, 165, 250, 0.12);
-  border-color: rgba(96, 165, 250, 0.45);
+  background: rgba(96, 165, 250, 0.18);
+  border-color: rgba(96, 165, 250, 0.5);
   color: #e2e8f0;
-}
-.shelf-field .route-waypoint-dropdown .VirtualizedSelectOption {
-  font-size: 12px;
 }
 
 /* Per-leg breakdown rows inside the route summary overlay */
