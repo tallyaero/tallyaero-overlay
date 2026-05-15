@@ -156,3 +156,175 @@ def test_longest_gap_nm_empty():
 def test_longest_gap_nm_max():
     gaps = [{"gap_nm": 5}, {"gap_nm": 22}, {"gap_nm": 10}]
     assert longest_gap_nm(gaps) == 22
+
+
+# === Terrain-aware reach (Phase 7h) ==========================================
+
+from core.diverts import (
+    can_glide_to, find_diverts_in_glide,
+    divert_coverage_along_route_glide,
+)
+
+
+def test_can_glide_to_short_no_terrain():
+    """No terrain, plenty of altitude — should reach."""
+    assert can_glide_to(
+        33.0, -80.0, sample_msl_ft=5500.0,
+        ap_lat=33.05, ap_lon=-80.05, ap_elev_ft=50.0,
+        glide_ratio=10.0,
+    ) is True
+
+
+def test_can_glide_to_too_far_no_terrain():
+    """100 NM target with only 5500 ft × 10:1 = ~9 NM still-air reach."""
+    assert can_glide_to(
+        33.0, -80.0, sample_msl_ft=5500.0,
+        ap_lat=34.5, ap_lon=-80.0, ap_elev_ft=50.0,
+        glide_ratio=10.0,
+    ) is False
+
+
+def test_can_glide_to_high_airport():
+    """Airport elevation eats the AGL — can't reach even nearby."""
+    assert can_glide_to(
+        33.0, -80.0, sample_msl_ft=5500.0,
+        ap_lat=33.05, ap_lon=-80.05, ap_elev_ft=5200.0,
+        glide_ratio=10.0,
+    ) is False
+
+
+def test_can_glide_to_with_ridge_blocks():
+    """Synthetic 10000 ft wall halfway → glide is blocked."""
+    def elev_fn(lat, lon):
+        # Wall between sample and airport (the eastern half)
+        if lon > -80.05:
+            return 10000.0 / 3.28084   # 10000 ft expressed in meters
+        return 0.0
+    blocked = can_glide_to(
+        33.0, -80.1, sample_msl_ft=5500.0,
+        ap_lat=33.0, ap_lon=-80.0, ap_elev_ft=50.0,
+        glide_ratio=10.0,
+        elevation_fn=elev_fn,
+    )
+    assert blocked is False
+
+
+def test_can_glide_to_terrain_below_glide_clear():
+    """Terrain at 500 ft, glide line is well above → reaches."""
+    def elev_fn(lat, lon):
+        return 500.0 / 3.28084
+    ok = can_glide_to(
+        33.0, -80.1, sample_msl_ft=5500.0,
+        ap_lat=33.0, ap_lon=-80.05, ap_elev_ft=50.0,
+        glide_ratio=10.0,
+        elevation_fn=elev_fn,
+    )
+    assert ok is True
+
+
+def test_can_glide_to_nan_terrain_does_not_block():
+    """NaN elevation = unknown — fail-safe, treat as clear."""
+    elev_fn = lambda lat, lon: float("nan")
+    assert can_glide_to(
+        33.0, -80.1, sample_msl_ft=5500.0,
+        ap_lat=33.0, ap_lon=-80.05, ap_elev_ft=50.0,
+        glide_ratio=10.0,
+        elevation_fn=elev_fn,
+    ) is True
+
+
+def test_can_glide_to_tailwind_extends_reach():
+    """A 20 kt tailwind toward the airport should make a marginal
+    target reachable that fails in still air."""
+    sample = (33.0, -80.0)
+    # 11.5 NM north — slightly beyond still-air 9 NM (5500/10/6076 NM × FT)
+    ap_lat, ap_lon = 33.19, -80.0
+    no_wind = can_glide_to(
+        *sample, sample_msl_ft=5500.0,
+        ap_lat=ap_lat, ap_lon=ap_lon, ap_elev_ft=50.0,
+        glide_ratio=10.0, glide_ias_kt=75.0,
+        wind_dir_deg=0.0, wind_speed_kt=0.0,
+    )
+    with_tailwind = can_glide_to(
+        *sample, sample_msl_ft=5500.0,
+        ap_lat=ap_lat, ap_lon=ap_lon, ap_elev_ft=50.0,
+        glide_ratio=10.0, glide_ias_kt=75.0,
+        wind_dir_deg=180.0, wind_speed_kt=30.0,    # wind FROM south → tailwind north
+    )
+    assert no_wind is False
+    assert with_tailwind is True
+
+
+def test_find_diverts_in_glide_no_terrain(airports):
+    """At 12000 ft with GR 10 the still-air reach is ~19.7 NM, so KCHS
+    (~15.6 NM east of KDYB) is in glide; KSAV (~70 NM south) is not."""
+    hits = find_diverts_in_glide(
+        airports,
+        sample_lat=33.0635, sample_lon=-80.2795,
+        sample_msl_ft=12000.0,
+        glide_ratio=10.0,
+    )
+    ids = [h["airport"]["id"] for h in hits]
+    assert "KDYB" in ids
+    assert "KCHS" in ids
+    assert "KSAV" not in ids
+
+
+def test_find_diverts_in_glide_too_low_misses_neighbors(airports):
+    """At 5500 ft KCHS is past the still-air glide (~9 NM)."""
+    hits = find_diverts_in_glide(
+        airports,
+        sample_lat=33.0635, sample_lon=-80.2795,
+        sample_msl_ft=5500.0,
+        glide_ratio=10.0,
+    )
+    ids = [h["airport"]["id"] for h in hits]
+    assert "KDYB" in ids
+    assert "KCHS" not in ids
+
+
+def test_find_diverts_in_glide_ridge_blocks(airports):
+    """A synthetic ridge between sample and KCHS blocks it; KDYB still
+    reachable because it's at the sample point itself."""
+    def ridge_fn(lat, lon):
+        # Wall just east of sample
+        if lon > -80.20:
+            return 9000.0 / 3.28084
+        return 0.0
+    hits = find_diverts_in_glide(
+        airports,
+        sample_lat=33.0635, sample_lon=-80.2795,
+        sample_msl_ft=5500.0,
+        glide_ratio=10.0,
+        elevation_fn=ridge_fn,
+    )
+    ids = [h["airport"]["id"] for h in hits]
+    assert "KDYB" in ids        # at sample, no ray-march distance
+    assert "KCHS" not in ids    # blocked by wall
+
+
+def test_coverage_along_route_glide_terrain_used_flag(airports):
+    samples = [(33.0635, -80.2795), (32.8986, -80.0405)]
+    out = divert_coverage_along_route_glide(
+        samples, airports,
+        cruise_alt_msl_ft=5500.0, glide_ratio=10.0,
+    )
+    assert out["terrain_used"] is False
+    out2 = divert_coverage_along_route_glide(
+        samples, airports,
+        cruise_alt_msl_ft=5500.0, glide_ratio=10.0,
+        elevation_fn=lambda lat, lon: 0.0,
+    )
+    assert out2["terrain_used"] is True
+    # With zero terrain, results should match the no-terrain path
+    assert (sorted(d["airport"]["id"] for d in out["unique_diverts"])
+            == sorted(d["airport"]["id"] for d in out2["unique_diverts"]))
+
+
+def test_coverage_along_route_glide_zero_alt_empty(airports):
+    samples = [(33.0635, -80.2795)]
+    out = divert_coverage_along_route_glide(
+        samples, airports,
+        cruise_alt_msl_ft=0.0, glide_ratio=10.0,
+    )
+    assert out["unique_diverts"] == []

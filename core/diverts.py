@@ -6,11 +6,14 @@ could reach from that altitude. Aggregate to:
   - "unsupported gap" segments where NO airport is reachable
   - per-sample reachability for downstream rendering
 
-Reach math is matched to the corridor (still-air NM × wind scale).
-Terrain ridge-clip from core.corridor isn't applied here yet — the
-unsupported-gap metric is therefore a slight under-count (terrain may
-block some flat-line diverts). Phase 7g+ adds terrain-aware divert
-reach by reusing terrain_intercept_nm per (sample, airport) bearing.
+Two modes:
+  - SIMPLE: pass `reach_per_sample_nm` to `divert_coverage_along_route`.
+    Flat haversine reach; no wind, no terrain. Useful for tests +
+    sanity checks.
+  - GLIDE: pass `cruise_alt_msl_ft + glide_ratio + wind + elevation_fn`
+    to `divert_coverage_along_route_glide`. Per-bearing wind-scaled
+    reach AND ray-march ridge-clip on every (sample, airport) line.
+    Matches the corridor math — same prefetch tiles cover both.
 
 Filter rules for "landable":
   - Skip seaplane bases (wheeled aircraft can't land on water).
@@ -22,9 +25,12 @@ Filter rules for "landable":
 from __future__ import annotations
 
 import math
-from typing import Iterable
+from typing import Callable, Iterable, Optional
 
-from core.route import haversine_nm, EARTH_RADIUS_NM
+from core.route import haversine_nm, initial_bearing_deg, EARTH_RADIUS_NM
+from core.corridor import _offset_latlon, FT_PER_NM, FT_PER_M
+
+ElevationFn = Callable[[float, float], float]
 
 # Default minimum runway for a survivable engine-out landing.
 # 1500 ft accommodates almost any GA single — pilots can always
@@ -207,3 +213,189 @@ def _gap_record(samples, start_idx: int, end_idx: int) -> dict:
 
 def longest_gap_nm(gaps: list[dict]) -> float:
     return max((g["gap_nm"] for g in gaps), default=0.0)
+
+
+# === Terrain-aware reach =====================================================
+
+def _wind_scale(bearing_deg: float,
+                wind_dir_deg: float, wind_speed_kt: float,
+                ias_kt: float) -> float:
+    """Per-bearing reach scale factor. Wind FROM direction; tailwind
+    extends ground reach, headwind shrinks it. Floored at 0.05 so a
+    pure headwind doesn't fully collapse the glide. Matches the
+    corridor envelope math one-for-one."""
+    rel = math.radians(wind_dir_deg + 180.0 - bearing_deg)
+    along = wind_speed_kt * math.cos(rel)
+    return max(0.05, 1.0 + along / max(1.0, ias_kt))
+
+
+def can_glide_to(
+    sample_lat: float, sample_lon: float, sample_msl_ft: float,
+    ap_lat: float, ap_lon: float, ap_elev_ft: float,
+    glide_ratio: float,
+    glide_ias_kt: float = 75.0,
+    wind_dir_deg: float = 0.0, wind_speed_kt: float = 0.0,
+    elevation_fn: Optional[ElevationFn] = None,
+    terrain_step_nm: float = 0.5,
+) -> bool:
+    """Can an engine-out glide from (sample) actually reach the airport
+    given wind and (optionally) terrain in between?
+
+    Two checks must pass:
+      1. Arrival altitude (sample_msl - distance × descent_per_nm) is
+         above the airport elevation. Wind on the bearing scales the
+         effective glide ratio.
+      2. (only if elevation_fn is supplied) Terrain at every step along
+         the great-circle never rises above the descending glide line.
+
+    `elevation_fn(lat, lon)` returns meters MSL. NaN return is treated
+    as "data unknown, do not block" — same fail-safe as the corridor.
+    """
+    if glide_ratio <= 0:
+        return False
+    distance_nm = haversine_nm(sample_lat, sample_lon, ap_lat, ap_lon)
+    if distance_nm <= 0:
+        return sample_msl_ft >= ap_elev_ft
+    bearing = initial_bearing_deg(sample_lat, sample_lon, ap_lat, ap_lon)
+
+    effective_gr = glide_ratio * _wind_scale(
+        bearing, wind_dir_deg, wind_speed_kt, glide_ias_kt)
+    descent_ft_per_nm = FT_PER_NM / effective_gr
+
+    arrival_alt_ft = sample_msl_ft - distance_nm * descent_ft_per_nm
+    if arrival_alt_ft < ap_elev_ft:
+        return False
+
+    if elevation_fn is None:
+        return True
+
+    d = terrain_step_nm
+    while d < distance_nm:
+        plat, plon = _offset_latlon(sample_lat, sample_lon, bearing, d)
+        terrain_m = elevation_fn(plat, plon)
+        if terrain_m == terrain_m:    # not NaN
+            terrain_ft = terrain_m * FT_PER_M
+            glide_alt_ft = sample_msl_ft - d * descent_ft_per_nm
+            if glide_alt_ft < terrain_ft:
+                return False
+        d += terrain_step_nm
+    return True
+
+
+def find_diverts_in_glide(
+    airport_data: list[dict],
+    sample_lat: float, sample_lon: float, sample_msl_ft: float,
+    glide_ratio: float,
+    glide_ias_kt: float = 75.0,
+    wind_dir_deg: float = 0.0, wind_speed_kt: float = 0.0,
+    min_runway_ft: int = DEFAULT_MIN_RUNWAY_FT,
+    elevation_fn: Optional[ElevationFn] = None,
+    terrain_step_nm: float = 0.5,
+) -> list[dict]:
+    """Like find_diverts_in_reach, but reach is computed per-airport
+    from the engine-out glide line + optional terrain ridge-clip.
+
+    Returns list of {airport, distance_nm} sorted by distance.
+    """
+    if sample_msl_ft <= 0 or glide_ratio <= 0:
+        return []
+    # Conservative bbox: max still-air reach at zero airport elevation
+    # = sample_msl × gr / FT_PER_NM, scaled by max possible tailwind
+    # boost (1 + wind_speed/IAS).
+    boost = 1.0 + wind_speed_kt / max(1.0, glide_ias_kt)
+    max_reach_nm = sample_msl_ft * glide_ratio / FT_PER_NM * max(1.0, boost)
+    pad_lat = max_reach_nm / 60.0
+    pad_lon = pad_lat / max(0.1, math.cos(math.radians(sample_lat)))
+    lat_lo, lat_hi = sample_lat - pad_lat, sample_lat + pad_lat
+    lon_lo, lon_hi = sample_lon - pad_lon, sample_lon + pad_lon
+
+    out: list[dict] = []
+    for ap in airport_data:
+        a_lat = ap.get("lat")
+        a_lon = ap.get("lon")
+        if a_lat is None or a_lon is None:
+            continue
+        if a_lat < lat_lo or a_lat > lat_hi or a_lon < lon_lo or a_lon > lon_hi:
+            continue
+        if not is_landable(ap, min_runway_ft):
+            continue
+        if can_glide_to(
+            sample_lat, sample_lon, sample_msl_ft,
+            a_lat, a_lon, ap.get("elevation_ft") or 0.0,
+            glide_ratio=glide_ratio, glide_ias_kt=glide_ias_kt,
+            wind_dir_deg=wind_dir_deg, wind_speed_kt=wind_speed_kt,
+            elevation_fn=elevation_fn,
+            terrain_step_nm=terrain_step_nm,
+        ):
+            out.append({
+                "airport": ap,
+                "distance_nm": haversine_nm(sample_lat, sample_lon, a_lat, a_lon),
+            })
+    out.sort(key=lambda r: r["distance_nm"])
+    return out
+
+
+def divert_coverage_along_route_glide(
+    samples: list[tuple[float, float]],
+    airport_data: list[dict],
+    cruise_alt_msl_ft: float,
+    glide_ratio: float,
+    glide_ias_kt: float = 75.0,
+    wind_dir_deg: float = 0.0,
+    wind_speed_kt: float = 0.0,
+    min_runway_ft: int = DEFAULT_MIN_RUNWAY_FT,
+    elevation_fn: Optional[ElevationFn] = None,
+    terrain_step_nm: float = 0.5,
+) -> dict:
+    """Per-sample divert coverage using engine-out glide + (optionally)
+    terrain ridge-clipping.
+
+    Same return shape as `divert_coverage_along_route`. Use this when
+    the route callback has full glide parameters available (always)
+    rather than precomputed reach.
+    """
+    per_sample: list[list[str]] = []
+    uniq_min_dist: dict[str, float] = {}
+    uniq_n_samples: dict[str, int] = {}
+    uniq_ap: dict[str, dict] = {}
+    for (lat, lon) in samples:
+        hits = find_diverts_in_glide(
+            airport_data, lat, lon,
+            sample_msl_ft=cruise_alt_msl_ft,
+            glide_ratio=glide_ratio,
+            glide_ias_kt=glide_ias_kt,
+            wind_dir_deg=wind_dir_deg, wind_speed_kt=wind_speed_kt,
+            min_runway_ft=min_runway_ft,
+            elevation_fn=elevation_fn,
+            terrain_step_nm=terrain_step_nm,
+        )
+        ids = []
+        for h in hits:
+            ap = h["airport"]
+            apid = ap.get("id") or ap.get("icao")
+            if not apid:
+                continue
+            ids.append(apid)
+            d = h["distance_nm"]
+            if apid not in uniq_min_dist or d < uniq_min_dist[apid]:
+                uniq_min_dist[apid] = d
+                uniq_ap[apid] = ap
+            uniq_n_samples[apid] = uniq_n_samples.get(apid, 0) + 1
+        per_sample.append(ids)
+
+    unique_diverts = [
+        {"airport": uniq_ap[apid],
+         "min_distance_nm": round(uniq_min_dist[apid], 1),
+         "n_samples": uniq_n_samples[apid]}
+        for apid in uniq_min_dist
+    ]
+    unique_diverts.sort(key=lambda r: r["min_distance_nm"])
+
+    no_cov = sum(1 for s in per_sample if not s)
+    return {
+        "per_sample": per_sample,
+        "unique_diverts": unique_diverts,
+        "n_samples_with_coverage": len(per_sample) - no_cov,
+        "n_samples_with_no_coverage": no_cov,
+        "terrain_used": elevation_fn is not None,
+    }
