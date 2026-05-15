@@ -1457,3 +1457,117 @@ input[type="radio"] {
 /* Dead .disclaimer-banner / .legal-links-row .disclaimer rules are now
    unreferenced (banner removed in Phase 4 Batch 1) but harmless; CSS-only
    cleanup pass deferred. */
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 4 polish — env-chip + rail-drawer-trigger + legal-links
+   Direct port from EM Diagram styles.css :1839–1874, 2040–2053,
+   773–791 so the MORE Configure button and footer look identical.
+   ══════════════════════════════════════════════════════════════ */
+
+.env-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  background: var(--ta-surface-field, #eef2f7);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--ta-text-primary, #0f172a);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+  white-space: nowrap;
+}
+.env-chip:hover {
+  background: var(--ta-surface-tertiary, #f1f5f9);
+  border-color: var(--ta-surface-elevated, #ffffff);
+}
+.env-chip:focus {
+  outline: none;
+  border-color: var(--ta-brand-blue, #0d59f2);
+  box-shadow: 0 0 0 2px rgba(13, 89, 242, 0.18);
+}
+.chip-prefix {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ta-text-secondary, #64748b);
+  text-transform: uppercase;
+}
+.chip-label {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Drawer trigger — accented vs other chips, full-width at bottom of rail */
+.rail-drawer-trigger {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  margin-top: 12px;
+  margin-bottom: 8px;
+  background: var(--ta-surface-elevated, #ffffff);
+  border: 1px solid var(--ta-brand-blue, #0d59f2);
+  color: var(--ta-text-primary, #0f172a);
+}
+.rail-drawer-trigger:hover {
+  background: rgba(13, 89, 242, 0.08);
+  border-color: var(--ta-brand-blue, #0d59f2);
+}
+.rail-drawer-trigger .chip-prefix {
+  color: var(--ta-brand-blue, #0d59f2);
+}
+
+/* Legal-links footer — single row, EM Diagram pattern */
+.legal-links {
+  background: var(--ta-surface-secondary, #ffffff);
+  border-top: 1px solid var(--ta-border-primary, #e2e8f0);
+  padding: 8px 16px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--ta-text-secondary, #64748b);
+}
+.legal-links .legal-link {
+  color: var(--ta-text-secondary, #64748b);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.12s ease;
+}
+.legal-links .legal-link:hover {
+  color: var(--ta-brand-blue, #0d59f2);
+}
+.legal-links .separator {
+  color: var(--ta-text-tertiary, #94a3b8);
+}
+.legal-links .legal-copyright {
+  color: var(--ta-text-tertiary, #94a3b8);
+}
+
+[data-theme="dark"] .env-chip {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+[data-theme="dark"] .env-chip:hover {
+  background: #1e293b;
+  border-color: #334155;
+}
+[data-theme="dark"] .rail-drawer-trigger {
+  background: #1e293b;
+  border-color: var(--ta-brand-blue, #0d59f2);
+}
+[data-theme="dark"] .rail-drawer-trigger:hover {
+  background: #233152;
+}
+[data-theme="dark"] .legal-links {
+  background: #1e293b;
+  border-top-color: #334155;
+  color: #cbd5e1;
+}
+[data-theme="dark"] .legal-links .legal-link { color: #cbd5e1; }
+[data-theme="dark"] .legal-links .separator { color: #475569; }
+[data-theme="dark"] .legal-links .legal-copyright { color: #94a3b8; }

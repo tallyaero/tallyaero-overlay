@@ -320,15 +320,6 @@ def desktop_layout():
                 ]),
                 html.Div(id="sidebar-content", children=[
 
-                # --- Configure button opens the settings drawer ---
-                html.Button(
-                    "Configure",
-                    id="open-drawer-btn",
-                    className="configure-btn sidebar-configure-btn",
-                    n_clicks=0,
-                    title="Open configuration drawer (aircraft, weight, environment, power)",
-                ),
-
                 # --- Airport Search (First - so user can navigate) ---
             html.Label("Search Airport", className="input-label"),
             dcc.Input(
@@ -400,6 +391,21 @@ def desktop_layout():
             # Store for tracking last clicked point (for undo)
             dcc.Store(id="last-click-info", data=None),
             ]),  # End sidebar-content
+
+            # MORE Configure — full-width chip trigger at the bottom of the
+            # rail, mirroring EM Diagram's Phase 5AD pattern.
+            html.Button(
+                [
+                    html.Span("MORE", className="chip-prefix"),
+                    html.Span("Configure", className="chip-label"),
+                ],
+                id="open-drawer-btn",
+                n_clicks=0,
+                className="env-chip rail-action-chip rail-drawer-trigger",
+                type="button",
+                title="Open configuration panel — aircraft, weight, environment, power",
+            ),
+
             # Store for sidebar collapse state
             dcc.Store(id="sidebar-collapsed-store", data=False),
         ]),
@@ -539,15 +545,16 @@ def desktop_layout():
             # Hidden display element for callback (visible version in rect_course_layout)
             html.Div(id="rectcourse-edge-info-display", style={"display": "none"}),
 
-            html.Div([
-                html.Div("© 2026 Nicholas Len, TALLYAERO. All rights reserved.",
-                         style={"fontSize": "11px", "color": "#666"}),
-                html.Div([
-                    html.A("Full Legal Disclaimer", href="#", id="open-disclaimer", className="legal-link", style={"fontSize": "10px"}),
-                    html.Span(" | ", style={"color": "#999", "fontSize": "10px"}),
-                    html.A("Terms of Use & Privacy Policy", href="#", id="open-terms-policy", className="legal-link", style={"fontSize": "10px"}),
-                ], style={"marginTop": "3px"}),
-            ], className="footer", style={"paddingBottom": "10px", "textAlign": "center"})
+            html.Div(
+                [
+                    html.Span("Full Legal Disclaimer", id="open-disclaimer", className="legal-link"),
+                    html.Span("|", className="separator"),
+                    html.Span("Terms of Use & Privacy Policy", id="open-terms-policy", className="legal-link"),
+                    html.Span("|", className="separator"),
+                    html.Span("© 2026 Nicholas Len, TallyAero. All rights reserved.", className="legal-copyright"),
+                ],
+                className="legal-links",
+            )
         ])
     ])
 ])
