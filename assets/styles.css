@@ -1833,3 +1833,109 @@ input[type="radio"] {
   min-height: 32px;
   font-size: 13px;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Sidebar tightening — kill wasted vertical space at the top.
+   ══════════════════════════════════════════════════════════════ */
+.resizable-sidebar { padding: 0 !important; }
+.sidebar-section {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--gray-border);
+}
+.sidebar-section:last-child { border-bottom: none; }
+.sidebar-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.sidebar-section-header .sidebar-section-title {
+  margin-bottom: 0;
+}
+.sidebar-section-header .sidebar-collapse-btn {
+  background: transparent;
+  border: 1px solid var(--gray-border);
+  border-radius: 3px;
+  font-size: 11px;
+  padding: 0 6px;
+  height: 20px;
+  cursor: pointer;
+}
+[data-theme="dark"] .sidebar-section-header .sidebar-collapse-btn {
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Top-bar airport widget — sits between aircraft picker + maneuver
+   picker. Compact input + Recenter button, floating results below.
+   ══════════════════════════════════════════════════════════════ */
+.topbar-airport-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+}
+.topbar-airport-wrap .chip-prefix {
+  font-size: 10px;
+}
+.topbar-airport-input {
+  height: 28px;
+  width: 140px;
+  padding: 0 8px;
+  font-size: 12px;
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  border-radius: 3px;
+  background: var(--ta-surface-elevated, #ffffff);
+  color: var(--ta-text-primary, #0f172a);
+}
+.topbar-airport-input:focus {
+  outline: none;
+  border-color: var(--ta-brand-blue, #0d59f2);
+}
+.topbar-airport-recenter {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: #6c757d;
+  color: #ffffff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.topbar-airport-recenter:hover { background: #5a6268; }
+
+.topbar-airport-results.search-results-box {
+  position: absolute;
+  top: 100%;
+  left: 28px;
+  z-index: 1100;
+  width: 320px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--ta-surface-elevated, #ffffff);
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  margin-top: 4px;
+}
+.topbar-airport-selected {
+  font-size: 11px;
+  color: #28a745;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+[data-theme="dark"] .topbar-airport-input {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+[data-theme="dark"] .topbar-airport-results.search-results-box {
+  background: #0f172a;
+  border-color: #334155;
+}

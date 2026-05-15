@@ -47,6 +47,28 @@ def _top_strip():
                         className="aircraft-picker-wrap",
                     ),
 
+                    # Airport — text input + Recenter, floating results below
+                    html.Div([
+                        html.Span("APT", className="chip-prefix"),
+                        dcc.Input(
+                            id="airport-search-input",
+                            type="text",
+                            placeholder="ICAO / name",
+                            debounce=False,
+                            className="topbar-airport-input",
+                            autoComplete="off",
+                        ),
+                        html.Button("Recenter", id="recenter-airport-btn",
+                                    className="topbar-airport-recenter",
+                                    title="Recenter map on airport"),
+                        # Floating results panel + hidden selected-airport display
+                        html.Div(id="airport-search-results",
+                                 className="search-results-box topbar-airport-results"),
+                        html.Div(id="selected-airport-display",
+                                 className="topbar-airport-selected",
+                                 style={"display": "none"}),
+                    ], className="topbar-airport-wrap"),
+
                     # Maneuver picker + Info button — moved up from the shelf
                     html.Div([
                         html.Span("MANEUVER", className="chip-prefix"),
@@ -282,16 +304,6 @@ def desktop_layout():
         html.Div(className="main-row main-grid", children=[
             # === Sidebar ===
             html.Div(id="sidebar", className="resizable-sidebar", children=[
-                # Slim header — brand lives in the top-strip; sidebar just
-                # keeps the collapse handle.
-                html.Div(className="sidebar-header sidebar-header-slim", children=[
-                    html.Button(
-                        "«",
-                        id="sidebar-collapse-btn",
-                        className="sidebar-collapse-btn",
-                        title="Collapse sidebar"
-                    ),
-                ]),
                 html.Div(id="sidebar-content", children=[
 
                 # Hidden stores for keyboard navigation (used by airport search)
@@ -300,7 +312,15 @@ def desktop_layout():
 
                 # === Aircraft sub-config (picker lives in the top bar) ===
                 html.Div(className="sidebar-section", children=[
-                    html.Div("Aircraft", className="sidebar-section-title"),
+                    html.Div(className="sidebar-section-header", children=[
+                        html.Div("Aircraft", className="sidebar-section-title"),
+                        html.Button(
+                            "«",
+                            id="sidebar-collapse-btn",
+                            className="sidebar-collapse-btn",
+                            title="Collapse sidebar",
+                        ),
+                    ]),
                     html.Label("Engine", className="input-label-sm"),
                     dcc.Dropdown(id="engine-select", className="dropdown", persistence=True, persistence_type="local"),
                     html.Div(className="action-buttons-row", style={"marginTop": "10px"}, children=[
@@ -313,31 +333,10 @@ def desktop_layout():
                     ]),
                 ]),
 
-                # === Environment section ===
+                # === Environment section (airport moved to top bar) ===
                 html.Div(className="sidebar-section", children=[
                     html.Div("Environment", className="sidebar-section-title"),
-                    html.Label("Search Airport", className="input-label-sm"),
-                    dcc.Input(
-                        id="airport-search-input",
-                        type="text",
-                        placeholder="ICAO or name",
-                        debounce=False,
-                        className="input-large",
-                        autoComplete="off",
-                        style={"width": "100%"},
-                    ),
-                    html.Div(id="airport-search-results", className="search-results-box"),
-                    html.Div(id="selected-airport-display", style={
-                        "fontSize": "12px", "color": "#28a745",
-                        "fontWeight": "500", "marginTop": "4px", "marginBottom": "4px",
-                        "display": "none",
-                    }),
-                    html.Button("Recenter to Airport", id="recenter-airport-btn",
-                                className="reset-btn-small",
-                                style={"marginTop": "4px", "marginBottom": "8px",
-                                       "backgroundColor": "#6c757d", "width": "100%"}),
-
-                    html.Div(style={"display": "flex", "gap": "8px", "marginTop": "8px"}, children=[
+                    html.Div(style={"display": "flex", "gap": "8px"}, children=[
                         html.Div([
                             html.Label("Wind °", className="input-label-sm"),
                             dcc.Input(id="env-wind-dir", type="number", value=360, min=1, max=360,
