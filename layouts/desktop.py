@@ -26,20 +26,25 @@ from core.data_loader import available_aircraft
 def legal_banner_block():
     return html.Div(
         children=[
-            html.Div(
-                "⚠️ This tool is for educational and training discussion only. It is not FAA-approved and may not reflect actual aircraft capabilities. "
-                "Always verify against the aircraft POH or AFM and applicable regulations. ⚠️",
-                className="disclaimer-banner",
-            ),
+            # Phase 4 — old aeroedge logo header + warning banner removed.
+            # Quick-links row stays (still useful nav); theme toggle floats
+            # to the right side of the same row per EM Diagram's quick-links
+            # reflow pattern.
             html.Div(
                 children=[
-                    html.A("Quick Start", href="#", id="open-quickstart", className="legal-link", style={"color": "#E65C00", "fontWeight": "bold"}),
-                    html.Span(" | ", className="legal-separator"),
-                    html.A("EM Diagram Tool", href="https://app.flyaeroedge.com/", target="_blank", className="legal-link", style={"color": "#28a745", "fontWeight": "bold"}),
-                    html.Span(" | ", className="legal-separator"),
-                    html.A("Report an Error", href="https://forms.gle/VX6CA1ugifAtmBM79", target="_blank", className="legal-link", style={"color": "#dc3545"}),
-                    html.Span(" | ", className="legal-separator"),
-                    html.A("Contact TallyAero", href="https://forms.gle/nDahQbhYDNYh6P129", target="_blank", className="legal-link"),
+                    html.Div(
+                        [
+                            html.A("Quick Start", href="#", id="open-quickstart", className="legal-link", style={"color": "#E65C00", "fontWeight": "bold"}),
+                            html.Span(" | ", className="legal-separator"),
+                            html.A("EM Diagram Tool", href="https://app.flyaeroedge.com/", target="_blank", className="legal-link", style={"color": "#28a745", "fontWeight": "bold"}),
+                            html.Span(" | ", className="legal-separator"),
+                            html.A("Report an Error", href="https://forms.gle/VX6CA1ugifAtmBM79", target="_blank", className="legal-link", style={"color": "#dc3545"}),
+                            html.Span(" | ", className="legal-separator"),
+                            html.A("Contact TallyAero", href="https://forms.gle/nDahQbhYDNYh6P129", target="_blank", className="legal-link"),
+                        ],
+                        className="legal-links",
+                    ),
+                    _theme_toggle(),
                 ],
                 className="legal-links-row",
             ),
@@ -154,19 +159,32 @@ def _reset_buttons_row():
     ], style={"display": "flex", "gap": "6px", "marginBottom": "10px"})
 
 
+def _theme_toggle():
+    """3-button theme toggle (Phase 4 mirror of EM Diagram). The hidden
+    `theme-btn-auto` stays in the DOM so the cycleTheme clientside
+    callback's 3-input signature keeps wiring; user-facing toggle is
+    light vs dark only."""
+    return html.Div(
+        [
+            html.Div(
+                [
+                    html.Button("Light", id="theme-btn-light", className="theme-btn active", title="Light mode"),
+                    html.Button("Dark",  id="theme-btn-dark",  className="theme-btn",        title="Dark mode"),
+                ],
+                className="theme-toggle-group",
+                **{"data-role": "theme-toggle"},
+            ),
+            html.Button("", id="theme-btn-auto", n_clicks=0, style={"display": "none"}),
+        ],
+        className="theme-toggle-wrap",
+    )
+
+
 def desktop_layout():
     """Desktop layout with resizable sidebar"""
     return html.Div(className="full-height-container", children=[
-        # Header
-        html.Div(className="banner-header", children=[
-            html.Div(className="banner-inner", children=[
-                html.A(
-                    html.Img(src="/assets/logo.png", className="banner-logo"),
-                    href="https://www.flyaeroedge.com",
-                    style={"textDecoration": "none"}
-                )
-            ])
-        ]),
+        # Phase 4 — banner-header (old aeroedge logo) removed. Theme toggle
+        # now lives in the legal-links row inside legal_banner_block.
         legal_banner_block(),
         # Main 2-column layout
         html.Div(className="main-row", children=[

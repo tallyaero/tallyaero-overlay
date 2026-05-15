@@ -19,33 +19,44 @@ import dash_leaflet as dl
 from core.data_loader import available_aircraft
 
 
+def _mobile_theme_toggle():
+    """Mirrors the desktop theme toggle (Phase 4). Same component IDs so
+    the same clientside callback wires both layouts."""
+    return html.Div(
+        [
+            html.Div(
+                [
+                    html.Button("Light", id="theme-btn-light", className="theme-btn active", title="Light mode"),
+                    html.Button("Dark",  id="theme-btn-dark",  className="theme-btn",        title="Dark mode"),
+                ],
+                className="theme-toggle-group",
+                **{"data-role": "theme-toggle"},
+            ),
+            html.Button("", id="theme-btn-auto", n_clicks=0, style={"display": "none"}),
+        ],
+        className="theme-toggle-wrap",
+    )
+
+
 def mobile_layout():
     """Mobile layout with collapsible settings"""
     return html.Div(className="mobile-container", children=[
-        # Header (smaller)
-        html.Div(className="mobile-header", children=[
-            html.A(
-                html.Img(src="/assets/logo.png", className="mobile-logo"),
-                href="https://www.flyaeroedge.com",
-                style={"textDecoration": "none"}
-            ),
-        ]),
-
-        # Warning banner (compact)
-        html.Div(
-            "⚠️ Educational use only. Verify with POH/AFM.",
-            className="mobile-disclaimer",
-        ),
-
-        # Quick links
+        # Phase 4 — mobile-header (logo) + mobile-disclaimer (warning)
+        # removed. Theme toggle joins the quick-links bar like desktop.
         html.Div(className="quick-links-bar-slim", children=[
-            html.A("Quick Start", href="#", id="mobile-open-quickstart", className="legal-link", style={"color": "#E65C00", "fontWeight": "bold"}),
-            html.Span(" | ", className="legal-separator"),
-            html.A("EM Diagram", href="https://app.flyaeroedge.com/", target="_blank", className="legal-link", style={"color": "#28a745"}),
-            html.Span(" | ", className="legal-separator"),
-            html.A("Report Error", href="mailto:support@flyaeroedge.com?subject=Overlay%20Tool%20Error", className="legal-link"),
-            html.Span(" | ", className="legal-separator"),
-            html.A("Contact TallyAero", href="https://www.flyaeroedge.com/contact", target="_blank", className="legal-link"),
+            html.Div(
+                [
+                    html.A("Quick Start", href="#", id="mobile-open-quickstart", className="legal-link", style={"color": "#E65C00", "fontWeight": "bold"}),
+                    html.Span(" | ", className="legal-separator"),
+                    html.A("EM Diagram", href="https://app.flyaeroedge.com/", target="_blank", className="legal-link", style={"color": "#28a745"}),
+                    html.Span(" | ", className="legal-separator"),
+                    html.A("Report Error", href="mailto:support@flyaeroedge.com?subject=Overlay%20Tool%20Error", className="legal-link"),
+                    html.Span(" | ", className="legal-separator"),
+                    html.A("Contact TallyAero", href="https://www.flyaeroedge.com/contact", target="_blank", className="legal-link"),
+                ],
+                className="legal-links",
+            ),
+            _mobile_theme_toggle(),
         ]),
 
         # Config toggle bar
