@@ -1323,3 +1323,63 @@ input[type="radio"] {
 [data-theme="dark"] .modal-footer { border-color: #334155; }
 [data-theme="dark"] .reset-btn-small { background: #334155; color: #e2e8f0; }
 [data-theme="dark"] .btn-action-orange { background: #c2410c; color: #ffffff; }
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 4 Batch 3 — mobile top bar
+   ══════════════════════════════════════════════════════════════ */
+
+.mobile-top-bar {
+  background: var(--ta-surface-secondary, #ffffff);
+  border-bottom: 1px solid var(--ta-border-primary, #e2e8f0);
+  padding: 8px 12px;
+}
+.mobile-top-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mobile-hamburger {
+  background: transparent;
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  border-radius: 4px;
+  font-size: 18px;
+  padding: 4px 10px;
+  cursor: pointer;
+  color: var(--ta-text-primary, #0f172a);
+}
+.mobile-aircraft-picker {
+  flex: 1;
+  min-width: 0;
+}
+.mobile-aircraft-picker .dropdown,
+.mobile-aircraft-picker .Select-control,
+.mobile-aircraft-picker > div .Select-control {
+  font-size: 13px;
+}
+.mobile-quicklinks {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--ta-text-tertiary, #94a3b8);
+}
+.mobile-quicklinks .quick-link {
+  color: var(--ta-text-secondary, #64748b);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.mobile-quicklinks .quick-link-sep {
+  color: var(--ta-text-tertiary, #94a3b8);
+}
+
+[data-theme="dark"] .mobile-top-bar {
+  background: #1e293b; border-bottom-color: #334155;
+}
+[data-theme="dark"] .mobile-hamburger {
+  background: #0f172a; color: #e2e8f0; border-color: #334155;
+}
+[data-theme="dark"] .mobile-quicklinks .quick-link { color: #cbd5e1; }
+[data-theme="dark"] .mobile-quicklinks .quick-link-sep { color: #475569; }
