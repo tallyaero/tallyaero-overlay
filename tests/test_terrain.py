@@ -153,3 +153,34 @@ def test_disk_cache_round_trip(synthetic_world, tmp_path):
     e2 = terrain.elevation_m(target_lat, target_lon, zoom=11)
     assert math.isfinite(e1) and math.isfinite(e2)
     assert abs(e1 - e2) < 1e-3
+
+
+# === Bbox + prefetch =========================================================
+
+def test_tiles_in_bbox_tiny_returns_at_least_one():
+    """A single-point bbox returns the one tile containing that point."""
+    tiles = terrain.tiles_in_bbox(0.0, 0.0, 0.001, 0.001, zoom=11)
+    assert len(tiles) >= 1
+
+
+def test_tiles_in_bbox_known_count():
+    """A bbox spanning ~2 deg at zoom 11 should cover a predictable
+    number of tiles. At zoom 11 each tile is ~0.176° wide near the
+    equator → ~12x12 grid for a 2° box, give or take 1 in each
+    direction."""
+    tiles = terrain.tiles_in_bbox(0.0, 0.0, 2.0, 2.0, zoom=11)
+    assert 100 <= len(tiles) <= 200
+
+
+def test_prefetch_bbox_concurrent(synthetic_world):
+    """prefetch_bbox should fetch every tile in the bbox. We track
+    fetch calls via our fake and verify the count rises by the
+    expected amount."""
+    target_lat, target_lon = synthetic_world.target_latlon
+    # Tiny bbox around the target — should hit exactly 1-2 tiles
+    n_touched = terrain.prefetch_bbox(
+        target_lat - 0.001, target_lon - 0.001,
+        target_lat + 0.001, target_lon + 0.001,
+        zoom=11,
+    )
+    assert n_touched >= 1

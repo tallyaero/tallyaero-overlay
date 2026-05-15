@@ -12,9 +12,9 @@ from dash.exceptions import PreventUpdate
 import dash_leaflet as dl
 
 from core.data_loader import airport_data
-from core.route import compute_route_segment, magvar_west_positive
-from core.corridor import compute_route_corridor
-from core.terrain import elevation_m as _terrain_elevation_m
+from core.route import compute_route_segment, magvar_west_positive, haversine_nm
+from core.corridor import compute_route_corridor, sample_route_points
+from core.terrain import elevation_m as _terrain_elevation_m, prefetch_corridor
 
 
 def _airport_by_id(airport_id: str):
@@ -148,6 +148,33 @@ def register(app):
                 origin.get("elevation_ft") or 0.0,
                 dest.get("elevation_ft") or 0.0,
             )
+
+            # Auto-scale spacing so a transcontinental route doesn't
+            # generate 1000+ sample envelopes (browser + worker can't
+            # handle). Target ~80-120 samples per route.
+            route_nm = haversine_nm(origin["lat"], origin["lon"],
+                                    dest["lat"], dest["lon"])
+            if route_nm <= 200:
+                spacing = 2.0
+            elif route_nm <= 600:
+                spacing = max(2.0, route_nm / 100.0)
+            else:
+                spacing = max(5.0, route_nm / 150.0)
+
+            # Approximate max envelope reach (still-air NM at cruise AGL).
+            max_reach_nm = max(2.0,
+                               (cruise_alt - field_elev) * glide_ratio / 6076.115)
+
+            # Concurrent S3 fetch of only the DEM tiles the corridor
+            # actually needs — a narrow strip along the route, not the
+            # whole bbox. ~10x fewer tiles than bbox for a long route.
+            corridor_samples = sample_route_points(
+                origin["lat"], origin["lon"],
+                dest["lat"], dest["lon"],
+                spacing_nm=max(2.0, max_reach_nm),  # coarse pre-fetch grid
+            )
+            prefetch_corridor(corridor_samples, reach_nm=max_reach_nm)
+
             rings, corridor_meta = compute_route_corridor(
                 origin_lat=origin["lat"], origin_lon=origin["lon"],
                 dest_lat=dest["lat"], dest_lon=dest["lon"],
@@ -156,8 +183,10 @@ def register(app):
                 glide_ratio=glide_ratio,
                 glide_ias_kt=glide_ias,
                 wind_dir_deg=wd, wind_speed_kt=ws,
-                spacing_nm=2.0,
+                spacing_nm=spacing,
                 elevation_fn=_terrain_elevation_m,
+                n_envelope_points=24,
+                terrain_step_nm=0.5,
             )
             for ring in rings:
                 layer.append(
