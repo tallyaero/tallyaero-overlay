@@ -20,7 +20,7 @@
   --accordion-active-bg: #e9ecef;
 
   /* Layout */
-  --sidebar-width: 360px;
+  --sidebar-width: 290px;
 }
 
 /* === Global Reset === */
@@ -1571,3 +1571,530 @@ input[type="radio"] {
 [data-theme="dark"] .legal-links .legal-link { color: #cbd5e1; }
 [data-theme="dark"] .legal-links .separator { color: #475569; }
 [data-theme="dark"] .legal-links .legal-copyright { color: #94a3b8; }
+
+/* ══════════════════════════════════════════════════════════════
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 4 — horizontal-native maneuver shelf.
+   Each per-maneuver layout returns a flex row of `.shelf-field`
+   columns (label-on-top, input-below, tight gap). Action buttons
+   sit on the right. No vertical stacking, no oversized buttons,
+   no stretched sliders.
+   ══════════════════════════════════════════════════════════════ */
+
+.maneuver-shelf-params {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 6px 12px;
+  padding: 8px 16px;
+  background: var(--ta-surface-secondary, #ffffff);
+  border-bottom: 1px solid var(--ta-border-primary, #e2e8f0);
+  flex-shrink: 0;
+}
+.maneuver-shelf-params:empty { display: none; }
+
+/* Each labeled control is a tight column */
+.shelf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.shelf-field-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ta-text-tertiary, #94a3b8);
+  white-space: nowrap;
+}
+/* Numeric / text input inside a shelf-field */
+.shelf-field input[type="number"],
+.shelf-field input[type="text"] {
+  width: 64px;
+  height: 26px;
+  padding: 0 6px;
+  font-size: 12px;
+  text-align: center;
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  border-radius: 3px;
+  background: var(--ta-surface-elevated, #ffffff);
+  color: var(--ta-text-primary, #0f172a);
+  font-variant-numeric: tabular-nums;
+}
+/* Dropdowns inside a shelf-field */
+.shelf-field .Select,
+.shelf-field .dash-dropdown {
+  width: 120px;
+  font-size: 12px;
+}
+.shelf-field .Select-control,
+.shelf-field > div .Select-control {
+  min-height: 26px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+/* Sliders inside a shelf-field — clamp width via a fixed-width wrapper */
+.shelf-field-slider {
+  width: 160px;
+  padding: 4px 4px 0;
+}
+.shelf-field-slider .rc-slider {
+  width: 100%;
+  margin: 4px 0;
+}
+.shelf-field-slider .rc-slider-mark-text {
+  font-size: 9px;
+}
+/* Radio rows */
+.shelf-field-radio {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding-bottom: 2px;
+}
+.shelf-field-radio label {
+  font-size: 11px;
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+  margin: 0;
+}
+
+/* Action buttons in the shelf */
+.shelf-action {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.shelf-action-set {
+  background: var(--ta-brand-orange, #f27b0d);
+  color: #ffffff;
+}
+.shelf-action-set:hover { background: var(--ta-brand-orange-dark, #c2410c); }
+.shelf-action-draw {
+  background: var(--ta-brand-blue, #0d59f2);
+  color: #ffffff;
+}
+.shelf-action-draw:hover { background: var(--ta-brand-blue-dark, #0a47c9); }
+
+/* Push action buttons to the right side of the row */
+.shelf-spacer { flex: 1 1 auto; min-width: 0; }
+
+[data-theme="dark"] .maneuver-shelf-params {
+  background: #1e293b;
+  border-bottom-color: #334155;
+}
+[data-theme="dark"] .shelf-field-label { color: #94a3b8; }
+[data-theme="dark"] .shelf-field input[type="number"],
+[data-theme="dark"] .shelf-field input[type="text"] {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+
+/* Top strip — picker layouts (MANEUVER picker + info button) */
+.maneuver-shelf-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 16px;
+}
+.maneuver-shelf-picker .chip-prefix {
+  font-size: 10px;
+}
+.maneuver-shelf-picker .chip-dropdown {
+  min-width: 200px;
+  font-size: 12px;
+}
+.maneuver-shelf-picker .chip-dropdown .Select-control,
+.maneuver-shelf-picker > div .Select-control {
+  min-height: 28px;
+  font-size: 12px;
+}
+
+/* Status text + global reset/undo cluster on right side of top strip */
+.top-strip-right .maneuver-shelf-status {
+  max-width: 220px;
+  font-size: 11px;
+  color: var(--ta-text-secondary, #64748b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-style: italic;
+}
+.top-strip-right .maneuver-shelf-globals {
+  display: inline-flex;
+  gap: 4px;
+}
+.top-strip-right .shelf-btn {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  background: var(--ta-surface-elevated, #ffffff);
+  color: var(--ta-text-primary, #0f172a);
+  cursor: pointer;
+}
+.top-strip-right .shelf-btn:hover {
+  background: var(--ta-surface-tertiary, #f1f5f9);
+  border-color: var(--ta-brand-blue, #0d59f2);
+}
+.top-strip-right .shelf-btn-undo {
+  border-color: #17a2b8;
+  color: #17a2b8;
+}
+
+/* "?" info button (small circle next to picker) */
+.shelf-info-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  background: var(--ta-surface-elevated, #ffffff);
+  color: var(--ta-text-secondary, #64748b);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.shelf-info-btn:hover {
+  background: var(--ta-brand-blue, #0d59f2);
+  color: #ffffff;
+  border-color: var(--ta-brand-blue, #0d59f2);
+}
+
+[data-theme="dark"] .top-strip-right .shelf-btn {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+[data-theme="dark"] .top-strip-right .shelf-btn:hover {
+  background: #1e293b;
+}
+[data-theme="dark"] .top-strip-right .maneuver-shelf-status { color: #cbd5e1; }
+[data-theme="dark"] .shelf-info-btn {
+  background: #0f172a;
+  color: #cbd5e1;
+  border-color: #334155;
+}
+
+/* Sidebar sections (re-added — were in earlier batch but may have been lost) */
+.sidebar-section {
+  padding: 12px;
+  border-bottom: 1px solid var(--gray-border);
+}
+.sidebar-section:last-child { border-bottom: none; }
+.sidebar-section-title {
+  font-family: var(--ta-font-sans, system-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ta-text-tertiary, #94a3b8);
+  margin-bottom: 8px;
+}
+[data-theme="dark"] .sidebar-section { border-bottom-color: #334155; }
+[data-theme="dark"] .sidebar-section-title { color: #94a3b8; }
+
+.input-label-sm {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ta-text-secondary, #64748b);
+  margin-bottom: 4px;
+  display: block;
+}
+[data-theme="dark"] .input-label-sm { color: #cbd5e1; }
+
+/* Aircraft picker wrap (top strip) */
+.aircraft-picker-wrap {
+  width: 280px;
+  min-width: 200px;
+  max-width: 28vw;
+}
+.aircraft-picker-wrap .aircraft-dropdown,
+.aircraft-picker-wrap .Select-control,
+.aircraft-picker-wrap > div .Select-control {
+  min-height: 32px;
+  font-size: 13px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Sidebar tightening — kill wasted vertical space at the top.
+   ══════════════════════════════════════════════════════════════ */
+.resizable-sidebar { padding: 0 !important; }
+.sidebar-section {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--gray-border);
+}
+.sidebar-section:last-child { border-bottom: none; }
+.sidebar-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.sidebar-section-header .sidebar-section-title {
+  margin-bottom: 0;
+}
+.sidebar-section-header .sidebar-collapse-btn {
+  background: transparent;
+  border: 1px solid var(--gray-border);
+  border-radius: 3px;
+  font-size: 11px;
+  padding: 0 6px;
+  height: 20px;
+  cursor: pointer;
+}
+[data-theme="dark"] .sidebar-section-header .sidebar-collapse-btn {
+  border-color: #334155;
+  color: #cbd5e1;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Top-bar airport widget — sits between aircraft picker + maneuver
+   picker. Compact input + Recenter button, floating results below.
+   ══════════════════════════════════════════════════════════════ */
+.topbar-airport-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+}
+.topbar-airport-wrap .chip-prefix {
+  font-size: 10px;
+}
+.topbar-airport-input {
+  height: 28px;
+  width: 140px;
+  padding: 0 8px;
+  font-size: 12px;
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  border-radius: 3px;
+  background: var(--ta-surface-elevated, #ffffff);
+  color: var(--ta-text-primary, #0f172a);
+}
+.topbar-airport-input:focus {
+  outline: none;
+  border-color: var(--ta-brand-blue, #0d59f2);
+}
+.topbar-airport-recenter {
+  height: 28px;
+  padding: 0 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: #6c757d;
+  color: #ffffff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.topbar-airport-recenter:hover { background: #5a6268; }
+
+.topbar-airport-results.search-results-box {
+  position: absolute;
+  top: 100%;
+  left: 28px;
+  z-index: 1100;
+  width: 320px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--ta-surface-elevated, #ffffff);
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  margin-top: 4px;
+}
+.topbar-airport-selected {
+  font-size: 11px;
+  color: #28a745;
+  font-weight: 500;
+  margin-left: 8px;
+}
+
+[data-theme="dark"] .topbar-airport-input {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+[data-theme="dark"] .topbar-airport-results.search-results-box {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+/* Sidebar bottom CRUD section — pin to the bottom of the rail */
+.sidebar-section-bottom {
+  margin-top: auto;
+  border-top: 1px solid var(--gray-border);
+  border-bottom: none !important;
+  background: var(--ta-surface-tertiary, transparent);
+}
+#sidebar-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+[data-theme="dark"] .sidebar-section-bottom {
+  border-top-color: #334155;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Final polish — sidebar narrower, selected-airport hidden,
+   shelf labels inline with their fields.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Narrower sidebar — minimum width drops with the default */
+.resizable-sidebar {
+  min-width: 220px !important;
+}
+
+/* Force-hide the redundant selected-airport label. The callback
+   sets a `style.display` value each time an airport is picked; the
+   !important rule wins. */
+#selected-airport-display {
+  display: none !important;
+}
+
+/* Inline labels for shelf fields — label on the left, control on
+   the right, side-by-side. Sliders keep column layout (labels
+   above) since their marks need full width. */
+.shelf-field {
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+.shelf-field-slider {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
+}
+.shelf-field-label {
+  white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Final-final polish
+   1. Right-align maneuver-shelf-params row
+   2. Tighten brand → aircraft picker gap
+   3. Overlay time scrubber on map (top-center)
+   4. Reset/Undo as bottom-right overlay on map
+   ══════════════════════════════════════════════════════════════ */
+
+/* 1. Right-align the per-maneuver params row */
+.maneuver-shelf-params {
+  justify-content: flex-end !important;
+}
+
+/* 2. Brand spacing tightened — no more letter-spacing margin and
+   smaller gap to the next element */
+.top-strip-brand {
+  letter-spacing: 0 !important;
+  font-size: 13px !important;
+  margin: 0 !important;
+}
+.top-strip-left {
+  gap: 8px !important;
+}
+.aircraft-picker-wrap {
+  margin-left: 0 !important;
+}
+
+/* 3. Time scrubber containers — when the per-maneuver callback
+   un-hides one, it becomes an absolute-positioned overlay just
+   below the top bar, centered horizontally on the map. */
+[id$="-slider-container"] {
+  position: fixed !important;
+  top: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1100;
+  width: 480px;
+  max-width: 80vw;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  backdrop-filter: blur(4px);
+}
+[id$="-slider-container"] .rc-slider {
+  width: 100% !important;
+}
+[id$="-slider-container"] label {
+  font-size: 10px !important;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ta-text-secondary, #64748b);
+}
+[data-theme="dark"] [id$="-slider-container"] {
+  background: rgba(15, 23, 42, 0.92);
+  border-color: #334155;
+}
+
+/* 4. Reset/Undo overlay — top-right of the map, just left of the
+   windsock. Same vertical alignment so they read as one cluster. */
+.map-controls-overlay {
+  position: absolute;
+  top: 10px;
+  right: 200px;
+  z-index: 1000;
+  display: flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 4px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  backdrop-filter: blur(4px);
+}
+.map-overlay-btn {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  background: var(--ta-surface-elevated, #ffffff);
+  color: var(--ta-text-primary, #0f172a);
+  cursor: pointer;
+}
+.map-overlay-btn:hover {
+  background: var(--ta-surface-tertiary, #f1f5f9);
+  border-color: var(--ta-brand-blue, #0d59f2);
+}
+.map-overlay-btn-undo {
+  color: #17a2b8;
+  border-color: #17a2b8;
+}
+[data-theme="dark"] .map-controls-overlay {
+  background: rgba(15, 23, 42, 0.92);
+}
+[data-theme="dark"] .map-overlay-btn {
+  background: #1e293b;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+[data-theme="dark"] .map-overlay-btn:hover {
+  background: #334155;
+}

@@ -24,9 +24,11 @@ from core.data_loader import available_aircraft
 
 
 def _top_strip():
-    """Phase 4 Batch 2b — brand + aircraft picker on the left, quick-links
-    + theme toggle on the right. Mirrors EM Diagram's current top-strip
-    pattern (env chips live inline in the rail per Phase 5AB-2, not here)."""
+    """Phase 4 — single consolidated top bar.
+
+    LEFT  : brand · aircraft picker · MANEUVER picker · ? info button.
+    RIGHT : status text · Reset / Undo · Quick Start · Contact · theme.
+    """
     return html.Div(
         [
             html.Div(
@@ -37,19 +39,83 @@ def _top_strip():
                             id="aircraft-select",
                             options=[{"label": name, "value": name} for name in available_aircraft],
                             value="C172" if "C172" in available_aircraft else (available_aircraft[0] if available_aircraft else None),
-                            placeholder="Select an aircraft…",
+                            placeholder="Select an aircraft",
                             className="dropdown aircraft-dropdown",
                             clearable=False,
-                            persistence=True,
-                            persistence_type="local",
+                            persistence=True, persistence_type="local",
                         ),
                         className="aircraft-picker-wrap",
+                    ),
+
+                    # Airport — text input + Recenter, floating results below.
+                    # The input itself displays the selected airport after pick;
+                    # selected-airport-display is kept hidden (callbacks still
+                    # write to it but it doesn't render visibly).
+                    html.Div([
+                        html.Span("APT", className="chip-prefix"),
+                        dcc.Input(
+                            id="airport-search-input",
+                            type="text",
+                            placeholder="ICAO / name",
+                            debounce=False,
+                            className="topbar-airport-input",
+                            autoComplete="off",
+                        ),
+                        html.Button("Recenter", id="recenter-airport-btn",
+                                    className="topbar-airport-recenter",
+                                    title="Recenter map on airport"),
+                        html.Div(id="airport-search-results",
+                                 className="search-results-box topbar-airport-results"),
+                        html.Div(id="selected-airport-display", style={"display": "none"}),
+                    ], className="topbar-airport-wrap"),
+
+                    # Maneuver picker + Info button — moved up from the shelf
+                    html.Div([
+                        html.Span("MANEUVER", className="chip-prefix"),
+                        dcc.Dropdown(
+                            id="maneuver-select",
+                            className="chip-dropdown",
+                            placeholder="Select maneuver",
+                            options=[
+                                {"label": "Impossible Turn", "value": "impossible_turn"},
+                                {"label": "Power-Off 180", "value": "poweroff180"},
+                                {"label": "Engine-Out Glide", "value": "engineout"},
+                                {"label": "Steep Turns", "value": "steep_turn"},
+                                {"label": "Chandelle", "value": "chandelle"},
+                                {"label": "Lazy Eight", "value": "lazy8"},
+                                {"label": "Steep Spiral", "value": "steep_spiral"},
+                                {"label": "S-Turns", "value": "s_turn"},
+                                {"label": "Turns Around a Point", "value": "turns_point"},
+                                {"label": "Rectangular Course", "value": "rect_course"},
+                                {"label": "Eights on Pylons", "value": "pylons"},
+                            ],
+                            clearable=False,
+                            persistence=True, persistence_type="local",
+                        ),
+                        html.Button("?", id="open-maneuver-info", n_clicks=0,
+                                    className="shelf-info-btn",
+                                    title="What is this maneuver?"),
+                    ], className="maneuver-shelf-picker"),
+
+                    # Maneuver info modal stays mounted (toggled by callback)
+                    dbc.Modal(
+                        [
+                            dbc.ModalHeader(dbc.ModalTitle(id="maneuver-info-title"), close_button=True),
+                            dbc.ModalBody(id="maneuver-info-body"),
+                            dbc.ModalFooter(dbc.Button("Close", id="close-maneuver-info", className="green-button")),
+                        ],
+                        id="maneuver-info-modal",
+                        is_open=False,
+                        centered=True,
+                        size="md",
+                        dialogClassName="tallyaero-modal",
                     ),
                 ],
                 className="top-strip-left",
             ),
             html.Div(
                 [
+                    html.Div(id="maneuver-shelf-status", className="maneuver-shelf-status"),
                     html.Div(
                         [
                             html.A("Quick Start", href="#", id="open-quickstart", className="quick-link", style={"color": "#E65C00", "fontWeight": "bold"}),
@@ -177,12 +243,11 @@ def _modals_block():
 
 
 def _reset_buttons_row():
-    """Returns the reset buttons row to be included in each maneuver layout."""
-    return html.Div([
-        html.Button("Reset All", id="reset-all", className="reset-btn-small", style={"flex": "1"}),
-        html.Button("Reset Clicks", id="reset-clicks", className="reset-btn-small", style={"flex": "1"}),
-        html.Button("Undo Click", id="undo-last-click", className="reset-btn-small", style={"flex": "1", "backgroundColor": "#17a2b8"}),
-    ], style={"display": "flex", "gap": "6px", "marginBottom": "10px"})
+    """Deprecated — Reset / Undo buttons now live in the top
+    maneuver_action_shelf. Returns an empty Div so the existing per-
+    maneuver layout call sites stay valid without duplicating the
+    button IDs."""
+    return html.Div(style={"display": "none"})
 
 
 def _theme_toggle():
@@ -206,88 +271,14 @@ def _theme_toggle():
     )
 
 
-def _settings_drawer():
-    """Phase 4 Batch 2d — Offcanvas drawer holding configuration that
-    doesn't need to be visible while flying. Mirrors EM Diagram's
-    "live controls in rail, config in drawer" pattern (Phase 5AA).
-
-    Contents: action buttons (Edit/Load aircraft) + Weight & Balance
-    + Environment + Power. Wind stays in the rail because the user
-    typically tunes it in line with map clicks."""
-    return dbc.Offcanvas(
-        [
-            html.Div(className="action-buttons-row", children=[
-                html.A("Edit/Create Aircraft", href="https://app.flyaeroedge.com/edit-aircraft", target="_blank", className="btn-action-orange"),
-                dcc.Upload(
-                    html.Button("Load Aircraft File", className="btn-action-orange"),
-                    id="upload-aircraft",
-                    accept=".json",
-                ),
-            ]),
-
-            dbc.Accordion([
-                dbc.AccordionItem([
-                    html.Label("Engine Option", className="input-label"),
-                    dcc.Dropdown(id="engine-select", className="dropdown", persistence=True, persistence_type="local"),
-
-                    html.Label("Occupants", className="input-label"),
-                    dcc.Input(id="occupants", type="number", value=1, min=1, max=4, className="input-small", persistence=True, persistence_type="local"),
-
-                    html.Label("Occupant Weight (lbs)", className="input-label"),
-                    dcc.Input(id="occupant-weight", type="number", value=180, min=100, max=300, className="input-small", persistence=True, persistence_type="local"),
-
-                    html.Label("Fuel Load (gal)", className="input-label"),
-                    dcc.Slider(
-                        id="fuel-load",
-                        min=0, max=50, step=1, value=0,
-                        marks={0: "0", 12: "1/4", 25: "1/2", 37: "3/4", 50: "Full"},
-                        tooltip={"always_visible": True},
-                        persistence=True, persistence_type="local",
-                    ),
-
-                    html.Label("Total Weight (lbs)", className="input-label"),
-                    dcc.Input(id="total-weight-display", type="text", value="", readOnly=True, className="input-small"),
-
-                    html.Label("CG Position", className="input-label"),
-                    dcc.Slider(
-                        id="cg-slider",
-                        min=0.0, max=1.0, step=0.01, value=0.5,
-                        marks={0.0: "FWD", 0.5: "MID", 1.0: "AFT"},
-                        tooltip={"always_visible": True},
-                        persistence=True, persistence_type="local",
-                    ),
-                ], title="Weight & Balance"),
-
-                dbc.AccordionItem([
-                    html.Label("Airport Elevation (ft)", className="input-label"),
-                    html.Div(id="env-airport-agl", className="weight-box", style={"marginBottom": "10px"}),
-
-                    html.Label("Outside Air Temp (F)", className="input-label"),
-                    dcc.Input(id="env-oat", type="number", value=52, className="input-small", persistence=True, persistence_type="local"),
-
-                    html.Label("Altimeter Setting (inHg)", className="input-label", style={"marginTop": "8px"}),
-                    dcc.Input(id="env-altimeter", type="number", value=29.92, className="input-small", persistence=True, persistence_type="local"),
-                ], title="Environment"),
-
-                dbc.AccordionItem([
-                    html.Label("Power Setting", className="input-label"),
-                    dcc.Slider(
-                        id="power-setting",
-                        min=0.05, max=1.0, step=0.05, value=0.5,
-                        marks={0.05: "IDLE", 0.2: "20%", 0.4: "40%", 0.6: "60%", 0.8: "80%", 0.99: "100%"},
-                        tooltip={"always_visible": True},
-                        persistence=True, persistence_type="local",
-                    ),
-                ], title="Power"),
-            ], start_collapsed=False, always_open=True, className="drawer-accordion"),
-        ],
-        id="settings-drawer",
-        title="Configuration",
-        placement="start",
-        is_open=False,
-        backdrop=True,
-        scrollable=True,
-        className="settings-drawer",
+def _maneuver_action_shelf():
+    """Single thin row that only appears when a maneuver is selected —
+    holds the per-maneuver params + Set Point / Draw / Erase buttons.
+    The picker, info button, reset/undo controls, and status text all
+    live in the consolidated top strip above this."""
+    return html.Div(
+        id="maneuver-params-container",
+        className="maneuver-shelf maneuver-shelf-params",
     )
 
 
@@ -301,110 +292,139 @@ def desktop_layout():
     """
     return html.Div(className="full-height-container desktop-shell", children=[
         _top_strip(),
+        _maneuver_action_shelf(),
         _modals_block(),
-        _settings_drawer(),
         # Main 2-column layout (sidebar + map) — wraps in main-grid so
         # the CSS can target it with the new shell rules.
         html.Div(className="main-row main-grid", children=[
             # === Sidebar ===
             html.Div(id="sidebar", className="resizable-sidebar", children=[
-                # Slim header — brand lives in the top-strip; sidebar just
-                # keeps the collapse handle.
-                html.Div(className="sidebar-header sidebar-header-slim", children=[
-                    html.Button(
-                        "«",
-                        id="sidebar-collapse-btn",
-                        className="sidebar-collapse-btn",
-                        title="Collapse sidebar"
-                    ),
-                ]),
                 html.Div(id="sidebar-content", children=[
 
-                # --- Airport Search (First - so user can navigate) ---
-            html.Label("Search Airport", className="input-label"),
-            dcc.Input(
-                id="airport-search-input",
-                type="text",
-                placeholder="ICAO or name...",
-                debounce=False,  # Instant results as you type
-                className="input-large",
-                autoComplete="off",
-            ),
-            # Hidden stores for keyboard navigation
-            dcc.Store(id="airport-highlight-index", data=0),
-            dcc.Store(id="airport-search-matches", data=[]),
-            html.Div(id="airport-search-results", className="search-results-box"),
-            # Selected airport display
-            html.Div(
-                id="selected-airport-display",
-                style={
-                    "fontSize": "12px",
-                    "color": "#28a745",
-                    "fontWeight": "500",
-                    "marginTop": "4px",
-                    "marginBottom": "4px",
-                    "display": "none"  # Hidden until airport selected
-                }
-            ),
+                # Hidden stores for keyboard navigation (used by airport search)
+                dcc.Store(id="airport-highlight-index", data=0),
+                dcc.Store(id="airport-search-matches", data=[]),
 
-            # Recenter to Airport button
-            html.Button("Recenter to Airport", id="recenter-airport-btn", className="reset-btn-small", style={"marginTop": "4px", "marginBottom": "8px", "backgroundColor": "#6c757d"}),
+                # === Aircraft sub-config (picker lives in the top bar) ===
+                html.Div(className="sidebar-section", children=[
+                    html.Div(className="sidebar-section-header", children=[
+                        html.Div("Aircraft", className="sidebar-section-title"),
+                        html.Button(
+                            "«",
+                            id="sidebar-collapse-btn",
+                            className="sidebar-collapse-btn",
+                            title="Collapse sidebar",
+                        ),
+                    ]),
+                    html.Label("Engine", className="input-label-sm"),
+                    dcc.Dropdown(id="engine-select", className="dropdown", persistence=True, persistence_type="local"),
+                ]),
 
-            # --- Aircraft Selection — moved to top-strip in Batch 2b ---
-            # --- Engine/Weight/CG/Env/Power — moved to settings drawer in Batch 2d ---
+                # === Environment section (airport moved to top bar) ===
+                html.Div(className="sidebar-section", children=[
+                    html.Div("Environment", className="sidebar-section-title"),
+                    html.Div(style={"display": "flex", "gap": "8px"}, children=[
+                        html.Div([
+                            html.Label("Wind °", className="input-label-sm"),
+                            dcc.Input(id="env-wind-dir", type="number", value=360, min=1, max=360,
+                                      className="input-small", style={"width": "100%"},
+                                      persistence=True, persistence_type="local"),
+                        ], style={"flex": "1"}),
+                        html.Div([
+                            html.Label("Speed (kt)", className="input-label-sm"),
+                            dcc.Input(id="env-wind-speed", type="number", value=0, min=0,
+                                      className="input-small", style={"width": "100%"},
+                                      persistence=True, persistence_type="local"),
+                        ], style={"flex": "1"}),
+                    ]),
 
-            # --- Wind (Compact single row) — stays in rail; live tuning ---
-            html.Div([
-                html.Span("Wind", style={"fontWeight": "600", "fontSize": "13px", "marginRight": "12px"}),
-                html.Span("Direction", style={"fontSize": "11px", "color": "#666", "marginRight": "4px"}),
-                dcc.Input(id="env-wind-dir", type="number", value=360, min=1, max=360, className="input-small", style={"width": "55px", "height": "28px", "marginRight": "10px"}, persistence=True, persistence_type="local"),
-                html.Span("Speed (Kts)", style={"fontSize": "11px", "color": "#666", "marginRight": "4px"}),
-                dcc.Input(id="env-wind-speed", type="number", value=0, min=0, className="input-small", style={"width": "50px", "height": "28px"}, persistence=True, persistence_type="local"),
-            ], className="wind-row"),
+                    html.Div(style={"display": "flex", "gap": "8px", "marginTop": "8px"}, children=[
+                        html.Div([
+                            html.Label("OAT (°F)", className="input-label-sm"),
+                            dcc.Input(id="env-oat", type="number", value=52,
+                                      className="input-small", style={"width": "100%"},
+                                      persistence=True, persistence_type="local"),
+                        ], style={"flex": "1"}),
+                        html.Div([
+                            html.Label("Altim (inHg)", className="input-label-sm"),
+                            dcc.Input(id="env-altimeter", type="number", value=29.92, step=0.01,
+                                      className="input-small", style={"width": "100%"},
+                                      persistence=True, persistence_type="local"),
+                        ], style={"flex": "1"}),
+                    ]),
 
-            # --- Maneuver Dropdown ---
-            html.Label("Maneuver", className="input-label"),
-            dcc.Dropdown(
-                id="maneuver-select",
-                className="dropdown",
-                placeholder="Select Maneuver",
-                options=[
-                    {"label": "Impossible Turn", "value": "impossible_turn"},
-                    {"label": "Power-Off 180", "value": "poweroff180"},
-                    {"label": "Engine-Out Glide Simulation", "value": "engineout"},
-                    {"label": "Steep Turns", "value": "steep_turn"},
-                    {"label": "Chandelle", "value": "chandelle"},
-                    {"label": "Lazy Eight", "value": "lazy8"},
-                    {"label": "Steep Spiral", "value": "steep_spiral"},
-                    {"label": "S-Turns", "value": "s_turn"},
-                    {"label": "Turns Around a Point", "value": "turns_point"},
-                    {"label": "Rectangular Course", "value": "rect_course"},
-                    {"label": "Eights on Pylons", "value": "pylons"},
-                ],
-                persistence=True,
-                persistence_type="local"
-            ),
+                    html.Div(id="env-airport-agl", className="weight-box",
+                             style={"marginTop": "8px", "fontSize": "11px"}),
+                ]),
 
-            # --- Conditionally Shown Based on Maneuver ---
-            html.Div(id="maneuver-params-container", children=[], style={"marginTop": "15px"}),
+                # === Weight & CG section ===
+                html.Div(className="sidebar-section", children=[
+                    html.Div("Weight & CG", className="sidebar-section-title"),
+                    html.Div(style={"display": "flex", "gap": "8px"}, children=[
+                        html.Div([
+                            html.Label("Occupants", className="input-label-sm"),
+                            dcc.Input(id="occupants", type="number", value=1, min=1, max=4,
+                                      className="input-small", style={"width": "100%"},
+                                      persistence=True, persistence_type="local"),
+                        ], style={"flex": "1"}),
+                        html.Div([
+                            html.Label("Occ. Wt (lb)", className="input-label-sm"),
+                            dcc.Input(id="occupant-weight", type="number", value=180, min=100, max=300,
+                                      className="input-small", style={"width": "100%"},
+                                      persistence=True, persistence_type="local"),
+                        ], style={"flex": "1"}),
+                    ]),
+                    html.Label("Fuel Load (gal)", className="input-label-sm", style={"marginTop": "10px"}),
+                    dcc.Slider(
+                        id="fuel-load", min=0, max=50, step=1, value=0,
+                        marks={0: "0", 12: "1/4", 25: "1/2", 37: "3/4", 50: "Full"},
+                        tooltip={"always_visible": True},
+                        persistence=True, persistence_type="local",
+                    ),
+                    html.Label("CG Position", className="input-label-sm", style={"marginTop": "10px"}),
+                    dcc.Slider(
+                        id="cg-slider", min=0.0, max=1.0, step=0.01, value=0.5,
+                        marks={0.0: "FWD", 0.5: "MID", 1.0: "AFT"},
+                        tooltip={"always_visible": True},
+                        persistence=True, persistence_type="local",
+                    ),
+                    html.Label("Total Weight", className="input-label-sm", style={"marginTop": "10px"}),
+                    dcc.Input(id="total-weight-display", type="text", value="", readOnly=True,
+                              className="input-small", style={"width": "100%"}),
+                ]),
 
-            # Store for tracking last clicked point (for undo)
-            dcc.Store(id="last-click-info", data=None),
+                # === Maneuver picker + params moved to the top shelf ===
+
+                # === Power section ===
+                html.Div(className="sidebar-section", children=[
+                    html.Div("Power", className="sidebar-section-title"),
+                    dcc.Slider(
+                        id="power-setting",
+                        min=0.05, max=1.0, step=0.05, value=0.5,
+                        marks={0.05: "IDLE", 0.5: "50%", 0.99: "100%"},
+                        tooltip={"always_visible": True},
+                        persistence=True, persistence_type="local",
+                    ),
+                ]),
+
+                # --- Maneuver params moved to the top shelf ---
+
+                # Bottom section — aircraft CRUD buttons (out of the way)
+                html.Div(className="sidebar-section sidebar-section-bottom", children=[
+                    html.Div(className="action-buttons-row", children=[
+                        html.A("Edit/Create", href="https://app.flyaeroedge.com/edit-aircraft",
+                               target="_blank", className="btn-action-orange"),
+                        dcc.Upload(
+                            html.Button("Load File", className="btn-action-orange"),
+                            id="upload-aircraft",
+                            accept=".json",
+                        ),
+                    ]),
+                ]),
+
+                # Store for tracking last clicked point (for undo)
+                dcc.Store(id="last-click-info", data=None),
             ]),  # End sidebar-content
-
-            # MORE Configure — full-width chip trigger at the bottom of the
-            # rail, mirroring EM Diagram's Phase 5AD pattern.
-            html.Button(
-                [
-                    html.Span("MORE", className="chip-prefix"),
-                    html.Span("Configure", className="chip-label"),
-                ],
-                id="open-drawer-btn",
-                n_clicks=0,
-                className="env-chip rail-action-chip rail-drawer-trigger",
-                type="button",
-                title="Open configuration panel — aircraft, weight, environment, power",
-            ),
 
             # Store for sidebar collapse state
             dcc.Store(id="sidebar-collapsed-store", data=False),
@@ -412,6 +432,7 @@ def desktop_layout():
 
         # === Map Column ===
         html.Div(id="engineout-click-status", style={"display": "none"}),
+
         html.Div(className="graph-column", style={"display": "flex", "flexDirection": "column"}, children=[
             html.Div(
                 style={
@@ -420,6 +441,16 @@ def desktop_layout():
                     "position": "relative"
                 },
                 children=[
+                    # Map-overlay controls — Reset/Undo float over the map
+                    # top-right, just left of the windsock. Lives inside the
+                    # relative-positioned map wrapper so the absolute position
+                    # anchors to the map, not the viewport.
+                    html.Div(className="map-controls-overlay", children=[
+                        html.Button("Reset All", id="reset-all", className="map-overlay-btn"),
+                        html.Button("Reset Clicks", id="reset-clicks", className="map-overlay-btn"),
+                        html.Button("Undo", id="undo-last-click", className="map-overlay-btn map-overlay-btn-undo"),
+                    ]),
+
                     dl.Map(
                         id="map",
                         center=[33.0635, -80.2795],
