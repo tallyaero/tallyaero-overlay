@@ -2,8 +2,8 @@
 
 Wires the Plan Route modal: takes departure/destination ICAO + cruise
 alt + TAS + optional wind, computes the route via core.route, renders
-the great-circle leg as a polyline on the map, and populates the
-summary card with distance / TC / MC / GS / ETE / fuel.
+the great-circle leg as a polyline on the map, auto-zooms the map to
+fit the route, and renders a persistent summary card overlay.
 """
 from __future__ import annotations
 
@@ -26,6 +26,19 @@ def _airport_by_id(airport_id: str):
         if (ap.get("icao") or "").upper() == target:
             return ap
     return None
+
+
+def _route_bounds(o_lat, o_lon, d_lat, d_lon, pad: float = 0.1):
+    """Bounding box [[sw_lat, sw_lon], [ne_lat, ne_lon]] enclosing
+    both endpoints with a small padding so the polyline doesn't hug
+    the viewport edge."""
+    lats = sorted([o_lat, d_lat])
+    lons = sorted([o_lon, d_lon])
+    # Pad as a fraction of the leg extent, with a small minimum
+    lat_pad = max(0.05, (lats[1] - lats[0]) * pad)
+    lon_pad = max(0.05, (lons[1] - lons[0]) * pad)
+    return [[lats[0] - lat_pad, lons[0] - lon_pad],
+            [lats[1] + lat_pad, lons[1] + lon_pad]]
 
 
 def _summary_card(result, origin_id, dest_id) -> html.Div:
@@ -57,76 +70,55 @@ def _summary_card(result, origin_id, dest_id) -> html.Div:
 def register(app):
     """Install route-planning callbacks."""
 
-    # === Modal toggle ===
+    # === Compute route + render on map + render summary overlay ===
     @app.callback(
-        Output("route-modal", "is_open"),
-        Input("open-route-btn", "n_clicks"),
-        Input("close-route-btn", "n_clicks"),
-        Input("compute-route-btn", "n_clicks"),
-        State("route-modal", "is_open"),
-        prevent_initial_call=True,
-    )
-    def toggle_route_modal(open_clicks, close_clicks, compute_clicks, is_open):
-        trigger = ctx.triggered_id
-        if trigger == "open-route-btn":
-            return True
-        if trigger == "close-route-btn":
-            return False
-        # compute-route-btn keeps the modal open so the user sees the result
-        return is_open
-
-    # === Compute route + render on map + populate summary card ===
-    @app.callback(
-        Output("route-summary-container", "children"),
+        Output("route-summary-overlay", "children"),
         Output("route-layer", "children"),
+        Output("map", "bounds"),
         Output("route-result-store", "data"),
         Input("compute-route-btn", "n_clicks"),
+        Input("route-clear-btn", "n_clicks"),
         State("route-origin-input", "value"),
         State("route-dest-input", "value"),
         State("route-cruise-alt", "value"),
         State("route-tas", "value"),
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
-        State("aircraft-select", "value"),
         prevent_initial_call=True,
     )
-    def compute_and_render(n_clicks, origin_id, dest_id, cruise_alt, tas,
-                          wind_dir, wind_speed, aircraft_name):
-        if not n_clicks:
+    def compute_and_render(compute_clicks, clear_clicks,
+                          origin_id, dest_id, cruise_alt, tas,
+                          wind_dir, wind_speed):
+        trigger = ctx.triggered_id
+        if trigger == "route-clear-btn":
+            return None, [], no_update, None
+
+        if not compute_clicks:
             raise PreventUpdate
 
-        # Validate inputs
         if not origin_id or not dest_id:
-            return (
-                html.Div("Set both origin and destination ICAOs.",
-                         className="route-summary-error"),
-                no_update,
-                None,
-            )
+            return (html.Div("Set both origin and destination ICAOs.",
+                             className="route-summary-error"),
+                    no_update, no_update, no_update)
         try:
             cruise_alt = float(cruise_alt) if cruise_alt else 5500.0
             tas = float(tas) if tas else 110.0
         except (TypeError, ValueError):
-            return (
-                html.Div("Cruise altitude and TAS must be numbers.",
-                         className="route-summary-error"),
-                no_update,
-                None,
-            )
+            return (html.Div("Cruise alt and TAS must be numbers.",
+                             className="route-summary-error"),
+                    no_update, no_update, no_update)
 
-        # Look up airports
         origin = _airport_by_id(origin_id)
         dest = _airport_by_id(dest_id)
         if origin is None:
             return (html.Div(f"Origin '{origin_id}' not found.",
                              className="route-summary-error"),
-                    no_update, None)
+                    no_update, no_update, no_update)
         if dest is None:
             return (html.Div(f"Destination '{dest_id}' not found.",
                              className="route-summary-error"),
-                    no_update, None)
+                    no_update, no_update, no_update)
 
-        # Pull magvar from origin's lat/lon (close enough for one leg)
         magvar = magvar_west_positive(origin["lat"], origin["lon"], cruise_alt)
 
         wd = float(wind_dir) if wind_dir not in (None, "", "null") else 0.0
@@ -135,19 +127,15 @@ def register(app):
         result = compute_route_segment(
             origin_lat=origin["lat"], origin_lon=origin["lon"],
             dest_lat=dest["lat"], dest_lon=dest["lon"],
-            tas_kt=tas,
-            wind_dir_deg=wd, wind_speed_kt=ws,
+            tas_kt=tas, wind_dir_deg=wd, wind_speed_kt=ws,
             magvar_deg=magvar,
         )
 
-        # Render: polyline + endpoint markers
         layer = [
             dl.Polyline(
                 positions=[[origin["lat"], origin["lon"]],
                            [dest["lat"], dest["lon"]]],
-                color="#0d59f2",
-                weight=3,
-                opacity=0.85,
+                color="#0d59f2", weight=3, opacity=0.85,
             ),
             dl.CircleMarker(
                 center=[origin["lat"], origin["lon"]],
@@ -160,6 +148,9 @@ def register(app):
                 children=[dl.Tooltip(f"{dest.get('id')} (dest)")],
             ),
         ]
+
+        bounds = _route_bounds(origin["lat"], origin["lon"],
+                               dest["lat"], dest["lon"])
 
         store = {
             "origin_id": origin.get("id"),
@@ -174,4 +165,16 @@ def register(app):
             "magvar_deg": round(magvar, 2),
         }
 
-        return _summary_card(result, origin.get("id"), dest.get("id")), layer, store
+        card = _summary_card(result, origin.get("id"), dest.get("id"))
+        overlay = html.Div(
+            [
+                html.Div(className="route-overlay-header", children=[
+                    html.Span(f"{origin.get('id')} → {dest.get('id')}",
+                              className="route-overlay-title"),
+                ]),
+                card,
+            ],
+            className="route-overlay-panel",
+        )
+
+        return overlay, layer, bounds, store

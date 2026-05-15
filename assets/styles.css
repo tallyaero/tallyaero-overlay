@@ -2168,3 +2168,38 @@ input[type="radio"] {
 }
 [data-theme="dark"] .route-summary-label { color: #cbd5e1; }
 [data-theme="dark"] .route-summary-value { color: #e2e8f0; }
+
+/* Route summary overlay — top-left of the map */
+#route-summary-overlay:empty { display: none; }
+.route-overlay-panel {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  width: 240px;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  backdrop-filter: blur(4px);
+  padding: 6px 10px;
+  font-size: 11px;
+}
+.route-overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--ta-border-primary, #e2e8f0);
+  margin-bottom: 6px;
+}
+.route-overlay-title {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--ta-text-primary, #0f172a);
+}
+[data-theme="dark"] .route-overlay-panel {
+  background: rgba(15, 23, 42, 0.94);
+  color: #e2e8f0;
+}
+[data-theme="dark"] .route-overlay-header { border-bottom-color: #334155; }
+[data-theme="dark"] .route-overlay-title { color: #f1f5f9; }

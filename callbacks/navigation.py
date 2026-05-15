@@ -65,6 +65,16 @@ def register(app):
     # === Maneuver info modal — populated from MANEUVER_INFO dict ===
 
     MANEUVER_INFO = {
+        "route": (
+            "Route Planner",
+            [
+                "Great-circle leg between two airports.",
+                "Computes distance, true / magnetic course, true / magnetic "
+                "heading (wind-corrected), groundspeed, and ETE.",
+                "Magnetic variation pulled from the WMM at the origin "
+                "coordinates; wind reads from the sidebar Environment row.",
+            ],
+        ),
         "impossible_turn": (
             "Impossible Turn",
             [
