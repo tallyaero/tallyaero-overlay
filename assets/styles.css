@@ -1383,3 +1383,30 @@ input[type="radio"] {
 }
 [data-theme="dark"] .mobile-quicklinks .quick-link { color: #cbd5e1; }
 [data-theme="dark"] .mobile-quicklinks .quick-link-sep { color: #475569; }
+
+/* Phase 4 Batch 2d — Configure button + drawer */
+.configure-btn {
+  background: var(--ta-brand-orange, #f27b0d);
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 100ms ease;
+}
+.configure-btn:hover { background: var(--ta-brand-orange-dark, #c2410c); }
+.configure-btn:active { transform: translateY(1px); }
+
+.settings-drawer .offcanvas-title { font-weight: 700; letter-spacing: 0.05em; }
+.settings-drawer .drawer-accordion .accordion-item { border-color: var(--accordion-border); }
+.settings-drawer .action-buttons-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.settings-drawer .btn-action-orange { flex: 1; }
+
+[data-theme="dark"] .settings-drawer .offcanvas { background: #0f172a; color: #e2e8f0; }
+[data-theme="dark"] .settings-drawer .offcanvas-header { border-bottom-color: #334155; }
+[data-theme="dark"] .configure-btn { background: #c2410c; }
+[data-theme="dark"] .configure-btn:hover { background: #9a3412; }

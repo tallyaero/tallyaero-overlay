@@ -62,6 +62,18 @@ def register(app):
             return new_state, "▲" if new_state else "▼"
         return is_open, "▼"
 
+    # === Settings drawer toggle (Phase 4 Batch 2d) ===
+    @app.callback(
+        Output("settings-drawer", "is_open"),
+        Input("open-drawer-btn", "n_clicks"),
+        State("settings-drawer", "is_open"),
+        prevent_initial_call=True,
+    )
+    def toggle_settings_drawer(n_clicks, is_open):
+        if n_clicks:
+            return not is_open
+        return is_open
+
     # === Clientside: sidebar collapse (DOM-class toggle) ===
     app.clientside_callback(
         """
