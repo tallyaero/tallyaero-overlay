@@ -73,11 +73,7 @@ def mobile_layout():
             html.Div(className="mobile-quicklinks", children=[
                 html.A("Quick Start", href="#", id="mobile-open-quickstart", className="quick-link", style={"color": "#E65C00", "fontWeight": "bold"}),
                 html.Span(" · ", className="quick-link-sep"),
-                html.A("EM Diagram", href="https://app.flyaeroedge.com/", target="_blank", className="quick-link", style={"color": "#28a745"}),
-                html.Span(" · ", className="quick-link-sep"),
-                html.A("Report Error", href="mailto:support@flyaeroedge.com?subject=Overlay%20Tool%20Error", className="quick-link"),
-                html.Span(" · ", className="quick-link-sep"),
-                html.A("Contact", href="https://www.flyaeroedge.com/contact", target="_blank", className="quick-link"),
+                html.A("Contact", href="mailto:info@tallyaero.com", className="quick-link"),
             ]),
         ]),
 

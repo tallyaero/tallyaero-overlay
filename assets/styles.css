@@ -1410,3 +1410,14 @@ input[type="radio"] {
 [data-theme="dark"] .settings-drawer .offcanvas-header { border-bottom-color: #334155; }
 [data-theme="dark"] .configure-btn { background: #c2410c; }
 [data-theme="dark"] .configure-btn:hover { background: #9a3412; }
+
+/* Sidebar Configure button — full-width prominent CTA at top of rail */
+.sidebar-configure-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-align: center;
+}

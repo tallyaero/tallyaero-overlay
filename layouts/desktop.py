@@ -54,20 +54,9 @@ def _top_strip():
                         [
                             html.A("Quick Start", href="#", id="open-quickstart", className="quick-link", style={"color": "#E65C00", "fontWeight": "bold"}),
                             html.Span(" · ", className="quick-link-sep"),
-                            html.A("EM Diagram", href="https://app.flyaeroedge.com/", target="_blank", className="quick-link", style={"color": "#28a745", "fontWeight": "bold"}),
-                            html.Span(" · ", className="quick-link-sep"),
-                            html.A("Report Error", href="https://forms.gle/VX6CA1ugifAtmBM79", target="_blank", className="quick-link", style={"color": "#dc3545"}),
-                            html.Span(" · ", className="quick-link-sep"),
-                            html.A("Contact", href="https://forms.gle/nDahQbhYDNYh6P129", target="_blank", className="quick-link"),
+                            html.A("Contact", href="mailto:info@tallyaero.com", className="quick-link"),
                         ],
                         className="top-strip-quicklinks",
-                    ),
-                    html.Button(
-                        "Configure",
-                        id="open-drawer-btn",
-                        className="configure-btn",
-                        n_clicks=0,
-                        title="Open configuration drawer",
                     ),
                     _theme_toggle(),
                 ],
@@ -331,9 +320,14 @@ def desktop_layout():
                 ]),
                 html.Div(id="sidebar-content", children=[
 
-                # --- Action buttons + Weight & Balance + Environment + Power
-                # moved to the settings drawer (Phase 4 Batch 2d). Open via
-                # the Configure button in the top-strip.
+                # --- Configure button opens the settings drawer ---
+                html.Button(
+                    "Configure",
+                    id="open-drawer-btn",
+                    className="configure-btn sidebar-configure-btn",
+                    n_clicks=0,
+                    title="Open configuration drawer (aircraft, weight, environment, power)",
+                ),
 
                 # --- Airport Search (First - so user can navigate) ---
             html.Label("Search Airport", className="input-label"),
