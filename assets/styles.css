@@ -1791,3 +1791,82 @@ input[type="radio"] {
 }
 [data-theme="dark"] .sidebar-section { border-bottom-color: #334155; }
 [data-theme="dark"] .sidebar-section-title { color: #94a3b8; }
+
+/* ══════════════════════════════════════════════════════════════
+   Maneuver action shelf — sits between top-strip and main-grid.
+   Holds per-maneuver Set Point / Draw / Erase buttons (left), the
+   global Reset / Undo buttons (center) and a status text area (right).
+   ══════════════════════════════════════════════════════════════ */
+
+.maneuver-shelf {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: var(--ta-surface-secondary, #ffffff);
+  border-bottom: 1px solid var(--ta-border-primary, #e2e8f0);
+  flex-shrink: 0;
+  min-height: 44px;
+}
+.maneuver-actions-slot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.maneuver-actions-slot:empty::before {
+  content: "Pick a maneuver to see its controls";
+  color: var(--ta-text-tertiary, #94a3b8);
+  font-size: 11px;
+  font-style: italic;
+}
+.maneuver-shelf-globals {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+.maneuver-shelf-status {
+  font-size: 11px;
+  color: var(--ta-text-secondary, #64748b);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.shelf-btn {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  border-radius: 4px;
+  background: var(--ta-surface-elevated, #ffffff);
+  color: var(--ta-text-primary, #0f172a);
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+.shelf-btn:hover {
+  background: var(--ta-surface-tertiary, #f1f5f9);
+  border-color: var(--ta-brand-blue, #0d59f2);
+}
+.shelf-btn-reset { color: #6c757d; }
+.shelf-btn-undo  { color: #17a2b8; border-color: #17a2b8; }
+
+[data-theme="dark"] .maneuver-shelf {
+  background: #1e293b;
+  border-bottom-color: #334155;
+}
+[data-theme="dark"] .shelf-btn {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+[data-theme="dark"] .shelf-btn:hover {
+  background: #1e293b;
+  border-color: var(--ta-brand-blue, #60a5fa);
+}
+[data-theme="dark"] .shelf-btn-reset { color: #94a3b8; }
+[data-theme="dark"] .shelf-btn-undo  { color: #5bc0de; border-color: #5bc0de; }
+[data-theme="dark"] .maneuver-shelf-status { color: #cbd5e1; }
