@@ -116,11 +116,6 @@ def _top_strip():
             html.Div(
                 [
                     html.Div(id="maneuver-shelf-status", className="maneuver-shelf-status"),
-                    html.Div(className="maneuver-shelf-globals", children=[
-                        html.Button("Reset All", id="reset-all", className="shelf-btn shelf-btn-reset"),
-                        html.Button("Reset Clicks", id="reset-clicks", className="shelf-btn shelf-btn-reset"),
-                        html.Button("Undo", id="undo-last-click", className="shelf-btn shelf-btn-undo"),
-                    ]),
                     html.Div(
                         [
                             html.A("Quick Start", href="#", id="open-quickstart", className="quick-link", style={"color": "#E65C00", "fontWeight": "bold"}),
@@ -437,6 +432,14 @@ def desktop_layout():
 
         # === Map Column ===
         html.Div(id="engineout-click-status", style={"display": "none"}),
+
+        # Map-overlay controls: Reset/Undo bottom-right of the map.
+        html.Div(className="map-controls-overlay", children=[
+            html.Button("Reset All", id="reset-all", className="map-overlay-btn"),
+            html.Button("Reset Clicks", id="reset-clicks", className="map-overlay-btn"),
+            html.Button("Undo", id="undo-last-click", className="map-overlay-btn map-overlay-btn-undo"),
+        ]),
+
         html.Div(className="graph-column", style={"display": "flex", "flexDirection": "column"}, children=[
             html.Div(
                 style={
