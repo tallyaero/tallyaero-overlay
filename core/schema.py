@@ -477,3 +477,44 @@ class Airport(BaseModel):
     scheduled_service: Optional[bool] = None
     wikipedia: Optional[str] = None
     runways: List[Runway] = Field(default_factory=list)
+
+
+# =============================================================================
+# Route planning (Phase 5)
+# =============================================================================
+
+
+class RouteInput(BaseModel):
+    """Inputs to compute_route_segment — what the user sets in the UI."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    origin_airport_id: str = Field(..., min_length=1)
+    dest_airport_id: str = Field(..., min_length=1)
+    cruise_alt_ft: float = Field(..., ge=0, le=60000)
+    tas_kt: float = Field(..., gt=0, le=600)
+    wind_dir_deg: float = Field(0.0, ge=0, le=360)
+    wind_speed_kt: float = Field(0.0, ge=0, le=200)
+    fuel_burn_gph: Optional[float] = Field(None, ge=0)
+
+
+class RouteResult(BaseModel):
+    """Output of one route leg — read by the summary card + map renderer."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    origin_airport_id: str
+    dest_airport_id: str
+    origin_lat: float = Field(..., ge=-90, le=90)
+    origin_lon: float = Field(..., ge=-180, le=180)
+    dest_lat: float = Field(..., ge=-90, le=90)
+    dest_lon: float = Field(..., ge=-180, le=180)
+    distance_nm: float = Field(..., ge=0)
+    true_course_deg: float = Field(..., ge=0, le=360)
+    magnetic_course_deg: float = Field(..., ge=0, le=360)
+    true_heading_deg: float = Field(..., ge=0, le=360)
+    magnetic_heading_deg: float = Field(..., ge=0, le=360)
+    ground_speed_kt: float = Field(..., ge=0)
+    ete_min: float = Field(..., ge=0)
+    fuel_burn_gal: Optional[float] = Field(None, ge=0)
+    magvar_deg: float
