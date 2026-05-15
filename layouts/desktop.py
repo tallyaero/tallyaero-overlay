@@ -7,7 +7,7 @@ Phase 1e will move it to callbacks/aircraft.py).
 
 Pure functions; no callbacks.
 
-Also hosts `legal_banner_block` and `_reset_buttons_row` since those are
+Also hosts `_top_strip` / `_modals_block` / `_reset_buttons_row` since those are
 layout helpers shared by every per-maneuver form in layouts/maneuvers/.
 The deferred imports inside each maneuver layout that used
 `from app import _reset_buttons_row` get cleaned up in the same commit
@@ -23,26 +23,61 @@ import dash_leaflet as dl
 from core.data_loader import available_aircraft
 
 
-def legal_banner_block():
+def _top_strip():
+    """Phase 4 Batch 2b — brand + aircraft picker on the left, quick-links
+    + theme toggle on the right. Mirrors EM Diagram's current top-strip
+    pattern (env chips live inline in the rail per Phase 5AB-2, not here)."""
+    return html.Div(
+        [
+            html.Div(
+                [
+                    html.Span("TallyAero Overlay", className="top-strip-brand"),
+                    html.Div(
+                        dcc.Dropdown(
+                            id="aircraft-select",
+                            options=[{"label": name, "value": name} for name in available_aircraft],
+                            value="C172" if "C172" in available_aircraft else (available_aircraft[0] if available_aircraft else None),
+                            placeholder="Select an aircraft…",
+                            className="dropdown aircraft-dropdown",
+                            clearable=False,
+                            persistence=True,
+                            persistence_type="local",
+                        ),
+                        className="aircraft-picker-wrap",
+                    ),
+                ],
+                className="top-strip-left",
+            ),
+            html.Div(
+                [
+                    html.Div(
+                        [
+                            html.A("Quick Start", href="#", id="open-quickstart", className="quick-link", style={"color": "#E65C00", "fontWeight": "bold"}),
+                            html.Span(" · ", className="quick-link-sep"),
+                            html.A("EM Diagram", href="https://app.flyaeroedge.com/", target="_blank", className="quick-link", style={"color": "#28a745", "fontWeight": "bold"}),
+                            html.Span(" · ", className="quick-link-sep"),
+                            html.A("Report Error", href="https://forms.gle/VX6CA1ugifAtmBM79", target="_blank", className="quick-link", style={"color": "#dc3545"}),
+                            html.Span(" · ", className="quick-link-sep"),
+                            html.A("Contact", href="https://forms.gle/nDahQbhYDNYh6P129", target="_blank", className="quick-link"),
+                        ],
+                        className="top-strip-quicklinks",
+                    ),
+                    _theme_toggle(),
+                ],
+                className="top-strip-right",
+            ),
+        ],
+        className="top-strip",
+    )
+
+
+def _modals_block():
+    """Quick-Start / Disclaimer / Terms modals. Pulled out of the old
+    legal_banner_block so the top-strip stays thin. Modals stay in the
+    DOM so the existing open-quickstart / disclaimer-modal callbacks
+    keep wiring."""
     return html.Div(
         children=[
-            html.Div(
-                "⚠️ This tool is for educational and training discussion only. It is not FAA-approved and may not reflect actual aircraft capabilities. "
-                "Always verify against the aircraft POH or AFM and applicable regulations. ⚠️",
-                className="disclaimer-banner",
-            ),
-            html.Div(
-                children=[
-                    html.A("Quick Start", href="#", id="open-quickstart", className="legal-link", style={"color": "#E65C00", "fontWeight": "bold"}),
-                    html.Span(" | ", className="legal-separator"),
-                    html.A("EM Diagram Tool", href="https://app.flyaeroedge.com/", target="_blank", className="legal-link", style={"color": "#28a745", "fontWeight": "bold"}),
-                    html.Span(" | ", className="legal-separator"),
-                    html.A("Report an Error", href="https://forms.gle/VX6CA1ugifAtmBM79", target="_blank", className="legal-link", style={"color": "#dc3545"}),
-                    html.Span(" | ", className="legal-separator"),
-                    html.A("Contact TallyAero", href="https://forms.gle/nDahQbhYDNYh6P129", target="_blank", className="legal-link"),
-                ],
-                className="legal-links-row",
-            ),
 
             # Quick Start Modal
             dbc.Modal(
@@ -154,22 +189,41 @@ def _reset_buttons_row():
     ], style={"display": "flex", "gap": "6px", "marginBottom": "10px"})
 
 
+def _theme_toggle():
+    """3-button theme toggle (Phase 4 mirror of EM Diagram). The hidden
+    `theme-btn-auto` stays in the DOM so the cycleTheme clientside
+    callback's 3-input signature keeps wiring; user-facing toggle is
+    light vs dark only."""
+    return html.Div(
+        [
+            html.Div(
+                [
+                    html.Button("Light", id="theme-btn-light", className="theme-btn active", title="Light mode"),
+                    html.Button("Dark",  id="theme-btn-dark",  className="theme-btn",        title="Dark mode"),
+                ],
+                className="theme-toggle-group",
+                **{"data-role": "theme-toggle"},
+            ),
+            html.Button("", id="theme-btn-auto", n_clicks=0, style={"display": "none"}),
+        ],
+        className="theme-toggle-wrap",
+    )
+
+
 def desktop_layout():
-    """Desktop layout with resizable sidebar"""
-    return html.Div(className="full-height-container", children=[
-        # Header
-        html.Div(className="banner-header", children=[
-            html.Div(className="banner-inner", children=[
-                html.A(
-                    html.Img(src="/assets/logo.png", className="banner-logo"),
-                    href="https://www.flyaeroedge.com",
-                    style={"textDecoration": "none"}
-                )
-            ])
-        ]),
-        legal_banner_block(),
-        # Main 2-column layout
-        html.Div(className="main-row", children=[
+    """Desktop layout — Phase 4 Batch 2a shell.
+
+    full-height-container > top-strip + main-grid + modals. The
+    main-grid keeps the existing sidebar + map split intact (Batch 2b
+    will promote aircraft picker into top-strip and add env chips;
+    Batch 2c moves the rail content into a slide-out drawer).
+    """
+    return html.Div(className="full-height-container desktop-shell", children=[
+        _top_strip(),
+        _modals_block(),
+        # Main 2-column layout (sidebar + map) — wraps in main-grid so
+        # the CSS can target it with the new shell rules.
+        html.Div(className="main-row main-grid", children=[
             # === Sidebar ===
             html.Div(id="sidebar", className="resizable-sidebar", children=[
                 # Header row with title and collapse button
@@ -224,17 +278,7 @@ def desktop_layout():
             # Recenter to Airport button
             html.Button("Recenter to Airport", id="recenter-airport-btn", className="reset-btn-small", style={"marginTop": "4px", "marginBottom": "8px", "backgroundColor": "#6c757d"}),
 
-            # --- Aircraft Selection ---
-            html.Label("Aircraft", className="input-label"),
-            dcc.Dropdown(
-                id="aircraft-select",
-                className="dropdown",
-                options=[{"label": name, "value": name} for name in available_aircraft],
-                value="C172" if "C172" in available_aircraft else (available_aircraft[0] if available_aircraft else None),
-                placeholder="Select Aircraft",
-                persistence=True,
-                persistence_type="local"
-            ),
+            # --- Aircraft Selection — moved to top-strip in Batch 2b ---
 
             # --- Collapsible Advanced Settings ---
             dbc.Accordion([

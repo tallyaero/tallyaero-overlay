@@ -1089,3 +1089,297 @@ input[type="radio"] {
   background: #f1f5f9;
   border-top: 1px solid var(--gray-border);
 }
+
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 4 Batch 1 — theme toggle + legal links reflow
+   Mirrors EM Diagram zz-em-app.css :650–705
+   ══════════════════════════════════════════════════════════════ */
+
+.legal-links-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 16px;
+  background: var(--ta-surface-secondary, #ffffff);
+  border-bottom: 1px solid var(--ta-border-primary, #e2e8f0);
+}
+.legal-links-row .legal-links {
+  flex: 1;
+  min-width: 0;
+}
+
+.theme-toggle-wrap {
+  display: inline-flex;
+  align-items: center;
+}
+
+.theme-toggle-group {
+  display: inline-flex;
+  gap: 0;
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--ta-surface-secondary, #ffffff);
+}
+
+.theme-toggle-group .theme-btn {
+  font-family: var(--ta-font-body, system-ui, sans-serif);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 0;
+  min-width: 48px;
+  height: 26px;
+  line-height: 1;
+  text-align: center;
+  background: transparent;
+  color: var(--ta-text-tertiary, #94a3b8);
+  border: none;
+  border-right: 1px solid var(--ta-border-primary, #e2e8f0);
+  margin: 0;
+  cursor: pointer;
+  transition: background-color 100ms ease, color 100ms ease;
+  box-sizing: border-box;
+}
+.theme-toggle-group .theme-btn:last-child {
+  border-right: none;
+}
+.theme-toggle-group .theme-btn:hover {
+  background: rgba(13, 89, 242, 0.08);
+  color: var(--ta-text-secondary, #64748b);
+}
+.theme-toggle-group .theme-btn.active {
+  background: var(--ta-brand-blue, #0d59f2);
+  color: #ffffff;
+}
+
+/* Mobile quick-links-bar-slim becomes a flex row with toggle on the right */
+.quick-links-bar-slim {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 12px;
+}
+.quick-links-bar-slim .legal-links {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  font-size: 12px;
+}
+
+/* Phase 4 Batch 2 will rebuild the shell against the full token palette;
+   the rules above keep the toggle legible until then. */
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 4 Batch 2a — top-strip shell skeleton
+   Mirrors EM Diagram zz-em-app.css top-strip rules.
+   ══════════════════════════════════════════════════════════════ */
+
+.desktop-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.top-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  height: 56px;
+  background: var(--ta-surface-secondary, #ffffff);
+  border-bottom: 1px solid var(--ta-border-primary, #e2e8f0);
+  flex-shrink: 0;
+}
+
+.top-strip-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.top-strip-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.top-strip-brand {
+  font-family: var(--ta-font-sans, system-ui, sans-serif);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  color: var(--ta-text-primary, #0f172a);
+  text-transform: uppercase;
+}
+
+.top-strip-quicklinks {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--ta-text-tertiary, #94a3b8);
+}
+.top-strip-quicklinks .quick-link {
+  color: var(--ta-text-secondary, #64748b);
+  text-decoration: none;
+  padding: 2px 4px;
+}
+.top-strip-quicklinks .quick-link:hover {
+  color: var(--ta-brand-blue, #0d59f2);
+}
+.top-strip-quicklinks .quick-link-sep {
+  color: var(--ta-text-tertiary, #94a3b8);
+}
+
+/* main-grid swallows the rest of the viewport below the top-strip.
+   The existing .main-row CSS (sidebar 320px + map 1fr) keeps working
+   because main-grid only sets the outer flex constraints. */
+.main-grid {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Phase 4 Batch 2b — aircraft picker in top-strip
+   Mirrors EM Diagram's aircraft-picker-wrap metrics. */
+.aircraft-picker-wrap {
+  width: 280px;
+  min-width: 200px;
+  max-width: 32vw;
+}
+.aircraft-picker-wrap .aircraft-dropdown .Select-control,
+.aircraft-picker-wrap .aircraft-dropdown .css-control,
+.aircraft-picker-wrap .aircraft-dropdown > div:first-child {
+  min-height: 32px;
+  font-size: 13px;
+}
+.aircraft-picker-wrap .aircraft-dropdown {
+  font-size: 13px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 4 Batch 2c — dark mode (override existing tokens)
+   Flips the overlay-tool's :root tokens when [data-theme="dark"].
+   Rules already using var(--gray-bg) / var(--text-dark) / etc.
+   automatically respond. Avoids touching 106 hardcoded lines.
+   ══════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+  --gray-bg: #0b1220;
+  --text-dark: #e2e8f0;
+  --white: #1e293b;
+  --gray-border: #334155;
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+
+  --accordion-header-bg: #1e293b;
+  --accordion-body-bg: #0f172a;
+  --accordion-border: #334155;
+  --accordion-active-bg: #334155;
+}
+
+/* Surfaces that hardcode #fff / #f1f5f9 / similar need explicit dark overrides */
+[data-theme="dark"] body { background-color: var(--gray-bg); color: var(--text-dark); }
+[data-theme="dark"] .top-strip { background: #1e293b; border-bottom-color: #334155; }
+[data-theme="dark"] .top-strip-brand { color: #f1f5f9; }
+[data-theme="dark"] .top-strip-quicklinks .quick-link { color: #cbd5e1; }
+[data-theme="dark"] .top-strip-quicklinks .quick-link:hover { color: #60a5fa; }
+[data-theme="dark"] .top-strip-quicklinks .quick-link-sep { color: #475569; }
+[data-theme="dark"] .theme-toggle-group { background: #0f172a; border-color: #334155; }
+[data-theme="dark"] .theme-toggle-group .theme-btn { color: #94a3b8; border-right-color: #334155; }
+[data-theme="dark"] .theme-toggle-group .theme-btn:hover { color: #e2e8f0; }
+[data-theme="dark"] .theme-toggle-group .theme-btn.active { background: var(--ta-brand-blue, #0d59f2); color: #ffffff; }
+
+/* Sidebar + accordion + inputs */
+[data-theme="dark"] .resizable-sidebar { background: #0f172a; }
+[data-theme="dark"] .sidebar-header { background: #1e293b; border-bottom-color: #334155; color: #f1f5f9; }
+[data-theme="dark"] .accordion-button { background: var(--accordion-header-bg); color: var(--text-dark); }
+[data-theme="dark"] .accordion-body { background: var(--accordion-body-bg); color: var(--text-dark); }
+[data-theme="dark"] .accordion-item { border-color: var(--accordion-border); }
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea,
+[data-theme="dark"] .input-large,
+[data-theme="dark"] .input-small {
+  background: #0f172a; color: #e2e8f0; border-color: #334155;
+}
+[data-theme="dark"] .Select-control,
+[data-theme="dark"] .dropdown .Select-control { background: #0f172a; border-color: #334155; }
+
+/* Search results, selected airport, modals, buttons */
+[data-theme="dark"] .search-results-box { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+[data-theme="dark"] .airport-result { color: #e2e8f0; }
+[data-theme="dark"] .airport-result:hover { background: #1e293b; }
+[data-theme="dark"] .modal-content { background: #0f172a; color: #e2e8f0; }
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer { border-color: #334155; }
+[data-theme="dark"] .reset-btn-small { background: #334155; color: #e2e8f0; }
+[data-theme="dark"] .btn-action-orange { background: #c2410c; color: #ffffff; }
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 4 Batch 3 — mobile top bar
+   ══════════════════════════════════════════════════════════════ */
+
+.mobile-top-bar {
+  background: var(--ta-surface-secondary, #ffffff);
+  border-bottom: 1px solid var(--ta-border-primary, #e2e8f0);
+  padding: 8px 12px;
+}
+.mobile-top-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mobile-hamburger {
+  background: transparent;
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  border-radius: 4px;
+  font-size: 18px;
+  padding: 4px 10px;
+  cursor: pointer;
+  color: var(--ta-text-primary, #0f172a);
+}
+.mobile-aircraft-picker {
+  flex: 1;
+  min-width: 0;
+}
+.mobile-aircraft-picker .dropdown,
+.mobile-aircraft-picker .Select-control,
+.mobile-aircraft-picker > div .Select-control {
+  font-size: 13px;
+}
+.mobile-quicklinks {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--ta-text-tertiary, #94a3b8);
+}
+.mobile-quicklinks .quick-link {
+  color: var(--ta-text-secondary, #64748b);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.mobile-quicklinks .quick-link-sep {
+  color: var(--ta-text-tertiary, #94a3b8);
+}
+
+[data-theme="dark"] .mobile-top-bar {
+  background: #1e293b; border-bottom-color: #334155;
+}
+[data-theme="dark"] .mobile-hamburger {
+  background: #0f172a; color: #e2e8f0; border-color: #334155;
+}
+[data-theme="dark"] .mobile-quicklinks .quick-link { color: #cbd5e1; }
+[data-theme="dark"] .mobile-quicklinks .quick-link-sep { color: #475569; }

@@ -42,6 +42,10 @@ register_all(app)
 
 app.title = "Maneuver Overlay Tool | TallyAero"
 
+# Phase 4 — Theme system + early-paint mirror the EM Diagram. The inline
+# <script> reads localStorage and sets data-theme on <html> before first
+# paint to prevent flash-of-unstyled-content. The toggle UI and the
+# syncThemeFromStorage clientside callback read the same key.
 app.index_string = """
 <!DOCTYPE html>
 <html>
@@ -50,6 +54,17 @@ app.index_string = """
         <title>{%title%}</title>
         {%favicon%}
         {%css%}
+        <script>
+        (function() {
+          var pref = localStorage.getItem('tallyaero_theme') || 'light';
+          var resolved = pref;
+          if (pref === 'system') {
+            resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', resolved);
+          document.documentElement.setAttribute('data-theme-pref', pref);
+        })();
+        </script>
     </head>
     <body>
         {%app_entry%}
@@ -69,8 +84,45 @@ app.index_string = """
 app.layout = html.Div([
     dcc.Location(id="url", refresh=False),
     dcc.Store(id="screen-width"),
+    # Phase 4: theme preference. Seeded by the early-paint <script> from
+    # localStorage; the syncThemeFromStorage clientside callback mirrors
+    # the same value into this Store after layout mounts. Light is default.
+    dcc.Store(id="theme-pref", storage_type="local", data="light"),
     html.Div(id="page-content"),
 ])
+
+
+# === Theme clientside callbacks ===
+# These wire to button IDs that the layouts will introduce in Batch 2.
+# Registered conditionally so a stray missing button doesn't crash the
+# callback graph during the transition.
+from dash import ClientsideFunction, Input, Output
+
+app.clientside_callback(
+    ClientsideFunction(namespace="tallyaero", function_name="cycleTheme"),
+    [
+        Output("theme-pref", "data", allow_duplicate=True),
+        Output("theme-btn-auto", "className"),
+        Output("theme-btn-light", "className"),
+        Output("theme-btn-dark", "className"),
+    ],
+    [
+        Input("theme-btn-auto", "n_clicks"),
+        Input("theme-btn-light", "n_clicks"),
+        Input("theme-btn-dark", "n_clicks"),
+    ],
+    prevent_initial_call=True,
+)
+
+app.clientside_callback(
+    ClientsideFunction(namespace="tallyaero", function_name="syncThemeFromStorage"),
+    Output("theme-pref", "data", allow_duplicate=True),
+    Input("url", "pathname"),
+    prevent_initial_call="initial_duplicate",
+)
+
+# Note: screen-width is registered in callbacks/navigation.py — keep one
+# canonical source so we don't double-register the same Output.
 
 
 if __name__ == "__main__":

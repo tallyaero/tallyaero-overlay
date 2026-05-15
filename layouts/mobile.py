@@ -19,39 +19,66 @@ import dash_leaflet as dl
 from core.data_loader import available_aircraft
 
 
-def mobile_layout():
-    """Mobile layout with collapsible settings"""
-    return html.Div(className="mobile-container", children=[
-        # Header (smaller)
-        html.Div(className="mobile-header", children=[
-            html.A(
-                html.Img(src="/assets/logo.png", className="mobile-logo"),
-                href="https://www.flyaeroedge.com",
-                style={"textDecoration": "none"}
+def _mobile_theme_toggle():
+    """Mirrors the desktop theme toggle (Phase 4). Same component IDs so
+    the same clientside callback wires both layouts."""
+    return html.Div(
+        [
+            html.Div(
+                [
+                    html.Button("Light", id="theme-btn-light", className="theme-btn active", title="Light mode"),
+                    html.Button("Dark",  id="theme-btn-dark",  className="theme-btn",        title="Dark mode"),
+                ],
+                className="theme-toggle-group",
+                **{"data-role": "theme-toggle"},
             ),
-        ]),
+            html.Button("", id="theme-btn-auto", n_clicks=0, style={"display": "none"}),
+        ],
+        className="theme-toggle-wrap",
+    )
 
-        # Warning banner (compact)
-        html.Div(
-            "⚠️ Educational use only. Verify with POH/AFM.",
-            className="mobile-disclaimer",
-        ),
 
-        # Quick links
-        html.Div(className="quick-links-bar-slim", children=[
-            html.A("Quick Start", href="#", id="mobile-open-quickstart", className="legal-link", style={"color": "#E65C00", "fontWeight": "bold"}),
-            html.Span(" | ", className="legal-separator"),
-            html.A("EM Diagram", href="https://app.flyaeroedge.com/", target="_blank", className="legal-link", style={"color": "#28a745"}),
-            html.Span(" | ", className="legal-separator"),
-            html.A("Report Error", href="mailto:support@flyaeroedge.com?subject=Overlay%20Tool%20Error", className="legal-link"),
-            html.Span(" | ", className="legal-separator"),
-            html.A("Contact TallyAero", href="https://www.flyaeroedge.com/contact", target="_blank", className="legal-link"),
-        ]),
+def mobile_layout():
+    """Mobile layout — Phase 4 Batch 3 mirror.
 
-        # Config toggle bar
-        html.Div(className="mobile-config-bar", children=[
-            html.Span("Configuration", style={"fontWeight": "600"}),
-            html.Button("▼", id="mobile-settings-toggle", className="mobile-config-btn"),
+    Top bar: hamburger (toggle settings) + aircraft picker + theme.
+    Slim sub-row holds quick-links. Settings still lives in a
+    dbc.Collapse below; Offcanvas migration deferred to Batch 4."""
+    return html.Div(className="mobile-container mobile-shell", children=[
+        html.Div(className="mobile-top-bar", children=[
+            html.Div(className="mobile-top-row", children=[
+                html.Button(
+                    "☰",
+                    id="mobile-settings-toggle",
+                    className="mobile-hamburger",
+                    n_clicks=0,
+                    title="Toggle settings",
+                    **{"aria-label": "Toggle settings"},
+                ),
+                html.Div(
+                    dcc.Dropdown(
+                        id="aircraft-select",
+                        options=[{"label": name, "value": name} for name in available_aircraft],
+                        value="C172" if "C172" in available_aircraft else (available_aircraft[0] if available_aircraft else None),
+                        placeholder="Select Aircraft…",
+                        className="dropdown",
+                        clearable=False,
+                        persistence=True,
+                        persistence_type="local",
+                    ),
+                    className="mobile-aircraft-picker",
+                ),
+                _mobile_theme_toggle(),
+            ]),
+            html.Div(className="mobile-quicklinks", children=[
+                html.A("Quick Start", href="#", id="mobile-open-quickstart", className="quick-link", style={"color": "#E65C00", "fontWeight": "bold"}),
+                html.Span(" · ", className="quick-link-sep"),
+                html.A("EM Diagram", href="https://app.flyaeroedge.com/", target="_blank", className="quick-link", style={"color": "#28a745"}),
+                html.Span(" · ", className="quick-link-sep"),
+                html.A("Report Error", href="mailto:support@flyaeroedge.com?subject=Overlay%20Tool%20Error", className="quick-link"),
+                html.Span(" · ", className="quick-link-sep"),
+                html.A("Contact", href="https://www.flyaeroedge.com/contact", target="_blank", className="quick-link"),
+            ]),
         ]),
 
         # Collapsible settings - uses SAME IDs as desktop for callback compatibility
@@ -84,16 +111,7 @@ def mobile_layout():
                     html.Button("Recenter", id="recenter-airport-btn", className="reset-btn-small", style={"fontSize": "10px"}),
                 ]),
 
-                # Aircraft Selection
-                html.Label("Aircraft", className="input-label"),
-                dcc.Dropdown(
-                    id="aircraft-select",
-                    className="mobile-dropdown",
-                    options=[{"label": name, "value": name} for name in available_aircraft],
-                    placeholder="Select Aircraft",
-                    persistence=True,
-                    persistence_type="local"
-                ),
+                # Aircraft Selection — moved to mobile-top-bar in Batch 3
 
                 # Weight & Balance Accordion
                 dbc.Accordion([
