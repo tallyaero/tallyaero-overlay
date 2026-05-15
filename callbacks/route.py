@@ -84,6 +84,7 @@ def register(app):
         State("route-cruise-alt", "value"),
         State("route-tas", "value"),
         State("route-glide-ratio", "value"),
+        State("route-glide-ias", "value"),
         State("route-show-corridor", "value"),
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
@@ -91,7 +92,7 @@ def register(app):
     )
     def compute_and_render(compute_clicks, clear_clicks,
                           origin_id, dest_id, cruise_alt, tas,
-                          glide_ratio, corridor_show,
+                          glide_ratio, glide_ias, corridor_show,
                           wind_dir, wind_speed):
         trigger = ctx.triggered_id
         if trigger == "route-clear-btn":
@@ -108,6 +109,7 @@ def register(app):
             cruise_alt = float(cruise_alt) if cruise_alt else 5500.0
             tas = float(tas) if tas else 110.0
             glide_ratio = float(glide_ratio) if glide_ratio else 9.0
+            glide_ias = float(glide_ias) if glide_ias else 75.0
         except (TypeError, ValueError):
             return (html.Div("Numeric fields must be numbers.",
                              className="route-summary-error"),
@@ -151,7 +153,7 @@ def register(app):
                 cruise_alt_msl_ft=cruise_alt,
                 field_elev_ft=field_elev,
                 glide_ratio=glide_ratio,
-                glide_ias_kt=tas * 0.7,   # crude best-glide vs TAS proxy
+                glide_ias_kt=glide_ias,
                 wind_dir_deg=wd, wind_speed_kt=ws,
                 spacing_nm=2.0,
             )

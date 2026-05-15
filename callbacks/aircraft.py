@@ -32,16 +32,35 @@ def register(app):
     @app.callback(
         Output("maneuver-params-container", "children"),
         Input("maneuver-select", "value"),
+        Input("aircraft-select", "value"),
         State("selected-airport-id", "data")
     )
-    def render_maneuver_layout(maneuver, airport_id):
+    def render_maneuver_layout(maneuver, aircraft_name, airport_id):
         elev_ft = None
         if airport_id:
             ap = next((a for a in airport_data if a["id"] == airport_id), None)
             elev_ft = ap.get("elevation_ft", None) if ap else None
 
         if maneuver == "route":
-            return route_layout()
+            gr = gi = tas = None
+            if aircraft_name and aircraft_name in aircraft_data:
+                ac = aircraft_data[aircraft_name]
+                sel = ac.get("single_engine_limits") or {}
+                gr = sel.get("best_glide_ratio")
+                gi = sel.get("best_glide")
+                # Default planning TAS = 85% of Vno (top of green arc), a
+                # standard ~75% power cruise approximation. Vno is present
+                # on every aircraft via arcs.green[1] or top-level Vno.
+                vno = ac.get("Vno")
+                if not vno:
+                    arcs = ac.get("arcs") or {}
+                    green = arcs.get("green") or []
+                    if len(green) >= 2:
+                        vno = green[1]
+                tas = round(vno * 0.85) if vno else None
+            return route_layout(default_glide_ratio=gr,
+                                default_glide_ias=gi,
+                                default_tas=tas)
         if maneuver == "impossible_turn":
             return impossible_turn_layout()
         elif maneuver == "poweroff180":
