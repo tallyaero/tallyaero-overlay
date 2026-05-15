@@ -1265,3 +1265,61 @@ input[type="radio"] {
 .aircraft-picker-wrap .aircraft-dropdown {
   font-size: 13px;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 4 Batch 2c — dark mode (override existing tokens)
+   Flips the overlay-tool's :root tokens when [data-theme="dark"].
+   Rules already using var(--gray-bg) / var(--text-dark) / etc.
+   automatically respond. Avoids touching 106 hardcoded lines.
+   ══════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+  --gray-bg: #0b1220;
+  --text-dark: #e2e8f0;
+  --white: #1e293b;
+  --gray-border: #334155;
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+
+  --accordion-header-bg: #1e293b;
+  --accordion-body-bg: #0f172a;
+  --accordion-border: #334155;
+  --accordion-active-bg: #334155;
+}
+
+/* Surfaces that hardcode #fff / #f1f5f9 / similar need explicit dark overrides */
+[data-theme="dark"] body { background-color: var(--gray-bg); color: var(--text-dark); }
+[data-theme="dark"] .top-strip { background: #1e293b; border-bottom-color: #334155; }
+[data-theme="dark"] .top-strip-brand { color: #f1f5f9; }
+[data-theme="dark"] .top-strip-quicklinks .quick-link { color: #cbd5e1; }
+[data-theme="dark"] .top-strip-quicklinks .quick-link:hover { color: #60a5fa; }
+[data-theme="dark"] .top-strip-quicklinks .quick-link-sep { color: #475569; }
+[data-theme="dark"] .theme-toggle-group { background: #0f172a; border-color: #334155; }
+[data-theme="dark"] .theme-toggle-group .theme-btn { color: #94a3b8; border-right-color: #334155; }
+[data-theme="dark"] .theme-toggle-group .theme-btn:hover { color: #e2e8f0; }
+[data-theme="dark"] .theme-toggle-group .theme-btn.active { background: var(--ta-brand-blue, #0d59f2); color: #ffffff; }
+
+/* Sidebar + accordion + inputs */
+[data-theme="dark"] .resizable-sidebar { background: #0f172a; }
+[data-theme="dark"] .sidebar-header { background: #1e293b; border-bottom-color: #334155; color: #f1f5f9; }
+[data-theme="dark"] .accordion-button { background: var(--accordion-header-bg); color: var(--text-dark); }
+[data-theme="dark"] .accordion-body { background: var(--accordion-body-bg); color: var(--text-dark); }
+[data-theme="dark"] .accordion-item { border-color: var(--accordion-border); }
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea,
+[data-theme="dark"] .input-large,
+[data-theme="dark"] .input-small {
+  background: #0f172a; color: #e2e8f0; border-color: #334155;
+}
+[data-theme="dark"] .Select-control,
+[data-theme="dark"] .dropdown .Select-control { background: #0f172a; border-color: #334155; }
+
+/* Search results, selected airport, modals, buttons */
+[data-theme="dark"] .search-results-box { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+[data-theme="dark"] .airport-result { color: #e2e8f0; }
+[data-theme="dark"] .airport-result:hover { background: #1e293b; }
+[data-theme="dark"] .modal-content { background: #0f172a; color: #e2e8f0; }
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer { border-color: #334155; }
+[data-theme="dark"] .reset-btn-small { background: #334155; color: #e2e8f0; }
+[data-theme="dark"] .btn-action-orange { background: #c2410c; color: #ffffff; }
