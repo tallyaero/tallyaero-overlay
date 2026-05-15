@@ -2216,3 +2216,41 @@ input[type="radio"] {
 [data-theme="dark"] .route-corridor-badge { border-top-color: #334155; }
 .route-summary-warn { color: #dc2626; font-weight: 600; }
 [data-theme="dark"] .route-summary-warn { color: #f87171; }
+
+/* Route waypoint multi-select — wider than other shelf fields so the
+   pills + search input have breathing room. */
+.shelf-field.shelf-field-route { min-width: 360px; flex-grow: 1; }
+.shelf-field .route-waypoint-dropdown .Select-control,
+.shelf-field .route-waypoint-dropdown .Select-multi-value-wrapper {
+  min-height: 30px;
+}
+.shelf-field .route-waypoint-dropdown .Select-value {
+  font-weight: 600;
+  background: rgba(13, 89, 242, 0.08);
+  border: 1px solid rgba(13, 89, 242, 0.35);
+}
+[data-theme="dark"] .shelf-field .route-waypoint-dropdown .Select-value {
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.45);
+  color: #e2e8f0;
+}
+.shelf-field .route-waypoint-dropdown .VirtualizedSelectOption {
+  font-size: 12px;
+}
+
+/* Per-leg breakdown rows inside the route summary overlay */
+.route-leg-list {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--ta-border-primary, #e2e8f0);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.route-leg-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 11px; gap: 8px;
+}
+.route-leg-label { font-weight: 700; color: var(--ta-text-primary, #0f172a); }
+.route-leg-value { color: var(--ta-text-secondary, #475569); }
+[data-theme="dark"] .route-leg-list { border-top-color: #334155; }
+[data-theme="dark"] .route-leg-label { color: #e2e8f0; }
+[data-theme="dark"] .route-leg-value { color: #94a3b8; }
