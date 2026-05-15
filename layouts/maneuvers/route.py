@@ -31,6 +31,15 @@ def route_layout(default_elev=None):
             id="route-tas", type="number",
             value=110, min=40, max=600,
         )),
+        _field("Glide Ratio", dcc.Input(
+            id="route-glide-ratio", type="number",
+            value=9.0, min=1, max=40, step=0.5,
+        )),
+        _field("Corridor", dcc.Checklist(
+            id="route-show-corridor",
+            options=[{"label": " On", "value": "show"}],
+            value=["show"],
+        )),
 
         html.Div(className="shelf-spacer"),
 
