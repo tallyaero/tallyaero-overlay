@@ -2098,3 +2098,73 @@ input[type="radio"] {
 [data-theme="dark"] .map-overlay-btn:hover {
   background: #334155;
 }
+
+/* Phase 5 — Plan Route button + modal styling */
+.shelf-btn-route {
+  background: var(--ta-brand-blue, #0d59f2);
+  color: #ffffff;
+  border-color: var(--ta-brand-blue, #0d59f2);
+  margin-left: 4px;
+}
+.shelf-btn-route:hover {
+  background: var(--ta-brand-blue-dark, #0a47c9);
+}
+
+.route-modal-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.route-modal-row label {
+  width: 130px;
+  font-size: 12px;
+  margin: 0;
+}
+.route-modal-row input {
+  flex: 1;
+}
+.route-modal-hint {
+  font-size: 11px;
+  color: var(--ta-text-tertiary, #94a3b8);
+  font-style: italic;
+  margin: 4px 0 0;
+}
+.route-summary {
+  background: var(--ta-surface-tertiary, #f1f5f9);
+  border-radius: 4px;
+  padding: 10px 12px;
+}
+.route-summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--ta-border-primary, #e2e8f0);
+  font-size: 12px;
+}
+.route-summary-row:last-child { border-bottom: none; }
+.route-summary-label {
+  color: var(--ta-text-secondary, #64748b);
+  font-weight: 500;
+}
+.route-summary-value {
+  color: var(--ta-text-primary, #0f172a);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.route-summary-error {
+  color: #dc3545;
+  font-size: 12px;
+  padding: 8px;
+  background: rgba(220, 53, 69, 0.08);
+  border-radius: 4px;
+}
+
+[data-theme="dark"] .route-summary {
+  background: #1e293b;
+}
+[data-theme="dark"] .route-summary-row {
+  border-bottom-color: #334155;
+}
+[data-theme="dark"] .route-summary-label { color: #cbd5e1; }
+[data-theme="dark"] .route-summary-value { color: #e2e8f0; }
