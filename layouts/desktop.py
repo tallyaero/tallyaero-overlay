@@ -7,7 +7,7 @@ Phase 1e will move it to callbacks/aircraft.py).
 
 Pure functions; no callbacks.
 
-Also hosts `legal_banner_block` and `_reset_buttons_row` since those are
+Also hosts `_top_strip` / `_modals_block` / `_reset_buttons_row` since those are
 layout helpers shared by every per-maneuver form in layouts/maneuvers/.
 The deferred imports inside each maneuver layout that used
 `from app import _reset_buttons_row` get cleaned up in the same commit
@@ -23,31 +23,46 @@ import dash_leaflet as dl
 from core.data_loader import available_aircraft
 
 
-def legal_banner_block():
+def _top_strip():
+    """Phase 4 Batch 2a — top-strip shell mirroring EM Diagram's
+    layout. Holds legal links + theme toggle today; Batch 2b adds
+    aircraft picker + env chips."""
     return html.Div(
-        children=[
-            # Phase 4 — old aeroedge logo header + warning banner removed.
-            # Quick-links row stays (still useful nav); theme toggle floats
-            # to the right side of the same row per EM Diagram's quick-links
-            # reflow pattern.
+        [
             html.Div(
-                children=[
+                html.Span("TallyAero Overlay", className="top-strip-brand"),
+                className="top-strip-left",
+            ),
+            html.Div(
+                [
                     html.Div(
                         [
-                            html.A("Quick Start", href="#", id="open-quickstart", className="legal-link", style={"color": "#E65C00", "fontWeight": "bold"}),
-                            html.Span(" | ", className="legal-separator"),
-                            html.A("EM Diagram Tool", href="https://app.flyaeroedge.com/", target="_blank", className="legal-link", style={"color": "#28a745", "fontWeight": "bold"}),
-                            html.Span(" | ", className="legal-separator"),
-                            html.A("Report an Error", href="https://forms.gle/VX6CA1ugifAtmBM79", target="_blank", className="legal-link", style={"color": "#dc3545"}),
-                            html.Span(" | ", className="legal-separator"),
-                            html.A("Contact TallyAero", href="https://forms.gle/nDahQbhYDNYh6P129", target="_blank", className="legal-link"),
+                            html.A("Quick Start", href="#", id="open-quickstart", className="quick-link", style={"color": "#E65C00", "fontWeight": "bold"}),
+                            html.Span(" · ", className="quick-link-sep"),
+                            html.A("EM Diagram", href="https://app.flyaeroedge.com/", target="_blank", className="quick-link", style={"color": "#28a745", "fontWeight": "bold"}),
+                            html.Span(" · ", className="quick-link-sep"),
+                            html.A("Report Error", href="https://forms.gle/VX6CA1ugifAtmBM79", target="_blank", className="quick-link", style={"color": "#dc3545"}),
+                            html.Span(" · ", className="quick-link-sep"),
+                            html.A("Contact", href="https://forms.gle/nDahQbhYDNYh6P129", target="_blank", className="quick-link"),
                         ],
-                        className="legal-links",
+                        className="top-strip-quicklinks",
                     ),
                     _theme_toggle(),
                 ],
-                className="legal-links-row",
+                className="top-strip-right",
             ),
+        ],
+        className="top-strip",
+    )
+
+
+def _modals_block():
+    """Quick-Start / Disclaimer / Terms modals. Pulled out of the old
+    legal_banner_block so the top-strip stays thin. Modals stay in the
+    DOM so the existing open-quickstart / disclaimer-modal callbacks
+    keep wiring."""
+    return html.Div(
+        children=[
 
             # Quick Start Modal
             dbc.Modal(
@@ -181,13 +196,19 @@ def _theme_toggle():
 
 
 def desktop_layout():
-    """Desktop layout with resizable sidebar"""
-    return html.Div(className="full-height-container", children=[
-        # Phase 4 — banner-header (old aeroedge logo) removed. Theme toggle
-        # now lives in the legal-links row inside legal_banner_block.
-        legal_banner_block(),
-        # Main 2-column layout
-        html.Div(className="main-row", children=[
+    """Desktop layout — Phase 4 Batch 2a shell.
+
+    full-height-container > top-strip + main-grid + modals. The
+    main-grid keeps the existing sidebar + map split intact (Batch 2b
+    will promote aircraft picker into top-strip and add env chips;
+    Batch 2c moves the rail content into a slide-out drawer).
+    """
+    return html.Div(className="full-height-container desktop-shell", children=[
+        _top_strip(),
+        _modals_block(),
+        # Main 2-column layout (sidebar + map) — wraps in main-grid so
+        # the CSS can target it with the new shell rules.
+        html.Div(className="main-row main-grid", children=[
             # === Sidebar ===
             html.Div(id="sidebar", className="resizable-sidebar", children=[
                 # Header row with title and collapse button

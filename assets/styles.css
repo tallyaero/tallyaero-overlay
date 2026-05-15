@@ -1175,3 +1175,76 @@ input[type="radio"] {
 
 /* Phase 4 Batch 2 will rebuild the shell against the full token palette;
    the rules above keep the toggle legible until then. */
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 4 Batch 2a — top-strip shell skeleton
+   Mirrors EM Diagram zz-em-app.css top-strip rules.
+   ══════════════════════════════════════════════════════════════ */
+
+.desktop-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.top-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  height: 56px;
+  background: var(--ta-surface-secondary, #ffffff);
+  border-bottom: 1px solid var(--ta-border-primary, #e2e8f0);
+  flex-shrink: 0;
+}
+
+.top-strip-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.top-strip-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.top-strip-brand {
+  font-family: var(--ta-font-sans, system-ui, sans-serif);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  color: var(--ta-text-primary, #0f172a);
+  text-transform: uppercase;
+}
+
+.top-strip-quicklinks {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--ta-text-tertiary, #94a3b8);
+}
+.top-strip-quicklinks .quick-link {
+  color: var(--ta-text-secondary, #64748b);
+  text-decoration: none;
+  padding: 2px 4px;
+}
+.top-strip-quicklinks .quick-link:hover {
+  color: var(--ta-brand-blue, #0d59f2);
+}
+.top-strip-quicklinks .quick-link-sep {
+  color: var(--ta-text-tertiary, #94a3b8);
+}
+
+/* main-grid swallows the rest of the viewport below the top-strip.
+   The existing .main-row CSS (sidebar 320px + map 1fr) keeps working
+   because main-grid only sets the outer flex constraints. */
+.main-grid {
+  flex: 1;
+  min-height: 0;
+}
