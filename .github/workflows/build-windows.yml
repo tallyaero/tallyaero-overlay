@@ -16,6 +16,11 @@ on:
     tags: ['v*']
   workflow_dispatch:
 
+# Phase 6S — softprops/action-gh-release needs write access to push the
+# zip onto the release for this tag. Default GITHUB_TOKEN is read-only.
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
