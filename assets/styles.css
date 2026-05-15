@@ -2299,3 +2299,17 @@ input[type="radio"] {
 [data-theme="dark"] .route-leg-list { border-top-color: #334155; }
 [data-theme="dark"] .route-leg-label { color: #e2e8f0; }
 [data-theme="dark"] .route-leg-value { color: #94a3b8; }
+
+/* Divert summary block — sits below the corridor badge in the route
+   overlay. Subtle green-accent border to match the divert marker color. */
+.route-divert-badge {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(34, 197, 94, 0.45);
+}
+.route-divert-badge .route-summary-row:first-child {
+  font-weight: 700;
+}
+[data-theme="dark"] .route-divert-badge {
+  border-top-color: rgba(34, 197, 94, 0.5);
+}
