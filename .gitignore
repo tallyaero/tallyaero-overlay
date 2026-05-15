@@ -31,6 +31,8 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+# Phase 6S — our PyInstaller spec is hand-maintained and tracked.
+!tallyaero_em.spec
 
 # Installer logs
 pip-log.txt
