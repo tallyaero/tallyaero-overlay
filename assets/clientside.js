@@ -225,3 +225,114 @@ window.dash_clientside.tallyaero.replayManeuver = function (scrubPct, figure) {
 
     return [figure, readout];
 };
+
+
+/* ──────────────────────────────────────────────────────────────────────
+   Phase 6S — Update-check banner.
+
+   On first page load, fetch a small JSON document from tallyaero.com:
+
+       {
+         "latest_version": "0.4.0",
+         "release_notes":  "Improved Ps accuracy, new Decathlon polar.",
+         "download_url":   "https://tallyaero.com/em-diagram/download"
+       }
+
+   Compare against the bundled version (rendered into the DOM by the
+   server-side template; here it's read from window.__TALLYAERO_VERSION__
+   set by a small inline-script tag, OR fallback to a known string).
+
+   If the user is on an older version, the banner is unhidden with a
+   message + a link to the download page. The X button stores a
+   "dismissed-for-this-version" flag in localStorage so the user isn't
+   nagged on every reload of the same outdated build.
+
+   This is a single fire-on-load global, not a Dash callback — keeps the
+   banner logic out of the Python callback graph and avoids a Store.
+   ──────────────────────────────────────────────────────────────────────*/
+
+(function tallyaeroUpdateCheck() {
+    var VERSION_URL = 'https://tallyaero.com/em-version.json';
+    var CURRENT     = (window.__TALLYAERO_VERSION__ || '0.0.0').trim();
+
+    // Naive semver comparator — returns negative if a < b, positive if a > b,
+    // zero if equal. Handles unequal segment counts (1.0 vs 1.0.1).
+    function cmpVer(a, b) {
+        var as = a.split('.').map(function (n) { return parseInt(n, 10) || 0; });
+        var bs = b.split('.').map(function (n) { return parseInt(n, 10) || 0; });
+        var max = Math.max(as.length, bs.length);
+        for (var i = 0; i < max; i++) {
+            var diff = (as[i] || 0) - (bs[i] || 0);
+            if (diff !== 0) return diff;
+        }
+        return 0;
+    }
+
+    function showBanner(msg, downloadUrl) {
+        var banner = document.getElementById('update-banner');
+        var msgEl  = document.getElementById('update-banner-msg');
+        var link   = document.getElementById('update-banner-link');
+        if (!banner || !msgEl || !link) return;     // banner DOM not on this page
+        msgEl.textContent = msg;
+        if (downloadUrl) link.href = downloadUrl;
+        banner.style.display = 'flex';
+    }
+
+    function dismiss(version) {
+        try {
+            localStorage.setItem('tallyaero_update_dismissed', version);
+        } catch (e) { /* private mode etc. */ }
+        var banner = document.getElementById('update-banner');
+        if (banner) banner.style.display = 'none';
+    }
+
+    // Wire the close button on first DOM-ready
+    function attachCloseHandler() {
+        var btn = document.getElementById('update-banner-close');
+        if (btn && !btn._tallyaeroBound) {
+            btn._tallyaeroBound = true;
+            btn.addEventListener('click', function () {
+                var v = btn.getAttribute('data-latest') || '';
+                dismiss(v);
+            });
+        }
+    }
+
+    function check() {
+        attachCloseHandler();
+        // Skip in dev (file:// or localhost without a real production URL).
+        // The check is best-effort — if network fails or the JSON is missing,
+        // the banner stays hidden and the app loads normally.
+        fetch(VERSION_URL, { cache: 'no-store' })
+            .then(function (r) {
+                if (!r.ok) throw new Error('http ' + r.status);
+                return r.json();
+            })
+            .then(function (data) {
+                var latest = (data.latest_version || '').trim();
+                var url    = data.download_url || 'https://tallyaero.com/em-diagram';
+                if (!latest || cmpVer(CURRENT, latest) >= 0) return;
+                // Honor a previous dismissal for this exact version
+                var dismissed = '';
+                try { dismissed = localStorage.getItem('tallyaero_update_dismissed') || ''; }
+                catch (e) {}
+                if (dismissed === latest) return;
+                var btn = document.getElementById('update-banner-close');
+                if (btn) btn.setAttribute('data-latest', latest);
+                showBanner(
+                    'TallyAero EM v' + latest + ' is available. ' +
+                    'You\'re on v' + CURRENT + '.',
+                    url,
+                );
+            })
+            .catch(function () { /* silent */ });
+    }
+
+    // Run after the layout's initial render so the banner DOM exists.
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', check);
+    } else {
+        setTimeout(check, 100);
+    }
+})();
+

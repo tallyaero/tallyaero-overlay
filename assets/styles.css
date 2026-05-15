@@ -3059,6 +3059,53 @@ button:hover,
   }
 }
 
+/* ============================================================
+   Phase 6S — Update-check banner
+   Fires when clientside fetch from tallyaero.com reports a newer
+   version than the currently-installed build. Dismissable.
+   ============================================================ */
+.update-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--ta-brand-blue, #0a47c9) 15%, transparent),
+    color-mix(in srgb, var(--ta-brand-orange, #f27b0d) 15%, transparent));
+  border-bottom: 1px solid var(--ta-border, var(--ta-surface-tertiary));
+  font-size: 13px;
+  color: var(--ta-text-primary, #1f2937);
+  position: relative;
+  z-index: 200;
+}
+.update-banner-msg { font-weight: 500; }
+.update-banner-link {
+  background: var(--ta-brand-blue, #0a47c9);
+  color: white !important;
+  padding: 4px 12px;
+  border-radius: 4px;
+  text-decoration: none !important;
+  font-weight: 600;
+  font-size: 12px;
+}
+.update-banner-link:hover {
+  background: color-mix(in srgb, var(--ta-brand-blue, #0a47c9) 85%, black);
+}
+.update-banner-close {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: 0;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--ta-text-secondary, #6b7280);
+  cursor: pointer;
+}
+.update-banner-close:hover {
+  color: var(--ta-text-primary, #1f2937);
+}
+
 /* Phase 5AF-3 — Short-viewport / landscape mobile compactness */
 @media (max-height: 500px) {
   .mobile-top-bar {

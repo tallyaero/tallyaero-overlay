@@ -1,0 +1,83 @@
+name: Build Windows installer
+
+# Phase 6S — runs on every push of a `v*` tag (e.g. `v0.2.0`).
+# Builds the EM Diagram bundle on a Windows runner, zips it,
+# and attaches the result to the GitHub release that the tag created.
+#
+# To trigger:
+#   git tag v0.2.0
+#   git push origin v0.2.0
+#
+# To use a different runner trigger, push directly via the Actions UI
+# `workflow_dispatch` button — useful for testing before tagging.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install pyinstaller
+
+      - name: Resolve symlinks (Windows can't follow them)
+        shell: pwsh
+        run: |
+          # _data submodule contents are linked via Unix symlinks on macOS.
+          # On Windows we replace the symlinks with direct copies so the
+          # spec's "_data/aircraft_data" path resolves cleanly.
+          Remove-Item aircraft_data, airports -Force -ErrorAction SilentlyContinue
+          Copy-Item _data/aircraft_data -Destination aircraft_data -Recurse
+          Copy-Item _data/airports      -Destination airports      -Recurse
+
+      - name: Build with PyInstaller
+        shell: pwsh
+        run: |
+          python -m PyInstaller tallyaero_em.spec --noconfirm --clean
+
+      - name: Compute version from VERSION file
+        id: ver
+        shell: pwsh
+        run: |
+          $v = (Get-Content VERSION).Trim()
+          echo "version=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Zip the bundle
+        shell: pwsh
+        run: |
+          Compress-Archive `
+            -Path "dist/TallyAero EM" `
+            -DestinationPath "dist/TallyAero-EM-v${{ steps.ver.outputs.version }}-win-x64.zip"
+
+      - name: Upload artefact (always)
+        uses: actions/upload-artifact@v4
+        with:
+          name: TallyAero-EM-Windows
+          path: dist/TallyAero-EM-v*.zip
+
+      - name: Attach to GitHub Release (tag push only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/TallyAero-EM-v*.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

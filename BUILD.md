@@ -1,8 +1,8 @@
 # Building TallyAero EM Diagram
 
-Phase 6 deliverable. This document covers building a desktop bundle from
-source. The signing/notarization steps require external certificates we
-don't include in the repo.
+Phase 6 + 6S deliverable. This document covers turning the source tree
+into a downloadable, signed, browser-launching desktop bundle for
+macOS and Windows.
 
 ---
 
@@ -13,140 +13,174 @@ make install-build    # one-time: installs PyInstaller into ./venv
 make build            # produces dist/TallyAero EM/ + dist/TallyAero EM.app
 ```
 
-Single-step from scratch:
-
-```bash
-venv/bin/python -m pip install pyinstaller
-venv/bin/python -m PyInstaller tallyaero_em.spec --noconfirm --clean
-open "dist/TallyAero EM.app"        # macOS
-# Windows: double-click dist/TallyAero EM/TallyAero EM.exe
-# Linux:   ./dist/TallyAero\ EM/TallyAero\ EM
-```
-
 First launch picks a free localhost port, starts the Dash server in a
 background thread, waits for it to respond, then opens the user's default
 browser to that URL. The launcher (`launcher.py`) survives until the user
-quits via the dock/tray.
+quits via the dock.
 
-Expected bundle size on Apple Silicon: **~385 MB** unsigned. Breakdown
-measured 2026-05-14 (after the `pandas` exclude):
-
-| Item | Size | Notes |
-|---|---|---|
-| `kaleido/` (bundled Chromium) | 232 MB | needed for PDF/PNG export via `plotly.io.write_image` |
-| `dash/` | 29 MB | core framework + vendored JS |
-| `airports/` | 18 MB | 49,128-airport JSON ships in the bundle |
-| `plotly/` | 9 MB | charting library |
-| `numpy/` | 7 MB | |
-| `python3.11/` runtime | 7 MB | |
-| `PIL/` | 5 MB | indirect kaleido dependency |
-| everything else | ~75 MB | dash-bootstrap, pydantic_core, deps, our own code |
-
-The plan target was **< 250 MB**. We're 50 % over it because of kaleido's
-bundled Chromium. To hit the budget, rewrite `callbacks/export.py` to use
-client-side `Plotly.toImage()` instead of `plotly.io.write_image()`, then
-drop `kaleido` from `hiddenimports` and add it to `excludes`. That trims
-the bundle to ~150 MB but loses the server-side rendering of complex
-multi-trace exports (the client-side path is good enough for most cases).
-Tracked as a Phase 6 follow-up — not blocking the unsigned-ship.
+Expected bundle size on Apple Silicon: **~385 MB** unsigned. Most of the
+weight is `kaleido` (bundled Chromium for server-side PNG/PDF export).
 
 ---
 
-## What's in the spec
+## Full macOS ship pipeline
 
-`tallyaero_em.spec` declares:
+Prerequisites — one-time:
 
-- **Entry point:** `launcher.py` (NOT `app.py` — the launcher wraps the
-  Dash server so the .app behaves like a real desktop app).
-- **Bundled data:** `aircraft_data/` (110 JSONs), `airports/airports.json`
-  (49,128 airports), `assets/` (CSS/JS), `VERSION`, `LICENSE`,
-  `PHYSICS_AUDIT_PLAN.md`. All available via `_MEIPASS` at runtime.
-- **Hidden imports:** Dash, Plotly, Kaleido, dash-bootstrap, NumPy, Pandas,
-  Pydantic, Flask, Werkzeug, plus our own packages (`core`, `callbacks`,
-  `layouts`, `components`, `services`).
-- **Exclusions:** matplotlib, scipy, tkinter, PyQt/PySide, IPython,
-  notebook — trims ~80 MB of weight.
-- **macOS:** wraps the bundle in a `.app` via `BUNDLE()`, declares
-  `LSMinimumSystemVersion = 11.0`, `NSHighResolutionCapable = True`.
+1. **Apple Developer Program** membership and a **Developer ID Application**
+   certificate installed in your login keychain. Verify with:
+   ```bash
+   security find-identity -v -p codesigning
+   ```
+   You should see something like
+   `1) ABCD1234... "Developer ID Application: TallyAero (TEAMID)"`.
 
----
+2. **App-specific password** stored as a notarytool keychain profile named
+   `TALLYAERO_NOTARY`:
+   ```bash
+   xcrun notarytool store-credentials TALLYAERO_NOTARY \
+     --apple-id you@example.com \
+     --team-id ABCDE12345 \
+     --password "xxxx-xxxx-xxxx-xxxx"
+   ```
 
-## What's NOT in this push (Phase 6 follow-ups)
+3. **ImageMagick** (only needed for Windows `.ico` generation):
+   ```bash
+   brew install imagemagick
+   ```
 
-Signing, notarization, installers, auto-update, and CI/CD are all blocked
-on resources the repo doesn't carry:
-
-### 1. macOS code signing + notarization
-
-Requires:
-- Apple Developer ID Application certificate ($99/yr) in the system Keychain
-- `xcrun notarytool` credentials (App Store Connect app-specific password)
-
-Steps once the cert is in place:
+Then one command builds, signs, notarizes, and wraps the app in a draggable
+DMG:
 
 ```bash
-# Sign the .app bundle
-codesign --deep --options runtime \
-  --sign "Developer ID Application: <Your Name> (<TeamID>)" \
-  "dist/TallyAero EM.app"
-
-# Notarize
-ditto -c -k --keepParent "dist/TallyAero EM.app" /tmp/TallyAero.zip
-xcrun notarytool submit /tmp/TallyAero.zip \
-  --keychain-profile "tallyaero-notary" \
-  --wait
-
-# Staple the ticket so Gatekeeper doesn't need a network call to verify
-xcrun stapler staple "dist/TallyAero EM.app"
+make ship-mac
 ```
 
-Without these, macOS users will see "TallyAero EM cannot be opened because
-the developer cannot be verified" on first run.
+That runs in order:
+- `make build-clean` — clear previous artefacts
+- `make icons` — `scripts/build_icons.sh` → `.icns` + `.ico`
+- `make build` — PyInstaller bundle
+- `make sign` — `scripts/sign_macos.sh` (codesign + notarize + staple)
+- `make dmg` — `scripts/build_dmg.sh` (drag-to-Applications DMG)
 
-### 2. Windows code signing
-
-Requires an OV (Organization Validation) code-signing certificate from
-DigiCert, Sectigo, etc. (~$200–400/yr). Without it Windows SmartScreen
-shows "Windows protected your PC" — most users will not click through.
-
-```powershell
-signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 ^
-  /a "dist\TallyAero EM\TallyAero EM.exe"
-```
-
-### 3. Installers
-
-- **macOS `.dmg`:** `pip install dmgbuild; dmgbuild -s installer/macos/dmgbuild.py "TallyAero EM" "TallyAero EM.dmg"`
-- **Windows installer:** Inno Setup or NSIS. The repo has no `.iss` file yet — write one once Windows signing is in place.
-- **Linux:** `.AppImage` via `appimagetool`; `.deb` via `fpm`.
-
-### 4. Auto-update banner
-
-On launch, fetch `https://api.github.com/repos/tallyaero/tallyaero-em/releases/latest`
-and compare `tag_name` against the bundled `VERSION`. Show a dismissible
-banner if newer. Don't auto-install.
-
-### 5. CI/CD
-
-GitHub Actions matrix (`macos-14` arm64, `macos-13` x64, `ubuntu-22.04`,
-`windows-2022`) — each builds + uploads to a draft release. Manual
-promote to public release after a smoke test on a clean machine.
+Final artefact: `dist/TallyAero-EM-v<version>.dmg`. Notarization is stapled,
+so the DMG works offline on a fresh Mac without any Gatekeeper warning.
 
 ---
 
-## Testing the unsigned build
+## Windows build (GitHub Actions)
+
+There's no Windows Authenticode cert yet, so we build unsigned bundles via
+the free GitHub Actions Windows runner. The workflow is
+`.github/workflows/build-windows.yml`. It runs automatically on any `v*`
+tag push:
+
+```bash
+echo "0.2.0" > VERSION
+git commit -am "bump v0.2.0"
+git tag v0.2.0
+git push origin main --tags
+```
+
+GitHub Actions then:
+1. Checks out the repo (submodules included).
+2. Replaces the `_data` symlinks with direct copies (Windows can't follow
+   them).
+3. Builds `dist/TallyAero EM/` via PyInstaller.
+4. Zips the bundle as `TallyAero-EM-v<version>-win-x64.zip`.
+5. Attaches the ZIP to the GitHub Release for that tag.
+
+To test the workflow without tagging, use the **Run workflow** button in
+the Actions UI (it dispatches on `workflow_dispatch`).
+
+**User experience on first run (Windows):** SmartScreen shows "Windows
+protected your PC" because the .exe isn't Authenticode-signed. The user
+clicks **More info → Run anyway**. Modern users know this pattern from
+indie software; an Authenticode cert ($200-500/yr) can be added later.
+
+---
+
+## Update-check banner
+
+The bundled app fetches `https://tallyaero.com/em-version.json` on every
+launch. Expected schema:
+
+```json
+{
+  "latest_version": "0.2.0",
+  "release_notes":  "Improved Ps accuracy, new aircraft.",
+  "download_url":   "https://tallyaero.com/em-diagram/download"
+}
+```
+
+If the installed version is older than `latest_version`, a banner appears
+at the top of the page with a Download link. The user can dismiss for a
+specific version (localStorage flag) so they aren't nagged on every
+reload of the same outdated build.
+
+Update the JSON every time you publish a new build. Hosting requirements:
+- Public URL
+- `Access-Control-Allow-Origin: *` so the bundle (running at
+  `http://127.0.0.1:<port>`) can fetch it cross-origin
+
+---
+
+## Hosting + distribution
+
+We host the installers directly on `tallyaero.com`:
+
+- `tallyaero.com/em-diagram/download/mac` → `TallyAero-EM-v<latest>.dmg`
+- `tallyaero.com/em-diagram/download/win` → `TallyAero-EM-v<latest>-win-x64.zip`
+- `tallyaero.com/em-version.json` → the update manifest
+
+The ATLAS app links to `/em-diagram/download` and lets the user pick
+their platform.
+
+---
+
+## Ship checklist
+
+1. Bump `VERSION` (semver).
+2. Update tallyaero-data submodule if any aircraft / airport data changed:
+   ```bash
+   cd _data && git pull origin main && cd ..
+   git add _data && git commit -m "chore: bump shared-data submodule"
+   ```
+3. Run the full pipeline:
+   ```bash
+   make ship-mac
+   ```
+4. Tag and push (triggers Windows build on Actions):
+   ```bash
+   git tag v$(cat VERSION)
+   git push origin main --tags
+   ```
+5. Wait for the Actions run to finish, grab the Windows ZIP from the
+   release assets.
+6. Upload `dist/TallyAero-EM-v*.dmg` and the Windows ZIP to
+   `tallyaero.com/em-diagram/download/`.
+7. Update `tallyaero.com/em-version.json` to the new version.
+8. Test on a clean Mac (no Gatekeeper warning) and a clean Windows
+   machine (SmartScreen click-through, then run).
+
+---
+
+## Sanity-test the unsigned build
 
 After `make build`:
 
-1. Open `dist/TallyAero EM.app` (macOS) — first time may require
-   right-click → Open to bypass Gatekeeper because the bundle is unsigned.
-2. Browser opens to a free localhost port.
+1. Open `dist/TallyAero EM.app` (macOS) — first time will require
+   right-click → Open to bypass Gatekeeper because unsigned.
+2. Browser opens to a free localhost port (random, e.g. `:59756`).
 3. EM Diagram renders.
 4. Pick Cessna 172P, slide altitude, see the chart respond.
 5. Open the drawer (`D` key), tweak overlays.
 6. Test PNG export — confirms kaleido is bundled correctly.
 
-If any of those fail, the missing piece is almost certainly a hidden
-import — PyInstaller's static analysis can miss dynamic imports.
-Check `dist/TallyAero EM/TallyAero EM.app/Contents/MacOS/` for the
-launcher process output (run from terminal: `./dist/TallyAero\ EM.app/Contents/MacOS/TallyAero\ EM`).
+If any of those fail, the missing piece is usually a hidden import that
+PyInstaller's static analysis missed. To debug, run the launcher directly
+from terminal so output is visible:
+
+```bash
+./dist/TallyAero\ EM.app/Contents/MacOS/TallyAero\ EM
+```

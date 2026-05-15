@@ -66,6 +66,24 @@ build:
 build-clean:
 	rm -rf build/ dist/
 
+# ─── Phase 6S: Ship pipeline (macOS) ────────────────────────────────────
+# `make ship-mac` runs the full chain: build → icons → sign → notarize → DMG.
+# Requires Developer ID Application cert in keychain + notarytool profile
+# named TALLYAERO_NOTARY (see BUILD.md).
+icons:
+	bash scripts/build_icons.sh
+
+sign:
+	bash scripts/sign_macos.sh
+
+dmg:
+	bash scripts/build_dmg.sh
+
+ship-mac: build-clean icons build sign dmg
+	@echo ""
+	@echo "✓ Ship pipeline complete."
+	@ls -lh dist/*.dmg 2>/dev/null || true
+
 # ─── Phase 7: cross-app drift detector ─────────────────────────────────
 sync-check:
 	$(PY) scripts/sync_check.py

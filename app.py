@@ -15,6 +15,7 @@ Run with:
 import os
 import sys
 import webbrowser
+from pathlib import Path
 
 import dash
 from dash import dcc, html, ClientsideFunction
@@ -41,12 +42,19 @@ server = app.server
 # =============================================================================
 # HTML index template (meta tags, title, favicon)
 # =============================================================================
+# Phase 6S — expose the build version to the clientside update-check.
+try:
+    _VERSION = (Path(__file__).parent / "VERSION").read_text().strip()
+except Exception:
+    _VERSION = "0.0.0"
+
 app.index_string = """
 <!DOCTYPE html>
 <html>
     <head>
         {%metas%}
         <title>Energy Maneuverability Diagram Generator</title>
+        <script>window.__TALLYAERO_VERSION__ = '__VERSION__';</script>""".replace("__VERSION__", _VERSION) + """
         <meta name="description" content="Interactive Energy Maneuverability Diagrams for general aviation, multi-engine, aerobatic, and military aircraft. Analyze Ps contours, Vmc dynamics, Vyse, G-limits, stall margins, and more.">
         <meta name="keywords" content="EM Diagram, Energy Maneuverability, Aircraft Performance, General Aviation, Vmc, Vyse, Vxse, Ps Contours, G-Limits, Stall Speed, Spin Awareness, Stall Awareness, Turn Rate, Flight Envelope, FAA Training, Multi-Engine Safety, Aerobatic Flight, FAA Flight Training, Maneuvering Performance, AOB, Angle of Bank, Aviation Education, Pilot Tools, Military Trainer Aircraft, FAA Checkride Prep, Performance Planning, General Aviation Safety">
         <meta name="robots" content="index, follow">
@@ -144,6 +152,20 @@ app.layout = html.Div([
     # callbacks/navigation.py writes to it on every URL change but no
     # Store ever existed. Adding it cleans up the warning surface.
     dcc.Store(id="browser-width"),
+    # Phase 6S: update banner — clientside JS fetches a small JSON from
+    # tallyaero.com on first load. If the server reports a newer version,
+    # the banner becomes visible with a download link.
+    html.Div(id="update-banner", style={"display": "none"}, className="update-banner",
+             children=[
+                 html.Span(id="update-banner-msg", className="update-banner-msg"),
+                 html.A("Download", id="update-banner-link",
+                        href="https://tallyaero.com/em-diagram",
+                        target="_blank",
+                        className="update-banner-link"),
+                 html.Button("×", id="update-banner-close",
+                             className="update-banner-close",
+                             **{"aria-label": "Dismiss update banner"}),
+             ]),
     html.Div(id="page-content"),
     dcc.Download(id="download-aircraft"),
 
