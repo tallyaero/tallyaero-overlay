@@ -433,13 +433,6 @@ def desktop_layout():
         # === Map Column ===
         html.Div(id="engineout-click-status", style={"display": "none"}),
 
-        # Map-overlay controls: Reset/Undo bottom-right of the map.
-        html.Div(className="map-controls-overlay", children=[
-            html.Button("Reset All", id="reset-all", className="map-overlay-btn"),
-            html.Button("Reset Clicks", id="reset-clicks", className="map-overlay-btn"),
-            html.Button("Undo", id="undo-last-click", className="map-overlay-btn map-overlay-btn-undo"),
-        ]),
-
         html.Div(className="graph-column", style={"display": "flex", "flexDirection": "column"}, children=[
             html.Div(
                 style={
@@ -448,6 +441,16 @@ def desktop_layout():
                     "position": "relative"
                 },
                 children=[
+                    # Map-overlay controls — Reset/Undo float over the map
+                    # top-right, just left of the windsock. Lives inside the
+                    # relative-positioned map wrapper so the absolute position
+                    # anchors to the map, not the viewport.
+                    html.Div(className="map-controls-overlay", children=[
+                        html.Button("Reset All", id="reset-all", className="map-overlay-btn"),
+                        html.Button("Reset Clicks", id="reset-clicks", className="map-overlay-btn"),
+                        html.Button("Undo", id="undo-last-click", className="map-overlay-btn map-overlay-btn-undo"),
+                    ]),
+
                     dl.Map(
                         id="map",
                         center=[33.0635, -80.2795],
