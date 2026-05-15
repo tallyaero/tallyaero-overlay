@@ -111,10 +111,10 @@ def register(app):
         empty_return = [], None, "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
 
         if not start_data or not touchdown_data:
-            return [], None, "⚠️ Set start and touchdown points first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
+            return [], None, "Set start and touchdown points first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
 
         if not ac_name or not engine_key:
-            return [], None, "⚠️ Select aircraft and engine first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
+            return [], None, "Select aircraft and engine first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
 
         try:
             states = dash.callback_context.states
@@ -162,7 +162,7 @@ def register(app):
                 if manual_hdg is not None:
                     touchdown_heading = manual_hdg
                 else:
-                    return [], None, "⚠️ Select a runway or enter manual heading.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
+                    return [], None, "Select a runway or enter manual heading.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
 
             required = [
                 start_heading, start_alt_agl, touchdown_heading,
@@ -170,7 +170,7 @@ def register(app):
                 total_wt
             ]
             if any(x is None for x in required):
-                return [], None, "⚠️ Missing or invalid input values.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
+                return [], None, "Missing or invalid input values.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
 
             start = GeoPoint(start_data["lat"], start_data["lon"])
             touchdown = GeoPoint(touchdown_data["lat"], touchdown_data["lon"])
@@ -213,7 +213,7 @@ def register(app):
             )
 
             if not path or not hover_data:
-                return [], None, "⚠️ No glide path generated. Check inputs.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
+                return [], None, "No glide path generated. Check inputs.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
 
             # Extract success/impact info from meta
             success = meta.get("success", False)
@@ -244,10 +244,10 @@ def register(app):
                     alt_high=5000.0,
                     resolution=25.0,
                 )
-                min_alt_display = f"📐 Minimum Altitude Required: {min_alt:.0f} ft AGL"
+                min_alt_display = f"Minimum Altitude Required: {min_alt:.0f} ft AGL"
             except Exception as min_err:
                 log.warning(f"Min altitude calc error: {min_err}")
-                min_alt_display = "⚠️ Could not calculate minimum altitude"
+                min_alt_display = "Could not calculate minimum altitude"
 
             # ---------- Core visuals: full glide track ----------
             # Color-code path by phase if available
@@ -319,13 +319,13 @@ def register(app):
                     color="black",
                     fill=True,
                     fillOpacity=1.0,
-                    children=dl.Tooltip("☠️ Impact Point"),
+                    children=dl.Tooltip("Impact Point"),
                 )
                 elements.append(impact_mark)
                 failure_reason = meta.get("reason", "ground_impact")
-                msg = f"⚠️ {failure_reason.replace('_', ' ').title()} at ({impact_lat:.4f}, {impact_lon:.4f})"
+                msg = f"{failure_reason.replace('_', ' ').title()} at ({impact_lat:.4f}, {impact_lon:.4f})"
             else:
-                msg = "✅ Engine-out glide successful."
+                msg = "Engine-out glide successful."
 
             # ---------- Bounds ----------
             lats = [pt[0] for pt in path] + [start.latitude, touchdown.latitude]
@@ -417,7 +417,7 @@ def register(app):
 
             # Build info content with enhanced data
             status_color = "#28a745" if success else "#dc3545"
-            status_text = "✅ TOUCHDOWN" if success else "❌ IMPACT"
+            status_text = "TOUCHDOWN" if success else "IMPACT"
 
             info_content = dbc.Accordion([
                 dbc.AccordionItem([
@@ -451,7 +451,7 @@ def register(app):
             import traceback
             log.error(f"EXCEPTION in draw_engineout(): {e}")
             traceback.print_exc()
-            return [], None, f"⚠️ Error generating path: {str(e)}", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
+            return [], None, f"Error generating path: {str(e)}", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
 
     @app.callback(
         Output("scrubber-layer", "children", allow_duplicate=True),

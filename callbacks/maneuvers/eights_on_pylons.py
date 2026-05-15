@@ -234,7 +234,7 @@ def register(app):
             warning_elements.append(html.Div("Warning: Stall margin below 1.2", style={"color": "#c0392b"}))
         # ACS compliance warnings
         if sim_warnings.get("pylon_distance_warning"):
-            warning_elements.append(html.Div(f"⚠ {sim_warnings['pylon_distance_warning']}", style={"color": "#e67e22"}))
+            warning_elements.append(html.Div(f"{sim_warnings['pylon_distance_warning']}", style={"color": "#e67e22"}))
         if sim_warnings.get("transition_time_warning"):
             warning_elements.append(html.Div(f"ℹ {sim_warnings['transition_time_warning']}", style={"color": "#3498db"}))
 

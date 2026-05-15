@@ -94,10 +94,10 @@ def register(app):
             raise PreventUpdate
 
         if not failure_data:
-            return [], None, "⚠️ Set takeoff point (runway threshold) first.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+            return [], None, "Set takeoff point (runway threshold) first.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
         if not ac_name or not engine_key:
-            return [], None, "⚠️ Select aircraft and engine first.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+            return [], None, "Select aircraft and engine first.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
         try:
             states = dash.callback_context.states
@@ -144,7 +144,7 @@ def register(app):
                 total_wt,
             ]
             if any(x is None for x in required):
-                return [], None, "⚠️ Missing or invalid inputs.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+                return [], None, "Missing or invalid inputs.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
             # The clicked point is now the runway threshold (takeoff start point)
             threshold_pt = {"lat": failure_data["lat"], "lon": failure_data["lon"]}
@@ -193,7 +193,7 @@ def register(app):
             )
 
             if not path:
-                return [], None, "⚠️ No path generated. Check inputs.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+                return [], None, "No path generated. Check inputs.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
             # Meta
             meta = meta or {}
@@ -294,7 +294,7 @@ def register(app):
                     failure_icon = {
                         "iconUrl": "data:image/svg+xml;utf8," +
                             "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>" +
-                            "<text y='80' font-size='80'>💥</text></svg>",
+                            "<text y='80' font-size='40'>X</text></svg>",
                         "iconSize": [28, 28],
                         "iconAnchor": [14, 14],
                     }
@@ -444,7 +444,7 @@ def register(app):
                     end_icon = {
                         "iconUrl": "data:image/svg+xml;utf8," +
                             "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>" +
-                            "<text y='80' font-size='80'>😀</text></svg>",
+                            "<text y='80' font-size='40'>OK</text></svg>",
                         "iconSize": [30, 30],
                         "iconAnchor": [15, 15],
                     }
@@ -454,7 +454,7 @@ def register(app):
                     end_icon = {
                         "iconUrl": "data:image/svg+xml;utf8," +
                             "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>" +
-                            "<text y='80' font-size='80'>💀</text></svg>",
+                            "<text y='80' font-size='40'>NO</text></svg>",
                         "iconSize": [30, 30],
                         "iconAnchor": [15, 15],
                     }
@@ -477,7 +477,7 @@ def register(app):
 
             # Status - provide clear failure reasons
             if made_it:
-                status = "✅ Impossible turn: successful"
+                status = "Impossible turn: successful"
             else:
                 # Map failure reasons to user-friendly messages
                 reason_messages = {
@@ -488,7 +488,7 @@ def register(app):
                     "timeout": "simulation timeout",
                 }
                 reason_text = reason_messages.get(reason, reason.replace("_", " "))
-                status = f"❌ Impossible turn: unsuccessful - {reason_text}"
+                status = f"Impossible turn: unsuccessful - {reason_text}"
 
             # Result text
             bank_txt = f"{float(bank_deg):.0f}°" if isinstance(bank_deg, (int, float)) else "n/a"
@@ -567,7 +567,7 @@ def register(app):
 
         except Exception as e:
             log.error(f"EXCEPTION in draw_impossible_turn(): {e}")
-            return [], None, f"⚠️ Error: {str(e)}", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+            return [], None, f"Error: {str(e)}", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
     @app.callback(
         Output("scrubber-layer", "children", allow_duplicate=True),

@@ -53,15 +53,15 @@ def edit_aircraft_layout():
         dcc.Store(id="stored-other-limits", data={}),
         dcc.Store(id="stored-oei-performance", data=[]),
 
+        # Phase 4 Batch 4 — banner-header (old aeroedge logo) removed;
+        # page now lives inside the desktop-shell so tokens + dark mode apply.
         html.Div([
-            html.Div([
-                html.Img(src="/assets/logo.png", className="banner-logo")
-            ], className="banner-inner")
-        ], className="banner-header"),
-
-        html.Div([
-            html.Button("⬅️ Back to EM Diagram", id="back-button", n_clicks=0, className="green-button")
-        ], style={"marginBottom": "20px"}),
+            html.Span("Edit Aircraft", className="top-strip-brand"),
+            html.A(
+                html.Button("Back", id="back-button", n_clicks=0, className="green-button"),
+                href="/",
+            ),
+        ], className="top-strip", style={"justifyContent": "space-between"}),
 
         html.Div([
             html.Div([
@@ -71,15 +71,14 @@ def edit_aircraft_layout():
                     options=[{"label": name, "value": name} for name in sorted(aircraft_data.keys())],
                     placeholder="Start typing...",
                     searchable=True,
-                    className="dropdown"
-                )
+                    className="dropdown")
             ]),
             html.Div([
                 html.Button("New Aircraft", id="new-aircraft-button", n_clicks=0, className="green-button", style={"marginRight": "10px"}),
-                html.Button("💾 Save Aircraft", id="save-aircraft-button", n_clicks=0, className="green-button"),
+                html.Button("Save Aircraft", id="save-aircraft-button", n_clicks=0, className="green-button"),
             ], style={"display": "flex", "alignItems": "center", "gap": "10px"}),
             html.Div(id="search-result", style={"marginTop": "10px", "color": "green"})
-        ], style={"marginBottom": "20px"}),
+        ], style={"marginBottom": "20px", "padding": "16px"}),
 
         html.Div([
             html.Label("Apply Default Performance Values:", className="input-label"),
@@ -103,8 +102,7 @@ def edit_aircraft_layout():
             ],
             value="KIAS",
             labelStyle={"display": "inline-block", "marginRight": "15px"},
-            className="dash-radio-items"
-        )
+            className="dash-radio-items")
     ], className="mb-3"),
 
     html.Div([
@@ -121,8 +119,7 @@ def edit_aircraft_layout():
                 {"label": "Multi Engine", "value": "multi_engine"}
             ],
             placeholder="Select type",
-            className="dropdown"
-        )
+            className="dropdown")
     ], className="mb-3"),
 
     html.Div([
@@ -166,7 +163,7 @@ def edit_aircraft_layout():
     ], className="mb-3"),
 
     html.Div([
-        html.Label("🛫 CG Range (inches)", className="input-label"),
+        html.Label("CG Range (inches)", className="input-label"),
         html.Div([
             html.Label("FWD", className="inline-label"),
             dcc.Input(id="cg-fwd", type="number", className="input-small", style={"marginRight": "20px"}),
@@ -210,7 +207,7 @@ def edit_aircraft_layout():
     ], className="mb-3"),
 
     html.Div([
-        html.Label("🛫 Airspeed Arcs", className="input-label"),
+        html.Label("Airspeed Arcs", className="input-label"),
 
         html.Div([
             html.Label("White Arc", className="inline-label"),
@@ -237,7 +234,7 @@ def edit_aircraft_layout():
     ], className="mb-4"),
 
     html.Div([
-        html.Label("🛫 Prop Thrust Decay", className="input-label"),
+        html.Label("Prop Thrust Decay", className="input-label"),
         html.Div([
             html.Label("T_static Factor", className="inline-label"),
             dcc.Input(id="prop-static-factor", type="number", step=0.1, className="input-small", style={"marginRight": "15px"}),
@@ -247,7 +244,7 @@ def edit_aircraft_layout():
     ], className="mb-4"),
 
     html.Div([
-        html.Label("🛫 Flap Configurations", className="input-label mb-2"),
+        html.Label("Flap Configurations", className="input-label mb-2"),
         html.Div(id="flap-configs-container", children=[
             html.Div([
                 html.Label("Clean / Up", className="inline-label", style={"width": "100px"}),
@@ -269,37 +266,37 @@ def edit_aircraft_layout():
     ], className="mb-4"),
 
     html.Div([
-        html.H3("🛫 G Limits", className="input-label"),
+        html.H3("G Limits", className="input-label"),
         html.Div(id="g-limits-container"),
-        html.Button("➕ Add G Limit", id="add-g-limit", n_clicks=0, className="green-button mt-2")
+        html.Button("Add G Limit", id="add-g-limit", n_clicks=0, className="green-button mt-2")
     ], className="mb-4"),
 
     html.Div([
-        html.H3("🛫 Stall Speeds", className="input-label"),
+        html.H3("Stall Speeds", className="input-label"),
         html.Div(id="stall-speeds-container"),
-        html.Button("➕ Add Stall Speed", id="add-stall-speed", n_clicks=0, className="green-button mt-2")
+        html.Button("Add Stall Speed", id="add-stall-speed", n_clicks=0, className="green-button mt-2")
     ], className="mb-4"),
 
     html.Div([
-        html.H3("🛫 Single Engine Limits", className="input-label"),
+        html.H3("Single Engine Limits", className="input-label"),
         html.Div(id="single-engine-limits-container"),
-        html.Button("➕ Add Single Engine Limit", id="add-single-engine-limit", n_clicks=0, className="green-button mt-2")
+        html.Button("Add Single Engine Limit", id="add-single-engine-limit", n_clicks=0, className="green-button mt-2")
     ], className="mb-4"),
 
     html.Div([
-        html.H3("🛫 OEI Performance", className="input-label"),
+        html.H3("OEI Performance", className="input-label"),
         html.Div(id="oei-performance-container"),
-        html.Button("➕ Add OEI Performance", id="add-oei-performance", n_clicks=0, className="green-button mt-2")
+        html.Button("Add OEI Performance", id="add-oei-performance", n_clicks=0, className="green-button mt-2")
     ], className="mb-4"),
 
     html.Div([
-        html.H3("🛫 Engine Options / HP / Power Curves", className="input-label"),
+        html.H3("Engine Options / HP / Power Curves", className="input-label"),
         html.Div(id="engine-options-container"),
-        html.Button("➕ Add Engine Option", id="add-engine-option", n_clicks=0, className="green-button mt-2")
+        html.Button("Add Engine Option", id="add-engine-option", n_clicks=0, className="green-button mt-2")
     ], className="mb-4"),
 
 
-    html.Button("💾 Save Aircraft", id="save-aircraft-button", n_clicks=0, className="green-button mt-4"),
+    html.Button("Save Aircraft", id="save-aircraft-button", n_clicks=0, className="green-button mt-4"),
     html.Div(id="save-status", className="mt-2", style={"marginTop": "20px"}),
 
 ])

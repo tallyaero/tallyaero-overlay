@@ -62,6 +62,18 @@ def register(app):
             return new_state, "▲" if new_state else "▼"
         return is_open, "▼"
 
+    # === Settings drawer toggle (Phase 4 Batch 2d) ===
+    @app.callback(
+        Output("settings-drawer", "is_open"),
+        Input("open-drawer-btn", "n_clicks"),
+        State("settings-drawer", "is_open"),
+        prevent_initial_call=True,
+    )
+    def toggle_settings_drawer(n_clicks, is_open):
+        if n_clicks:
+            return not is_open
+        return is_open
+
     # === Clientside: sidebar collapse (DOM-class toggle) ===
     app.clientside_callback(
         """
@@ -176,7 +188,7 @@ def register(app):
         - 9 kt: ~60% extended
         - 12 kt: ~80% extended
         - 15+ kt: fully extended
-        - 40+ kt: windsock blew away! 🌪️
+        - 40+ kt: windsock blew away! 
         """
         # Parse values (use same defaults as input fields: dir=360, speed=0)
         wind_dir_val = float(wind_dir) if wind_dir not in [None, "", "null"] else 360
@@ -187,7 +199,7 @@ def register(app):
             label_text = f"{int(wind_dir_val):03d}° @ {int(wind_speed_val)} kt"
             return [
                 html.Div(
-                    "🌪️",
+                    "",
                     style={"fontSize": "32px", "width": "60px", "height": "60px", "display": "flex", "alignItems": "center", "justifyContent": "center"}
                 ),
                 html.Span(

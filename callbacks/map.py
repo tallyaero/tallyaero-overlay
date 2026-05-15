@@ -270,7 +270,7 @@ def register(app):
 
         triggered_id = ctx_local.triggered_id
         role = triggered_id.get("role")
-        return f"🖱 Click on the map to set the {role.replace('_', ' ')} point."
+        return f"Click on the map to set the {role.replace('_', ' ')} point."
 
     @app.callback(
         Output({"type": "point-store", "m_id": ALL, "role": ALL}, "data", allow_duplicate=True),
@@ -419,17 +419,17 @@ def register(app):
             # Show warning when pylon was adjusted due to minimum distance
             feedback = html.Div([
                 html.Div([
-                    html.Span("⚠", style={"color": "#e67e22", "fontSize": "8px", "marginRight": "3px"}),
+                    html.Span("!", style={"color": "#e67e22", "fontSize": "8px", "marginRight": "3px", "fontWeight": "bold"}),
                     html.Span(min_pylon_distance_warning, style={"fontSize": "8px", "color": "#e67e22"}),
                 ]),
                 html.Div([
-                    html.Span("✓", style={"color": "#aaa", "fontSize": "6px", "marginRight": "2px"}),
+                    html.Span("", style={"color": "#aaa", "fontSize": "6px", "marginRight": "2px"}),
                     html.Span(f"{role_display} adjusted: {lat:.4f}, {lon:.4f}", style={"fontSize": "7px", "color": "#999"}),
                 ]),
             ], style={"padding": "1px 0", "marginTop": "1px", "lineHeight": "1.2"})
         else:
             feedback = html.Div([
-                html.Span("✓", style={"color": "#aaa", "fontSize": "6px", "marginRight": "2px"}),
+                html.Span("", style={"color": "#aaa", "fontSize": "6px", "marginRight": "2px"}),
                 html.Span(f"{role_display}: {lat:.4f}, {lon:.4f}", style={"fontSize": "7px", "color": "#999"}),
             ], style={"padding": "1px 0", "marginTop": "1px", "lineHeight": "1"})
 
@@ -458,9 +458,9 @@ def register(app):
                 lon = pdata["lon"]
                 elev = pdata.get("elevation_ft")
                 if role == "touchdown" and elev is not None:
-                    parts.append(f"✅ {role} set ({lat:.4f}, {lon:.4f}) elev {int(round(elev))} ft")
+                    parts.append(f"{role} set ({lat:.4f}, {lon:.4f}) elev {int(round(elev))} ft")
                 else:
-                    parts.append(f"✅ {role} set ({lat:.4f}, {lon:.4f})")
+                    parts.append(f"{role} set ({lat:.4f}, {lon:.4f})")
             else:
                 parts.append(f"⬜ {role} not set")
         return " | ".join(parts)
@@ -537,4 +537,4 @@ def register(app):
 
         lat = click["latlng"]["lat"]
         lon = click["latlng"]["lng"]
-        return f"🗺️ Location clicked: {lat:.5f}, {lon:.5f}"
+        return f"Location clicked: {lat:.5f}, {lon:.5f}"

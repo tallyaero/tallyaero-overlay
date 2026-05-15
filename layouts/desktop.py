@@ -54,11 +54,7 @@ def _top_strip():
                         [
                             html.A("Quick Start", href="#", id="open-quickstart", className="quick-link", style={"color": "#E65C00", "fontWeight": "bold"}),
                             html.Span(" · ", className="quick-link-sep"),
-                            html.A("EM Diagram", href="https://app.flyaeroedge.com/", target="_blank", className="quick-link", style={"color": "#28a745", "fontWeight": "bold"}),
-                            html.Span(" · ", className="quick-link-sep"),
-                            html.A("Report Error", href="https://forms.gle/VX6CA1ugifAtmBM79", target="_blank", className="quick-link", style={"color": "#dc3545"}),
-                            html.Span(" · ", className="quick-link-sep"),
-                            html.A("Contact", href="https://forms.gle/nDahQbhYDNYh6P129", target="_blank", className="quick-link"),
+                            html.A("Contact", href="mailto:info@tallyaero.com", className="quick-link"),
                         ],
                         className="top-strip-quicklinks",
                     ),
@@ -210,6 +206,91 @@ def _theme_toggle():
     )
 
 
+def _settings_drawer():
+    """Phase 4 Batch 2d — Offcanvas drawer holding configuration that
+    doesn't need to be visible while flying. Mirrors EM Diagram's
+    "live controls in rail, config in drawer" pattern (Phase 5AA).
+
+    Contents: action buttons (Edit/Load aircraft) + Weight & Balance
+    + Environment + Power. Wind stays in the rail because the user
+    typically tunes it in line with map clicks."""
+    return dbc.Offcanvas(
+        [
+            html.Div(className="action-buttons-row", children=[
+                html.A("Edit/Create Aircraft", href="https://app.flyaeroedge.com/edit-aircraft", target="_blank", className="btn-action-orange"),
+                dcc.Upload(
+                    html.Button("Load Aircraft File", className="btn-action-orange"),
+                    id="upload-aircraft",
+                    accept=".json",
+                ),
+            ]),
+
+            dbc.Accordion([
+                dbc.AccordionItem([
+                    html.Label("Engine Option", className="input-label"),
+                    dcc.Dropdown(id="engine-select", className="dropdown", persistence=True, persistence_type="local"),
+
+                    html.Label("Occupants", className="input-label"),
+                    dcc.Input(id="occupants", type="number", value=1, min=1, max=4, className="input-small", persistence=True, persistence_type="local"),
+
+                    html.Label("Occupant Weight (lbs)", className="input-label"),
+                    dcc.Input(id="occupant-weight", type="number", value=180, min=100, max=300, className="input-small", persistence=True, persistence_type="local"),
+
+                    html.Label("Fuel Load (gal)", className="input-label"),
+                    dcc.Slider(
+                        id="fuel-load",
+                        min=0, max=50, step=1, value=0,
+                        marks={0: "0", 12: "1/4", 25: "1/2", 37: "3/4", 50: "Full"},
+                        tooltip={"always_visible": True},
+                        persistence=True, persistence_type="local",
+                    ),
+
+                    html.Label("Total Weight (lbs)", className="input-label"),
+                    dcc.Input(id="total-weight-display", type="text", value="", readOnly=True, className="input-small"),
+
+                    html.Label("CG Position", className="input-label"),
+                    dcc.Slider(
+                        id="cg-slider",
+                        min=0.0, max=1.0, step=0.01, value=0.5,
+                        marks={0.0: "FWD", 0.5: "MID", 1.0: "AFT"},
+                        tooltip={"always_visible": True},
+                        persistence=True, persistence_type="local",
+                    ),
+                ], title="Weight & Balance"),
+
+                dbc.AccordionItem([
+                    html.Label("Airport Elevation (ft)", className="input-label"),
+                    html.Div(id="env-airport-agl", className="weight-box", style={"marginBottom": "10px"}),
+
+                    html.Label("Outside Air Temp (F)", className="input-label"),
+                    dcc.Input(id="env-oat", type="number", value=52, className="input-small", persistence=True, persistence_type="local"),
+
+                    html.Label("Altimeter Setting (inHg)", className="input-label", style={"marginTop": "8px"}),
+                    dcc.Input(id="env-altimeter", type="number", value=29.92, className="input-small", persistence=True, persistence_type="local"),
+                ], title="Environment"),
+
+                dbc.AccordionItem([
+                    html.Label("Power Setting", className="input-label"),
+                    dcc.Slider(
+                        id="power-setting",
+                        min=0.05, max=1.0, step=0.05, value=0.5,
+                        marks={0.05: "IDLE", 0.2: "20%", 0.4: "40%", 0.6: "60%", 0.8: "80%", 0.99: "100%"},
+                        tooltip={"always_visible": True},
+                        persistence=True, persistence_type="local",
+                    ),
+                ], title="Power"),
+            ], start_collapsed=False, always_open=True, className="drawer-accordion"),
+        ],
+        id="settings-drawer",
+        title="Configuration",
+        placement="start",
+        is_open=False,
+        backdrop=True,
+        scrollable=True,
+        className="settings-drawer",
+    )
+
+
 def desktop_layout():
     """Desktop layout — Phase 4 Batch 2a shell.
 
@@ -221,6 +302,7 @@ def desktop_layout():
     return html.Div(className="full-height-container desktop-shell", children=[
         _top_strip(),
         _modals_block(),
+        _settings_drawer(),
         # Main 2-column layout (sidebar + map) — wraps in main-grid so
         # the CSS can target it with the new shell rules.
         html.Div(className="main-row main-grid", children=[
@@ -238,15 +320,14 @@ def desktop_layout():
                 ]),
                 html.Div(id="sidebar-content", children=[
 
-                # --- Action Buttons Row ---
-                html.Div(className="action-buttons-row", children=[
-                    html.A("Edit/Create Aircraft", href="https://app.flyaeroedge.com/edit-aircraft", target="_blank", className="btn-action-orange"),
-                    dcc.Upload(
-                        html.Button("Load Aircraft File", className="btn-action-orange"),
-                        id="upload-aircraft",
-                        accept=".json"
-                    ),
-                ]),
+                # --- Configure button opens the settings drawer ---
+                html.Button(
+                    "Configure",
+                    id="open-drawer-btn",
+                    className="configure-btn sidebar-configure-btn",
+                    n_clicks=0,
+                    title="Open configuration drawer (aircraft, weight, environment, power)",
+                ),
 
                 # --- Airport Search (First - so user can navigate) ---
             html.Label("Search Airport", className="input-label"),
@@ -279,68 +360,9 @@ def desktop_layout():
             html.Button("Recenter to Airport", id="recenter-airport-btn", className="reset-btn-small", style={"marginTop": "4px", "marginBottom": "8px", "backgroundColor": "#6c757d"}),
 
             # --- Aircraft Selection — moved to top-strip in Batch 2b ---
+            # --- Engine/Weight/CG/Env/Power — moved to settings drawer in Batch 2d ---
 
-            # --- Collapsible Advanced Settings ---
-            dbc.Accordion([
-                dbc.AccordionItem([
-                    html.Label("Engine Option", className="input-label"),
-                    dcc.Dropdown(id="engine-select", className="dropdown", persistence=True, persistence_type="local"),
-
-                    html.Label("Occupants", className="input-label"),
-                    dcc.Input(id="occupants", type="number", value=1, min=1, max=4, className="input-small", persistence=True, persistence_type="local"),
-
-                    html.Label("Occupant Weight (lbs)", className="input-label"),
-                    dcc.Input(id="occupant-weight", type="number", value=180, min=100, max=300, className="input-small", persistence=True, persistence_type="local"),
-
-                    html.Label("Fuel Load (gal)", className="input-label"),
-                    dcc.Slider(
-                        id="fuel-load",
-                        min=0,
-                        max=50,
-                        step=1,
-                        value=0,
-                        marks={0: "0", 12: "¼", 25: "½", 37: "¾", 50: "Full"},
-                        tooltip={"always_visible": True},
-                        persistence=True,
-                        persistence_type="local"
-                    ),
-
-                    html.Label("Total Weight (lbs)", className="input-label"),
-                    dcc.Input(
-                        id="total-weight-display",
-                        type="text",
-                        value="",
-                        readOnly=True,
-                        className="input-small",
-                    ),
-
-                    html.Label("CG Position", className="input-label"),
-                    dcc.Slider(
-                        id="cg-slider",
-                        min=0.0,
-                        max=1.0,
-                        step=0.01,
-                        value=0.5,
-                        marks={0.0: "FWD", 0.5: "MID", 1.0: "AFT"},
-                        tooltip={"always_visible": True},
-                        persistence=True,
-                        persistence_type="local"
-                    ),
-                ], title="Weight & Balance"),
-
-                dbc.AccordionItem([
-                    html.Label("Airport Elevation (ft)", className="input-label"),
-                    html.Div(id="env-airport-agl", className="weight-box", style={"marginBottom": "10px"}),
-
-                    html.Label("Outside Air Temp (°F)", className="input-label"),
-                    dcc.Input(id="env-oat", type="number", value=52, className="input-small", persistence=True, persistence_type="local"),
-
-                    html.Label("Altimeter Setting (inHg)", className="input-label", style={"marginTop": "8px"}),
-                    dcc.Input(id="env-altimeter", type="number", value=29.92, className="input-small", persistence=True, persistence_type="local"),
-                ], title="Environment"),
-            ], start_collapsed=True, always_open=True, className="sidebar-accordion", style={"marginTop": "10px"}),
-
-            # --- Wind (Compact single row) ---
+            # --- Wind (Compact single row) — stays in rail; live tuning ---
             html.Div([
                 html.Span("Wind", style={"fontWeight": "600", "fontSize": "13px", "marginRight": "12px"}),
                 html.Span("Direction", style={"fontSize": "11px", "color": "#666", "marginRight": "4px"}),
@@ -348,21 +370,6 @@ def desktop_layout():
                 html.Span("Speed (Kts)", style={"fontSize": "11px", "color": "#666", "marginRight": "4px"}),
                 dcc.Input(id="env-wind-speed", type="number", value=0, min=0, className="input-small", style={"width": "50px", "height": "28px"}, persistence=True, persistence_type="local"),
             ], className="wind-row"),
-
-            # --- Power Accordion ---
-            dbc.Accordion([
-                dbc.AccordionItem([
-                    html.Label("Power Setting", className="input-label"),
-                    dcc.Slider(
-                        id="power-setting",
-                        min=0.05, max=1.0, step=0.05, value=0.5,
-                        marks={0.05: "IDLE", 0.2: "20%", 0.4: "40%", 0.6: "60%", 0.8: "80%", 0.99: "100%"},
-                        tooltip={"always_visible": True},
-                        persistence=True,
-                        persistence_type="local"
-                    ),
-                ], title="Power"),
-            ], start_collapsed=True, always_open=True, className="sidebar-accordion", style={"marginBottom": "10px"}),
 
             # --- Maneuver Dropdown ---
             html.Label("Maneuver", className="input-label"),
