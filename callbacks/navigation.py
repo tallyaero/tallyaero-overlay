@@ -62,8 +62,130 @@ def register(app):
             return new_state, "▲" if new_state else "▼"
         return is_open, "▼"
 
-    # Chip-strip label callbacks no longer needed — each chip now holds
-    # its input inline, so the value displays itself. Removed.
+    # === Maneuver info modal — populated from MANEUVER_INFO dict ===
+
+    MANEUVER_INFO = {
+        "impossible_turn": (
+            "Impossible Turn",
+            [
+                "Engine failure on takeoff: can you turn back to the runway?",
+                "Simulates the trade between altitude and turn radius at "
+                "bank-angle limits, with reaction time and descent rate.",
+                "If the rollout heading is too far off the runway, the turn "
+                "is flagged as unsuccessful regardless of altitude lost.",
+            ],
+        ),
+        "poweroff180": (
+            "Power-Off 180",
+            [
+                "Accuracy approach from downwind abeam the touchdown point.",
+                "Energy-based glide path with automatic slip if high.",
+                "ACS standard: -0 / +200 ft of the aim point.",
+            ],
+        ),
+        "engineout": (
+            "Engine-Out Glide",
+            [
+                "Best-glide reach to a chosen touchdown spot from a chosen "
+                "starting altitude and heading.",
+                "Wind-aware: wind-correction angle + drift is included.",
+                "Use to evaluate field-selection and approach options.",
+            ],
+        ),
+        "steep_turn": (
+            "Steep Turns (45° / 50°)",
+            [
+                "Constant-altitude turns at a fixed bank.",
+                "Load factor = 1 / cos(bank); stall speed scales as sqrt(n).",
+                "ACS: ±100 ft alt, ±10 kt IAS, ±10° rollout heading.",
+            ],
+        ),
+        "chandelle": (
+            "Chandelle",
+            [
+                "Maximum-performance 180° climbing turn.",
+                "Constant bank in the first 90°, then constant pitch as bank "
+                "reduces to wings-level at the 180° point.",
+                "Completion near power-on stall, within ±10° of target.",
+            ],
+        ),
+        "lazy8": (
+            "Lazy Eight",
+            [
+                "Symmetrical climbing/descending S — coordination at varying "
+                "airspeeds.",
+                "Max bank ~30° at the 90° point, max pitch ~10° at 45°.",
+                "Mirror entry and exit altitudes within ±100 ft.",
+            ],
+        ),
+        "steep_spiral": (
+            "Steep Spiral",
+            [
+                "Gliding turn around a surface point, constant ground-track "
+                "radius, three full 360° turns minimum.",
+                "Constant best-glide IAS; bank varies with wind.",
+                "Finish no lower than 1500 ft AGL.",
+            ],
+        ),
+        "s_turn": (
+            "S-Turns Across a Road",
+            [
+                "Two equal semicircles on opposite sides of a road, ground-"
+                "speed compensation via varying bank.",
+                "Wings level momentarily as you cross.",
+                "Standard ground-reference maneuver from FAA AFH Ch. 7.",
+            ],
+        ),
+        "turns_point": (
+            "Turns Around a Point",
+            [
+                "Constant-radius ground turns around a chosen point.",
+                "Bank varies inversely with groundspeed — steepest downwind, "
+                "shallowest upwind.",
+                "Standard ground-reference maneuver from FAA AFH Ch. 7.",
+            ],
+        ),
+        "rect_course": (
+            "Rectangular Course",
+            [
+                "Wind-aware pattern around a rectangle on the ground.",
+                "Crab angles change leg by leg; pace via groundspeed.",
+                "Foundation for traffic-pattern flight.",
+            ],
+        ),
+        "pylons": (
+            "Eights on Pylons",
+            [
+                "Two pylons with a pivotal-altitude geometry — wingtip stays "
+                "on each pylon through the turn.",
+                "Altitude = (groundspeed_kt)^2 / 11.3 (pivotal).",
+                "Commercial pilot ACS.",
+            ],
+        ),
+    }
+
+    @app.callback(
+        Output("maneuver-info-modal", "is_open"),
+        Output("maneuver-info-title", "children"),
+        Output("maneuver-info-body", "children"),
+        Input("open-maneuver-info", "n_clicks"),
+        Input("close-maneuver-info", "n_clicks"),
+        State("maneuver-select", "value"),
+        State("maneuver-info-modal", "is_open"),
+        prevent_initial_call=True,
+    )
+    def toggle_maneuver_info(open_clicks, close_clicks, maneuver, is_open):
+        trigger = ctx.triggered_id
+        if trigger == "close-maneuver-info":
+            return False, no_update, no_update
+        if trigger == "open-maneuver-info":
+            title, bullets = MANEUVER_INFO.get(
+                maneuver,
+                ("Maneuver Info", ["Pick a maneuver from the dropdown to see its details."]),
+            )
+            body = html.Ul([html.Li(b) for b in bullets], style={"fontSize": "13px", "lineHeight": "1.5"})
+            return True, title, body
+        return is_open, no_update, no_update
 
     # === Clientside: sidebar collapse (DOM-class toggle) ===
     app.clientside_callback(

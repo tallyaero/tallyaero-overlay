@@ -1912,3 +1912,143 @@ input[type="radio"] {
 [data-theme="dark"] .maneuver-shelf-row-top {
   border-bottom-color: #334155;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Maneuver shelf — tight horizontal compression for the per-maneuver
+   form. Existing maneuver layouts were designed for a vertical
+   sidebar; this overrides them to display as a single horizontal
+   row of compact labeled controls.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Hide the verbose Description accordions — content now lives in
+   the Info modal triggered from the shelf. */
+.maneuver-shelf-params .accordion,
+.maneuver-shelf-params .sidebar-accordion {
+  display: none !important;
+}
+
+/* Compact controls — strip vertical margins, shrink labels/inputs */
+.maneuver-shelf-params,
+.maneuver-shelf-params * {
+  font-size: 11px !important;
+  box-sizing: border-box;
+}
+.maneuver-shelf-params {
+  font-size: 11px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: center;
+  padding-top: 4px;
+}
+.maneuver-shelf-params label {
+  display: inline-flex !important;
+  align-items: center;
+  font-size: 10px !important;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ta-text-secondary, #64748b);
+  margin: 0 4px 0 0 !important;
+  padding: 0 !important;
+}
+.maneuver-shelf-params .input-label,
+.maneuver-shelf-params .input-label-sm {
+  display: inline-flex !important;
+  margin: 0 4px 0 0 !important;
+}
+.maneuver-shelf-params input[type="text"],
+.maneuver-shelf-params input[type="number"] {
+  height: 24px !important;
+  width: 64px !important;
+  padding: 0 6px !important;
+  font-size: 11px !important;
+  text-align: center;
+  margin: 0 !important;
+}
+.maneuver-shelf-params .Select-control,
+.maneuver-shelf-params .css-control,
+.maneuver-shelf-params > div .Select-control {
+  min-height: 26px !important;
+  font-size: 11px !important;
+}
+.maneuver-shelf-params .Select,
+.maneuver-shelf-params .dropdown,
+.maneuver-shelf-params .dash-dropdown {
+  min-width: 100px !important;
+  max-width: 180px !important;
+  margin: 0 !important;
+}
+.maneuver-shelf-params .dcc-slider,
+.maneuver-shelf-params [class*="rc-slider"] {
+  width: 140px !important;
+  display: inline-block !important;
+  margin: 0 4px !important;
+}
+.maneuver-shelf-params button {
+  height: 24px !important;
+  padding: 0 10px !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 !important;
+  white-space: nowrap;
+}
+.maneuver-shelf-params .btn-action-orange {
+  height: 24px !important;
+  padding: 0 10px !important;
+}
+/* The "Draw <maneuver>" button is the primary action — accent it */
+.maneuver-shelf-params [id*="-draw-btn"],
+.maneuver-shelf-params [id^="draw-"] {
+  background: var(--ta-brand-blue, #0d59f2) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+/* "Click on the runway where you intend to touch down" instruction text */
+.maneuver-shelf-params .help-text,
+.maneuver-shelf-params [class*="instruction"] {
+  display: none !important;  /* covered by the Info modal */
+}
+
+/* Drop the maneuver-shelf-params border/padding bottom so the row
+   flows tight against the map */
+.maneuver-shelf-params:empty { padding-top: 0; }
+
+/* RadioItems (Left/Right pattern direction) — inline tight */
+.maneuver-shelf-params .dash-radio-items,
+.maneuver-shelf-params [class*="radio-items"] {
+  display: inline-flex !important;
+  gap: 8px;
+  margin: 0 6px !important;
+}
+.maneuver-shelf-params input[type="radio"] { margin: 0 2px 0 0 !important; }
+
+/* Info "?" button next to the MANEUVER picker */
+.shelf-info-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  background: var(--ta-surface-elevated, #ffffff);
+  color: var(--ta-text-secondary, #64748b);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.shelf-info-btn:hover {
+  background: var(--ta-brand-blue, #0d59f2);
+  color: #ffffff;
+  border-color: var(--ta-brand-blue, #0d59f2);
+}
+[data-theme="dark"] .shelf-info-btn {
+  background: #0f172a;
+  color: #cbd5e1;
+  border-color: #334155;
+}

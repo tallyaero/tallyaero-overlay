@@ -238,7 +238,25 @@ def _maneuver_action_shelf():
                         clearable=False,
                         persistence=True, persistence_type="local",
                     ),
+                    html.Button("?", id="open-maneuver-info", n_clicks=0,
+                                className="shelf-info-btn",
+                                title="What is this maneuver?"),
                 ], className="maneuver-shelf-picker"),
+
+                # Maneuver info modal — description content is set per
+                # maneuver by the toggle_maneuver_info callback.
+                dbc.Modal(
+                    [
+                        dbc.ModalHeader(dbc.ModalTitle(id="maneuver-info-title"), close_button=True),
+                        dbc.ModalBody(id="maneuver-info-body"),
+                        dbc.ModalFooter(dbc.Button("Close", id="close-maneuver-info", className="green-button")),
+                    ],
+                    id="maneuver-info-modal",
+                    is_open=False,
+                    centered=True,
+                    size="md",
+                    dialogClassName="tallyaero-modal",
+                ),
 
                 html.Div(className="maneuver-shelf-globals", children=[
                     html.Button("Reset All", id="reset-all", className="shelf-btn shelf-btn-reset"),
