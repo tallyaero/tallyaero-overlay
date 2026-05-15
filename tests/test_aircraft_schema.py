@@ -22,10 +22,25 @@ AIRCRAFT_DIR = Path(__file__).resolve().parent.parent / "aircraft_data"
 # Enumerate every aircraft file at collection time so pytest parametrizes them
 AIRCRAFT_FILES = sorted(AIRCRAFT_DIR.glob("*.json"))
 
+# Known data-quality issues in shared data v0.2.0 (EM Diagram session's Vne
+# canonicalization). Tracked as a Phase 2 follow-up — fix in tallyaero-data
+# via PR, then drop these markers.
+#   Zlin_Z-242L: Vne=117 (km/h) vs Vno=164 (KIAS) — cross-unit comparison.
+#   North_American_P51-D_Mustang: Vne=439 < Vno=440 (both MPH) — Vne wrong.
+KNOWN_BAD_VNE_VNO = {
+    "Zlin_Z-242L",
+    "North_American_P51-D_Mustang",
+}
+
 
 @pytest.mark.parametrize("aircraft_path", AIRCRAFT_FILES, ids=lambda p: p.stem)
-def test_aircraft_file_validates(aircraft_path):
+def test_aircraft_file_validates(aircraft_path, request):
     """Every aircraft file must parse cleanly against the Aircraft schema."""
+    if aircraft_path.stem in KNOWN_BAD_VNE_VNO:
+        request.applymarker(pytest.mark.xfail(
+            reason="shared-data v0.2.0 Vne/Vno unit inconsistency — fix upstream",
+            strict=True,
+        ))
     data = json.loads(aircraft_path.read_text())
     try:
         Aircraft(**data)

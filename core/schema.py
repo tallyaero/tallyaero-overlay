@@ -223,6 +223,11 @@ class Aircraft(BaseModel):
     # Optional here because pre-Phase-2 EM Diagram archive data lacks them.
     Vx: Optional[float] = Field(None, gt=0, description="kt — best-angle climb")
     Vy: Optional[float] = Field(None, gt=0, description="kt — best-rate climb")
+    # Phase 2i extended (EM Diagram v0.2.0) — original publication unit for the
+    # V-speeds. When present, indicates the airframe's POH/TCDS published V-speeds
+    # in this unit (e.g., warbirds in MPH or km/h). Our stored values are still
+    # KIAS — this is provenance only.
+    vspeeds_published_units: Optional[Literal["KIAS", "MPH", "km/h"]] = None
     CL_max: Dict[str, float]
     arcs: Arcs
 
