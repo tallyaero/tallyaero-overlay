@@ -466,33 +466,16 @@ def desktop_layout():
                         zoom=13.5,
                         style={"width": "100%", "height": "100%"},
                         children=[
-                            # Layer toggle UI. Base layers (mutually exclusive)
-                            # currently Satellite + OSM road map. Overlay layers
-                            # (additive) is where FAA Sectional + IFR Low will go
-                            # once we wire up an OpenAIP/SkyVector API-keyed
-                            # source — every free public mirror (chartbundle,
-                            # vfrmap, etc.) is dead or paywalled as of 2026.
-                            dl.LayersControl(
-                                position="topright",
-                                collapsed=True,
-                                children=[
-                                    dl.BaseLayer(
-                                        dl.TileLayer(
-                                            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-                                            attribution="Tiles &copy; Esri",
-                                        ),
-                                        name="Satellite",
-                                        checked=True,
-                                    ),
-                                    dl.BaseLayer(
-                                        dl.TileLayer(
-                                            url="https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                                            attribution="&copy; OpenStreetMap contributors",
-                                        ),
-                                        name="Road map (OSM)",
-                                        checked=False,
-                                    ),
-                                ],
+                            # Single base layer. dash-leaflet 1.0.15's
+                            # LayersControl errors out at runtime when sibling
+                            # LayerGroups in this same dl.Map are updated by
+                            # callbacks (the layer / scrubber-layer / route-layer
+                            # children below). When OpenAIP key + sectional tiles
+                            # land, the LayersControl wrapper returns with the
+                            # known-good child shape.
+                            dl.TileLayer(
+                                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                                attribution="Tiles &copy; Esri",
                             ),
                             dl.LayerGroup(id="layer"),
                             dl.LayerGroup(id="scrubber-layer"),  # Dedicated layer for time scrubber marker

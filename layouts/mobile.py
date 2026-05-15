@@ -217,27 +217,9 @@ def mobile_layout():
                 zoom=12,
                 style={"width": "100%", "height": "100%", "minHeight": "70vh"},
                 children=[
-                    dl.LayersControl(
-                        position="topright",
-                        collapsed=True,
-                        children=[
-                            dl.BaseLayer(
-                                dl.TileLayer(
-                                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-                                    attribution="Tiles © Esri",
-                                ),
-                                name="Satellite",
-                                checked=True,
-                            ),
-                            dl.BaseLayer(
-                                dl.TileLayer(
-                                    url="https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                                    attribution="&copy; OpenStreetMap contributors",
-                                ),
-                                name="Road map (OSM)",
-                                checked=False,
-                            ),
-                        ],
+                    dl.TileLayer(
+                        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                        attribution="Tiles © Esri",
                     ),
                     dl.LayerGroup(id="layer"),
                     dl.LayerGroup(id="scrubber-layer"),
