@@ -55,7 +55,9 @@ def load_aircraft_data_from_folder(folder_name="aircraft_data"):
     for filename in os.listdir(folder_path):
         if filename.endswith(".json"):
             filepath = os.path.join(folder_path, filename)
-            with open(filepath, "r") as f:
+            # Phase 6S: explicit UTF-8 — Windows' default codec (cp1252) chokes
+            # on non-ASCII characters in aircraft notes / airport names.
+            with open(filepath, "r", encoding="utf-8") as f:
                 try:
                     data = json.load(f)
                     name = os.path.splitext(filename)[0].replace("_", " ")
@@ -143,7 +145,8 @@ def load_airport_data(filename="airports/airports.json"):
         return []
 
     try:
-        with open(filepath, "r") as f:
+        # Phase 6S: explicit UTF-8 for Windows compatibility
+        with open(filepath, "r", encoding="utf-8") as f:
             airports = json.load(f)
         return airports
     except Exception as e:
