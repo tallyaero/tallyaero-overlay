@@ -14,6 +14,7 @@ import dash_leaflet as dl
 from core.data_loader import airport_data
 from core.route import compute_route_segment, magvar_west_positive
 from core.corridor import compute_route_corridor
+from core.terrain import elevation_m as _terrain_elevation_m
 
 
 def _airport_by_id(airport_id: str):
@@ -156,6 +157,7 @@ def register(app):
                 glide_ias_kt=glide_ias,
                 wind_dir_deg=wd, wind_speed_kt=ws,
                 spacing_nm=2.0,
+                elevation_fn=_terrain_elevation_m,
             )
             for ring in rings:
                 layer.append(
@@ -205,24 +207,58 @@ def register(app):
         card = _summary_card(result, origin.get("id"), dest.get("id"))
         # Append corridor-specific badge to the summary if computed
         if corridor_meta:
-            extras = html.Div(className="route-corridor-badge", children=[
-                html.Div([html.Span("AGL", className="route-summary-label"),
-                          html.Span(f"{corridor_meta['agl_ft']:.0f} ft",
-                                    className="route-summary-value")],
-                         className="route-summary-row"),
-                html.Div([html.Span("Narrowest", className="route-summary-label"),
+            rows = []
+            if corridor_meta.get("terrain_used"):
+                rows.append(
+                    html.Div([html.Span("AGL min/avg/max",
+                                        className="route-summary-label"),
+                              html.Span(
+                                  f"{corridor_meta['min_agl_ft']:.0f} / "
+                                  f"{corridor_meta['agl_ft']:.0f} / "
+                                  f"{corridor_meta['max_agl_ft']:.0f} ft",
+                                  className="route-summary-value")],
+                             className="route-summary-row"))
+            else:
+                rows.append(
+                    html.Div([html.Span("AGL", className="route-summary-label"),
+                              html.Span(f"{corridor_meta['agl_ft']:.0f} ft",
+                                        className="route-summary-value")],
+                             className="route-summary-row"))
+            rows.extend([
+                html.Div([html.Span("Narrowest",
+                                    className="route-summary-label"),
                           html.Span(f"{corridor_meta['narrowest_nm']:.1f} NM",
                                     className="route-summary-value")],
                          className="route-summary-row"),
-                html.Div([html.Span("Widest", className="route-summary-label"),
+                html.Div([html.Span("Widest",
+                                    className="route-summary-label"),
                           html.Span(f"{corridor_meta['widest_nm']:.1f} NM",
                                     className="route-summary-value")],
                          className="route-summary-row"),
-                html.Div([html.Span("Area", className="route-summary-label"),
+                html.Div([html.Span("Area",
+                                    className="route-summary-label"),
                           html.Span(f"{corridor_meta['area_nm2']:.0f} NM²",
                                     className="route-summary-value")],
                          className="route-summary-row"),
             ])
+            if corridor_meta.get("terrain_used"):
+                tlim = corridor_meta.get("terrain_limited_samples", 0)
+                below = corridor_meta.get("below_terrain_samples", 0)
+                n_samp = corridor_meta.get("n_samples", 1)
+                rows.append(
+                    html.Div([html.Span("Ridge-clipped",
+                                        className="route-summary-label"),
+                              html.Span(f"{tlim} / {n_samp} samples",
+                                        className="route-summary-value")],
+                             className="route-summary-row"))
+                if below > 0:
+                    rows.append(
+                        html.Div([html.Span("Below ridge",
+                                            className="route-summary-label"),
+                                  html.Span(f"{below} samples",
+                                            className="route-summary-value route-summary-warn")],
+                                 className="route-summary-row"))
+            extras = html.Div(className="route-corridor-badge", children=rows)
         else:
             extras = None
 

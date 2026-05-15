@@ -2214,3 +2214,5 @@ input[type="radio"] {
   font-weight: 700;
 }
 [data-theme="dark"] .route-corridor-badge { border-top-color: #334155; }
+.route-summary-warn { color: #dc2626; font-weight: 600; }
+[data-theme="dark"] .route-summary-warn { color: #f87171; }
