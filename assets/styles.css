@@ -1248,3 +1248,20 @@ input[type="radio"] {
   flex: 1;
   min-height: 0;
 }
+
+/* Phase 4 Batch 2b — aircraft picker in top-strip
+   Mirrors EM Diagram's aircraft-picker-wrap metrics. */
+.aircraft-picker-wrap {
+  width: 280px;
+  min-width: 200px;
+  max-width: 32vw;
+}
+.aircraft-picker-wrap .aircraft-dropdown .Select-control,
+.aircraft-picker-wrap .aircraft-dropdown .css-control,
+.aircraft-picker-wrap .aircraft-dropdown > div:first-child {
+  min-height: 32px;
+  font-size: 13px;
+}
+.aircraft-picker-wrap .aircraft-dropdown {
+  font-size: 13px;
+}

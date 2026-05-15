@@ -24,13 +24,28 @@ from core.data_loader import available_aircraft
 
 
 def _top_strip():
-    """Phase 4 Batch 2a — top-strip shell mirroring EM Diagram's
-    layout. Holds legal links + theme toggle today; Batch 2b adds
-    aircraft picker + env chips."""
+    """Phase 4 Batch 2b — brand + aircraft picker on the left, quick-links
+    + theme toggle on the right. Mirrors EM Diagram's current top-strip
+    pattern (env chips live inline in the rail per Phase 5AB-2, not here)."""
     return html.Div(
         [
             html.Div(
-                html.Span("TallyAero Overlay", className="top-strip-brand"),
+                [
+                    html.Span("TallyAero Overlay", className="top-strip-brand"),
+                    html.Div(
+                        dcc.Dropdown(
+                            id="aircraft-select",
+                            options=[{"label": name, "value": name} for name in available_aircraft],
+                            value="C172" if "C172" in available_aircraft else (available_aircraft[0] if available_aircraft else None),
+                            placeholder="Select an aircraft…",
+                            className="dropdown aircraft-dropdown",
+                            clearable=False,
+                            persistence=True,
+                            persistence_type="local",
+                        ),
+                        className="aircraft-picker-wrap",
+                    ),
+                ],
                 className="top-strip-left",
             ),
             html.Div(
@@ -263,17 +278,7 @@ def desktop_layout():
             # Recenter to Airport button
             html.Button("Recenter to Airport", id="recenter-airport-btn", className="reset-btn-small", style={"marginTop": "4px", "marginBottom": "8px", "backgroundColor": "#6c757d"}),
 
-            # --- Aircraft Selection ---
-            html.Label("Aircraft", className="input-label"),
-            dcc.Dropdown(
-                id="aircraft-select",
-                className="dropdown",
-                options=[{"label": name, "value": name} for name in available_aircraft],
-                value="C172" if "C172" in available_aircraft else (available_aircraft[0] if available_aircraft else None),
-                placeholder="Select Aircraft",
-                persistence=True,
-                persistence_type="local"
-            ),
+            # --- Aircraft Selection — moved to top-strip in Batch 2b ---
 
             # --- Collapsible Advanced Settings ---
             dbc.Accordion([
