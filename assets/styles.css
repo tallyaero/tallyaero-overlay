@@ -2052,3 +2052,58 @@ input[type="radio"] {
   color: #cbd5e1;
   border-color: #334155;
 }
+
+/* Stronger overrides for shelf compression — beat inline width:100% */
+.maneuver-shelf-params button {
+  width: auto !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+/* Top-level wrapper divs that the maneuver layouts use for button groups
+   sometimes carry inline width: 100%. Force inline flow. */
+.maneuver-shelf-params > div {
+  display: inline-block !important;
+  width: auto !important;
+  vertical-align: middle;
+}
+.maneuver-shelf-params .green-button,
+.maneuver-shelf-params .blue-button,
+.maneuver-shelf-params .btn-action-orange {
+  width: auto !important;
+  height: 26px !important;
+  padding: 0 12px !important;
+  font-size: 11px !important;
+  margin: 0 4px 0 0 !important;
+}
+
+/* Slider — clamp width inside the shelf */
+.maneuver-shelf-params .rc-slider,
+.maneuver-shelf-params [class*="rc-slider"]:not([class*="handle"]):not([class*="track"]):not([class*="rail"]):not([class*="step"]) {
+  width: 140px !important;
+  margin: 0 6px !important;
+  display: inline-block !important;
+  vertical-align: middle;
+}
+/* Slider tooltip — keep close, smaller */
+.maneuver-shelf-params .rc-slider-tooltip {
+  font-size: 10px !important;
+}
+.maneuver-shelf-params .rc-slider-mark-text {
+  font-size: 9px !important;
+}
+
+/* Hide inline help text rendered by the maneuver layouts (these used
+   to live next to each button as a one-line instruction). The Info
+   modal now carries this content. */
+.maneuver-shelf-params [style*="color: #666"]:not(input):not(select):not(label) {
+  display: none !important;
+}
+.maneuver-shelf-params [style*="fontStyle: italic"] {
+  display: none !important;
+}
+
+/* Horizontal hr separators inside the per-maneuver layouts — drop */
+.maneuver-shelf-params hr {
+  display: none !important;
+}
