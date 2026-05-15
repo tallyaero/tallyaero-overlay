@@ -290,6 +290,7 @@ def simulate_steep_spiral(
         drift_deg = _angle_diff_deg(track_deg, hdg_deg)
 
         # Record point (apply turn_sign to bank for L/R display)
+        load_factor = 1.0 / math.cos(math.radians(actual_bank_deg)) if abs(actual_bank_deg) < 89.9 else None
         hover.append({
             "time": round(t, 2),
             "alt": round(alt_agl, 1),
@@ -297,10 +298,12 @@ def simulate_steep_spiral(
             "ias": round(bg_kias, 1),
             "gs": round(gs_kt, 1),
             "aob": round(turn_sign * actual_bank_deg, 1),
+            "load_factor": round(load_factor, 2) if load_factor is not None else None,
             "vs": round(-descent_fpm, 0),
             "track": round(track_deg, 1),
             "heading": round(hdg_deg, 1),
             "drift": round(drift_deg, 1),
+            "segment": f"turn_{current_turn + 1}",
             "turn_number": current_turn + 1,
             "turn_progress": round(math.degrees(total_angle_traveled % (2 * math.pi)), 1),
         })
@@ -331,6 +334,7 @@ def simulate_steep_spiral(
         final_pos_lon = ref_pt.longitude + (orbit_radius_ft / (364567.2 * math.cos(math.radians(ref_pt.latitude)))) * math.sin(current_angle)
         track_deg = _wrap_360(math.degrees(current_angle) + turn_sign * 90.0)
 
+        load_factor2 = 1.0 / math.cos(math.radians(actual_bank_deg)) if abs(actual_bank_deg) < 89.9 else None
         hover.append({
             "time": round(t, 2),
             "alt": round(alt_agl, 1),
@@ -338,10 +342,12 @@ def simulate_steep_spiral(
             "ias": round(bg_kias, 1),
             "gs": round(gs_kt, 1),
             "aob": round(turn_sign * actual_bank_deg, 1),  # Apply turn_sign for L/R display
+            "load_factor": round(load_factor2, 2) if load_factor2 is not None else None,
             "vs": round(-descent_fpm, 0),
             "track": round(track_deg, 1),
             "heading": round(hdg_deg, 1),
             "drift": round(drift_deg, 1),
+            "segment": f"turn_{current_turn + 1}",
             "turn_number": current_turn + 1,
             "turn_progress": round(math.degrees(total_angle_traveled % (2 * math.pi)), 1),
         })

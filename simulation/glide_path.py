@@ -303,9 +303,11 @@ def simulate_glide_path_to_target(
         else:
             aob_display = 0.0
 
+        load_factor = 1.0 / math.cos(math.radians(aob_display)) if abs(aob_display) < 89.9 else None
         path.append([lat, lon])
         hover.append({
-            "alt": alt_ft, "tas": tas_knots, "time": time_s, "aob": aob_display,
+            "alt": alt_ft, "tas": tas_knots, "ias": best_glide_kias, "time": time_s, "aob": aob_display,
+            "load_factor": round(load_factor, 2) if load_factor is not None else None,
             "vs": vs_fpm, "segment": segment, "track": track_hdg,
             "heading": heading_deg, "drift": drift_deg, "gs": gs_knots,
         })
@@ -323,7 +325,8 @@ def simulate_glide_path_to_target(
             vs_fpm = -(dh_ft / dt) * 60.0 if dt > 1e-3 else 0.0
             path.append([lat, lon])
             hover.append({
-                "alt": alt_ft, "tas": tas_knots, "time": time_s, "aob": 0.0,
+                "alt": alt_ft, "tas": tas_knots, "ias": best_glide_kias, "time": time_s, "aob": 0.0,
+                "load_factor": 1.0,
                 "vs": vs_fpm, "segment": "final", "track": touchdown_heading,
                 "heading": heading_deg, "drift": drift_deg, "gs": gs_knots,
             })
@@ -344,7 +347,8 @@ def simulate_glide_path_to_target(
                 time_s += dt
                 path.append([lat, lon])
                 hover.append({
-                    "alt": alt_ft, "tas": tas_knots, "time": time_s, "aob": 0.0,
+                    "alt": alt_ft, "tas": tas_knots, "ias": best_glide_kias, "time": time_s, "aob": 0.0,
+                    "load_factor": 1.0,
                     "vs": vs_fpm, "segment": "final", "track": touchdown_heading,
                     "heading": heading_deg, "drift": drift_deg, "gs": gs_knots,
                 })

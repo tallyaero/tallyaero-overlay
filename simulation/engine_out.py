@@ -1536,7 +1536,9 @@ def run_simulation(
         "vs": 0.0,
         "slip_pct": 0,
         "glide_ratio": straight_gr,
-    })
+        "load_factor": ((1.0 / math.cos(math.radians(0.0))) if abs(0.0) < 89.9 else None),
+        "segment": "Engine Failure",
+        })
 
     reaction_end = reaction_sec
     max_iterations = int(MAX_SIM_TIME_SEC / dt)
@@ -1567,7 +1569,9 @@ def run_simulation(
                     "vs": 0.0,
                     "slip_pct": 0,
                     "glide_ratio": straight_gr,
-                })
+                    "load_factor": ((1.0 / math.cos(math.radians(0.0))) if abs(0.0) < 89.9 else None),
+                    "segment": "touchdown",
+        })
                 break
 
         if alt_agl <= 0:
@@ -2518,6 +2522,8 @@ def run_simulation(
             "vs": round(-vs_fpm, 0),
             "slip_pct": slip_pct,
             "glide_ratio": round(effective_gr, 1),
+            "load_factor": ((1.0 / math.cos(math.radians(bank_deg))) if abs(bank_deg) < 89.9 else None),
+            "segment": phase_name,
         })
 
         if time_sec > MAX_SIM_TIME_SEC:

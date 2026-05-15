@@ -434,6 +434,7 @@ def simulate_power_off_180(
         else:
             hover_slip_pct = 0
 
+        load_factor = 1.0 / math.cos(math.radians(current_bank)) if abs(current_bank) < 89.9 else None
         hover.append({
             'time': round(time_s, 2),
             'segment': segment,
@@ -446,6 +447,7 @@ def simulate_power_off_180(
             'track': round(track_deg, 1),
             'drift': round(drift_deg, 1),
             'aob': round(current_bank, 1),
+            'load_factor': round(load_factor, 2) if load_factor is not None else None,
             'slip_active': slip_active or (segment == "final" and slip_info['slip_needed']),
             'slip_intensity': hover_slip_pct,
             'slip_pct': hover_slip_pct,
@@ -565,6 +567,7 @@ def simulate_power_off_180(
         'track': round(final_heading, 1),
         'drift': round(drift_deg, 1),
         'aob': 0.0,
+        'load_factor': 1.0,
         'slip_active': False,
         'slip_intensity': 0,
         'slip_pct': 0,

@@ -263,6 +263,7 @@ def simulate_rectangular_course(
         if abs(crab_deg) > stats["max_crab"]:
             stats["max_crab"] = abs(crab_deg)
 
+        load_factor = 1.0 / math.cos(math.radians(bank_deg)) if abs(bank_deg) < 89.9 else None
         path.append([lat, lon])
         hover.append({
             "time": round(time_sec, 1),
@@ -271,9 +272,11 @@ def simulate_rectangular_course(
             "ias": round(ias_knots, 1),
             "gs": round(gs_kt, 1),
             "aob": round(bank_deg, 1),
+            "load_factor": round(load_factor, 2) if load_factor is not None else None,
             "vs": 0,
             "track": round(track_deg, 1),
             "heading": round(hdg_deg, 1),
+            "drift": round(float(crab_deg), 1),
             "crab": _format_crab(crab_deg),
             "segment": segment,
         })
