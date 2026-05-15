@@ -135,12 +135,13 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,          # signed in a separate step; see BUILD.md
     entitlements_file=None,
-    # Phase 6S: branded icon. PyInstaller picks .icns on macOS, .ico on Windows,
-    # ignores when neither file exists.
-    icon=[
-        str(PROJECT_ROOT / "assets" / "branding" / "tallyaero.icns"),
-        str(PROJECT_ROOT / "assets" / "branding" / "tallyaero.ico"),
-    ],
+    # Phase 6S: platform-specific icon. PyInstaller's docs claim a list will
+    # auto-select, but Windows tries the first entry regardless and errors
+    # when it's not a .ico — pick the right format per platform up front.
+    icon=str(
+        PROJECT_ROOT / "assets" / "branding"
+        / ("tallyaero.icns" if sys.platform == "darwin" else "tallyaero.ico")
+    ),
 )
 
 coll = COLLECT(
