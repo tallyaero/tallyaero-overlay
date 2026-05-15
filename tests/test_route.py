@@ -16,6 +16,7 @@ from core.route import (
     wind_triangle,
     true_to_magnetic,
     compute_route_segment,
+    magvar_west_positive,
 )
 from core.schema import RouteInput, RouteResult
 
@@ -187,6 +188,29 @@ def test_route_input_rejects_bad_tas():
             origin_airport_id="KJFK", dest_airport_id="KLAX",
             cruise_alt_ft=8000, tas_kt=0,
         )
+
+
+# ── magvar via pygeomag/WMM ───────────────────────────────────────────
+
+
+def test_magvar_jfk_positive_west():
+    """KJFK is in the W-declination zone (~13°W). W-positive
+    convention should give a POSITIVE number, magnitude 10-15°."""
+    var = magvar_west_positive(*KJFK, decimal_year=2026.5)
+    assert 10.0 < var < 15.0, f"expected ~13°W, got {var:.2f}"
+
+
+def test_magvar_sfo_negative_east():
+    """KSFO sits at ~13°E. W-positive convention should give a
+    NEGATIVE number with magnitude 10-15°."""
+    var = magvar_west_positive(*KSFO, decimal_year=2026.5)
+    assert -15.0 < var < -10.0, f"expected ~-13° (13°E), got {var:.2f}"
+
+
+def test_magvar_equator_small():
+    """Mid-Atlantic equator should have near-zero declination."""
+    var = magvar_west_positive(0.0, -25.0, decimal_year=2026.5)
+    assert abs(var) < 25.0
 
 
 def test_route_result_roundtrip():

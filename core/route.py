@@ -16,10 +16,54 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Optional
 
 EARTH_RADIUS_NM = 3440.065     # nautical miles
 FT_PER_NM = 6076.115
+
+
+# ── Magnetic variation (WMM) via pygeomag ─────────────────────────────
+# Cached at module load so we don't reinitialize the coefficient table
+# on every call. pygeomag's `calculate(glat, glon, alt, time)` returns
+# a result where `.d` is the declination (east positive, west negative)
+# — the geophysics convention. Pilots use W-positive variation, so we
+# negate at the boundary.
+
+_GEOMAG = None
+
+
+def _get_geomag():
+    global _GEOMAG
+    if _GEOMAG is None:
+        from pygeomag import GeoMag
+        _GEOMAG = GeoMag()
+    return _GEOMAG
+
+
+def _current_decimal_year() -> float:
+    now = datetime.now(timezone.utc)
+    year_start = datetime(now.year, 1, 1, tzinfo=timezone.utc)
+    year_end = datetime(now.year + 1, 1, 1, tzinfo=timezone.utc)
+    return now.year + (now - year_start).total_seconds() / (year_end - year_start).total_seconds()
+
+
+def magvar_west_positive(lat_deg: float, lon_deg: float,
+                         alt_ft: float = 0.0,
+                         decimal_year: Optional[float] = None) -> float:
+    """Magnetic variation at a point, returned with the pilot's
+    W-positive sign convention (most of the continental US is positive).
+
+    `decimal_year` defaults to today (UTC). Pass an explicit float for
+    deterministic tests."""
+    year = _current_decimal_year() if decimal_year is None else decimal_year
+    geomag = _get_geomag()
+    result = geomag.calculate(
+        glat=lat_deg, glon=lon_deg,
+        alt=alt_ft / 3280.84,   # ft → km (WMM altitude is in km)
+        time=year,
+    )
+    return -result.d   # pygeomag E+ → pilot W+
 
 
 def haversine_nm(lat1_deg: float, lon1_deg: float,
