@@ -22,16 +22,20 @@ def route_layout(default_glide_ratio: float | None = None,
     gi = default_glide_ias if default_glide_ias else 75.0
     tas = default_tas if default_tas else 110.0
     return [
-        _field("From", dcc.Input(
-            id="route-origin-input", type="text",
-            placeholder="KJFK",
-            style={"textTransform": "uppercase"},
-        )),
-        _field("To", dcc.Input(
-            id="route-dest-input", type="text",
-            placeholder="KLAX",
-            style={"textTransform": "uppercase"},
-        )),
+        html.Div(
+            [html.Div("Route", className="shelf-field-label"),
+             dcc.Dropdown(
+                id="route-waypoints",
+                multi=True,
+                searchable=True,
+                clearable=True,
+                placeholder="Type ICAO, city, or name — e.g. KJFK, summerville, savannah",
+                options=[],
+                value=[],
+                className="route-waypoint-dropdown",
+             )],
+            className="shelf-field shelf-field-route",
+        ),
         _field("Cruise Alt", dcc.Input(
             id="route-cruise-alt", type="number",
             value=5500, min=0, max=60000, step=500,
