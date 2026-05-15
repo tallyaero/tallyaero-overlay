@@ -47,7 +47,10 @@ def _top_strip():
                         className="aircraft-picker-wrap",
                     ),
 
-                    # Airport — text input + Recenter, floating results below
+                    # Airport — text input + Recenter, floating results below.
+                    # The input itself displays the selected airport after pick;
+                    # selected-airport-display is kept hidden (callbacks still
+                    # write to it but it doesn't render visibly).
                     html.Div([
                         html.Span("APT", className="chip-prefix"),
                         dcc.Input(
@@ -61,12 +64,9 @@ def _top_strip():
                         html.Button("Recenter", id="recenter-airport-btn",
                                     className="topbar-airport-recenter",
                                     title="Recenter map on airport"),
-                        # Floating results panel + hidden selected-airport display
                         html.Div(id="airport-search-results",
                                  className="search-results-box topbar-airport-results"),
-                        html.Div(id="selected-airport-display",
-                                 className="topbar-airport-selected",
-                                 style={"display": "none"}),
+                        html.Div(id="selected-airport-display", style={"display": "none"}),
                     ], className="topbar-airport-wrap"),
 
                     # Maneuver picker + Info button — moved up from the shelf
@@ -323,14 +323,6 @@ def desktop_layout():
                     ]),
                     html.Label("Engine", className="input-label-sm"),
                     dcc.Dropdown(id="engine-select", className="dropdown", persistence=True, persistence_type="local"),
-                    html.Div(className="action-buttons-row", style={"marginTop": "10px"}, children=[
-                        html.A("Edit/Create", href="https://app.flyaeroedge.com/edit-aircraft", target="_blank", className="btn-action-orange"),
-                        dcc.Upload(
-                            html.Button("Load File", className="btn-action-orange"),
-                            id="upload-aircraft",
-                            accept=".json",
-                        ),
-                    ]),
                 ]),
 
                 # === Environment section (airport moved to top bar) ===
@@ -421,6 +413,19 @@ def desktop_layout():
                 ]),
 
                 # --- Maneuver params moved to the top shelf ---
+
+                # Bottom section — aircraft CRUD buttons (out of the way)
+                html.Div(className="sidebar-section sidebar-section-bottom", children=[
+                    html.Div(className="action-buttons-row", children=[
+                        html.A("Edit/Create", href="https://app.flyaeroedge.com/edit-aircraft",
+                               target="_blank", className="btn-action-orange"),
+                        dcc.Upload(
+                            html.Button("Load File", className="btn-action-orange"),
+                            id="upload-aircraft",
+                            accept=".json",
+                        ),
+                    ]),
+                ]),
 
                 # Store for tracking last clicked point (for undo)
                 dcc.Store(id="last-click-info", data=None),

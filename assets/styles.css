@@ -1939,3 +1939,20 @@ input[type="radio"] {
   background: #0f172a;
   border-color: #334155;
 }
+
+/* Sidebar bottom CRUD section — pin to the bottom of the rail */
+.sidebar-section-bottom {
+  margin-top: auto;
+  border-top: 1px solid var(--gray-border);
+  border-bottom: none !important;
+  background: var(--ta-surface-tertiary, transparent);
+}
+#sidebar-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+[data-theme="dark"] .sidebar-section-bottom {
+  border-top-color: #334155;
+  background: rgba(15, 23, 42, 0.5);
+}
