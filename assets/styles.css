@@ -1658,3 +1658,136 @@ input[type="radio"] {
 [data-theme="dark"] .input-label-sm {
   color: #cbd5e1;
 }
+
+/* Phase 4 chip-strip — inline input sizing inside chips */
+.env-chip-inline {
+  padding: 0 8px;
+  gap: 4px;
+}
+.env-chip-inline .chip-prefix {
+  margin-right: 2px;
+}
+.env-chip-inline .chip-input {
+  height: 22px;
+  padding: 0 4px;
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  border-radius: 3px;
+  background: var(--ta-surface-elevated, #ffffff);
+  color: var(--ta-text-primary, #0f172a);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  margin: 0;
+  box-sizing: border-box;
+}
+.env-chip-inline .chip-input:focus {
+  outline: none;
+  border-color: var(--ta-brand-blue, #0d59f2);
+  box-shadow: 0 0 0 2px rgba(13, 89, 242, 0.18);
+}
+.env-chip-inline .chip-input-num {
+  width: 48px;
+}
+.env-chip-inline .chip-input-num[id="env-altimeter"] {
+  width: 62px;
+}
+.env-chip-inline .chip-input-text {
+  width: 120px;
+  text-align: left;
+}
+.env-chip-inline .chip-input-readout {
+  width: 70px;
+  background: transparent;
+  border-color: transparent;
+  cursor: default;
+}
+.env-chip-inline .chip-sep {
+  color: var(--ta-text-tertiary, #94a3b8);
+  font-size: 12px;
+  margin: 0 1px;
+}
+.env-chip-inline .chip-unit {
+  color: var(--ta-text-tertiary, #94a3b8);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  margin-left: 2px;
+}
+.env-chip-inline .chip-action-mini {
+  height: 22px;
+  padding: 0 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  background: #6c757d;
+  color: #ffffff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-left: 4px;
+}
+.env-chip-inline .chip-action-mini:hover {
+  background: #5a6268;
+}
+
+/* MANEUVER dropdown — needs more width than the numeric chips */
+.env-chip-maneuver { padding-right: 4px; }
+.env-chip-maneuver .chip-dropdown { min-width: 170px; }
+.env-chip-maneuver .Select-control,
+.env-chip-maneuver .css-control,
+.env-chip-maneuver > div > div:first-child {
+  min-height: 24px;
+  font-size: 12px;
+  border-radius: 3px;
+}
+
+/* APT chip — floating search results below the chip */
+.chip-floating.search-results-box {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1100;
+  width: 320px;
+  max-height: 280px;
+  overflow-y: auto;
+  background: var(--ta-surface-elevated, #ffffff);
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  margin-top: 2px;
+}
+.env-chip-apt {
+  position: relative;
+}
+
+/* Sidebar sections */
+.sidebar-section {
+  padding: 12px 12px;
+  border-bottom: 1px solid var(--gray-border);
+}
+.sidebar-section:last-child { border-bottom: none; }
+.sidebar-section-title {
+  font-family: var(--ta-font-sans, system-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ta-text-tertiary, #94a3b8);
+  margin-bottom: 8px;
+}
+
+[data-theme="dark"] .env-chip-inline .chip-input {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+[data-theme="dark"] .env-chip-inline .chip-input-readout {
+  background: transparent;
+  border-color: transparent;
+}
+[data-theme="dark"] .chip-floating.search-results-box {
+  background: #0f172a;
+  border-color: #334155;
+}
+[data-theme="dark"] .sidebar-section { border-bottom-color: #334155; }
+[data-theme="dark"] .sidebar-section-title { color: #94a3b8; }

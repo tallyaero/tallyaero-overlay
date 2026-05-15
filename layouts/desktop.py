@@ -24,28 +24,13 @@ from core.data_loader import available_aircraft
 
 
 def _top_strip():
-    """Phase 4 Batch 2b — brand + aircraft picker on the left, quick-links
-    + theme toggle on the right. Mirrors EM Diagram's current top-strip
-    pattern (env chips live inline in the rail per Phase 5AB-2, not here)."""
+    """Phase 4 chip-strip — top row is just brand + theme/links. The
+    chip row below holds environmental + situational state. Aircraft-
+    specific inputs live in the left sidebar."""
     return html.Div(
         [
             html.Div(
-                [
-                    html.Span("TallyAero Overlay", className="top-strip-brand"),
-                    html.Div(
-                        dcc.Dropdown(
-                            id="aircraft-select",
-                            options=[{"label": name, "value": name} for name in available_aircraft],
-                            value="C172" if "C172" in available_aircraft else (available_aircraft[0] if available_aircraft else None),
-                            placeholder="Select an aircraft…",
-                            className="dropdown aircraft-dropdown",
-                            clearable=False,
-                            persistence=True,
-                            persistence_type="local",
-                        ),
-                        className="aircraft-picker-wrap",
-                    ),
-                ],
+                html.Span("TallyAero Overlay", className="top-strip-brand"),
                 className="top-strip-left",
             ),
             html.Div(
@@ -206,285 +191,123 @@ def _theme_toggle():
     )
 
 
-def _settings_drawer():
-    """Phase 4 chip-strip — drawer now holds the lower-frequency config
-    (Aircraft CRUD + Engine + Power) that doesn't merit a top-strip chip.
-    APT / WIND / WEIGHT / OAT / ALTIM / MANEUVER all moved to chip
-    popovers in the top bar."""
-    return dbc.Offcanvas(
-        [
-            html.Div(className="action-buttons-row", children=[
-                html.A("Edit/Create Aircraft", href="https://app.flyaeroedge.com/edit-aircraft", target="_blank", className="btn-action-orange"),
-                dcc.Upload(
-                    html.Button("Load Aircraft File", className="btn-action-orange"),
-                    id="upload-aircraft",
-                    accept=".json",
-                ),
-            ]),
-
-            html.Label("Engine Option", className="input-label", style={"marginTop": "16px"}),
-            dcc.Dropdown(id="engine-select", className="dropdown", persistence=True, persistence_type="local"),
-
-            html.Label("Power Setting", className="input-label", style={"marginTop": "16px"}),
-            dcc.Slider(
-                id="power-setting",
-                min=0.05, max=1.0, step=0.05, value=0.5,
-                marks={0.05: "IDLE", 0.2: "20%", 0.4: "40%", 0.6: "60%", 0.8: "80%", 0.99: "100%"},
-                tooltip={"always_visible": True},
-                persistence=True, persistence_type="local",
-            ),
-        ],
-        id="settings-drawer",
-        title="Configuration",
-        placement="start",
-        is_open=False,
-        backdrop=True,
-        scrollable=True,
-        className="settings-drawer",
-    )
-
-
 def _env_chips_strip():
-    """Phase 4 chip-strip — row of tappable chips in the top bar.
-    Each chip opens a dbc.Popover holding the existing input(s).
-    Chip labels mirror the current value via small server callbacks."""
+    """Phase 4 chip-strip — each chip holds its input inline. No
+    popovers. Type / drag / pick directly in the chip. The chip-prefix
+    span on the left labels what the input controls; the input fills
+    the rest of the chip."""
     return html.Div(
         className="env-chips-strip",
         children=[
-            html.Button(
-                [html.Span("APT", className="chip-prefix"),
-                 html.Span("Select", id="chip-apt-label", className="chip-label")],
-                id="chip-apt", n_clicks=0, type="button",
-                className="env-chip env-chip-tappable",
-                title="Airport search + recenter",
+            # APT chip — text input drives airport-search results
+            html.Div(
+                [
+                    html.Span("APT", className="chip-prefix"),
+                    dcc.Input(
+                        id="airport-search-input",
+                        type="text",
+                        placeholder="ICAO / name",
+                        debounce=False,
+                        className="chip-input chip-input-text",
+                        autoComplete="off",
+                    ),
+                    html.Button("Recenter", id="recenter-airport-btn",
+                                className="chip-action-mini", title="Recenter map on airport"),
+                ],
+                className="env-chip env-chip-inline env-chip-apt",
             ),
-            html.Button(
-                [html.Span("WIND", className="chip-prefix"),
-                 html.Span("360°/0kt", id="chip-wind-label", className="chip-label")],
-                id="chip-wind", n_clicks=0, type="button",
-                className="env-chip env-chip-tappable",
-                title="Wind direction + speed",
+
+            # WIND chip — direction + speed inputs side by side
+            html.Div(
+                [
+                    html.Span("WIND", className="chip-prefix"),
+                    dcc.Input(id="env-wind-dir", type="number", value=360, min=1, max=360,
+                              className="chip-input chip-input-num",
+                              persistence=True, persistence_type="local"),
+                    html.Span("°/", className="chip-sep"),
+                    dcc.Input(id="env-wind-speed", type="number", value=0, min=0,
+                              className="chip-input chip-input-num",
+                              persistence=True, persistence_type="local"),
+                    html.Span("kt", className="chip-unit"),
+                ],
+                className="env-chip env-chip-inline env-chip-wind",
             ),
-            html.Button(
-                [html.Span("WEIGHT", className="chip-prefix"),
-                 html.Span("—", id="chip-weight-label", className="chip-label")],
-                id="chip-weight", n_clicks=0, type="button",
-                className="env-chip env-chip-tappable",
-                title="Occupants + fuel + CG",
+
+            # WEIGHT chip — readout only (edit via drawer)
+            html.Div(
+                [
+                    html.Span("WEIGHT", className="chip-prefix"),
+                    dcc.Input(id="total-weight-display", type="text", value="", readOnly=True,
+                              className="chip-input chip-input-readout"),
+                    html.Span("lb", className="chip-unit"),
+                ],
+                className="env-chip env-chip-inline env-chip-weight",
             ),
-            html.Button(
-                [html.Span("OAT", className="chip-prefix"),
-                 html.Span("52°F", id="chip-oat-label", className="chip-label")],
-                id="chip-oat", n_clicks=0, type="button",
-                className="env-chip env-chip-tappable",
-                title="Outside Air Temperature",
+
+            # OAT chip — temperature input
+            html.Div(
+                [
+                    html.Span("OAT", className="chip-prefix"),
+                    dcc.Input(id="env-oat", type="number", value=52,
+                              className="chip-input chip-input-num",
+                              persistence=True, persistence_type="local"),
+                    html.Span("°F", className="chip-unit"),
+                ],
+                className="env-chip env-chip-inline env-chip-oat",
             ),
-            html.Button(
-                [html.Span("ALTIM", className="chip-prefix"),
-                 html.Span("29.92", id="chip-altim-label", className="chip-label")],
-                id="chip-altim", n_clicks=0, type="button",
-                className="env-chip env-chip-tappable",
-                title="Altimeter setting (inHg)",
+
+            # ALTIM chip — altimeter setting
+            html.Div(
+                [
+                    html.Span("ALTIM", className="chip-prefix"),
+                    dcc.Input(id="env-altimeter", type="number", value=29.92, step=0.01,
+                              className="chip-input chip-input-num",
+                              persistence=True, persistence_type="local"),
+                    html.Span("inHg", className="chip-unit"),
+                ],
+                className="env-chip env-chip-inline env-chip-altim",
             ),
-            html.Button(
-                [html.Span("MANEUVER", className="chip-prefix"),
-                 html.Span("Select", id="chip-maneuver-label", className="chip-label")],
-                id="chip-maneuver", n_clicks=0, type="button",
-                className="env-chip env-chip-tappable",
-                title="Maneuver picker",
+
+            # MANEUVER chip — inline dropdown
+            html.Div(
+                [
+                    html.Span("MANEUVER", className="chip-prefix"),
+                    dcc.Dropdown(
+                        id="maneuver-select",
+                        placeholder="Select maneuver",
+                        options=[
+                            {"label": "Impossible Turn", "value": "impossible_turn"},
+                            {"label": "Power-Off 180", "value": "poweroff180"},
+                            {"label": "Engine-Out Glide", "value": "engineout"},
+                            {"label": "Steep Turns", "value": "steep_turn"},
+                            {"label": "Chandelle", "value": "chandelle"},
+                            {"label": "Lazy Eight", "value": "lazy8"},
+                            {"label": "Steep Spiral", "value": "steep_spiral"},
+                            {"label": "S-Turns", "value": "s_turn"},
+                            {"label": "Turns Around Point", "value": "turns_point"},
+                            {"label": "Rectangular", "value": "rect_course"},
+                            {"label": "Eights on Pylons", "value": "pylons"},
+                        ],
+                        className="chip-dropdown",
+                        clearable=False,
+                        persistence=True, persistence_type="local",
+                    ),
+                ],
+                className="env-chip env-chip-inline env-chip-maneuver",
             ),
+
+            # Hidden DOM nodes referenced by existing callbacks (results
+            # list, selected airport display) — float-positioned below
+            # the APT chip via CSS.
+            html.Div(id="airport-search-results", className="search-results-box chip-floating"),
+            html.Div(
+                id="selected-airport-display",
+                style={"display": "none"},
+            ),
+            # env-airport-agl is referenced by the airport-elevation
+            # callback. Keep a hidden div so callbacks find it.
+            html.Div(id="env-airport-agl", style={"display": "none"}),
         ],
-    )
-
-
-def _env_popovers():
-    """Popovers for each top-strip chip. Each popover hosts the
-    canonical inputs (same component IDs as before so existing
-    callbacks wire through unchanged). dbc.Popover keeps the body in
-    the DOM when closed, so the inputs stay reachable for callbacks."""
-    return html.Div(
-        [
-            # APT popover — airport search input + results + selected display + recenter
-            dbc.Popover(
-                [
-                    dbc.PopoverHeader("Airport"),
-                    dbc.PopoverBody([
-                        dcc.Input(
-                            id="airport-search-input",
-                            type="text",
-                            placeholder="ICAO or name…",
-                            debounce=False,
-                            className="input-large",
-                            autoComplete="off",
-                            style={"width": "100%"},
-                        ),
-                        html.Div(id="airport-search-results", className="search-results-box"),
-                        html.Div(
-                            id="selected-airport-display",
-                            style={
-                                "fontSize": "12px",
-                                "color": "#28a745",
-                                "fontWeight": "500",
-                                "marginTop": "6px",
-                                "display": "none",
-                            },
-                        ),
-                        html.Button(
-                            "Recenter to Airport",
-                            id="recenter-airport-btn",
-                            className="reset-btn-small",
-                            style={"marginTop": "6px", "width": "100%", "backgroundColor": "#6c757d"},
-                        ),
-                    ]),
-                ],
-                id="popover-apt",
-                target="chip-apt",
-                trigger="legacy",
-                placement="bottom-start",
-                className="env-popover env-popover-apt",
-            ),
-
-            # WIND popover — direction + speed
-            dbc.Popover(
-                [
-                    dbc.PopoverHeader("Wind"),
-                    dbc.PopoverBody([
-                        html.Div([
-                            html.Label("Direction (°)", className="input-label-sm"),
-                            dcc.Input(id="env-wind-dir", type="number", value=360, min=1, max=360,
-                                      className="input-small", style={"width": "100%"},
-                                      persistence=True, persistence_type="local"),
-                        ], style={"marginBottom": "8px"}),
-                        html.Div([
-                            html.Label("Speed (kt)", className="input-label-sm"),
-                            dcc.Input(id="env-wind-speed", type="number", value=0, min=0,
-                                      className="input-small", style={"width": "100%"},
-                                      persistence=True, persistence_type="local"),
-                        ]),
-                    ]),
-                ],
-                id="popover-wind",
-                target="chip-wind",
-                trigger="legacy",
-                placement="bottom",
-                className="env-popover",
-            ),
-
-            # WEIGHT popover — occupants + occ wt + fuel + total + CG
-            dbc.Popover(
-                [
-                    dbc.PopoverHeader("Weight & CG"),
-                    dbc.PopoverBody([
-                        html.Div(style={"display": "flex", "gap": "8px", "marginBottom": "8px"}, children=[
-                            html.Div([
-                                html.Label("Occupants", className="input-label-sm"),
-                                dcc.Input(id="occupants", type="number", value=1, min=1, max=4,
-                                          className="input-small", style={"width": "100%"},
-                                          persistence=True, persistence_type="local"),
-                            ], style={"flex": "1"}),
-                            html.Div([
-                                html.Label("Occ. Wt (lb)", className="input-label-sm"),
-                                dcc.Input(id="occupant-weight", type="number", value=180, min=100, max=300,
-                                          className="input-small", style={"width": "100%"},
-                                          persistence=True, persistence_type="local"),
-                            ], style={"flex": "1"}),
-                        ]),
-                        html.Label("Fuel Load (gal)", className="input-label-sm"),
-                        dcc.Slider(
-                            id="fuel-load", min=0, max=50, step=1, value=0,
-                            marks={0: "0", 25: "1/2", 50: "Full"},
-                            tooltip={"always_visible": True},
-                            persistence=True, persistence_type="local",
-                        ),
-                        html.Label("Total Weight (lbs)", className="input-label-sm", style={"marginTop": "8px"}),
-                        dcc.Input(id="total-weight-display", type="text", value="", readOnly=True,
-                                  className="input-small", style={"width": "100%"}),
-                        html.Label("CG Position", className="input-label-sm", style={"marginTop": "8px"}),
-                        dcc.Slider(
-                            id="cg-slider", min=0.0, max=1.0, step=0.01, value=0.5,
-                            marks={0.0: "FWD", 0.5: "MID", 1.0: "AFT"},
-                            tooltip={"always_visible": True},
-                            persistence=True, persistence_type="local",
-                        ),
-                    ]),
-                ],
-                id="popover-weight",
-                target="chip-weight",
-                trigger="legacy",
-                placement="bottom",
-                className="env-popover env-popover-weight",
-            ),
-
-            # OAT popover
-            dbc.Popover(
-                [
-                    dbc.PopoverHeader("Outside Air Temp (°F)"),
-                    dbc.PopoverBody([
-                        dcc.Input(id="env-oat", type="number", value=52,
-                                  className="input-small", style={"width": "100%"},
-                                  persistence=True, persistence_type="local"),
-                        html.Div(id="env-airport-agl", className="weight-box",
-                                 style={"marginTop": "8px", "fontSize": "11px"}),
-                    ]),
-                ],
-                id="popover-oat",
-                target="chip-oat",
-                trigger="legacy",
-                placement="bottom",
-                className="env-popover",
-            ),
-
-            # ALTIM popover
-            dbc.Popover(
-                [
-                    dbc.PopoverHeader("Altimeter (inHg)"),
-                    dbc.PopoverBody([
-                        dcc.Input(id="env-altimeter", type="number", value=29.92, step=0.01,
-                                  className="input-small", style={"width": "100%"},
-                                  persistence=True, persistence_type="local"),
-                    ]),
-                ],
-                id="popover-altim",
-                target="chip-altim",
-                trigger="legacy",
-                placement="bottom",
-                className="env-popover",
-            ),
-
-            # MANEUVER popover
-            dbc.Popover(
-                [
-                    dbc.PopoverHeader("Maneuver"),
-                    dbc.PopoverBody([
-                        dcc.Dropdown(
-                            id="maneuver-select",
-                            placeholder="Select Maneuver",
-                            options=[
-                                {"label": "Impossible Turn", "value": "impossible_turn"},
-                                {"label": "Power-Off 180", "value": "poweroff180"},
-                                {"label": "Engine-Out Glide Simulation", "value": "engineout"},
-                                {"label": "Steep Turns", "value": "steep_turn"},
-                                {"label": "Chandelle", "value": "chandelle"},
-                                {"label": "Lazy Eight", "value": "lazy8"},
-                                {"label": "Steep Spiral", "value": "steep_spiral"},
-                                {"label": "S-Turns", "value": "s_turn"},
-                                {"label": "Turns Around a Point", "value": "turns_point"},
-                                {"label": "Rectangular Course", "value": "rect_course"},
-                                {"label": "Eights on Pylons", "value": "pylons"},
-                            ],
-                            className="dropdown",
-                            persistence=True, persistence_type="local",
-                            style={"minWidth": "240px"},
-                        ),
-                    ]),
-                ],
-                id="popover-maneuver",
-                target="chip-maneuver",
-                trigger="legacy",
-                placement="bottom",
-                className="env-popover env-popover-maneuver",
-            ),
-        ]
     )
 
 
@@ -499,9 +322,7 @@ def desktop_layout():
     return html.Div(className="full-height-container desktop-shell", children=[
         _top_strip(),
         _env_chips_strip(),
-        _env_popovers(),
         _modals_block(),
-        _settings_drawer(),
         # Main 2-column layout (sidebar + map) — wraps in main-grid so
         # the CSS can target it with the new shell rules.
         html.Div(className="main-row main-grid", children=[
@@ -523,28 +344,87 @@ def desktop_layout():
                 dcc.Store(id="airport-highlight-index", data=0),
                 dcc.Store(id="airport-search-matches", data=[]),
 
+                # === Aircraft section — all aircraft-specific inputs ===
+                html.Div(className="sidebar-section", children=[
+                    html.Div("Aircraft", className="sidebar-section-title"),
+
+                    # Aircraft picker
+                    dcc.Dropdown(
+                        id="aircraft-select",
+                        options=[{"label": name, "value": name} for name in available_aircraft],
+                        value="C172" if "C172" in available_aircraft else (available_aircraft[0] if available_aircraft else None),
+                        placeholder="Select an aircraft",
+                        className="dropdown aircraft-dropdown",
+                        clearable=False,
+                        persistence=True, persistence_type="local",
+                    ),
+
+                    # Engine option
+                    html.Label("Engine", className="input-label-sm", style={"marginTop": "10px"}),
+                    dcc.Dropdown(id="engine-select", className="dropdown", persistence=True, persistence_type="local"),
+
+                    # Edit / Load row
+                    html.Div(className="action-buttons-row", style={"marginTop": "10px"}, children=[
+                        html.A("Edit/Create", href="https://app.flyaeroedge.com/edit-aircraft", target="_blank", className="btn-action-orange"),
+                        dcc.Upload(
+                            html.Button("Load File", className="btn-action-orange"),
+                            id="upload-aircraft",
+                            accept=".json",
+                        ),
+                    ]),
+                ]),
+
+                # === Weight & CG section ===
+                html.Div(className="sidebar-section", children=[
+                    html.Div("Weight & CG", className="sidebar-section-title"),
+                    html.Div(style={"display": "flex", "gap": "8px"}, children=[
+                        html.Div([
+                            html.Label("Occupants", className="input-label-sm"),
+                            dcc.Input(id="occupants", type="number", value=1, min=1, max=4,
+                                      className="input-small", style={"width": "100%"},
+                                      persistence=True, persistence_type="local"),
+                        ], style={"flex": "1"}),
+                        html.Div([
+                            html.Label("Occ. Wt (lb)", className="input-label-sm"),
+                            dcc.Input(id="occupant-weight", type="number", value=180, min=100, max=300,
+                                      className="input-small", style={"width": "100%"},
+                                      persistence=True, persistence_type="local"),
+                        ], style={"flex": "1"}),
+                    ]),
+                    html.Label("Fuel Load (gal)", className="input-label-sm", style={"marginTop": "10px"}),
+                    dcc.Slider(
+                        id="fuel-load", min=0, max=50, step=1, value=0,
+                        marks={0: "0", 12: "1/4", 25: "1/2", 37: "3/4", 50: "Full"},
+                        tooltip={"always_visible": True},
+                        persistence=True, persistence_type="local",
+                    ),
+                    html.Label("CG Position", className="input-label-sm", style={"marginTop": "10px"}),
+                    dcc.Slider(
+                        id="cg-slider", min=0.0, max=1.0, step=0.01, value=0.5,
+                        marks={0.0: "FWD", 0.5: "MID", 1.0: "AFT"},
+                        tooltip={"always_visible": True},
+                        persistence=True, persistence_type="local",
+                    ),
+                ]),
+
+                # === Power section ===
+                html.Div(className="sidebar-section", children=[
+                    html.Div("Power", className="sidebar-section-title"),
+                    dcc.Slider(
+                        id="power-setting",
+                        min=0.05, max=1.0, step=0.05, value=0.5,
+                        marks={0.05: "IDLE", 0.5: "50%", 0.99: "100%"},
+                        tooltip={"always_visible": True},
+                        persistence=True, persistence_type="local",
+                    ),
+                ]),
+
                 # --- Conditionally Shown Based on Maneuver ---
-                # All other inputs now live in the top-strip chip popovers.
-                # The rail is just the per-maneuver parameter form area.
                 html.Div(id="maneuver-params-container", children=[], style={"marginTop": "15px"}),
 
                 # Store for tracking last clicked point (for undo)
                 dcc.Store(id="last-click-info", data=None),
             ]),  # End sidebar-content
-
-            # MORE Configure — full-width chip trigger at the bottom of the
-            # rail, mirroring EM Diagram's Phase 5AD pattern.
-            html.Button(
-                [
-                    html.Span("MORE", className="chip-prefix"),
-                    html.Span("Configure", className="chip-label"),
-                ],
-                id="open-drawer-btn",
-                n_clicks=0,
-                className="env-chip rail-action-chip rail-drawer-trigger",
-                type="button",
-                title="Open configuration panel — aircraft, weight, environment, power",
-            ),
 
             # Store for sidebar collapse state
             dcc.Store(id="sidebar-collapsed-store", data=False),
