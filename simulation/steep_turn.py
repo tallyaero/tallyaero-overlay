@@ -158,13 +158,21 @@ def simulate_steep_turn(
     hover = []
 
     def record(gs_kt, aob_deg, track_deg, drift_deg, segment):
-        """Record a point in path and hover data."""
+        """Record a point in path and hover data.
+
+        Per MANEUVER_STANDARD.md every maneuver must publish `ias`
+        (constant for a level steep turn — equal to the input
+        ias_knots) and `load_factor` (1/cos(bank), the load the
+        wings see at the current bank)."""
+        load_factor = 1.0 / math.cos(math.radians(aob_deg)) if abs(aob_deg) < 89.9 else float("inf")
         hover.append({
             "time": round(t, 2),
             "alt": round(altitude_ft, 1),
+            "ias": round(float(ias_knots), 1),
             "tas": round(tas_knots_val, 1),
             "gs": round(gs_kt, 1),
             "aob": round(aob_deg, 1),
+            "load_factor": round(load_factor, 2) if math.isfinite(load_factor) else None,
             "vs": 0.0,  # Level steep turn
             "track": round(track_deg, 1),
             "heading": round(hdg, 1),
