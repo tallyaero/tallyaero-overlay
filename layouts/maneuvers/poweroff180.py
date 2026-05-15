@@ -13,14 +13,7 @@ from __future__ import annotations
 
 from dash import dcc, html
 
-
-def _field(label, control, slider=False):
-    """One labeled mini-column in the shelf."""
-    cls = "shelf-field shelf-field-slider" if slider else "shelf-field"
-    return html.Div([
-        html.Div(label, className="shelf-field-label"),
-        control,
-    ], className=cls)
+from layouts.maneuvers._shared import _field
 
 
 def poweroff180_layout(default_elev=None):
