@@ -228,6 +228,7 @@ def simulate_lazy_eight(
 
     def record(gs_kt, aob_deg, vs_fpm, track_deg, drift_deg, pitch_deg, segment, turn_progress):
         """Record a point in path and hover data."""
+        load_factor = 1.0 / math.cos(math.radians(aob_deg)) if abs(aob_deg) < 89.9 else None
         hover.append({
             "time": round(t, 2),
             "alt": round(alt_agl, 1),
@@ -235,6 +236,7 @@ def simulate_lazy_eight(
             "ias": round(ias, 1),
             "gs": round(gs_kt, 1),
             "aob": round(aob_deg, 1),
+            "load_factor": round(load_factor, 2) if load_factor is not None else None,
             "vs": round(vs_fpm, 0),
             "track": round(track_deg, 1),
             "heading": round(hdg, 1),

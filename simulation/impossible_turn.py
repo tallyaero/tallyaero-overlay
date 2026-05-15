@@ -248,7 +248,9 @@ def simulate_takeoff_phase(
         "track": heading_deg,
         "bank": 0.0,
         "dist_from_threshold": 0.0,
-    })
+        "load_factor": (1.0 / math.cos(math.radians(0.0))) if abs(0.0) < 89.9 else None,
+        "segment": PHASE_TAKEOFF,
+        })
 
     while v_ias_kt < v_lof_kias and t < 60:  # Max 60 sec ground roll
         # Speed-dependent acceleration reduction
@@ -287,6 +289,8 @@ def simulate_takeoff_phase(
             "track": heading_deg,
             "bank": 0.0,
             "dist_from_threshold": dist_ft / FT_PER_NM,
+            "load_factor": (1.0 / math.cos(math.radians(0.0))) if abs(0.0) < 89.9 else None,
+            "segment": PHASE_TAKEOFF,
         })
 
     liftoff_point = {"lat": cur.latitude, "lon": cur.longitude}
@@ -402,8 +406,10 @@ def simulate_climb_phase(
         "track": desired_track_deg,  # Actual ground track (runway heading)
         "bank": 0.0,
         "dist_from_threshold": 0.0,
-        "wca": wca_deg,  # Wind correction angle
-    })
+        "wca": wca_deg,  # Wind correction angle,
+        "load_factor": (1.0 / math.cos(math.radians(0.0))) if abs(0.0) < 89.9 else None,
+        "segment": PHASE_CLIMB,
+        })
 
     dist_from_liftoff_ft = 0.0
 
@@ -446,6 +452,8 @@ def simulate_climb_phase(
             "bank": 0.0,
             "dist_from_threshold": dist_from_liftoff_ft / FT_PER_NM,
             "wca": wca_deg,
+            "load_factor": (1.0 / math.cos(math.radians(0.0))) if abs(0.0) < 89.9 else None,
+            "segment": PHASE_CLIMB,
         })
 
     failure_point = {"lat": cur.latitude, "lon": cur.longitude}
@@ -582,6 +590,8 @@ def _run_impossible_turn_once(
             "drift": float(drift_deg) if drift_deg is not None else None,
             "phase": phase,
             "slip_pct": float(slip_pct),
+            "load_factor": ((1.0 / math.cos(math.radians(aob_deg))) if abs(aob_deg) < 89.9 else None),
+            "segment": phase,
         })
         path.append([cur.latitude, cur.longitude])
 
@@ -908,7 +918,9 @@ def _run_impossible_turn_once(
                             "heading": float(hdg),
                             "phase": "rollout",
                             "slip_pct": 0.0,
-                        })
+                            "load_factor": (1.0 / math.cos(math.radians(0.0))) if abs(0.0) < 89.9 else None,
+                            "segment": "rollout",
+        })
                     xtrack_ft = 0.0  # Now on centerline
                     # Update marker to end of rollout (on centerline)
                     marker_lat, marker_lon = path[-1][0], path[-1][1]
