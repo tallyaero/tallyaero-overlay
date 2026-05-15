@@ -415,3 +415,65 @@ def find_sanity_warnings(data: dict) -> list[str]:
             warnings.append("G_limits.aerobatic.* all zero (not aerobatic-certified sentinel)")
 
     return warnings
+
+
+# =============================================================================
+# Airport schema (Phase 3d)
+# =============================================================================
+# Mirrors the shape produced by tallyaero-data/scripts/build_airports.py.
+# Both nested models use extra="forbid" so upstream additions are caught
+# explicitly (same pattern as the Aircraft schema).
+
+
+AirportType = Literal[
+    "small_airport",
+    "medium_airport",
+    "large_airport",
+    "seaplane_base",
+]
+
+
+class RunwayEnd(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(..., min_length=1)
+    lat: Optional[float] = Field(None, ge=-90, le=90)
+    lon: Optional[float] = Field(None, ge=-180, le=180)
+    elevation_ft: Optional[float] = None
+    heading: Optional[float] = Field(None, ge=0, le=360)
+    ils: Optional[str] = None
+
+
+class Runway(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(..., min_length=1)
+    # length_ft/width_ft accept 0 as a NASR placeholder for runway stubs
+    # (e.g., declared-only IDs with no physical surface — KORD has one).
+    length_ft: Optional[float] = Field(None, ge=0)
+    width_ft: Optional[float] = Field(None, ge=0)
+    surface: Optional[str] = None
+    lighting: Optional[str] = None
+    gradient_pct: Optional[float] = None
+    ends: List[RunwayEnd] = Field(default_factory=list)
+
+
+class Airport(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(..., min_length=1)
+    name: str = Field(..., min_length=1)
+    lat: float = Field(..., ge=-90, le=90)
+    lon: float = Field(..., ge=-180, le=180)
+    type: AirportType
+    elevation_ft: Optional[float] = None
+    country: Optional[str] = None
+    region: Optional[str] = None
+    state: Optional[str] = None
+    municipality: Optional[str] = None
+    icao: Optional[str] = None
+    iata: Optional[str] = None
+    local: Optional[str] = None
+    scheduled_service: Optional[bool] = None
+    wikipedia: Optional[str] = None
+    runways: List[Runway] = Field(default_factory=list)
