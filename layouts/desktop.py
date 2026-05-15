@@ -308,9 +308,9 @@ def desktop_layout():
         html.Div(className="main-row main-grid", children=[
             # === Sidebar ===
             html.Div(id="sidebar", className="resizable-sidebar", children=[
-                # Header row with title and collapse button
-                html.Div(className="sidebar-header", children=[
-                    html.Div("Maneuver Overlay Tool", className="sidebar-title"),
+                # Slim header — brand lives in the top-strip; sidebar just
+                # keeps the collapse handle.
+                html.Div(className="sidebar-header sidebar-header-slim", children=[
                     html.Button(
                         "«",
                         id="sidebar-collapse-btn",

@@ -1421,3 +1421,20 @@ input[type="radio"] {
   letter-spacing: 0.06em;
   text-align: center;
 }
+
+/* Slim sidebar header — Phase 4 cleanup. Brand removed (top-strip
+   owns it); only the collapse-handle remains. */
+.sidebar-header.sidebar-header-slim {
+  padding: 6px 8px;
+  justify-content: flex-end;
+  min-height: 0;
+  background: transparent;
+  border-bottom: 1px solid var(--gray-border);
+}
+.sidebar-header.sidebar-header-slim .sidebar-collapse-btn {
+  margin-left: auto;
+}
+
+[data-theme="dark"] .sidebar-header.sidebar-header-slim {
+  border-bottom-color: #334155;
+}
