@@ -26,7 +26,7 @@ def engineout_layout():
                     "Automatically uses slips, S-turns, or 360s when too high."
                 ], style={"fontSize": "11px", "color": "#666", "margin": "0"}),
                 html.Div([
-                    html.Strong("⚠️ Warning: ", style={"color": "#dc3545", "fontSize": "11px"}),
+                    html.Strong("Warning: ", style={"color": "#dc3545", "fontSize": "11px"}),
                     html.Span("Actual glide performance varies significantly with density altitude, configuration, and technique. "
                              "Use conservative planning margins.", style={"fontSize": "11px", "color": "#666"})
                 ], style={"marginTop": "6px", "paddingTop": "6px", "borderTop": "1px solid #ddd"}),

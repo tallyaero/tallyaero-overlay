@@ -159,7 +159,7 @@ def register(app):
         if warnings.get('ground_impact'):
             warning_elements.append(
                 html.Div([
-                    html.Strong("⚠️ GROUND IMPACT: "),
+                    html.Strong("GROUND IMPACT: "),
                     html.Span("Aircraft would impact terrain before completing the maneuver. "),
                     html.Span(f"Suggested minimum start altitude: {warnings.get('suggested_min_start_alt', 0):.0f} ft AGL"),
                 ], style={"color": "white", "backgroundColor": "#dc3545", "padding": "8px", "borderRadius": "4px", "marginBottom": "5px"})
@@ -169,7 +169,7 @@ def register(app):
         elif warnings.get('below_minimum'):
             warning_elements.append(
                 html.Div([
-                    html.Strong("⚠️ BELOW MINIMUM: "),
+                    html.Strong("BELOW MINIMUM: "),
                     html.Span(f"Final altitude {warnings.get('final_altitude_agl', 0):.0f} ft AGL is below 1,500 ft AGL minimum. "),
                     html.Span(f"Suggested minimum start altitude: {warnings.get('suggested_min_start_alt', 0):.0f} ft AGL"),
                 ], style={"color": "#856404", "backgroundColor": "#fff3cd", "padding": "8px", "borderRadius": "4px", "marginBottom": "5px"})

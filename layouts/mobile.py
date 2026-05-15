@@ -48,7 +48,7 @@ def mobile_layout():
         html.Div(className="mobile-top-bar", children=[
             html.Div(className="mobile-top-row", children=[
                 html.Button(
-                    "☰",
+                    "Menu",
                     id="mobile-settings-toggle",
                     className="mobile-hamburger",
                     n_clicks=0,

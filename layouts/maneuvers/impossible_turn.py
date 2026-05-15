@@ -26,7 +26,7 @@ def impossible_turn_layout():
                     "Model applies pilot reaction delay, transitions to best glide speed, and attempts to intercept the reciprocal runway heading."
                 ], style={"fontSize": "11px", "color": "#666", "margin": "0"}),
                 html.Div([
-                    html.Strong("⚠️ Warning: ", style={"color": "#dc3545", "fontSize": "11px"}),
+                    html.Strong("Warning: ", style={"color": "#dc3545", "fontSize": "11px"}),
                     html.Span("This is a planning tool only. Actual performance varies with density altitude, wind shear, pilot technique, and aircraft condition. "
                              "Always maintain a safety margin.", style={"fontSize": "11px", "color": "#666"})
                 ], style={"marginTop": "6px", "paddingTop": "6px", "borderTop": "1px solid #ddd"}),

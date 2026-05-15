@@ -78,11 +78,11 @@ def register(app):
             return [], None, "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
         if not ac_name or not engine_key:
-            return [], None, "⚠️ Select aircraft and engine first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+            return [], None, "Select aircraft and engine first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
         # Touchdown point is always required (user clicks on runway)
         if not touchdown_data:
-            return [], None, "⚠️ Click 'Set Touchdown Point' then click on the runway where you want to land.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+            return [], None, "Click 'Set Touchdown Point' then click on the runway where you want to land.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
         try:
             # Get airport data for elevation
@@ -109,7 +109,7 @@ def register(app):
                 if manual_heading:
                     runway_heading = float(manual_heading)
                 else:
-                    return [], None, "⚠️ Select a runway or enter manual heading.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+                    return [], None, "Select a runway or enter manual heading.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
             # Get values
             pattern_alt = float(pattern_alt_agl) if pattern_alt_agl else 1000.0
@@ -149,7 +149,7 @@ def register(app):
             )
 
             if not path or not hover_data:
-                return [], None, "⚠️ No glide path generated. Check inputs.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+                return [], None, "No glide path generated. Check inputs.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
             # Build map elements
             elements = []
@@ -200,14 +200,14 @@ def register(app):
 
             if success:
                 if td_error == 0:
-                    msg = "✅ SUCCESS - Touchdown on target!"
+                    msg = "SUCCESS - Touchdown on target!"
                 else:
-                    msg = f"✅ SUCCESS - Touchdown +{td_error:.0f} ft (within ACS -0/+200)"
+                    msg = f"SUCCESS - Touchdown +{td_error:.0f} ft (within ACS -0/+200)"
             else:
                 if td_error < 0:
-                    msg = f"❌ FAILED - SHORT by {abs(td_error):.0f} ft"
+                    msg = f"FAILED - SHORT by {abs(td_error):.0f} ft"
                 else:
-                    msg = f"❌ FAILED - LONG by {td_error:.0f} ft (exceeds +200)"
+                    msg = f"FAILED - LONG by {td_error:.0f} ft (exceeds +200)"
 
             # Calculate bounds
             lats = [pt[0] for pt in path] + [runway_threshold['lat']]
@@ -255,12 +255,12 @@ def register(app):
             # Success/Failure banner
             if success:
                 result_banner = html.Div(
-                    f"✅ SUCCESSFUL - Touchdown {'+' if td_error >= 0 else ''}{td_error:.0f} ft",
+                    f"SUCCESSFUL - Touchdown {'+' if td_error >= 0 else ''}{td_error:.0f} ft",
                     style={"fontWeight": "bold", "color": "#28a745", "marginBottom": "8px", "fontSize": "12px"}
                 )
             else:
                 result_banner = html.Div(
-                    f"❌ {'SHORT' if td_error < 0 else 'LONG'} - {abs(td_error):.0f} ft {'before' if td_error < 0 else 'beyond'} target",
+                    f"{'SHORT' if td_error < 0 else 'LONG'} - {abs(td_error):.0f} ft {'before' if td_error < 0 else 'beyond'} target",
                     style={"fontWeight": "bold", "color": "#dc3545", "marginBottom": "8px", "fontSize": "12px"}
                 )
 
@@ -308,7 +308,7 @@ def register(app):
             import traceback
             log.error(f"EXCEPTION in draw_poweroff180(): {e}")
             traceback.print_exc()
-            return [], None, f"⚠️ Error: {str(e)}", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+            return [], None, f"Error: {str(e)}", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
 
     @app.callback(
         Output("scrubber-layer", "children", allow_duplicate=True),
