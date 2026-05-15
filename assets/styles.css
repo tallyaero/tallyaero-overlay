@@ -2219,16 +2219,21 @@ input[type="radio"] {
 
 /* Route waypoint multi-select — needs to dominate the shelf row so
    pills lay out horizontally. flex-grow:9 beats .shelf-spacer's
-   flex-grow:1 so essentially all extra row space goes here. */
+   flex-grow:1 so essentially all extra row space goes here. The
+   inner dropdown is also told to flex-fill the field's width, since
+   the .shelf-field row-direction rule otherwise leaves the dropdown
+   at its natural pill-width. */
 .shelf-field.shelf-field-route {
-  flex: 9 1 520px;
-  min-width: 360px;
+  flex: 9 1 520px !important;
+  min-width: 480px;
   max-width: none;
 }
-.shelf-field .route-waypoint-dropdown,
-.shelf-field .route-waypoint-dropdown .Select,
-.shelf-field .route-waypoint-dropdown .Select-control {
-  width: 100%;
+.shelf-field-route > .route-waypoint-dropdown,
+.shelf-field-route .Select,
+.shelf-field-route .Select-control {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 420px;
   min-height: 30px;
 }
 .shelf-field .route-waypoint-dropdown .Select-multi-value-wrapper {
