@@ -27,6 +27,9 @@ from core.route import compute_route_segment, magvar_west_positive, haversine_nm
 from core.corridor import compute_route_corridor, sample_route_points
 from core.terrain import elevation_m as _terrain_elevation_m, prefetch_corridor
 from core.airport_search import search_airports, airport_label, resolve_waypoint
+from core.diverts import (
+    divert_coverage_along_route, gap_segments, longest_gap_nm,
+)
 
 
 def _multi_route_bounds(waypoints: list[dict], pad: float = 0.1):
@@ -294,6 +297,60 @@ def register(app):
                 "terrain_used": True,
             }
 
+        # ─── Divert airport reach analysis ─────────────────────────────
+        # Per route sample, what airports could the aircraft glide to if
+        # the engine quit at that point? Aggregate across all legs.
+        all_samples: list[tuple[float, float]] = []
+        all_reaches: list[float] = []
+        for a, b in zip(waypoints[:-1], waypoints[1:]):
+            leg_nm = haversine_nm(a["lat"], a["lon"], b["lat"], b["lon"])
+            if leg_nm <= 200:
+                spacing = 2.0
+            elif leg_nm <= 600:
+                spacing = max(2.0, leg_nm / 100.0)
+            else:
+                spacing = max(5.0, leg_nm / 150.0)
+            leg_samples = sample_route_points(
+                a["lat"], a["lon"], b["lat"], b["lon"], spacing_nm=spacing)
+            # Match corridor reach: still-air glide NM at this leg's AGL.
+            # We use the conservative max(origin,dest) elev for the leg.
+            field_e = max(a.get("elevation_ft") or 0.0,
+                          b.get("elevation_ft") or 0.0)
+            leg_reach = max(2.0,
+                            (cruise_alt - field_e) * glide_ratio / 6076.115)
+            for s in leg_samples:
+                all_samples.append(s)
+                all_reaches.append(leg_reach)
+
+        divert = divert_coverage_along_route(
+            all_samples, airport_data, all_reaches,
+        )
+        gaps = gap_segments(all_samples, divert["per_sample"])
+        long_gap = longest_gap_nm(gaps)
+
+        # Render reachable airports as small green dots.
+        # Cap at 200 so we don't melt the browser on transcontinental routes.
+        for entry in divert["unique_diverts"][:200]:
+            ap = entry["airport"]
+            tip = (f"{ap.get('id')} — {ap.get('name','')} "
+                   f"({entry['min_distance_nm']:.1f} NM nearest)")
+            layer.append(dl.CircleMarker(
+                center=[ap["lat"], ap["lon"]],
+                radius=3, weight=1,
+                color="#15803d", fillColor="#22c55e", fillOpacity=0.8,
+                children=[dl.Tooltip(tip)],
+            ))
+        # Render gap segments as red dashed segments along the route.
+        for g in gaps:
+            if g["gap_nm"] < 1.0:
+                continue   # skip single-sample blips
+            layer.append(dl.Polyline(
+                positions=[[g["start_lat"], g["start_lon"]],
+                           [g["end_lat"], g["end_lon"]]],
+                color="#dc2626", weight=5, opacity=0.85,
+                dashArray="8 6",
+            ))
+
         # ─── Polyline + waypoint markers on top ────────────────────────
         polyline_positions = [[w["lat"], w["lon"]] for w in waypoints]
         layer.append(dl.Polyline(
@@ -358,6 +415,35 @@ def register(app):
                 ], className="route-summary-row"))
             extras = html.Div(className="route-corridor-badge", children=rows)
 
+        # Divert summary block — always shown, even without corridor.
+        n_diverts = len(divert["unique_diverts"])
+        no_cov = divert["n_samples_with_no_coverage"]
+        n_samp = len(all_samples)
+        divert_rows = [
+            html.Div([html.Span("Diverts in reach",
+                                className="route-summary-label"),
+                      html.Span(f"{n_diverts} airports",
+                                className="route-summary-value")],
+                     className="route-summary-row"),
+        ]
+        if no_cov == 0:
+            divert_rows.append(html.Div([
+                html.Span("Coverage", className="route-summary-label"),
+                html.Span("Full route in glide reach",
+                          className="route-summary-value"),
+            ], className="route-summary-row"))
+        else:
+            # Long gap warning if biggest gap > 10 NM
+            gap_cls = "route-summary-value"
+            if long_gap > 10:
+                gap_cls += " route-summary-warn"
+            divert_rows.append(html.Div([
+                html.Span("Longest gap", className="route-summary-label"),
+                html.Span(f"{long_gap:.0f} NM ({no_cov}/{n_samp} samples)",
+                          className=gap_cls),
+            ], className="route-summary-row"))
+        divert_block = html.Div(className="route-divert-badge", children=divert_rows)
+
         overlay = html.Div(
             [
                 html.Div(className="route-overlay-header", children=[
@@ -366,6 +452,7 @@ def register(app):
                 ]),
                 card,
                 extras,
+                divert_block,
             ],
             className="route-overlay-panel",
         )
@@ -374,5 +461,11 @@ def register(app):
             "waypoints": [w.get("id") for w in waypoints],
             "legs": legs,
             "corridor": corridor_meta_agg,
+            "diverts": {
+                "n_unique": n_diverts,
+                "longest_gap_nm": long_gap,
+                "n_samples_with_no_coverage": no_cov,
+                "n_samples": n_samp,
+            },
         }
         return overlay, layer, bounds, store
