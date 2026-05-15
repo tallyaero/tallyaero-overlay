@@ -74,6 +74,71 @@ def register(app):
             return not is_open
         return is_open
 
+    # === Chip-strip label updaters (Phase 4 chip-strip) ===
+    # Each chip shows the current value of its underlying input.
+    # Server callbacks are simple String formatting; clientside is unnecessary.
+
+    @app.callback(
+        Output("chip-wind-label", "children"),
+        Input("env-wind-dir", "value"),
+        Input("env-wind-speed", "value"),
+    )
+    def _chip_wind_label(direction, speed):
+        d = int(direction) if direction not in (None, "", "null") else 360
+        s = int(speed) if speed not in (None, "", "null") else 0
+        return f"{d:03d}°/{s}kt"
+
+    @app.callback(Output("chip-oat-label", "children"), Input("env-oat", "value"))
+    def _chip_oat_label(oat):
+        try:
+            return f"{int(float(oat))}°F"
+        except (TypeError, ValueError):
+            return "—"
+
+    @app.callback(Output("chip-altim-label", "children"), Input("env-altimeter", "value"))
+    def _chip_altim_label(altim):
+        try:
+            return f"{float(altim):.2f}"
+        except (TypeError, ValueError):
+            return "—"
+
+    @app.callback(
+        Output("chip-weight-label", "children"),
+        Input("total-weight-display", "value"),
+    )
+    def _chip_weight_label(total):
+        if not total:
+            return "—"
+        # total-weight-display already includes "lb" via the formatter
+        return str(total)
+
+    @app.callback(
+        Output("chip-maneuver-label", "children"),
+        Input("maneuver-select", "value"),
+    )
+    def _chip_maneuver_label(value):
+        labels = {
+            "impossible_turn": "Impossible Turn",
+            "poweroff180": "Power-Off 180",
+            "engineout": "Engine-Out Glide",
+            "steep_turn": "Steep Turns",
+            "chandelle": "Chandelle",
+            "lazy8": "Lazy Eight",
+            "steep_spiral": "Steep Spiral",
+            "s_turn": "S-Turns",
+            "turns_point": "Turns Around Point",
+            "rect_course": "Rectangular",
+            "pylons": "Eights on Pylons",
+        }
+        return labels.get(value, "Select")
+
+    @app.callback(
+        Output("chip-apt-label", "children"),
+        Input("selected-airport-id", "data"),
+    )
+    def _chip_apt_label(airport_id):
+        return airport_id or "Select"
+
     # === Clientside: sidebar collapse (DOM-class toggle) ===
     app.clientside_callback(
         """

@@ -1571,3 +1571,90 @@ input[type="radio"] {
 [data-theme="dark"] .legal-links .legal-link { color: #cbd5e1; }
 [data-theme="dark"] .legal-links .separator { color: #475569; }
 [data-theme="dark"] .legal-links .legal-copyright { color: #94a3b8; }
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 4 chip-strip — second row below the top-strip, above the map.
+   Horizontal scroll on overflow so narrow desktops still see everything.
+   ══════════════════════════════════════════════════════════════ */
+
+.env-chips-strip {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--ta-surface-secondary, #ffffff);
+  border-bottom: 1px solid var(--ta-border-primary, #e2e8f0);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  flex-shrink: 0;
+}
+
+/* Tappable variant — visually distinct from the static env-chip */
+.env-chip-tappable {
+  flex-shrink: 0;
+}
+.env-chip-tappable:hover {
+  background: rgba(13, 89, 242, 0.06);
+  border-color: var(--ta-brand-blue, #0d59f2);
+}
+
+/* Popover bodies — give each one breathing room */
+.env-popover {
+  min-width: 260px;
+  max-width: 360px;
+  z-index: 1100;
+}
+.env-popover.env-popover-apt {
+  min-width: 340px;
+}
+.env-popover.env-popover-weight {
+  min-width: 320px;
+}
+.env-popover.env-popover-maneuver {
+  min-width: 280px;
+}
+.env-popover .popover-header {
+  font-family: var(--ta-font-sans, system-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ta-text-secondary, #64748b);
+  background: var(--ta-surface-elevated, #ffffff);
+  padding: 8px 12px;
+}
+.env-popover .popover-body {
+  padding: 12px;
+}
+.input-label-sm {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ta-text-secondary, #64748b);
+  margin-bottom: 4px;
+  display: block;
+}
+
+[data-theme="dark"] .env-chips-strip {
+  background: #1e293b;
+  border-bottom-color: #334155;
+}
+[data-theme="dark"] .env-chip-tappable:hover {
+  background: rgba(96, 165, 250, 0.12);
+}
+[data-theme="dark"] .env-popover .popover {
+  background: #0f172a;
+  border-color: #334155;
+}
+[data-theme="dark"] .env-popover .popover-header {
+  background: #1e293b;
+  color: #cbd5e1;
+  border-bottom-color: #334155;
+}
+[data-theme="dark"] .env-popover .popover-body {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+[data-theme="dark"] .input-label-sm {
+  color: #cbd5e1;
+}
