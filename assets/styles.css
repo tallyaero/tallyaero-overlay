@@ -2203,3 +2203,14 @@ input[type="radio"] {
 }
 [data-theme="dark"] .route-overlay-header { border-bottom-color: #334155; }
 [data-theme="dark"] .route-overlay-title { color: #f1f5f9; }
+
+/* Glide corridor section inside the route summary overlay */
+.route-corridor-badge {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--ta-border-primary, #e2e8f0);
+}
+.route-corridor-badge .route-summary-row:first-child {
+  font-weight: 700;
+}
+[data-theme="dark"] .route-corridor-badge { border-top-color: #334155; }

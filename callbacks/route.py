@@ -13,6 +13,7 @@ import dash_leaflet as dl
 
 from core.data_loader import airport_data
 from core.route import compute_route_segment, magvar_west_positive
+from core.corridor import compute_route_corridor
 
 
 def _airport_by_id(airport_id: str):
@@ -82,12 +83,15 @@ def register(app):
         State("route-dest-input", "value"),
         State("route-cruise-alt", "value"),
         State("route-tas", "value"),
+        State("route-glide-ratio", "value"),
+        State("route-show-corridor", "value"),
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
         prevent_initial_call=True,
     )
     def compute_and_render(compute_clicks, clear_clicks,
                           origin_id, dest_id, cruise_alt, tas,
+                          glide_ratio, corridor_show,
                           wind_dir, wind_speed):
         trigger = ctx.triggered_id
         if trigger == "route-clear-btn":
@@ -103,8 +107,9 @@ def register(app):
         try:
             cruise_alt = float(cruise_alt) if cruise_alt else 5500.0
             tas = float(tas) if tas else 110.0
+            glide_ratio = float(glide_ratio) if glide_ratio else 9.0
         except (TypeError, ValueError):
-            return (html.Div("Cruise alt and TAS must be numbers.",
+            return (html.Div("Numeric fields must be numbers.",
                              className="route-summary-error"),
                     no_update, no_update, no_update)
 
@@ -131,7 +136,36 @@ def register(app):
             magvar_deg=magvar,
         )
 
-        layer = [
+        layer = []
+
+        # Glide corridor (under the route line so the line sits on top)
+        corridor_meta = None
+        if corridor_show and "show" in corridor_show:
+            field_elev = max(
+                origin.get("elevation_ft") or 0.0,
+                dest.get("elevation_ft") or 0.0,
+            )
+            rings, corridor_meta = compute_route_corridor(
+                origin_lat=origin["lat"], origin_lon=origin["lon"],
+                dest_lat=dest["lat"], dest_lon=dest["lon"],
+                cruise_alt_msl_ft=cruise_alt,
+                field_elev_ft=field_elev,
+                glide_ratio=glide_ratio,
+                glide_ias_kt=tas * 0.7,   # crude best-glide vs TAS proxy
+                wind_dir_deg=wd, wind_speed_kt=ws,
+                spacing_nm=2.0,
+            )
+            for ring in rings:
+                layer.append(
+                    dl.Polygon(
+                        positions=ring,
+                        color="#22c55e", weight=1,
+                        fillColor="#22c55e", fillOpacity=0.18,
+                    )
+                )
+
+        # Route line + endpoints on top
+        layer.extend([
             dl.Polyline(
                 positions=[[origin["lat"], origin["lon"]],
                            [dest["lat"], dest["lon"]]],
@@ -147,7 +181,7 @@ def register(app):
                 radius=6, color="#ef4444", fillOpacity=1.0,
                 children=[dl.Tooltip(f"{dest.get('id')} (dest)")],
             ),
-        ]
+        ])
 
         bounds = _route_bounds(origin["lat"], origin["lon"],
                                dest["lat"], dest["lon"])
@@ -163,9 +197,33 @@ def register(app):
             "ground_speed_kt": round(result.ground_speed_kt, 1),
             "ete_min": round(result.ete_min, 1),
             "magvar_deg": round(magvar, 2),
+            "corridor": corridor_meta,
         }
 
         card = _summary_card(result, origin.get("id"), dest.get("id"))
+        # Append corridor-specific badge to the summary if computed
+        if corridor_meta:
+            extras = html.Div(className="route-corridor-badge", children=[
+                html.Div([html.Span("AGL", className="route-summary-label"),
+                          html.Span(f"{corridor_meta['agl_ft']:.0f} ft",
+                                    className="route-summary-value")],
+                         className="route-summary-row"),
+                html.Div([html.Span("Narrowest", className="route-summary-label"),
+                          html.Span(f"{corridor_meta['narrowest_nm']:.1f} NM",
+                                    className="route-summary-value")],
+                         className="route-summary-row"),
+                html.Div([html.Span("Widest", className="route-summary-label"),
+                          html.Span(f"{corridor_meta['widest_nm']:.1f} NM",
+                                    className="route-summary-value")],
+                         className="route-summary-row"),
+                html.Div([html.Span("Area", className="route-summary-label"),
+                          html.Span(f"{corridor_meta['area_nm2']:.0f} NM²",
+                                    className="route-summary-value")],
+                         className="route-summary-row"),
+            ])
+        else:
+            extras = None
+
         overlay = html.Div(
             [
                 html.Div(className="route-overlay-header", children=[
@@ -173,6 +231,7 @@ def register(app):
                               className="route-overlay-title"),
                 ]),
                 card,
+                extras,
             ],
             className="route-overlay-panel",
         )
