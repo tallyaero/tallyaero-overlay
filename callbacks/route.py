@@ -28,7 +28,7 @@ from core.corridor import compute_route_corridor, sample_route_points
 from core.terrain import elevation_m as _terrain_elevation_m, prefetch_corridor
 from core.airport_search import search_airports, airport_label, resolve_waypoint
 from core.diverts import (
-    divert_coverage_along_route, gap_segments, longest_gap_nm,
+    divert_coverage_along_route_glide, gap_segments, longest_gap_nm,
 )
 
 
@@ -299,9 +299,12 @@ def register(app):
 
         # ─── Divert airport reach analysis ─────────────────────────────
         # Per route sample, what airports could the aircraft glide to if
-        # the engine quit at that point? Aggregate across all legs.
+        # the engine quit at that point — accounting for wind on the
+        # bearing AND terrain ridges between sample and airport? The
+        # elevation_fn here is the same one the corridor uses; tiles
+        # warmed by prefetch_corridor already cover the bearings the
+        # divert ray-march walks.
         all_samples: list[tuple[float, float]] = []
-        all_reaches: list[float] = []
         for a, b in zip(waypoints[:-1], waypoints[1:]):
             leg_nm = haversine_nm(a["lat"], a["lon"], b["lat"], b["lon"])
             if leg_nm <= 200:
@@ -310,20 +313,17 @@ def register(app):
                 spacing = max(2.0, leg_nm / 100.0)
             else:
                 spacing = max(5.0, leg_nm / 150.0)
-            leg_samples = sample_route_points(
-                a["lat"], a["lon"], b["lat"], b["lon"], spacing_nm=spacing)
-            # Match corridor reach: still-air glide NM at this leg's AGL.
-            # We use the conservative max(origin,dest) elev for the leg.
-            field_e = max(a.get("elevation_ft") or 0.0,
-                          b.get("elevation_ft") or 0.0)
-            leg_reach = max(2.0,
-                            (cruise_alt - field_e) * glide_ratio / 6076.115)
-            for s in leg_samples:
-                all_samples.append(s)
-                all_reaches.append(leg_reach)
+            all_samples.extend(sample_route_points(
+                a["lat"], a["lon"], b["lat"], b["lon"], spacing_nm=spacing))
 
-        divert = divert_coverage_along_route(
-            all_samples, airport_data, all_reaches,
+        divert = divert_coverage_along_route_glide(
+            all_samples, airport_data,
+            cruise_alt_msl_ft=cruise_alt,
+            glide_ratio=glide_ratio,
+            glide_ias_kt=glide_ias,
+            wind_dir_deg=wd, wind_speed_kt=ws,
+            elevation_fn=_terrain_elevation_m,
+            terrain_step_nm=0.5,
         )
         gaps = gap_segments(all_samples, divert["per_sample"])
         long_gap = longest_gap_nm(gaps)
