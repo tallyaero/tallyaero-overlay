@@ -32,6 +32,9 @@ from core.diverts import (
 )
 
 
+import math
+
+
 def _multi_route_bounds(waypoints: list[dict], pad: float = 0.1):
     """[[sw_lat, sw_lon], [ne_lat, ne_lon]] enclosing every waypoint."""
     lats = [w["lat"] for w in waypoints]
@@ -42,6 +45,49 @@ def _multi_route_bounds(waypoints: list[dict], pad: float = 0.1):
     lon_pad = max(0.05, (hi_lon - lo_lon) * pad)
     return [[lo_lat - lat_pad, lo_lon - lon_pad],
             [hi_lat + lat_pad, hi_lon + lon_pad]]
+
+
+def _bounds_to_viewport(bounds, map_px=(1100, 700)):
+    """Convert SW/NE bounds into a dash-leaflet `viewport` dict
+    (center + zoom). In dash-leaflet 1.0.15 the `bounds` prop only
+    fits on initial mount; programmatic re-fitting after mount needs
+    to set `viewport` instead.
+
+    Zoom is computed from the bounds diagonal using the Web Mercator
+    pixel formula: each zoom level halves the pixel scale, and the
+    map is 256 px wide at z=0. We pick the smaller of lat/lon zoom
+    so the whole bounds fits, and cap at 13 to avoid zooming past
+    typical viewport scales.
+    """
+    (sw_lat, sw_lon), (ne_lat, ne_lon) = bounds
+    center_lat = (sw_lat + ne_lat) / 2.0
+    center_lon = (sw_lon + ne_lon) / 2.0
+    w_px, h_px = map_px
+
+    # World pixel size at zoom z: 256 * 2^z. We need the zoom where
+    # the bounds in pixels fits within (w_px, h_px).
+    lon_span = max(0.001, ne_lon - sw_lon)
+    lat_span = max(0.001, ne_lat - sw_lat)
+
+    # Mercator lat-span pixel correction at the bound's center
+    lat_rad = math.radians(center_lat)
+    merc = math.log(math.tan(math.pi / 4 + lat_rad / 2))
+    lat_rad_n = math.radians(ne_lat)
+    lat_rad_s = math.radians(sw_lat)
+    merc_span = (math.log(math.tan(math.pi / 4 + lat_rad_n / 2))
+                 - math.log(math.tan(math.pi / 4 + lat_rad_s / 2)))
+    # Each unit of Mercator y == (256 / 2π) px at z=0
+    lat_px_z0 = abs(merc_span) * 256 / (2 * math.pi)
+    lon_px_z0 = lon_span / 360.0 * 256
+
+    z_lat = math.log2(h_px / max(0.001, lat_px_z0))
+    z_lon = math.log2(w_px / max(0.001, lon_px_z0))
+    zoom = max(2, min(13, min(z_lat, z_lon)))
+    return {
+        "center": [center_lat, center_lon],
+        "zoom": zoom,
+        "transition": "flyTo",
+    }
 
 
 def _summary_card(legs: list[dict], waypoints: list[dict]) -> html.Div:
@@ -135,7 +181,7 @@ def register(app):
     @app.callback(
         Output("route-summary-overlay", "children"),
         Output("route-layer", "children"),
-        Output("map", "bounds"),
+        Output("map", "viewport"),
         Output("route-result-store", "data"),
         Input("compute-route-btn", "n_clicks"),
         Input("route-clear-btn", "n_clicks"),
@@ -371,6 +417,7 @@ def register(app):
             ))
 
         bounds = _multi_route_bounds(waypoints)
+        viewport = _bounds_to_viewport(bounds)
 
         card = _summary_card(legs, waypoints)
         extras = None
@@ -468,4 +515,4 @@ def register(app):
                 "n_samples": n_samp,
             },
         }
-        return overlay, layer, bounds, store
+        return overlay, layer, viewport, store
