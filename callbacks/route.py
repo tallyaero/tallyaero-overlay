@@ -374,19 +374,21 @@ def register(app):
         gaps = gap_segments(all_samples, divert["per_sample"])
         long_gap = longest_gap_nm(gaps)
 
-        # Render reachable airports as small green dots.
-        # Cap at 200 so we don't melt the browser on transcontinental routes.
+        # Reachable divert airports — cyan dots so they stand out against
+        # the green corridor fill. Cap at 200 so we don't melt the browser
+        # on transcontinental routes.
         for entry in divert["unique_diverts"][:200]:
             ap = entry["airport"]
             tip = (f"{ap.get('id')} — {ap.get('name','')} "
-                   f"({entry['min_distance_nm']:.1f} NM nearest)")
+                   f"(divert · {entry['min_distance_nm']:.1f} NM nearest)")
             layer.append(dl.CircleMarker(
                 center=[ap["lat"], ap["lon"]],
-                radius=3, weight=1,
-                color="#15803d", fillColor="#22c55e", fillOpacity=0.8,
+                radius=4, weight=1.5,
+                color="#0e7490", fillColor="#22d3ee", fillOpacity=0.95,
                 children=[dl.Tooltip(tip)],
             ))
-        # Render gap segments as red dashed segments along the route.
+        # Red dashed segments where no airport is in engine-out glide.
+        # Tooltip explains the semantic so a pilot doesn't have to guess.
         for g in gaps:
             if g["gap_nm"] < 1.0:
                 continue   # skip single-sample blips
@@ -395,6 +397,10 @@ def register(app):
                            [g["end_lat"], g["end_lon"]]],
                 color="#dc2626", weight=5, opacity=0.85,
                 dashArray="8 6",
+                children=[dl.Tooltip(
+                    f"No airport within engine-out glide range — "
+                    f"{g['gap_nm']:.0f} NM stretch"
+                )],
             ))
 
         # ─── Polyline + waypoint markers on top ────────────────────────
@@ -467,16 +473,16 @@ def register(app):
         no_cov = divert["n_samples_with_no_coverage"]
         n_samp = len(all_samples)
         divert_rows = [
-            html.Div([html.Span("Diverts in reach",
+            html.Div([html.Span("Engine-out diverts",
                                 className="route-summary-label"),
-                      html.Span(f"{n_diverts} airports",
+                      html.Span(f"{n_diverts} airports in glide",
                                 className="route-summary-value")],
                      className="route-summary-row"),
         ]
         if no_cov == 0:
             divert_rows.append(html.Div([
                 html.Span("Coverage", className="route-summary-label"),
-                html.Span("Full route in glide reach",
+                html.Span("Full route within an engine-out glide",
                           className="route-summary-value"),
             ], className="route-summary-row"))
         else:
@@ -484,10 +490,16 @@ def register(app):
             gap_cls = "route-summary-value"
             if long_gap > 10:
                 gap_cls += " route-summary-warn"
+            # Compute how much of the route the gaps span, in NM
+            pct = (no_cov / n_samp * 100.0) if n_samp else 0.0
             divert_rows.append(html.Div([
-                html.Span("Longest gap", className="route-summary-label"),
-                html.Span(f"{long_gap:.0f} NM ({no_cov}/{n_samp} samples)",
-                          className=gap_cls),
+                html.Span("Longest no-divert stretch",
+                          className="route-summary-label"),
+                html.Span(
+                    f"{long_gap:.0f} NM with no airfield in glide "
+                    f"({pct:.0f}% of route)",
+                    className=gap_cls,
+                ),
             ], className="route-summary-row"))
         divert_block = html.Div(className="route-divert-badge", children=divert_rows)
 
