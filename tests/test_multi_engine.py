@@ -119,27 +119,34 @@ def test_driftdown_bad_data_returns_no_descent():
 
 # === Powered SE reach =======================================================
 
-def test_reach_full_fuel_no_wind():
-    """Seneca II at 8000 ft, full 93 gal, calm air. Already below
-    ceiling so it's pure level flight: 93/10 = 9.3 hr × 120 kt = ~1116 NM.
-    But realistically these reaches are huge; we cap test expectations
-    at the 1000-NM ballpark."""
+def test_reach_full_fuel_no_wind_default_60min_cap():
+    """Seneca II at 8000 ft (below ceiling) with full 93 gal, calm air,
+    DEFAULT 60-min operational cap: 60 min × 120 kt = 120 NM. Fuel
+    doesn't constrain because 93 gal / 10 gph = 9.3 hr ≫ 60 min."""
     r = single_engine_powered_reach_nm(
         _seneca_like(),
         current_alt_msl_ft=8000,
         fuel_remaining_gal=93,
         bearing_deg=0,
     )
+    assert 110 < r < 130
+
+
+def test_reach_uncapped_max_theoretical():
+    """When the operational cap is lifted, the reach approaches the
+    fuel-out maximum (~1116 NM for full Seneca tanks)."""
+    r = single_engine_powered_reach_nm(
+        _seneca_like(), 8000, 93, 0,
+        max_minutes_after_failure=1e6,   # effectively unlimited
+    )
     assert 1000 < r < 1200
 
 
-def test_reach_half_fuel_half_distance():
-    """Half fuel ≈ half reach (linear at calm, below ceiling)."""
-    full = single_engine_powered_reach_nm(
-        _seneca_like(), 8000, 93, 0)
-    half = single_engine_powered_reach_nm(
-        _seneca_like(), 8000, 46.5, 0)
-    assert abs(half / full - 0.5) < 0.02
+def test_reach_fuel_limit_under_cap():
+    """If fuel runs out before the cap, fuel wins. 5 gal / 10 gph = 30
+    min × 120 kt = 60 NM, vs default 60-min cap = 120 NM."""
+    r = single_engine_powered_reach_nm(_seneca_like(), 8000, 5, 0)
+    assert 55 < r < 65
 
 
 def test_reach_tailwind_extends():

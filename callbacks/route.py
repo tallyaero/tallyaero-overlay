@@ -260,13 +260,15 @@ def register(app):
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
         State("aircraft-select", "value"),
+        State("fuel-load", "value"),
         prevent_initial_call=True,
     )
     def compute_and_render(compute_clicks, clear_clicks,
                           waypoint_ids, cruise_alt, tas,
                           glide_ratio, glide_ias, climb_ias, corridor_show,
                           use_live_winds, engine_out_mode,
-                          wind_dir, wind_speed, aircraft_name):
+                          wind_dir, wind_speed, aircraft_name,
+                          fuel_load_gal):
         trigger = ctx.triggered_id
         if trigger == "route-clear-btn":
             return _empty_clear()
@@ -528,20 +530,50 @@ def register(app):
             }
 
             # ─── Multi-engine: powered SE corridor (purple) ──────────
-            # When the aircraft is a twin with populated SE perf data,
-            # compute the powered single-engine reach footprint and
-            # render based on the engine_out_mode toggle.
+            # Two corrections vs first cut: (1) the SE reach is capped
+            # at 60 min after failure (operational reality — no pilot
+            # flies hours single-engine), (2) fuel decreases along the
+            # route from the actual loaded amount, using twin-engine
+            # cruise burn ≈ 2× SE burn as the depletion rate.
             se_meta = None
             if ac_is_me and has_se_performance_data(ac_for_me):
                 show_se = mode in ("se", "both")
-                fuel_full = ac_for_me.get("fuel_capacity_gal") or 0.0
-                if show_se and fuel_full > 0:
+                # Actual fuel loaded (from sidebar), capped at tank
+                # capacity. fuel-load slider is in gallons (0-50 ish
+                # range default; pilot can override).
+                fuel_cap = ac_for_me.get("fuel_capacity_gal") or 0.0
+                starting_fuel_gal = min(fuel_cap, float(fuel_load_gal or 0))
+                if starting_fuel_gal <= 0:
+                    # If pilot didn't set fuel, assume full tanks
+                    starting_fuel_gal = fuel_cap
+                if show_se and starting_fuel_gal > 0:
+                    # Per-sample fuel = starting - cumulative twin
+                    # cruise burn to this sample. Twin burn ≈ 2×
+                    # SE burn. Distance to sample / cruise GS = time.
+                    se_fuel_gph = float(
+                        ac_for_me["single_engine_limits"]["fuel_burn_gph"])
+                    twin_burn_gph = 2.0 * se_fuel_gph
+                    cruise_kt = float(
+                        ac_for_me["single_engine_limits"]["cruise_kt"])
+                    cum_dist = 0.0
+                    sample_fuels = [starting_fuel_gal]
+                    for i in range(1, len(all_samples)):
+                        prev = all_samples[i - 1]
+                        cur = all_samples[i]
+                        cum_dist += haversine_nm(*prev, *cur)
+                        hours = cum_dist / max(50.0, tas)
+                        used = hours * twin_burn_gph
+                        sample_fuels.append(
+                            max(0.0, starting_fuel_gal - used))
+
                     se_rings, se_meta = compute_route_se_corridor(
                         all_samples, all_alts, ac_for_me,
-                        fuel_remaining_gal=fuel_full,
+                        fuel_remaining_gal=starting_fuel_gal,
                         wind_dir_deg=wd, wind_speed_kt=ws,
                         sample_winds=all_winds,
                         n_envelope_points=24,
+                        max_minutes_after_failure=60.0,
+                        sample_fuel_remaining_gal=sample_fuels,
                     )
                     for ring in se_rings:
                         layer.append(dl.Polygon(

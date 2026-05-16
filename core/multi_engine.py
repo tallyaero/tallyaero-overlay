@@ -151,13 +151,20 @@ def single_engine_powered_reach_nm(
     wind_dir_deg: float = 0.0,
     wind_speed_kt: float = 0.0,
     dest_elev_ft: float = 0.0,
+    max_minutes_after_failure: float = 60.0,
 ) -> float:
     """Directional powered reach on remaining engine.
 
     Combines a driftdown segment (if above SE ceiling) + a level-flight
-    segment (at the ceiling or current alt, whichever is lower) using
-    remaining fuel. Wind component along the bearing is applied to
-    ground speed for both segments.
+    segment (at the ceiling or current alt, whichever is lower).
+
+    Reach is capped at `max_minutes_after_failure` (default 60 min)
+    OR fuel-out, whichever is sooner. The cap reflects operational
+    reality: standard ME engine-out procedure is to land at the
+    nearest suitable airport within ~30-60 min — no pilot flies hours
+    on one engine if they have an alternative. The math-maximum reach
+    without the cap would be 800-1200 NM for a typical twin with
+    full tanks; that number is real but operationally meaningless.
 
     Returns 0 when SE performance data isn't populated.
     """
@@ -166,7 +173,6 @@ def single_engine_powered_reach_nm(
     sel = aircraft.get("single_engine_limits") or {}
     cruise_kt = float(sel["cruise_kt"])
     fuel_gph = float(sel["fuel_burn_gph"])
-    ceiling = float(sel["service_ceiling_ft"])
 
     along = _wind_along_track(bearing_deg, wind_dir_deg, wind_speed_kt)
 
@@ -180,13 +186,15 @@ def single_engine_powered_reach_nm(
     fuel_used_dd = (dd_minutes / 60.0) * fuel_gph
     fuel_left = max(0.0, fuel_remaining_gal - fuel_used_dd)
 
-    # Level-flight segment: from min(current_alt, ceiling) until fuel
-    # runs out OR we reach destination elevation (if dest > ceiling
-    # we can't get above it on one engine — corner case).
     gs = max(1.0, cruise_kt + along)
     if fuel_gph <= 0:
         return dd_dist
-    level_minutes = fuel_left / fuel_gph * 60.0
+
+    # Time-cap reach: minutes available after failure minus what was
+    # consumed in driftdown.
+    cap_minutes_left = max(0.0, max_minutes_after_failure - dd_minutes)
+    fuel_minutes_left = fuel_left / fuel_gph * 60.0
+    level_minutes = min(cap_minutes_left, fuel_minutes_left)
     level_dist = (level_minutes / 60.0) * gs
 
     return dd_dist + level_dist
@@ -203,6 +211,8 @@ def compute_route_se_corridor(
     wind_speed_kt: float = 0.0,
     sample_winds: Optional[list[tuple[float, float]]] = None,
     n_envelope_points: int = 24,
+    max_minutes_after_failure: float = 60.0,
+    sample_fuel_remaining_gal: Optional[list[float]] = None,
 ) -> tuple[list[list[list[float]]], dict]:
     """Build the powered single-engine corridor along the route.
 
@@ -232,18 +242,24 @@ def compute_route_se_corridor(
         per_sample_wind = list(sample_winds)
     else:
         per_sample_wind = [(wind_dir_deg, wind_speed_kt)] * len(samples)
+    if (sample_fuel_remaining_gal is not None
+            and len(sample_fuel_remaining_gal) == len(samples)):
+        per_sample_fuel = list(sample_fuel_remaining_gal)
+    else:
+        per_sample_fuel = [fuel_remaining_gal] * len(samples)
 
     polys: list[Polygon] = []
     reaches: list[float] = []
-    for (lat, lon), alt, (wd, ws) in zip(
-        samples, sample_alts_msl_ft, per_sample_wind,
+    for (lat, lon), alt, (wd, ws), sample_fuel in zip(
+        samples, sample_alts_msl_ft, per_sample_wind, per_sample_fuel,
     ):
         poly = single_engine_envelope_polygon(
             lat, lon, aircraft,
             current_alt_msl_ft=alt,
-            fuel_remaining_gal=fuel_remaining_gal,
+            fuel_remaining_gal=sample_fuel,
             wind_dir_deg=wd, wind_speed_kt=ws,
             n_points=n_envelope_points,
+            max_minutes_after_failure=max_minutes_after_failure,
         )
         if poly.is_empty:
             continue
@@ -294,6 +310,7 @@ def single_engine_envelope_polygon(
     wind_dir_deg: float = 0.0,
     wind_speed_kt: float = 0.0,
     n_points: int = 36,
+    max_minutes_after_failure: float = 60.0,
 ) -> Polygon:
     """Build a powered SE reach polygon around a single sample point.
 
@@ -308,6 +325,7 @@ def single_engine_envelope_polygon(
         reach = single_engine_powered_reach_nm(
             aircraft, current_alt_msl_ft, fuel_remaining_gal,
             heading, wind_dir_deg, wind_speed_kt,
+            max_minutes_after_failure=max_minutes_after_failure,
         )
         if reach <= 0:
             reach = 0.01
