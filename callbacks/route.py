@@ -22,13 +22,18 @@ from dash import Input, Output, State, html, ctx, no_update
 from dash.exceptions import PreventUpdate
 import dash_leaflet as dl
 
-from core.data_loader import airport_data
+from core.data_loader import aircraft_data, airport_data
 from core.route import compute_route_segment, magvar_west_positive, haversine_nm
 from core.corridor import compute_route_corridor, sample_route_points
 from core.terrain import elevation_m as _terrain_elevation_m, prefetch_corridor
 from core.airport_search import search_airports, airport_label, resolve_waypoint
 from core.diverts import (
     divert_coverage_along_route_glide, gap_segments, longest_gap_nm,
+)
+from core.flight_profile import (
+    compute_flight_profile, altitude_at_distance,
+    climb_rate_fpm as _climb_rate_fpm,
+    class_baseline_climb_rate,
 )
 
 
@@ -177,6 +182,25 @@ def register(app):
                 existing_ids.add(wid)
         return kept
 
+    # === Live climb-rate chip — derives fpm from typed climb IAS ===
+    @app.callback(
+        Output("route-climb-rate-chip", "children"),
+        Input("route-climb-ias", "value"),
+        State("aircraft-select", "value"),
+        prevent_initial_call=False,
+    )
+    def update_climb_rate_chip(climb_ias, aircraft_name):
+        ac = aircraft_data.get(aircraft_name) if aircraft_name else None
+        vy = (ac.get("Vy") if ac else None) or 76.0
+        vno = (ac.get("Vno") if ac else None) or 129.0
+        baseline = class_baseline_climb_rate(ac) if ac else 700.0
+        try:
+            ias = float(climb_ias) if climb_ias else vy
+        except (TypeError, ValueError):
+            ias = vy
+        rate = _climb_rate_fpm(ias, vy, vno, baseline)
+        return f"≈ {rate:.0f} fpm"
+
     # === Compute route + render on map + render summary overlay ===
     @app.callback(
         Output("route-summary-overlay", "children"),
@@ -190,15 +214,17 @@ def register(app):
         State("route-tas", "value"),
         State("route-glide-ratio", "value"),
         State("route-glide-ias", "value"),
+        State("route-climb-ias", "value"),
         State("route-show-corridor", "value"),
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
+        State("aircraft-select", "value"),
         prevent_initial_call=True,
     )
     def compute_and_render(compute_clicks, clear_clicks,
                           waypoint_ids, cruise_alt, tas,
-                          glide_ratio, glide_ias, corridor_show,
-                          wind_dir, wind_speed):
+                          glide_ratio, glide_ias, climb_ias, corridor_show,
+                          wind_dir, wind_speed, aircraft_name):
         trigger = ctx.triggered_id
         if trigger == "route-clear-btn":
             return _empty_clear()
@@ -216,10 +242,21 @@ def register(app):
             tas = float(tas) if tas else 110.0
             glide_ratio = float(glide_ratio) if glide_ratio else 9.0
             glide_ias = float(glide_ias) if glide_ias else 75.0
+            climb_ias = float(climb_ias) if climb_ias else 76.0
         except (TypeError, ValueError):
             return (html.Div("Numeric fields must be numbers.",
                              className="route-summary-error"),
                     no_update, no_update, no_update)
+
+        # Aircraft-derived inputs for the climb model: Vy + Vno + class
+        # baseline climb rate. Falls back to typical-single defaults if
+        # the user hasn't selected an aircraft.
+        ac = aircraft_data.get(aircraft_name) if aircraft_name else None
+        vy_kt = (ac.get("Vy") if ac else None) or 76.0
+        vno_kt = (ac.get("Vno") if ac else None) or 129.0
+        baseline_climb = class_baseline_climb_rate(ac) if ac else 700.0
+        derived_climb_rate = _climb_rate_fpm(
+            climb_ias, vy_kt, vno_kt, baseline_climb)
 
         # Resolve every waypoint to a concrete airport dict.
         waypoints: list[dict] = []
@@ -233,6 +270,61 @@ def register(app):
 
         wd = float(wind_dir) if wind_dir not in (None, "", "null") else 0.0
         ws = float(wind_speed) if wind_speed not in (None, "", "null") else 0.0
+
+        # ─── Flight profile (climb / cruise / descent) ─────────────────
+        # Per-sample altitude is no longer the flat cruise slab. Real
+        # altitude varies along the route: rising during climb, flat
+        # across cruise, descending into the destination. This drives
+        # how much glide reach the corridor + diverts see at each
+        # sample.
+        leg_distances_nm = [
+            haversine_nm(a["lat"], a["lon"], b["lat"], b["lon"])
+            for a, b in zip(waypoints[:-1], waypoints[1:])
+        ]
+        total_route_nm = sum(leg_distances_nm)
+        field_dep_ft = waypoints[0].get("elevation_ft") or 0.0
+        field_dest_ft = waypoints[-1].get("elevation_ft") or 0.0
+        profile = compute_flight_profile(
+            field_dep_ft=field_dep_ft,
+            field_dest_ft=field_dest_ft,
+            cruise_alt_msl_ft=cruise_alt,
+            total_route_nm=total_route_nm,
+            climb_ias_kt=climb_ias,
+            climb_rate_fpm=derived_climb_rate,
+            cruise_tas_kt=tas,
+        )
+
+        # Per-leg samples + per-sample MSL altitude from the profile.
+        # We sample each leg with its own spacing, then compute the
+        # GLOBAL distance-from-departure for each sample and look up
+        # altitude(d). Both corridor and divert paths consume these.
+        leg_offsets_nm = [0.0]
+        for d in leg_distances_nm:
+            leg_offsets_nm.append(leg_offsets_nm[-1] + d)
+        per_leg_samples: list[tuple[list, list[float], float]] = []
+        all_samples: list[tuple[float, float]] = []
+        all_alts: list[float] = []
+        for (a, b), leg_offset, leg_nm in zip(
+            zip(waypoints[:-1], waypoints[1:]),
+            leg_offsets_nm[:-1], leg_distances_nm,
+        ):
+            if leg_nm <= 200:
+                spacing = 2.0
+            elif leg_nm <= 600:
+                spacing = max(2.0, leg_nm / 100.0)
+            else:
+                spacing = max(5.0, leg_nm / 150.0)
+            leg_samples = sample_route_points(
+                a["lat"], a["lon"], b["lat"], b["lon"], spacing_nm=spacing)
+            n = len(leg_samples)
+            leg_alts = []
+            for i in range(n):
+                frac = i / max(1, n - 1)
+                d_global = leg_offset + leg_nm * frac
+                leg_alts.append(altitude_at_distance(d_global, profile))
+            per_leg_samples.append((leg_samples, leg_alts, spacing))
+            all_samples.extend(leg_samples)
+            all_alts.extend(leg_alts)
 
         # ─── Per-leg route math ────────────────────────────────────────
         legs: list[dict] = []
@@ -287,14 +379,9 @@ def register(app):
             agl_weight = 0
             narrowest = widest = 0.0
             total_area = 0.0
-            for a, b in zip(waypoints[:-1], waypoints[1:]):
-                leg_nm = haversine_nm(a["lat"], a["lon"], b["lat"], b["lon"])
-                if leg_nm <= 200:
-                    spacing = 2.0
-                elif leg_nm <= 600:
-                    spacing = max(2.0, leg_nm / 100.0)
-                else:
-                    spacing = max(5.0, leg_nm / 150.0)
+            for (a, b), (leg_samples, leg_alts, spacing) in zip(
+                zip(waypoints[:-1], waypoints[1:]), per_leg_samples,
+            ):
                 rings, m = compute_route_corridor(
                     origin_lat=a["lat"], origin_lon=a["lon"],
                     dest_lat=b["lat"], dest_lon=b["lon"],
@@ -307,6 +394,7 @@ def register(app):
                     elevation_fn=_terrain_elevation_m,
                     n_envelope_points=24,
                     terrain_step_nm=0.5,
+                    sample_alts_msl_ft=leg_alts,
                 )
                 agg_rings.extend(rings)
                 agg_n_samples += m["n_samples"]
@@ -346,22 +434,10 @@ def register(app):
         # ─── Divert airport reach analysis ─────────────────────────────
         # Per route sample, what airports could the aircraft glide to if
         # the engine quit at that point — accounting for wind on the
-        # bearing AND terrain ridges between sample and airport? The
-        # elevation_fn here is the same one the corridor uses; tiles
-        # warmed by prefetch_corridor already cover the bearings the
-        # divert ray-march walks.
-        all_samples: list[tuple[float, float]] = []
-        for a, b in zip(waypoints[:-1], waypoints[1:]):
-            leg_nm = haversine_nm(a["lat"], a["lon"], b["lat"], b["lon"])
-            if leg_nm <= 200:
-                spacing = 2.0
-            elif leg_nm <= 600:
-                spacing = max(2.0, leg_nm / 100.0)
-            else:
-                spacing = max(5.0, leg_nm / 150.0)
-            all_samples.extend(sample_route_points(
-                a["lat"], a["lon"], b["lat"], b["lon"], spacing_nm=spacing))
-
+        # bearing AND terrain ridges between sample and airport. We
+        # pass the per-sample MSL altitude from the flight profile so
+        # climb-out / final-descent samples see a smaller divert set
+        # than cruise samples.
         divert = divert_coverage_along_route_glide(
             all_samples, airport_data,
             cruise_alt_msl_ft=cruise_alt,
@@ -370,6 +446,7 @@ def register(app):
             wind_dir_deg=wd, wind_speed_kt=ws,
             elevation_fn=_terrain_elevation_m,
             terrain_step_nm=0.5,
+            sample_alts_msl_ft=all_alts,
         )
         gaps = gap_segments(all_samples, divert["per_sample"])
         long_gap = longest_gap_nm(gaps)
