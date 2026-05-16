@@ -201,6 +201,7 @@ def compute_route_corridor(
     elevation_fn: Optional[ElevationFn] = None,
     terrain_step_nm: float = 0.25,
     sample_alts_msl_ft: Optional[list[float]] = None,
+    sample_winds: Optional[list[tuple[float, float]]] = None,
 ) -> tuple[list[list[list[float]]], dict]:
     """Compute the union of glide envelopes along a route.
 
@@ -231,12 +232,20 @@ def compute_route_corridor(
     else:
         per_sample_alt = [cruise_alt_msl_ft] * len(samples)
 
+    # Per-sample wind: from winds-aloft when supplied, else scalar.
+    if sample_winds is not None and len(sample_winds) == len(samples):
+        per_sample_wind = list(sample_winds)
+    else:
+        per_sample_wind = [(wind_dir_deg, wind_speed_kt)] * len(samples)
+
     polygons: list[Polygon] = []
     terrain_limited_samples = 0
     below_terrain_samples = 0
     agl_values: list[float] = []
 
-    for (lat, lon), sample_msl in zip(samples, per_sample_alt):
+    for (lat, lon), sample_msl, (s_wind_dir, s_wind_speed) in zip(
+        samples, per_sample_alt, per_sample_wind,
+    ):
         if have_terrain:
             elev_m = elevation_fn(lat, lon)
             if elev_m != elev_m:    # NaN — missing tile
@@ -259,8 +268,8 @@ def compute_route_corridor(
             agl_ft=agl_ft,
             glide_ratio=glide_ratio,
             glide_ias_kt=glide_ias_kt,
-            wind_dir_deg=wind_dir_deg,
-            wind_speed_kt=wind_speed_kt,
+            wind_dir_deg=s_wind_dir,
+            wind_speed_kt=s_wind_speed,
             n_points=n_envelope_points,
             cruise_alt_msl_ft=sample_msl if have_terrain else None,
             elevation_fn=elevation_fn,

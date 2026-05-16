@@ -2341,3 +2341,34 @@ input[type="radio"] {
   background: rgba(96, 165, 250, 0.15);
   border-color: rgba(96, 165, 250, 0.4);
 }
+
+/* Wind source pill at the bottom of the route overlay. Reports
+   whether the corridor + diverts used live forecast winds or the
+   manual scalar from the sidebar. */
+.route-wind-pill {
+  margin-top: 6px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-align: center;
+}
+.route-wind-pill.route-wind-live {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.45);
+}
+.route-wind-pill.route-wind-manual {
+  background: rgba(148, 163, 184, 0.18);
+  color: #475569;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+}
+.route-wind-pill.route-wind-warn {
+  background: rgba(245, 158, 11, 0.18);
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.55);
+}
+[data-theme="dark"] .route-wind-pill.route-wind-live { color: #4ade80; }
+[data-theme="dark"] .route-wind-pill.route-wind-manual { color: #cbd5e1; }
+[data-theme="dark"] .route-wind-pill.route-wind-warn { color: #fbbf24; }
