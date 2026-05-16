@@ -28,6 +28,10 @@ from core.route import compute_route_segment, magvar_west_positive, haversine_nm
 from core.corridor import compute_route_corridor, sample_route_points
 from core.terrain import elevation_m as _terrain_elevation_m, prefetch_corridor
 from core.airport_search import search_airports, airport_label, resolve_waypoint
+from core.waypoints import (
+    resolve_any, nearest_airport_within, format_gps_ident,
+    format_gps_display, parse_gps_coordinate,
+)
 from core.diverts import (
     divert_coverage_along_route_glide, gap_segments, longest_gap_nm,
 )
@@ -181,6 +185,17 @@ def register(app):
         # the short form auto-shortens the pills.
         kept: list[dict] = []
         for v in current_value or []:
+            # GPS waypoints have value of form "GPS:lat,lon"; render
+            # them with a friendly pill label without going through
+            # airport_data.
+            wp = resolve_any(v, airport_data=airport_data)
+            if wp is not None and wp.kind == "gps":
+                kept.append({
+                    "label": f"GPS {wp.lat:.2f},{wp.lon:.2f}",
+                    "value": wp.ident,
+                    "title": wp.name,
+                })
+                continue
             ap = resolve_waypoint(airport_data, v)
             if ap:
                 kept.append({
@@ -188,6 +203,19 @@ def register(app):
                     "value": ap.get("id") or v,
                     "title": airport_label(ap),
                 })
+        # Also try parsing the typed query as a GPS coord — if it
+        # parses, surface a "GPS lat,lon" option the user can pick.
+        if query and len(query.strip()) >= 4:
+            parsed = parse_gps_coordinate(query)
+            if parsed is not None:
+                lat, lon = parsed
+                ident = format_gps_ident(lat, lon)
+                if not any(o["value"] == ident for o in kept):
+                    kept.append({
+                        "label": format_gps_display(lat, lon),
+                        "value": ident,
+                        "title": f"GPS waypoint at {lat:.4f}, {lon:.4f}",
+                    })
         if not query or len(query.strip()) < 2:
             return kept
         hits = search_airports(airport_data, query, limit=20)
@@ -239,6 +267,58 @@ def register(app):
         if not suggested:
             raise PreventUpdate
         return suggested, (current_compute or 0) + 1
+
+    # === Click-to-build: map click appends to route-waypoints ===
+    @app.callback(
+        Output("route-waypoints", "value", allow_duplicate=True),
+        Output("route-waypoints", "options", allow_duplicate=True),
+        Input("map", "clickData"),
+        State("route-click-build-mode", "value"),
+        State("route-waypoints", "value"),
+        State("route-waypoints", "options"),
+        prevent_initial_call=True,
+    )
+    def click_to_add_waypoint(click_data, click_mode, current_value, current_options):
+        # Guard: only act when click-build mode is on AND we have a
+        # clickData payload with lat/lng.
+        if not click_mode or "on" not in click_mode:
+            raise PreventUpdate
+        if not click_data or "latlng" not in click_data:
+            raise PreventUpdate
+        latlng = click_data.get("latlng") or {}
+        lat = latlng.get("lat")
+        lon = latlng.get("lng")
+        if lat is None or lon is None:
+            raise PreventUpdate
+
+        # Snap to nearest airport within 3 NM, else drop a GPS waypoint.
+        snapped = nearest_airport_within(airport_data, lat, lon, max_nm=3.0)
+        if snapped:
+            new_value = snapped.get("id")
+            new_option = {
+                "label": new_value,
+                "value": new_value,
+                "title": airport_label(snapped),
+            }
+        else:
+            new_value = format_gps_ident(lat, lon)
+            new_option = {
+                "label": f"GPS {lat:.2f},{lon:.2f}",
+                "value": new_value,
+                "title": format_gps_display(lat, lon),
+            }
+
+        new_values = list(current_value or [])
+        if new_value in new_values:
+            # Already in the route — no-op to avoid duplicates
+            raise PreventUpdate
+        new_values.append(new_value)
+
+        existing_opts = list(current_options or [])
+        if not any(o.get("value") == new_value for o in existing_opts):
+            existing_opts.append(new_option)
+
+        return new_values, existing_opts
 
     # === Compute route + render on map + render summary overlay ===
     @app.callback(
@@ -302,15 +382,18 @@ def register(app):
         derived_climb_rate = _climb_rate_fpm(
             climb_ias, vy_kt, vno_kt, baseline_climb)
 
-        # Resolve every waypoint to a concrete airport dict.
+        # Resolve every waypoint. GPS coordinates resolve directly;
+        # other tokens go through airport_search. Returned Waypoint is
+        # converted to the legacy airport-dict shape downstream code
+        # expects (lat / lon / elevation_ft / id / name).
         waypoints: list[dict] = []
         for wid in waypoint_ids:
-            ap = resolve_waypoint(airport_data, wid)
-            if ap is None:
+            wp = resolve_any(wid, airport_data=airport_data)
+            if wp is None:
                 return (html.Div(f"Waypoint '{wid}' not found.",
                                  className="route-summary-error"),
                         no_update, no_update, no_update)
-            waypoints.append(ap)
+            waypoints.append(wp.to_dict_min())
 
         wd = float(wind_dir) if wind_dir not in (None, "", "null") else 0.0
         ws = float(wind_speed) if wind_speed not in (None, "", "null") else 0.0

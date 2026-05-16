@@ -100,6 +100,12 @@ def route_layout(default_glide_ratio: float | None = None,
                        + ("" if is_multi_engine else " shelf-field-hidden")),
         ),
 
+        _field("Click to add", dcc.Checklist(
+            id="route-click-build-mode",
+            options=[{"label": " On", "value": "on"}],
+            value=[],
+        )),
+
         html.Div(className="shelf-spacer"),
 
         html.Button("Compute Route", id="compute-route-btn",
