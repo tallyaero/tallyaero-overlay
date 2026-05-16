@@ -2372,3 +2372,25 @@ input[type="radio"] {
 [data-theme="dark"] .route-wind-pill.route-wind-live { color: #4ade80; }
 [data-theme="dark"] .route-wind-pill.route-wind-manual { color: #cbd5e1; }
 [data-theme="dark"] .route-wind-pill.route-wind-warn { color: #fbbf24; }
+
+/* Wind barb markers: invisible container; the inline SVG draws the barb
+   with its own black stroke. No padding/background so it sits cleanly
+   on the map. */
+.wind-barb-marker {
+  background: transparent !important;
+  border: none !important;
+  pointer-events: auto;
+}
+.wind-barb-marker svg {
+  display: block;
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7))
+          drop-shadow(0 0 1px rgba(0, 0, 0, 0.4));
+}
+[data-theme="dark"] .wind-barb-marker svg {
+  filter: drop-shadow(0 0 2px rgba(15, 23, 42, 0.85))
+          drop-shadow(0 0 1px rgba(255, 255, 255, 0.5));
+}
+[data-theme="dark"] .wind-barb-marker svg * {
+  stroke: #e2e8f0;
+  fill: #e2e8f0;
+}

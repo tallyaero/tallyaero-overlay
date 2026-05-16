@@ -36,6 +36,10 @@ from core.flight_profile import (
     class_baseline_climb_rate,
 )
 from core.winds_aloft import fetch_winds_aloft
+from core.wind_display import (
+    wind_barb_svg, wind_components, format_wind_components,
+    pick_barb_indices, route_average_wind,
+)
 
 
 import math
@@ -120,16 +124,22 @@ def _summary_card(legs: list[dict], waypoints: list[dict]) -> html.Div:
         className="route-summary",
     )
     if len(legs) > 1:
-        leg_rows = [
-            html.Div([
+        leg_rows = []
+        for l in legs:
+            value_parts = [
+                f"{l['distance_nm']:.0f} NM",
+                f"{l['magnetic_course_deg']:03.0f}°M",
+                f"{l['ete_min']:.0f} min",
+            ]
+            ws = l.get("wind_summary")
+            if ws:
+                value_parts.append(ws)
+            leg_rows.append(html.Div([
                 html.Span(f"{l['origin_id']}→{l['dest_id']}",
                           className="route-leg-label"),
-                html.Span(f"{l['distance_nm']:.0f} NM · {l['magnetic_course_deg']:03.0f}°M · "
-                          f"{l['ete_min']:.0f} min",
+                html.Span(" · ".join(value_parts),
                           className="route-leg-value"),
-            ], className="route-leg-row")
-            for l in legs
-        ]
+            ], className="route-leg-row"))
         head = html.Div([head, html.Div(leg_rows, className="route-leg-list")])
     return head
 
@@ -355,13 +365,27 @@ def register(app):
 
         # ─── Per-leg route math ────────────────────────────────────────
         legs: list[dict] = []
-        for a, b in zip(waypoints[:-1], waypoints[1:]):
+        for leg_idx, (a, b) in enumerate(zip(waypoints[:-1], waypoints[1:])):
             magvar = magvar_west_positive(a["lat"], a["lon"], cruise_alt)
             r = compute_route_segment(
                 origin_lat=a["lat"], origin_lon=a["lon"],
                 dest_lat=b["lat"], dest_lon=b["lon"],
                 tas_kt=tas, wind_dir_deg=wd, wind_speed_kt=ws,
                 magvar_deg=magvar,
+            )
+            # Leg-mid wind for HW/TW summary: pick the middle sample
+            # from per_leg_winds when available, else use the scalar.
+            leg_winds = per_leg_winds[leg_idx] if leg_idx < len(per_leg_winds) else None
+            if leg_winds:
+                mid = leg_winds[len(leg_winds) // 2]
+                leg_wind_dir, leg_wind_speed = mid
+            else:
+                leg_wind_dir, leg_wind_speed = wd, ws
+            hw_tw, cross = wind_components(
+                r.true_course_deg, leg_wind_dir, leg_wind_speed)
+            wind_summary = (
+                f"{leg_wind_dir:03.0f}/{leg_wind_speed:.0f}kt · "
+                f"{format_wind_components(hw_tw, cross)}"
             )
             legs.append({
                 "origin_id": a.get("id"),
@@ -376,6 +400,11 @@ def register(app):
                 "fuel_burn_gal": (round(r.fuel_burn_gal, 2)
                                   if r.fuel_burn_gal is not None else None),
                 "magvar_deg": round(magvar, 2),
+                "wind_dir_deg": round(leg_wind_dir, 0),
+                "wind_speed_kt": round(leg_wind_speed, 1),
+                "headtail_kt": round(hw_tw, 1),
+                "crosswind_kt": round(cross, 1),
+                "wind_summary": wind_summary,
             })
 
         layer: list = []
@@ -510,6 +539,25 @@ def register(app):
                 )],
             ))
 
+        # ─── Wind barbs along route (if winds available) ──────────────
+        if all_winds is not None and all_samples:
+            barb_idxs = pick_barb_indices(len(all_samples), total_route_nm)
+            for i in barb_idxs:
+                lat, lon = all_samples[i]
+                wdir, wsp = all_winds[i]
+                svg = wind_barb_svg(wdir, wsp, size_px=40)
+                tip = f"{wdir:03.0f}° @ {wsp:.0f} kt at {all_alts[i]:.0f} ft MSL"
+                layer.append(dl.DivMarker(
+                    position=[lat, lon],
+                    iconOptions={
+                        "html": svg,
+                        "className": "wind-barb-marker",
+                        "iconSize": [40, 40],
+                        "iconAnchor": [20, 20],
+                    },
+                    children=[dl.Tooltip(tip)],
+                ))
+
         # ─── Polyline + waypoint markers on top ────────────────────────
         polyline_positions = [[w["lat"], w["lon"]] for w in waypoints]
         layer.append(dl.Polyline(
@@ -611,15 +659,36 @@ def register(app):
         divert_block = html.Div(className="route-divert-badge", children=divert_rows)
 
         # Wind status pill — tells the pilot which wind source the
-        # corridor + diverts were computed against.
+        # corridor + diverts were computed against AND the actual
+        # route-averaged values + dominant headwind/tailwind component
+        # along the great-circle from origin to destination.
+        if all_winds:
+            avg_dir, avg_speed = route_average_wind(all_winds)
+            # Component on the overall origin→destination track
+            overall_track = legs[0]["true_course_deg"] if legs else 0.0
+            avg_hw_tw, _ = wind_components(overall_track, avg_dir, avg_speed)
+            comp_str = (f"TW {round(avg_hw_tw)} kt avg"
+                        if avg_hw_tw >= 1 else
+                        f"HW {abs(round(avg_hw_tw))} kt avg"
+                        if avg_hw_tw <= -1 else "calm avg")
+        else:
+            avg_dir, avg_speed = wd, ws
+            comp_str = ""
+
         if wind_source == "live":
-            wind_pill_text = "Wind: live forecast (Open-Meteo)"
+            wind_pill_text = (
+                f"Wind (live · forecast): "
+                f"{avg_dir:03.0f}° @ {avg_speed:.0f} kt · {comp_str}"
+            )
             wind_pill_cls = "route-wind-pill route-wind-live"
         elif wind_source == "live-unavailable":
-            wind_pill_text = f"Wind: live unavailable — manual {wd:.0f}° @ {ws:.0f} kt"
+            wind_pill_text = (
+                f"Wind (live unavailable, manual): "
+                f"{wd:.0f}° @ {ws:.0f} kt"
+            )
             wind_pill_cls = "route-wind-pill route-wind-warn"
         else:
-            wind_pill_text = f"Wind: manual {wd:.0f}° @ {ws:.0f} kt"
+            wind_pill_text = f"Wind (manual): {wd:.0f}° @ {ws:.0f} kt"
             wind_pill_cls = "route-wind-pill route-wind-manual"
         wind_pill = html.Div(wind_pill_text, className=wind_pill_cls)
 
