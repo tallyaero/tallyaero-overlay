@@ -19,7 +19,8 @@ def route_layout(default_glide_ratio: float | None = None,
                  default_tas: float | None = None,
                  default_climb_ias: float | None = None,
                  vx_kt: float | None = None,
-                 vy_kt: float | None = None):
+                 vy_kt: float | None = None,
+                 is_multi_engine: bool = False):
     gr = default_glide_ratio if default_glide_ratio else 9.0
     gi = default_glide_ias if default_glide_ias else 75.0
     tas = default_tas if default_tas else 110.0
@@ -79,6 +80,25 @@ def route_layout(default_glide_ratio: float | None = None,
             options=[{"label": " On", "value": "on"}],
             value=["on"],
         )),
+        # Engine-out scenario toggle — only meaningful for ME aircraft
+        # but the id must always exist for the callback to bind. We
+        # hide via CSS when single-engine.
+        html.Div(
+            [html.Div("Engine-out", className="shelf-field-label"),
+             dcc.RadioItems(
+                id="route-engine-out-mode",
+                options=[
+                    {"label": " SE", "value": "se"},
+                    {"label": " Glide", "value": "glide"},
+                    {"label": " Both", "value": "both"},
+                ],
+                value="both" if is_multi_engine else "glide",
+                inline=True,
+                className="shelf-engine-out-radio",
+             )],
+            className=("shelf-field shelf-field-engine-out"
+                       + ("" if is_multi_engine else " shelf-field-hidden")),
+        ),
 
         html.Div(className="shelf-spacer"),
 

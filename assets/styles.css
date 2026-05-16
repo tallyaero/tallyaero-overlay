@@ -2440,3 +2440,21 @@ input[type="radio"] {
 [data-theme="dark"] .route-profile-chart {
   border-top-color: #334155;
 }
+
+/* Engine-out scenario toggle (SE / Glide / Both) — only shown for
+   multi-engine aircraft. .shelf-field-hidden hides it for singles. */
+.shelf-field-hidden { display: none !important; }
+.shelf-engine-out-radio { display: inline-flex; gap: 4px; }
+.shelf-engine-out-radio label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-right: 2px;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+.shelf-engine-out-radio input[type="radio"] {
+  margin-right: 2px;
+  cursor: pointer;
+}

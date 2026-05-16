@@ -100,6 +100,23 @@ class SingleEngineLimits(BaseModel):
     Vyse: Optional[VConfig] = None
     Vxse: Optional[VConfig] = None
 
+    # Multi-engine driftdown / powered single-engine performance.
+    # All optional in schema; enforced for ME aircraft via
+    # Aircraft.model_validator below. Sources: published POH/AFM,
+    # cited in each aircraft's sources[] array.
+    service_ceiling_ft: Optional[float] = Field(
+        default=None, gt=0, lt=60000,
+        description="Single-engine service ceiling (FAR 23.65: SE RoC = 50 fpm).")
+    rate_of_climb_sl_fpm: Optional[float] = Field(
+        default=None, ge=0, lt=3000,
+        description="Single-engine rate of climb at sea level, gross weight.")
+    cruise_kt: Optional[float] = Field(
+        default=None, gt=0, lt=600,
+        description="Single-engine cruise TAS, typically 80-90% of two-engine cruise.")
+    fuel_burn_gph: Optional[float] = Field(
+        default=None, gt=0, lt=200,
+        description="Per-engine fuel burn at SE cruise power (one engine running).")
+
 
 class PowerCurve(BaseModel):
     model_config = ConfigDict(extra="forbid")
