@@ -46,6 +46,10 @@ from core.terrain_conflict import (
     max_terrain_in_corridor_strip, suggest_min_cruise_alt,
     build_profile_series,
 )
+from core.multi_engine import (
+    is_multi_engine, has_se_performance_data,
+    compute_route_se_corridor,
+)
 
 
 import math
@@ -252,6 +256,7 @@ def register(app):
         State("route-climb-ias", "value"),
         State("route-show-corridor", "value"),
         State("route-use-live-winds", "value"),
+        State("route-engine-out-mode", "value"),
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
         State("aircraft-select", "value"),
@@ -260,7 +265,7 @@ def register(app):
     def compute_and_render(compute_clicks, clear_clicks,
                           waypoint_ids, cruise_alt, tas,
                           glide_ratio, glide_ias, climb_ias, corridor_show,
-                          use_live_winds,
+                          use_live_winds, engine_out_mode,
                           wind_dir, wind_speed, aircraft_name):
         trigger = ctx.triggered_id
         if trigger == "route-clear-btn":
@@ -494,12 +499,21 @@ def register(app):
                 widest = max(widest, m["widest_nm"])
                 total_area += m["area_nm2"]
 
-            for ring in agg_rings:
-                layer.append(dl.Polygon(
-                    positions=ring,
-                    color="#22c55e", weight=1,
-                    fillColor="#22c55e", fillOpacity=0.18,
-                ))
+            # Render glide corridor only when the engine-out mode
+            # asks for it (glide or both). For ME aircraft in pure
+            # SE mode the glide polygons are suppressed so the user
+            # sees only the powered-reach footprint.
+            ac_for_me = aircraft_data.get(aircraft_name) if aircraft_name else None
+            ac_is_me = ac_for_me is not None and is_multi_engine(ac_for_me)
+            mode = (engine_out_mode or "both").lower()
+            show_glide = (not ac_is_me) or mode in ("glide", "both")
+            if show_glide:
+                for ring in agg_rings:
+                    layer.append(dl.Polygon(
+                        positions=ring,
+                        color="#22c55e", weight=1,
+                        fillColor="#22c55e", fillOpacity=0.18,
+                    ))
             corridor_meta_agg = {
                 "n_samples": agg_n_samples,
                 "terrain_limited_samples": agg_ridge_clipped,
@@ -512,6 +526,29 @@ def register(app):
                 "area_nm2": round(total_area, 1),
                 "terrain_used": True,
             }
+
+            # ─── Multi-engine: powered SE corridor (purple) ──────────
+            # When the aircraft is a twin with populated SE perf data,
+            # compute the powered single-engine reach footprint and
+            # render based on the engine_out_mode toggle.
+            se_meta = None
+            if ac_is_me and has_se_performance_data(ac_for_me):
+                show_se = mode in ("se", "both")
+                fuel_full = ac_for_me.get("fuel_capacity_gal") or 0.0
+                if show_se and fuel_full > 0:
+                    se_rings, se_meta = compute_route_se_corridor(
+                        all_samples, all_alts, ac_for_me,
+                        fuel_remaining_gal=fuel_full,
+                        wind_dir_deg=wd, wind_speed_kt=ws,
+                        sample_winds=all_winds,
+                        n_envelope_points=24,
+                    )
+                    for ring in se_rings:
+                        layer.append(dl.Polygon(
+                            positions=ring,
+                            color="#7e22ce", weight=1,
+                            fillColor="#a855f7", fillOpacity=0.15,
+                        ))
 
         # ─── Divert airport reach analysis ─────────────────────────────
         # Per route sample, what airports could the aircraft glide to if

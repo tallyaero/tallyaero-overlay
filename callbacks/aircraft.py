@@ -61,11 +61,13 @@ def register(app):
                         vno = green[1]
                 tas = round(vno * 0.85) if vno else None
                 ci = vy   # default climb IAS = Vy
+            is_me = (ac.get("engine_count") or 1) >= 2 if ac else False
             return route_layout(default_glide_ratio=gr,
                                 default_glide_ias=gi,
                                 default_tas=tas,
                                 default_climb_ias=ci,
-                                vx_kt=vx, vy_kt=vy)
+                                vx_kt=vx, vy_kt=vy,
+                                is_multi_engine=is_me)
         if maneuver == "impossible_turn":
             return impossible_turn_layout()
         elif maneuver == "poweroff180":
