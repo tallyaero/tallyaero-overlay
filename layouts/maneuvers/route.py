@@ -74,6 +74,11 @@ def route_layout(default_glide_ratio: float | None = None,
             options=[{"label": " On", "value": "show"}],
             value=["show"],
         )),
+        _field("Live winds", dcc.Checklist(
+            id="route-use-live-winds",
+            options=[{"label": " On", "value": "on"}],
+            value=["on"],
+        )),
 
         html.Div(className="shelf-spacer"),
 

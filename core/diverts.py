@@ -347,33 +347,39 @@ def divert_coverage_along_route_glide(
     elevation_fn: Optional[ElevationFn] = None,
     terrain_step_nm: float = 0.5,
     sample_alts_msl_ft: Optional[list[float]] = None,
+    sample_winds: Optional[list[tuple[float, float]]] = None,
 ) -> dict:
     """Per-sample divert coverage using engine-out glide + (optionally)
     terrain ridge-clipping.
 
-    Same return shape as `divert_coverage_along_route`. When
-    `sample_alts_msl_ft` is supplied and matches `len(samples)`, that
-    per-sample altitude is used in place of the constant
-    `cruise_alt_msl_ft` (so climb-out / final-descent samples see a
-    smaller divert set than cruise samples). Length mismatch silently
-    falls back to constant.
+    Same return shape as `divert_coverage_along_route`. Two optional
+    per-sample lists when supplied with matching length:
+      - `sample_alts_msl_ft`: altitude at each sample (flight profile)
+      - `sample_winds`: (dir, speed) at each sample (winds aloft)
+    Length mismatch silently falls back to the scalar values.
     """
     if sample_alts_msl_ft is not None and len(sample_alts_msl_ft) == len(samples):
         per_sample_alt = list(sample_alts_msl_ft)
     else:
         per_sample_alt = [cruise_alt_msl_ft] * len(samples)
+    if sample_winds is not None and len(sample_winds) == len(samples):
+        per_sample_wind = list(sample_winds)
+    else:
+        per_sample_wind = [(wind_dir_deg, wind_speed_kt)] * len(samples)
 
     per_sample: list[list[str]] = []
     uniq_min_dist: dict[str, float] = {}
     uniq_n_samples: dict[str, int] = {}
     uniq_ap: dict[str, dict] = {}
-    for (lat, lon), sample_msl in zip(samples, per_sample_alt):
+    for (lat, lon), sample_msl, (s_wd, s_ws) in zip(
+        samples, per_sample_alt, per_sample_wind,
+    ):
         hits = find_diverts_in_glide(
             airport_data, lat, lon,
             sample_msl_ft=sample_msl,
             glide_ratio=glide_ratio,
             glide_ias_kt=glide_ias_kt,
-            wind_dir_deg=wind_dir_deg, wind_speed_kt=wind_speed_kt,
+            wind_dir_deg=s_wd, wind_speed_kt=s_ws,
             min_runway_ft=min_runway_ft,
             elevation_fn=elevation_fn,
             terrain_step_nm=terrain_step_nm,

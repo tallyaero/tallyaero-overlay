@@ -35,6 +35,7 @@ from core.flight_profile import (
     climb_rate_fpm as _climb_rate_fpm,
     class_baseline_climb_rate,
 )
+from core.winds_aloft import fetch_winds_aloft
 
 
 import math
@@ -216,6 +217,7 @@ def register(app):
         State("route-glide-ias", "value"),
         State("route-climb-ias", "value"),
         State("route-show-corridor", "value"),
+        State("route-use-live-winds", "value"),
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
         State("aircraft-select", "value"),
@@ -224,6 +226,7 @@ def register(app):
     def compute_and_render(compute_clicks, clear_clicks,
                           waypoint_ids, cruise_alt, tas,
                           glide_ratio, glide_ias, climb_ias, corridor_show,
+                          use_live_winds,
                           wind_dir, wind_speed, aircraft_name):
         trigger = ctx.triggered_id
         if trigger == "route-clear-btn":
@@ -326,6 +329,30 @@ def register(app):
             all_samples.extend(leg_samples)
             all_alts.extend(leg_alts)
 
+        # ─── Live winds aloft (per sample) ─────────────────────────────
+        # Default ON. If the toggle is off, or the API errors, we fall
+        # back to the manual sidebar wind applied uniformly. The status
+        # chip in the overlay reflects which source is in effect.
+        wind_source = "manual"        # 'live' | 'manual' | 'live-unavailable'
+        all_winds: list[tuple[float, float]] | None = None
+        if use_live_winds and "on" in use_live_winds:
+            fetched = fetch_winds_aloft(all_samples, all_alts)
+            if fetched is not None and len(fetched) == len(all_samples):
+                all_winds = fetched
+                wind_source = "live"
+            else:
+                wind_source = "live-unavailable"
+
+        # Per-leg wind lists matched to leg_samples
+        per_leg_winds: list[list[tuple[float, float]] | None] = []
+        idx = 0
+        for leg_samples, _alts, _sp in per_leg_samples:
+            if all_winds is not None:
+                per_leg_winds.append(all_winds[idx:idx + len(leg_samples)])
+            else:
+                per_leg_winds.append(None)
+            idx += len(leg_samples)
+
         # ─── Per-leg route math ────────────────────────────────────────
         legs: list[dict] = []
         for a, b in zip(waypoints[:-1], waypoints[1:]):
@@ -379,8 +406,9 @@ def register(app):
             agl_weight = 0
             narrowest = widest = 0.0
             total_area = 0.0
-            for (a, b), (leg_samples, leg_alts, spacing) in zip(
+            for (a, b), (leg_samples, leg_alts, spacing), leg_winds in zip(
                 zip(waypoints[:-1], waypoints[1:]), per_leg_samples,
+                per_leg_winds,
             ):
                 rings, m = compute_route_corridor(
                     origin_lat=a["lat"], origin_lon=a["lon"],
@@ -395,6 +423,7 @@ def register(app):
                     n_envelope_points=24,
                     terrain_step_nm=0.5,
                     sample_alts_msl_ft=leg_alts,
+                    sample_winds=leg_winds,
                 )
                 agg_rings.extend(rings)
                 agg_n_samples += m["n_samples"]
@@ -447,6 +476,7 @@ def register(app):
             elevation_fn=_terrain_elevation_m,
             terrain_step_nm=0.5,
             sample_alts_msl_ft=all_alts,
+            sample_winds=all_winds,
         )
         gaps = gap_segments(all_samples, divert["per_sample"])
         long_gap = longest_gap_nm(gaps)
@@ -580,6 +610,19 @@ def register(app):
             ], className="route-summary-row"))
         divert_block = html.Div(className="route-divert-badge", children=divert_rows)
 
+        # Wind status pill — tells the pilot which wind source the
+        # corridor + diverts were computed against.
+        if wind_source == "live":
+            wind_pill_text = "Wind: live forecast (Open-Meteo)"
+            wind_pill_cls = "route-wind-pill route-wind-live"
+        elif wind_source == "live-unavailable":
+            wind_pill_text = f"Wind: live unavailable — manual {wd:.0f}° @ {ws:.0f} kt"
+            wind_pill_cls = "route-wind-pill route-wind-warn"
+        else:
+            wind_pill_text = f"Wind: manual {wd:.0f}° @ {ws:.0f} kt"
+            wind_pill_cls = "route-wind-pill route-wind-manual"
+        wind_pill = html.Div(wind_pill_text, className=wind_pill_cls)
+
         overlay = html.Div(
             [
                 html.Div(className="route-overlay-header", children=[
@@ -589,6 +632,7 @@ def register(app):
                 card,
                 extras,
                 divert_block,
+                wind_pill,
             ],
             className="route-overlay-panel",
         )
@@ -603,5 +647,6 @@ def register(app):
                 "n_samples_with_no_coverage": no_cov,
                 "n_samples": n_samp,
             },
+            "wind_source": wind_source,
         }
         return overlay, layer, viewport, store
