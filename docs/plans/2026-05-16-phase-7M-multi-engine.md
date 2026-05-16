@@ -144,43 +144,83 @@ Math notes:
   Total reach = fuel_remaining / fuel_burn_gph × SE_cruise_kt
   ± wind component.
 
-### 7M-c — Corridor + divert branching
+### 7M-c — Corridor + divert branching, with engine-out-mode toggle
+
+For ME aircraft the corridor can be computed under **two** failure
+scenarios, and the pilot can view either or both:
+
+| Mode | Math | Color | Meaning |
+|---|---|---|---|
+| **SE powered** (default) | `single_engine_powered_reach_nm` — driftdown + level flight on remaining engine + fuel range | Purple `#a855f7` / `#c084fc` 0.18 fill | "If one engine fails, here's where I can go." Realistic for most twin emergencies. |
+| **Both engines out** | Existing glide math (same as a single, using `best_glide_ratio`) | Green `#22c55e` 0.18 fill (current corridor color) | "If BOTH engines fail (fuel exhaustion, fuel contamination, dual electrical, etc.), here's my glide." Catastrophic but real. |
+| **Show both** | Render both polygons stacked, green underneath, purple on top | Both | Visually compare: the small green glide footprint sits inside the much larger purple powered-reach footprint. The pilot sees the gap in capability. |
 
 ```
-EDIT  core/corridor.py        (branch glider vs ME powered)
-EDIT  core/diverts.py         (use powered reach for ME)
-EDIT  tests/test_corridor.py  (ME case)
-EDIT  tests/test_diverts.py   (ME case)
+EDIT  core/corridor.py        (engine_out_mode param: 'se' | 'glide' | 'both')
+EDIT  core/diverts.py         (same — divert set differs by mode)
+EDIT  tests/test_corridor.py  (ME case both modes)
+EDIT  tests/test_diverts.py   (ME case both modes)
 ```
 
 The corridor's per-direction reach becomes:
 ```python
-if is_multi_engine(aircraft):
-    reach_nm = single_engine_powered_reach_nm(
-        aircraft, sample_alt, fuel_remaining,
-        bearing, wind_dir, wind_speed, ...,
-    )
-    reach_nm = min(reach_nm, terrain_intercept_nm(...))   # ridge clip
-else:
-    reach_nm = wind_scaled_glide_reach × terrain_intercept   # existing
+def per_direction_reach(aircraft, mode, ...):
+    if not is_multi_engine(aircraft) or mode == "glide":
+        # glider math (existing)
+        return wind_scaled_glide_reach × terrain_intercept
+    if mode == "se":
+        return min(
+            single_engine_powered_reach_nm(aircraft, sample_alt, fuel,
+                                            bearing, wind, ...),
+            terrain_intercept_nm(...),
+        )
+    # mode == 'both' is handled by the caller: compute corridor twice
+    # (once with 'se', once with 'glide') and stack the polygons in
+    # the route layer with the glide layer on top so it stays visible.
 ```
 
-The corridor polygon for an ME is drawn in a different color
-(magenta or purple) to visually telegraph "this is powered reach,
-not glide reach" — pilots should not confuse the two on the map.
+For diverts under "both" mode: render the SE-reachable airports as
+purple dots, and the glide-only-reachable subset (which is the *same*
+airport set if the airplane is within glide of them — i.e. close in)
+as green dots overlaid. A pilot sees which diverts survive a dual
+failure vs. an SE failure.
 
-For diverts, the same swap: ME considers airports within powered
-reach (typically dozens to hundreds of options at cruise) rather
-than within glide.
+In "se" mode for an ME, divert filtering uses SE powered reach (much
+larger set, dozens to hundreds at cruise). In "glide" mode for an
+ME, divert filtering uses the same glide math as a single.
 
 ### 7M-d — UI
 
 ```
 EDIT  layouts/maneuvers/route.py
-EDIT  callbacks/route.py        (different default field set per aircraft type)
+EDIT  callbacks/route.py        (different default field set per aircraft type +
+                                  engine-out-mode toggle handling)
 EDIT  callbacks/aircraft.py     (route_layout call branches on engine_count)
-EDIT  assets/styles.css         (.route-corridor-poly-me, status chip)
+EDIT  assets/styles.css         (.route-corridor-poly-me, .engine-out-toggle)
 ```
+
+**Engine-out mode toggle** (only rendered for ME aircraft):
+
+A new shelf field "Engine-out scenario" with three radio-style pills:
+- `SE` — One engine failed (powered, drift down + sustain)
+- `Glide` — Both engines failed (glider math, far smaller)
+- `Both` — Render both corridors stacked
+
+Default: `Both`. Defaulting to "Both" is the safety-positive choice —
+pilots see at a glance that the dual-out case is a much tighter
+footprint than the single-out case, and they're never surprised by
+which scenario the corridor represents.
+
+For single-engine aircraft the toggle is hidden (only one scenario
+makes sense; the existing green glide corridor is the answer).
+
+Shelf field swap when engine_count >= 2:
+- Hide: Glide Ratio, Glide IAS (still used as fallback below SE
+  ceiling and as the "Glide" mode inputs; pilot doesn't need to set
+  them at the surface)
+- Show: SE Service Ceiling, SE Cruise, SE Fuel Burn (all
+  aircraft-derived defaults, all editable for sanity)
+- Show: Engine-out scenario toggle (SE | Glide | Both)
 
 Shelf field swap when engine_count >= 2:
 - Hide: Glide Ratio, Glide IAS (still used as fallback below SE
@@ -251,17 +291,26 @@ Critical to honest UX:
    each with a `sources[]` entry citing the document.
 2. Pydantic schema enforces the new fields are present on ME
    aircraft (test fails until research lands).
-3. Corridor for a Seneca II at 8000 ft cruise draws a purple
+3. ME aircraft shelf shows an "Engine-out scenario" toggle with
+   three options: SE | Glide | Both. Default is Both.
+4. In **SE mode**, the Seneca II at 8000 ft cruise draws a purple
    powered-reach polygon covering ~400 NM (vs the ~13 NM glide
    circle we currently show).
-4. Diverts for a Seneca II include airports up to powered reach
-   away, not just glide range.
-5. Shelf shows ME-specific defaults when the aircraft is a twin.
-6. Tooltips on the SE corridor explain critical-engine assumption +
+5. In **Glide mode**, the same Seneca renders the small green
+   glide-only corridor (identical math to a single).
+6. In **Both mode**, both polygons are drawn stacked — green glide
+   visible on top of the larger purple SE footprint. Pilot sees the
+   capability gap at a glance.
+7. Diverts in SE mode for a Seneca include airports up to powered
+   reach away (dozens to hundreds at cruise); diverts in Glide mode
+   match the single's glide range.
+8. Shelf shows ME-specific defaults when the aircraft is a twin.
+   Hidden when the aircraft is a single.
+9. Tooltips on the SE corridor explain critical-engine assumption +
    secured-engine assumption + DA caveat.
-7. Singles render exactly as before. No regression on the 100
-   single-engine aircraft in the catalog.
-8. Full test suite passes.
+10. Singles render exactly as before. No regression on the 100
+    single-engine aircraft in the catalog. Toggle is not shown.
+11. Full test suite passes.
 
 ## Out of scope
 
