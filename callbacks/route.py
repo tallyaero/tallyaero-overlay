@@ -18,7 +18,8 @@ core.airport_search.resolve_waypoint without changing this file.
 """
 from __future__ import annotations
 
-from dash import Input, Output, State, html, ctx, no_update
+from dash import Input, Output, State, html, dcc, ctx, no_update
+import plotly.graph_objects as go
 from dash.exceptions import PreventUpdate
 import dash_leaflet as dl
 
@@ -39,6 +40,11 @@ from core.winds_aloft import fetch_winds_aloft
 from core.wind_display import (
     wind_barb_svg, wind_components, format_wind_components,
     pick_barb_indices, route_average_wind,
+)
+from core.terrain_conflict import (
+    classify_route_statuses, segment_polyline_by_status,
+    max_terrain_in_corridor_strip, suggest_min_cruise_alt,
+    build_profile_series,
 )
 
 
@@ -211,6 +217,24 @@ def register(app):
             ias = vy
         rate = _climb_rate_fpm(ias, vy, vno, baseline)
         return f"≈ {rate:.0f} fpm"
+
+    # === Apply suggested altitude (terrain conflict button) ===
+    @app.callback(
+        Output("route-cruise-alt", "value"),
+        Output("compute-route-btn", "n_clicks", allow_duplicate=True),
+        Input("route-apply-suggested-alt", "n_clicks"),
+        State("route-cruise-alt", "value"),
+        State("compute-route-btn", "n_clicks"),
+        State("route-result-store", "data"),
+        prevent_initial_call=True,
+    )
+    def apply_suggested_altitude(n_clicks, current_alt, current_compute, store):
+        if not n_clicks or not store:
+            raise PreventUpdate
+        suggested = (store or {}).get("suggested_alt_ft")
+        if not suggested:
+            raise PreventUpdate
+        return suggested, (current_compute or 0) + 1
 
     # === Compute route + render on map + render summary overlay ===
     @app.callback(
@@ -558,12 +582,40 @@ def register(app):
                     children=[dl.Tooltip(tip)],
                 ))
 
-        # ─── Polyline + waypoint markers on top ────────────────────────
-        polyline_positions = [[w["lat"], w["lon"]] for w in waypoints]
-        layer.append(dl.Polyline(
-            positions=polyline_positions,
-            color="#0d59f2", weight=3, opacity=0.85,
-        ))
+        # ─── Terrain conflict status per sample ───────────────────────
+        # Classify each sample as clear / marginal / conflict based on
+        # AGL vs terrain. The samples are along great-circle legs so
+        # the resulting status array directly drives a segmented
+        # multi-color polyline. Uses the corridor's elevation_fn
+        # (warm tiles from the prefetch above).
+        sample_status_pairs = classify_route_statuses(
+            all_samples, all_alts, _terrain_elevation_m,
+        )
+        statuses_only = [s for s, _t in sample_status_pairs]
+        terrain_at_samples = [t for _s, t in sample_status_pairs]
+
+        # ─── Segmented route polyline by terrain status ───────────────
+        STATUS_STYLE = {
+            "clear": {"color": "#0d59f2", "weight": 3, "opacity": 0.85},
+            "marginal": {"color": "#f59e0b", "weight": 4, "opacity": 0.95},
+            "conflict": {"color": "#dc2626", "weight": 5, "opacity": 0.98},
+        }
+        STATUS_TIP = {
+            "clear": "Clear of terrain (AGL ≥ 2000 ft)",
+            "marginal": "Marginal terrain clearance (500–2000 ft AGL)",
+            "conflict": "Cruise altitude conflicts with terrain",
+        }
+        segs = segment_polyline_by_status(all_samples, statuses_only)
+        for seg in segs:
+            style = STATUS_STYLE[seg["status"]]
+            layer.append(dl.Polyline(
+                positions=seg["positions"],
+                color=style["color"], weight=style["weight"],
+                opacity=style["opacity"],
+                children=[dl.Tooltip(STATUS_TIP[seg["status"]])],
+            ))
+
+        # Waypoint markers on top of the segmented polyline.
         for i, w in enumerate(waypoints):
             if i == 0:
                 color = "#22c55e"; tip = f"{w['id']} (origin)"
@@ -692,6 +744,113 @@ def register(app):
             wind_pill_cls = "route-wind-pill route-wind-manual"
         wind_pill = html.Div(wind_pill_text, className=wind_pill_cls)
 
+        # ─── Terrain conflict chip + suggested altitude button ────────
+        # Built when any sample is in 'conflict' status. Computes the
+        # peak terrain in the corridor strip (perpendicular swath
+        # within max_reach), buffers it by 1000 or 2000 ft based on
+        # terrain variance, and rounds to next VFR-legal cruise.
+        terrain_block = None
+        suggested_alt = None
+        n_conflict = statuses_only.count("conflict")
+        n_marginal = statuses_only.count("marginal")
+        if n_conflict > 0:
+            # Peak terrain in the strip (5 NM half-width swath)
+            peak_ft, peak_lat, peak_lon = max_terrain_in_corridor_strip(
+                all_samples, _terrain_elevation_m,
+                half_width_nm=5.0, perp_samples=5,
+            )
+            t_var = max(terrain_at_samples) - min(terrain_at_samples) if terrain_at_samples else 0.0
+            mc_courses = [l["magnetic_course_deg"] for l in legs] or [0.0]
+            suggested_alt, reason = suggest_min_cruise_alt(
+                peak_ft, mc_courses, terrain_variance_ft=t_var)
+            terrain_block = html.Div(
+                className="route-terrain-conflict", children=[
+                    html.Div([
+                        html.Span("Terrain conflict",
+                                  className="route-summary-label"),
+                        html.Span(
+                            f"{n_conflict} samples below cruise (peak "
+                            f"{peak_ft:.0f} ft near "
+                            f"{peak_lat:.2f}°N {abs(peak_lon):.2f}°W)",
+                            className="route-summary-value route-summary-warn"),
+                    ], className="route-summary-row"),
+                    html.Div([
+                        html.Span("Suggested cruise",
+                                  className="route-summary-label"),
+                        html.Span(f"{suggested_alt:.0f} ft",
+                                  className="route-summary-value"),
+                        html.Button(
+                            f"Use {suggested_alt:.0f} ft",
+                            id="route-apply-suggested-alt",
+                            n_clicks=0,
+                            className="route-apply-alt-btn",
+                        ),
+                    ], className="route-summary-row"),
+                ])
+        elif n_marginal > 0:
+            terrain_block = html.Div(
+                className="route-terrain-marginal", children=[
+                    html.Div([
+                        html.Span("Terrain margin",
+                                  className="route-summary-label"),
+                        html.Span(
+                            f"{n_marginal} samples in 500-2000 ft AGL",
+                            className="route-summary-value"),
+                    ], className="route-summary-row"),
+                ])
+
+        # ─── Altitude profile side-view chart ─────────────────────────
+        profile_series = build_profile_series(
+            all_samples, all_alts, _terrain_elevation_m)
+        # Plotly figure: terrain area + flight profile line + conflict
+        # markers. Compact for the overlay panel.
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=profile_series["distance_nm"],
+            y=profile_series["terrain_ft"],
+            fill="tozeroy",
+            fillcolor="rgba(120, 113, 108, 0.45)",
+            line=dict(color="#78716c", width=1),
+            name="Terrain",
+            hovertemplate="%{x:.0f} NM<br>%{y:.0f} ft<extra>terrain</extra>",
+        ))
+        fig.add_trace(go.Scatter(
+            x=profile_series["distance_nm"],
+            y=profile_series["flight_alt_ft"],
+            line=dict(color="#0d59f2", width=2),
+            mode="lines",
+            name="Flight profile",
+            hovertemplate="%{x:.0f} NM<br>%{y:.0f} ft<extra>flight</extra>",
+        ))
+        # Mark conflict samples
+        cx = [profile_series["distance_nm"][i]
+              for i, s in enumerate(profile_series["statuses"]) if s == "conflict"]
+        cy = [profile_series["flight_alt_ft"][i]
+              for i, s in enumerate(profile_series["statuses"]) if s == "conflict"]
+        if cx:
+            fig.add_trace(go.Scatter(
+                x=cx, y=cy, mode="markers",
+                marker=dict(color="#dc2626", size=6, symbol="x"),
+                name="Conflict",
+                hovertemplate="conflict at %{x:.0f} NM<extra></extra>",
+            ))
+        fig.update_layout(
+            height=140,
+            margin=dict(l=40, r=10, t=10, b=30),
+            xaxis_title="Distance (NM)",
+            yaxis_title="ft MSL",
+            showlegend=False,
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(248, 250, 252, 0.7)",
+            font=dict(size=9),
+        )
+        profile_chart = dcc.Graph(
+            id="route-profile-chart",
+            figure=fig,
+            config={"displayModeBar": False, "staticPlot": False},
+            className="route-profile-chart",
+        )
+
         overlay = html.Div(
             [
                 html.Div(className="route-overlay-header", children=[
@@ -701,7 +860,9 @@ def register(app):
                 card,
                 extras,
                 divert_block,
+                terrain_block,
                 wind_pill,
+                profile_chart,
             ],
             className="route-overlay-panel",
         )
@@ -717,5 +878,10 @@ def register(app):
                 "n_samples": n_samp,
             },
             "wind_source": wind_source,
+            "terrain": {
+                "n_conflict": n_conflict,
+                "n_marginal": n_marginal,
+            },
+            "suggested_alt_ft": float(suggested_alt) if suggested_alt else None,
         }
         return overlay, layer, viewport, store

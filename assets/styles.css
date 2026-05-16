@@ -2394,3 +2394,49 @@ input[type="radio"] {
   stroke: #e2e8f0;
   fill: #e2e8f0;
 }
+
+/* Terrain conflict / marginal blocks in the route overlay. */
+.route-terrain-conflict {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(220, 38, 38, 0.5);
+}
+.route-terrain-marginal {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(245, 158, 11, 0.5);
+}
+.route-terrain-conflict .route-summary-row:first-child {
+  font-weight: 700;
+}
+
+/* "Use suggested altitude" button inside the conflict block. */
+.route-apply-alt-btn {
+  background: #0d59f2;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 3px 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  margin-left: 8px;
+}
+.route-apply-alt-btn:hover {
+  background: #1149c7;
+}
+[data-theme="dark"] .route-apply-alt-btn {
+  background: #2563eb;
+}
+
+/* Altitude profile side-view chart. Compact thumbnail at the bottom
+   of the route overlay. */
+.route-profile-chart {
+  margin-top: 8px;
+  border-top: 1px dashed var(--ta-border-primary, #e2e8f0);
+  padding-top: 6px;
+}
+[data-theme="dark"] .route-profile-chart {
+  border-top-color: #334155;
+}
