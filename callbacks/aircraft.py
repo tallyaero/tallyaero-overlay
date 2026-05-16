@@ -42,12 +42,14 @@ def register(app):
             elev_ft = ap.get("elevation_ft", None) if ap else None
 
         if maneuver == "route":
-            gr = gi = tas = None
+            gr = gi = tas = ci = vx = vy = None
             if aircraft_name and aircraft_name in aircraft_data:
                 ac = aircraft_data[aircraft_name]
                 sel = ac.get("single_engine_limits") or {}
                 gr = sel.get("best_glide_ratio")
                 gi = sel.get("best_glide")
+                vx = ac.get("Vx")
+                vy = ac.get("Vy")
                 # Default planning TAS = 85% of Vno (top of green arc), a
                 # standard ~75% power cruise approximation. Vno is present
                 # on every aircraft via arcs.green[1] or top-level Vno.
@@ -58,9 +60,12 @@ def register(app):
                     if len(green) >= 2:
                         vno = green[1]
                 tas = round(vno * 0.85) if vno else None
+                ci = vy   # default climb IAS = Vy
             return route_layout(default_glide_ratio=gr,
                                 default_glide_ias=gi,
-                                default_tas=tas)
+                                default_tas=tas,
+                                default_climb_ias=ci,
+                                vx_kt=vx, vy_kt=vy)
         if maneuver == "impossible_turn":
             return impossible_turn_layout()
         elif maneuver == "poweroff180":

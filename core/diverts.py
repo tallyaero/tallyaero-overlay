@@ -346,22 +346,31 @@ def divert_coverage_along_route_glide(
     min_runway_ft: int = DEFAULT_MIN_RUNWAY_FT,
     elevation_fn: Optional[ElevationFn] = None,
     terrain_step_nm: float = 0.5,
+    sample_alts_msl_ft: Optional[list[float]] = None,
 ) -> dict:
     """Per-sample divert coverage using engine-out glide + (optionally)
     terrain ridge-clipping.
 
-    Same return shape as `divert_coverage_along_route`. Use this when
-    the route callback has full glide parameters available (always)
-    rather than precomputed reach.
+    Same return shape as `divert_coverage_along_route`. When
+    `sample_alts_msl_ft` is supplied and matches `len(samples)`, that
+    per-sample altitude is used in place of the constant
+    `cruise_alt_msl_ft` (so climb-out / final-descent samples see a
+    smaller divert set than cruise samples). Length mismatch silently
+    falls back to constant.
     """
+    if sample_alts_msl_ft is not None and len(sample_alts_msl_ft) == len(samples):
+        per_sample_alt = list(sample_alts_msl_ft)
+    else:
+        per_sample_alt = [cruise_alt_msl_ft] * len(samples)
+
     per_sample: list[list[str]] = []
     uniq_min_dist: dict[str, float] = {}
     uniq_n_samples: dict[str, int] = {}
     uniq_ap: dict[str, dict] = {}
-    for (lat, lon) in samples:
+    for (lat, lon), sample_msl in zip(samples, per_sample_alt):
         hits = find_diverts_in_glide(
             airport_data, lat, lon,
-            sample_msl_ft=cruise_alt_msl_ft,
+            sample_msl_ft=sample_msl,
             glide_ratio=glide_ratio,
             glide_ias_kt=glide_ias_kt,
             wind_dir_deg=wind_dir_deg, wind_speed_kt=wind_speed_kt,

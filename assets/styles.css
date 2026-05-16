@@ -2313,3 +2313,31 @@ input[type="radio"] {
 [data-theme="dark"] .route-divert-badge {
   border-top-color: rgba(34, 197, 94, 0.5);
 }
+
+/* Climb-IAS shelf row — IAS input + Vy reminder chip + derived rate. */
+.shelf-climb-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.shelf-vy-hint {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ta-text-tertiary, #94a3b8);
+  letter-spacing: 0.04em;
+}
+.shelf-derived-chip {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--ta-text-secondary, #475569);
+  background: rgba(13, 89, 242, 0.08);
+  border: 1px solid rgba(13, 89, 242, 0.25);
+  padding: 1px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+[data-theme="dark"] .shelf-derived-chip {
+  color: #cbd5e1;
+  background: rgba(96, 165, 250, 0.15);
+  border-color: rgba(96, 165, 250, 0.4);
+}
