@@ -223,6 +223,8 @@ def mobile_layout():
                     ),
                     dl.LayerGroup(id="layer"),
                     dl.LayerGroup(id="scrubber-layer"),
+                    dl.LayerGroup(id="route-layer"),
+                    dl.LayerGroup(id="route-pending-markers"),
                     dl.ScaleControl(position="bottomleft", imperial=True, metric=False),  # Scale bar
                     # Windsock overlay
                     html.Div(
