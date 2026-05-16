@@ -480,6 +480,7 @@ def desktop_layout():
                             dl.LayerGroup(id="layer"),
                             dl.LayerGroup(id="scrubber-layer"),  # Dedicated layer for time scrubber marker
                             dl.LayerGroup(id="route-layer"),     # Phase 5 — great-circle route
+                            dl.LayerGroup(id="route-pending-markers"),  # 7N — pre-Compute waypoint dots
                             dl.ScaleControl(position="bottomleft", imperial=True, metric=False),  # Scale bar - JS converts to NM
                             # Windsock indicator overlay - default 360@0kt (calm), updated by callback
                             html.Div(

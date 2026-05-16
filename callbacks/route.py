@@ -320,6 +320,43 @@ def register(app):
 
         return new_values, existing_opts
 
+    # === Pre-compute waypoint markers (immediate visual feedback) ===
+    @app.callback(
+        Output("route-pending-markers", "children"),
+        Input("route-waypoints", "value"),
+        prevent_initial_call=True,
+    )
+    def render_pending_waypoint_markers(waypoint_ids):
+        """As soon as the route-waypoints list changes (click-to-add,
+        typed entry, removed pill), drop dots on the map for each
+        current waypoint. These are independent of Compute Route — the
+        user sees their work taking shape immediately.
+
+        Cleared by the Compute callback (which redraws fuller markers
+        in route-layer) and by Clear."""
+        if not waypoint_ids:
+            return []
+        markers = []
+        for i, wid in enumerate(waypoint_ids):
+            wp = resolve_any(wid, airport_data=airport_data)
+            if wp is None or wp.lat is None or wp.lon is None:
+                continue
+            if i == 0:
+                color, fill = "#15803d", "#22c55e"   # origin green
+            elif i == len(waypoint_ids) - 1:
+                color, fill = "#991b1b", "#ef4444"   # dest red
+            else:
+                color, fill = "#b45309", "#f59e0b"   # mid amber
+            tip = (f"{wp.ident}" if wp.kind != "gps"
+                   else f"GPS {wp.lat:.4f}, {wp.lon:.4f}")
+            markers.append(dl.CircleMarker(
+                center=[wp.lat, wp.lon],
+                radius=5, weight=2,
+                color=color, fillColor=fill, fillOpacity=0.95,
+                children=[dl.Tooltip(tip)],
+            ))
+        return markers
+
     # === Compute route + render on map + render summary overlay ===
     @app.callback(
         Output("route-summary-overlay", "children"),
@@ -583,6 +620,29 @@ def register(app):
                              else min(narrowest, m["narrowest_nm"]))
                 widest = max(widest, m["widest_nm"])
                 total_area += m["area_nm2"]
+
+            # Cross-leg union: each leg's compute_route_corridor returns
+            # rings that are leg-locally unioned but not unioned across
+            # leg boundaries. For short legs (1-5 NM) the per-leg rings
+            # look like distinct circles even when they overlap visually.
+            # Reconstruct shapely polygons and unary_union them so the
+            # final corridor is ONE continuous shape.
+            from shapely.geometry import Polygon as _ShPolygon
+            from shapely.ops import unary_union as _unary_union
+            poly_objs = []
+            for ring in agg_rings:
+                if len(ring) >= 4:
+                    # ring is [[lat, lon], ...]; shapely wants (lon, lat)
+                    poly_objs.append(_ShPolygon([(lon, lat) for lat, lon in ring]))
+            if poly_objs:
+                merged = _unary_union(poly_objs)
+                geoms = ([merged] if isinstance(merged, _ShPolygon)
+                         else list(merged.geoms))
+                agg_rings = []
+                for g in geoms:
+                    if isinstance(g, _ShPolygon) and not g.is_empty:
+                        agg_rings.append(
+                            [[lat, lon] for lon, lat in g.exterior.coords])
 
             # Render glide corridor only when the engine-out mode
             # asks for it (glide or both). For ME aircraft in pure
