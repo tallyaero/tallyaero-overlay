@@ -55,6 +55,7 @@ from core.multi_engine import (
     compute_route_se_corridor,
 )
 from core.terrain_slope import build_slope_heatmap_overlay
+from core.land_cover_osm import fetch_suitable_land, SUITABLE_LAND_STYLE
 
 
 import math
@@ -377,6 +378,8 @@ def register(app):
         State("route-engine-out-mode", "value"),
         State("route-show-slope", "value"),
         State("route-slope-threshold", "value"),
+        State("route-show-land-cover", "value"),
+        State("route-clip-corridor-suitable", "value"),
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
         State("aircraft-select", "value"),
@@ -388,6 +391,7 @@ def register(app):
                           glide_ratio, glide_ias, climb_ias, corridor_show,
                           use_live_winds, engine_out_mode,
                           show_slope, slope_threshold,
+                          show_land_cover, clip_corridor_suitable,
                           wind_dir, wind_speed, aircraft_name,
                           fuel_load_gal):
         trigger = ctx.triggered_id
@@ -564,6 +568,38 @@ def register(app):
 
         layer: list = []
 
+        # ─── Suitable-land fetch (Phase 8b, hoisted) ───────────────────
+        # Fetch the OSM "where a pilot could actually land" polygons
+        # once if either the rendering toggle or the corridor-clip
+        # toggle is on. The fetch is the slow step (Overpass network
+        # call); doing it before corridor rendering lets us optionally
+        # intersect the corridor shape with the suitable union.
+        suitable_fc: dict | None = None         # GeoJSON FeatureCollection
+        suitable_union_shape = None              # shapely union for clipping
+        clip_to_suitable = bool(
+            clip_corridor_suitable and "on" in clip_corridor_suitable)
+        want_suitable_render = bool(
+            show_land_cover and "on" in show_land_cover)
+        if (clip_to_suitable or want_suitable_render) and waypoints:
+            _slats = [w["lat"] for w in waypoints]
+            _slons = [w["lon"] for w in waypoints]
+            _pad = 0.1
+            suitable_fc = fetch_suitable_land(
+                min(_slats) - _pad, min(_slons) - _pad,
+                max(_slats) + _pad, max(_slons) + _pad,
+            )
+            if clip_to_suitable and suitable_fc.get("features"):
+                from shapely.geometry import shape as _shp_shape
+                from shapely.ops import unary_union as _shp_union
+                _polys = []
+                for feat in suitable_fc["features"]:
+                    try:
+                        _polys.append(_shp_shape(feat["geometry"]))
+                    except Exception:
+                        continue
+                if _polys:
+                    suitable_union_shape = _shp_union(_polys)
+
         # ─── Multi-leg corridor (under the polyline) ───────────────────
         corridor_meta_agg = None
         corridor_shape = None    # shapely geom, populated below; used to
@@ -642,6 +678,13 @@ def register(app):
                     poly_objs.append(_ShPolygon([(lon, lat) for lat, lon in ring]))
             if poly_objs:
                 merged = _unary_union(poly_objs)
+                # Phase 8b: optionally intersect the corridor with the
+                # suitable-land union so the rendered polygon shows ONLY
+                # the parts a pilot could actually plant the aircraft in.
+                if suitable_union_shape is not None:
+                    clipped = merged.intersection(suitable_union_shape)
+                    if not clipped.is_empty:
+                        merged = clipped
                 corridor_shape = merged   # exposed for slope-heatmap clipping
                 geoms = ([merged] if isinstance(merged, _ShPolygon)
                          else list(merged.geoms))
@@ -725,6 +768,32 @@ def register(app):
                         max_minutes_after_failure=60.0,
                         sample_fuel_remaining_gal=sample_fuels,
                     )
+                    # Phase 8b: clip SE corridor to suitable land when
+                    # the user has the toggle on. Same intersection
+                    # logic as the glide corridor — rebuild as shapely,
+                    # intersect, re-extract rings.
+                    if suitable_union_shape is not None and se_rings:
+                        se_polys = []
+                        for ring in se_rings:
+                            if len(ring) >= 4:
+                                se_polys.append(_ShPolygon(
+                                    [(lon, lat) for lat, lon in ring]))
+                        if se_polys:
+                            se_merged = _unary_union(se_polys)
+                            se_clipped = se_merged.intersection(
+                                suitable_union_shape)
+                            if not se_clipped.is_empty:
+                                geoms = ([se_clipped]
+                                         if isinstance(se_clipped, _ShPolygon)
+                                         else list(se_clipped.geoms))
+                                se_rings = []
+                                for g in geoms:
+                                    if (isinstance(g, _ShPolygon)
+                                            and not g.is_empty):
+                                        se_rings.append([
+                                            [lat, lon]
+                                            for lon, lat in g.exterior.coords
+                                        ])
                     for ring in se_rings:
                         layer.append(dl.Polygon(
                             positions=ring,
@@ -800,6 +869,22 @@ def register(app):
                     },
                     children=[dl.Tooltip(tip)],
                 ))
+
+        # ─── Suitable-land render (Phase 8b, refined) ────────────────
+        # Paints only the OSM polygons a pilot would treat as viable
+        # off-field landing (farmland, meadow, grass, pasture,
+        # grassland, heath). The fetch already happened above (hoisted
+        # so corridor-clip can share the result); here we just append
+        # the GeoJSON layer if the user toggled rendering on.
+        land_cover_meta = None
+        if want_suitable_render and suitable_fc:
+            n_suitable = len(suitable_fc["features"])
+            if n_suitable:
+                layer.append(dl.GeoJSON(
+                    data=suitable_fc,
+                    options=dict(style=SUITABLE_LAND_STYLE),
+                ))
+            land_cover_meta = {"suitable_features": n_suitable}
 
         # ─── Slope heatmap (off-field landability proxy, Phase 8a) ────
         # Renders a translucent color-coded raster over the route bbox.
@@ -1060,12 +1145,10 @@ def register(app):
             slope_block = html.Div(
                 className="route-slope-badge", children=[
                     html.Div([
-                        html.Span(f"Off-field slope (≤{slope_meta['threshold_deg']:.0f}°)",
+                        html.Span(f"Slope ≤ {slope_meta['threshold_deg']:.0f}° (landable)",
                                   className="route-summary-label"),
                         html.Span(
-                            f"{slope_meta['pct_landable']:.0f}% landable · "
-                            f"{slope_meta['pct_marginal']:.0f}% upslope-only · "
-                            f"{slope_meta['pct_steep']:.0f}% steep",
+                            f"{slope_meta['pct_landable']:.0f}% of corridor",
                             className="route-summary-value"),
                     ], className="route-summary-row"),
                     html.Div([
@@ -1076,8 +1159,26 @@ def register(app):
                     ], className="route-summary-row"),
                     html.Div(
                         "FAA AFH §18-4: slope is one of three off-field "
-                        "landing factors (with wind + obstacles). "
-                        "Slope alone — Phase 8b adds land-cover.",
+                        "landing factors (with wind + obstacles). Green "
+                        "shading = pixels suitable for landing.",
+                        className="route-slope-caveat"),
+                ])
+
+        # Suitable-land summary — surfaced when OSM land layer is on.
+        land_cover_block = None
+        if land_cover_meta:
+            n = land_cover_meta["suitable_features"]
+            land_cover_block = html.Div(
+                className="route-slope-badge", children=[
+                    html.Div([
+                        html.Span("Suitable land (OSM)",
+                                  className="route-summary-label"),
+                        html.Span(f"{n} polygons in route bbox",
+                                  className="route-summary-value"),
+                    ], className="route-summary-row"),
+                    html.Div(
+                        "Farmland, meadow, grass, pasture, grassland, "
+                        "heath. Source: OpenStreetMap Overpass API.",
                         className="route-slope-caveat"),
                 ])
 
@@ -1144,6 +1245,7 @@ def register(app):
                 divert_block,
                 terrain_block,
                 slope_block,
+                land_cover_block,
                 wind_pill,
                 profile_chart,
             ],

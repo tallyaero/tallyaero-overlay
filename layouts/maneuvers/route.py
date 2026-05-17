@@ -110,6 +110,22 @@ def route_layout(default_glide_ratio: float | None = None,
             options=[{"label": " On", "value": "on"}],
             value=[],
         )),
+        _field("Suitable land", dcc.Checklist(
+            id="route-show-land-cover",
+            options=[{"label": " On", "value": "on"}],
+            value=[],
+        )),
+        _field("Clip corridor", html.Span(
+            dcc.Checklist(
+                id="route-clip-corridor-suitable",
+                options=[{"label": " On", "value": "on"}],
+                value=[],
+            ),
+            title=("Intersect the engine-out glide corridor with suitable "
+                   "land (OSM farmland/meadow/grass/pasture/grassland). "
+                   "Shows only the parts of the corridor where a pilot "
+                   "could actually plant the aircraft."),
+        )),
         # FAA AFH Chapter 18 names slope as one of three pillars of
         # off-field landing site selection (with wind + obstacles).
         # Default 3° matches operational consensus for "level enough

@@ -68,28 +68,32 @@ def test_colorize_flat_is_green():
     assert rgba[0, 0, 2] == 94
 
 
-def test_colorize_marginal_is_amber():
-    """Slope 5° with threshold 3° (so 1-2× is 3-6° marginal) → amber."""
+def test_colorize_marginal_is_transparent():
+    """Slope above threshold → fully transparent (only suitable areas
+    are painted under the Phase 8b "show only suitable" rule)."""
     slopes = np.array([[5.0]])
     rgba = colorize_slope(slopes, threshold_deg=3.0)
-    # Amber is (245, 158, 11)
-    assert rgba[0, 0, 0] == 245
-    assert rgba[0, 0, 1] == 158
+    assert rgba[0, 0, 3] == 0   # alpha = 0
 
 
-def test_colorize_steep_is_red():
-    """Slope 20° far above any reasonable threshold → red."""
+def test_colorize_steep_is_transparent():
+    """Steep slope → transparent under the suitable-only rule."""
     slopes = np.array([[20.0]])
     rgba = colorize_slope(slopes, threshold_deg=3.0)
-    # Red is (220, 38, 38)
-    assert rgba[0, 0, 0] == 220
-    assert rgba[0, 0, 1] == 38
+    assert rgba[0, 0, 3] == 0
 
 
 def test_colorize_nan_is_transparent():
     slopes = np.array([[float("nan")]])
     rgba = colorize_slope(slopes, threshold_deg=3.0)
     assert rgba[0, 0, 3] == 0   # alpha = 0
+
+
+def test_colorize_at_threshold_is_green():
+    """Boundary case: slope exactly == threshold should be painted."""
+    slopes = np.array([[3.0]])
+    rgba = colorize_slope(slopes, threshold_deg=3.0)
+    assert rgba[0, 0, 0] == 34 and rgba[0, 0, 3] > 0
 
 
 # === Data URL encoding ======================================================
