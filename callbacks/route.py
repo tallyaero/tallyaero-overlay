@@ -54,6 +54,7 @@ from core.multi_engine import (
     is_multi_engine, has_se_performance_data,
     compute_route_se_corridor,
 )
+from core.terrain_slope import build_slope_heatmap_overlay
 
 
 import math
@@ -374,6 +375,8 @@ def register(app):
         State("route-show-corridor", "value"),
         State("route-use-live-winds", "value"),
         State("route-engine-out-mode", "value"),
+        State("route-show-slope", "value"),
+        State("route-slope-threshold", "value"),
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
         State("aircraft-select", "value"),
@@ -384,6 +387,7 @@ def register(app):
                           waypoint_ids, cruise_alt, tas,
                           glide_ratio, glide_ias, climb_ias, corridor_show,
                           use_live_winds, engine_out_mode,
+                          show_slope, slope_threshold,
                           wind_dir, wind_speed, aircraft_name,
                           fuel_load_gal):
         trigger = ctx.triggered_id
@@ -794,6 +798,41 @@ def register(app):
                     children=[dl.Tooltip(tip)],
                 ))
 
+        # ─── Slope heatmap (off-field landability proxy, Phase 8a) ────
+        # Renders a translucent color-coded raster over the route bbox.
+        # Sources slope from the same DEM the corridor uses; FAA AFH
+        # §18-4 names slope as one of three off-field landing factors
+        # (along with wind + obstacles). This is slope ONLY — surface
+        # type (water/forest/built) comes in Phase 8b.
+        slope_meta = None
+        if show_slope and "on" in show_slope and waypoints:
+            try:
+                threshold = float(slope_threshold) if slope_threshold else 3.0
+            except (TypeError, ValueError):
+                threshold = 3.0
+            # Bbox covering all waypoints with a 0.1° pad
+            lats = [w["lat"] for w in waypoints]
+            lons = [w["lon"] for w in waypoints]
+            pad = 0.1
+            heat_lat_min = min(lats) - pad
+            heat_lat_max = max(lats) + pad
+            heat_lon_min = min(lons) - pad
+            heat_lon_max = max(lons) + pad
+            data_url, slope_meta = build_slope_heatmap_overlay(
+                _terrain_elevation_m,
+                heat_lat_min, heat_lon_min,
+                heat_lat_max, heat_lon_max,
+                threshold_deg=threshold,
+                grid_size=128,
+                fill_opacity=0.45,
+            )
+            layer.append(dl.ImageOverlay(
+                url=data_url,
+                bounds=[[heat_lat_min, heat_lon_min],
+                        [heat_lat_max, heat_lon_max]],
+                opacity=0.7,
+            ))
+
         # ─── Terrain conflict status per sample ───────────────────────
         # Classify each sample as clear / marginal / conflict based on
         # AGL vs terrain. The samples are along great-circle legs so
@@ -1011,6 +1050,33 @@ def register(app):
                     ], className="route-summary-row"),
                 ])
 
+        # Slope-heatmap summary stats — surfaced when the layer is on.
+        slope_block = None
+        if slope_meta:
+            slope_block = html.Div(
+                className="route-slope-badge", children=[
+                    html.Div([
+                        html.Span(f"Off-field slope (≤{slope_meta['threshold_deg']:.0f}°)",
+                                  className="route-summary-label"),
+                        html.Span(
+                            f"{slope_meta['pct_landable']:.0f}% landable · "
+                            f"{slope_meta['pct_marginal']:.0f}% upslope-only · "
+                            f"{slope_meta['pct_steep']:.0f}% steep",
+                            className="route-summary-value"),
+                    ], className="route-summary-row"),
+                    html.Div([
+                        html.Span("Peak slope",
+                                  className="route-summary-label"),
+                        html.Span(f"{slope_meta['max_slope_deg']:.0f}°",
+                                  className="route-summary-value"),
+                    ], className="route-summary-row"),
+                    html.Div(
+                        "FAA AFH §18-4: slope is one of three off-field "
+                        "landing factors (with wind + obstacles). "
+                        "Slope alone — Phase 8b adds land-cover.",
+                        className="route-slope-caveat"),
+                ])
+
         # ─── Altitude profile side-view chart ─────────────────────────
         profile_series = build_profile_series(
             all_samples, all_alts, _terrain_elevation_m)
@@ -1073,6 +1139,7 @@ def register(app):
                 extras,
                 divert_block,
                 terrain_block,
+                slope_block,
                 wind_pill,
                 profile_chart,
             ],

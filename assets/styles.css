@@ -2441,6 +2441,25 @@ input[type="radio"] {
   border-top-color: #334155;
 }
 
+/* Slope heatmap badge — FAA-aligned off-field landability summary. */
+.route-slope-badge {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(34, 197, 94, 0.35);
+}
+.route-slope-badge .route-summary-row:first-child {
+  font-weight: 700;
+}
+.route-slope-caveat {
+  font-size: 10px;
+  font-style: italic;
+  color: var(--ta-text-tertiary, #94a3b8);
+  margin-top: 4px;
+}
+[data-theme="dark"] .route-slope-badge {
+  border-top-color: rgba(34, 197, 94, 0.45);
+}
+
 /* Engine-out scenario toggle (SE / Glide / Both) — only shown for
    multi-engine aircraft. .shelf-field-hidden hides it for singles. */
 .shelf-field-hidden { display: none !important; }
