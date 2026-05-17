@@ -76,24 +76,43 @@ def register(app):
 
     @app.callback(
         Output("map", "center"),
+        Output("map", "zoom"),
         Output("env-airport-agl", "children"),
         Output("selected-airport-id", "data"),
         Output("airport-search-input", "value"),
         Output("selected-airport-display", "children"),
         Output("selected-airport-display", "style"),
-        Output("airport-search-results", "children", allow_duplicate=True),  # Clear results after selection
+        Output("airport-search-results", "children", allow_duplicate=True),
         Input({"type": "airport-result", "index": ALL}, "n_clicks"),
-        prevent_initial_call=True
+        Input("airport-search-input", "n_submit"),
+        State("airport-search-matches", "data"),
+        prevent_initial_call=True,
     )
-    def handle_airport_result_click(n_clicks_list):
-        # Only process if there was an actual click (not just element creation)
-        if not n_clicks_list or all(n is None or n == 0 for n in n_clicks_list):
-            raise PreventUpdate
+    def handle_airport_pick(n_clicks_list, n_submit, current_matches):
+        """Two paths to the same outcome:
+          - User clicks a result row in the dropdown (existing).
+          - User presses Enter in the search input → picks the top
+            match from airport-search-matches (autocomplete behavior).
+        After selection, map auto-zooms to a terminal-area view
+        (zoom 11) so the airport is visible without manual pan/zoom.
+        """
+        trigger = ctx.triggered_id
+        airport_id = None
 
-        if not ctx.triggered_id or not isinstance(ctx.triggered_id, dict):
-            raise PreventUpdate
+        # Enter-key path
+        if trigger == "airport-search-input":
+            if not current_matches:
+                raise PreventUpdate
+            airport_id = current_matches[0]
+        elif isinstance(trigger, dict):
+            # Result-row click path
+            if (not n_clicks_list
+                    or all(n is None or n == 0 for n in n_clicks_list)):
+                raise PreventUpdate
+            airport_id = trigger.get("index")
 
-        airport_id = ctx.triggered_id.get("index")
+        if not airport_id:
+            raise PreventUpdate
         ap = next((a for a in airport_data if a.get("id") == airport_id), None)
         if not ap:
             raise PreventUpdate
@@ -102,18 +121,18 @@ def register(app):
         elev = ap.get("elevation_ft", "---")
         name = ap.get("name", airport_id)
 
-        # Display style (visible)
         display_style = {
             "fontSize": "12px",
             "color": "#28a745",
             "fontWeight": "500",
             "marginTop": "4px",
             "marginBottom": "4px",
-            "display": "block"
+            "display": "block",
         }
-
-        # Clear the search input, show display, and clear search results
-        return [lat, lon], f"{elev} ft", airport_id, "", f"Selected: {name} ({airport_id})", display_style, []
+        # Terminal-area zoom — ~zoom 11 puts the airport + a few NM
+        # around it comfortably in the map view.
+        return ([lat, lon], 11, f"{elev} ft", airport_id, "",
+                f"Selected: {name} ({airport_id})", display_style, [])
 
     @app.callback(
         Output("airport-search-results", "children"),
