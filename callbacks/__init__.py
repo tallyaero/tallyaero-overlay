@@ -32,6 +32,7 @@ def register_all(app):
     from . import map as map_      # Phase 1f
     from . import edit_aircraft    # Phase 1g
     from . import route            # Phase 5d
+    from . import sidebar          # Phase 8d
     from .maneuvers import register_maneuvers   # Phase 1c
 
     navigation.register(app)
@@ -40,6 +41,7 @@ def register_all(app):
     map_.register(app)
     edit_aircraft.register(app)
     route.register(app)
+    sidebar.register(app)
     register_maneuvers(app)
 
     # Phase 1 complete: every callback module is wired. app.py retains

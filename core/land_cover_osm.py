@@ -265,12 +265,12 @@ def fetch_land_cover(
 
 # === Suitable-area styling ==================================================
 
-# Same green as the slope-landable layer so the two suitability signals
-# read as one composite "landable" wash. Slightly lower opacity so the
-# slope green can stack visually when both are on.
+# Lime-500 — distinct from the Tailwind green-500 used by the glide
+# corridor and the slope-landable heatmap, so when all three overlays
+# stack the suitable-land patches still read as their own signal.
 SUITABLE_LAND_STYLE = {
-    "color": "#15803d", "weight": 1,
-    "fillColor": "#22c55e", "fillOpacity": 0.22,
+    "color": "#4d7c0f", "weight": 1,
+    "fillColor": "#84cc16", "fillOpacity": 0.45,
 }
 
 # Water = AFH §18-7 ditching option. Blue, NOT red — AFH explicitly

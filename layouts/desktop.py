@@ -342,7 +342,9 @@ def desktop_layout():
                         ], style={"flex": "1"}),
                     ]),
 
-                    html.Div(style={"display": "flex", "gap": "8px", "marginTop": "8px"}, children=[
+                    html.Div(id="sidebar-thermo-row",
+                             style={"display": "flex", "gap": "8px", "marginTop": "8px"},
+                             children=[
                         html.Div([
                             html.Label("OAT (°F)", className="input-label-sm"),
                             dcc.Input(id="env-oat", type="number", value=52,
@@ -357,8 +359,10 @@ def desktop_layout():
                         ], style={"flex": "1"}),
                     ]),
 
-                    html.Div(id="env-airport-agl", className="weight-box",
-                             style={"marginTop": "8px", "fontSize": "11px"}),
+                    html.Div(id="sidebar-agl-wrap", children=[
+                        html.Div(id="env-airport-agl", className="weight-box",
+                                 style={"marginTop": "8px", "fontSize": "11px"}),
+                    ]),
                 ]),
 
                 # === Weight & CG section ===
@@ -385,13 +389,15 @@ def desktop_layout():
                         tooltip={"always_visible": True},
                         persistence=True, persistence_type="local",
                     ),
-                    html.Label("CG Position", className="input-label-sm", style={"marginTop": "10px"}),
-                    dcc.Slider(
-                        id="cg-slider", min=0.0, max=1.0, step=0.01, value=0.5,
-                        marks={0.0: "FWD", 0.5: "MID", 1.0: "AFT"},
-                        tooltip={"always_visible": True},
-                        persistence=True, persistence_type="local",
-                    ),
+                    html.Div(id="sidebar-cg-block", children=[
+                        html.Label("CG Position", className="input-label-sm", style={"marginTop": "10px"}),
+                        dcc.Slider(
+                            id="cg-slider", min=0.0, max=1.0, step=0.01, value=0.5,
+                            marks={0.0: "FWD", 0.5: "MID", 1.0: "AFT"},
+                            tooltip={"always_visible": True},
+                            persistence=True, persistence_type="local",
+                        ),
+                    ]),
                     html.Label("Total Weight", className="input-label-sm", style={"marginTop": "10px"}),
                     dcc.Input(id="total-weight-display", type="text", value="", readOnly=True,
                               className="input-small", style={"width": "100%"}),
@@ -400,7 +406,8 @@ def desktop_layout():
                 # === Maneuver picker + params moved to the top shelf ===
 
                 # === Power section ===
-                html.Div(className="sidebar-section", children=[
+                html.Div(id="sidebar-power-section",
+                         className="sidebar-section", children=[
                     html.Div("Power", className="sidebar-section-title"),
                     dcc.Slider(
                         id="power-setting",
