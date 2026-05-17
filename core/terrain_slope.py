@@ -129,24 +129,18 @@ def colorize_slope(
     threshold_deg: float = 10.0,
     fill_opacity: float = 0.45,
 ) -> np.ndarray:
-    """Map slope degrees to RGBA. Green ≤ threshold, amber 1×-2×,
-    red above. NaN → fully transparent. Returns uint8 (H, W, 4).
+    """Map slope degrees to RGBA. Only landable pixels (≤ threshold) are
+    painted green; steeper terrain and NaN are fully transparent so the
+    overlay highlights ONLY suitable landing areas. Returns uint8 (H, W, 4).
     """
     h, w = slope_grid_deg.shape
     rgba = np.zeros((h, w, 4), dtype=np.uint8)
-    nan_mask = np.isnan(slope_grid_deg)
 
-    # Three regions
-    green_mask = slope_grid_deg <= threshold_deg
-    amber_mask = (slope_grid_deg > threshold_deg) & (
-        slope_grid_deg <= 2.0 * threshold_deg)
-    red_mask = slope_grid_deg > 2.0 * threshold_deg
-
-    # Tailwind-style palette
-    rgba[green_mask] = (34, 197, 94, int(255 * fill_opacity))      # #22c55e
-    rgba[amber_mask] = (245, 158, 11, int(255 * fill_opacity))     # #f59e0b
-    rgba[red_mask] = (220, 38, 38, int(255 * fill_opacity * 1.05)) # #dc2626 slightly more opaque
-    rgba[nan_mask] = (0, 0, 0, 0)
+    # Suitable = slope at or below the user-set threshold. numpy's
+    # comparison treats NaN as False so steep + NaN end up transparent
+    # without an extra mask.
+    landable_mask = slope_grid_deg <= threshold_deg
+    rgba[landable_mask] = (34, 197, 94, int(255 * fill_opacity))   # #22c55e
 
     return rgba
 

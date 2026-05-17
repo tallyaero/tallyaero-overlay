@@ -70,10 +70,18 @@ def route_layout(default_glide_ratio: float | None = None,
                 className="shelf-climb-row")],
             className="shelf-field shelf-field-climb",
         ),
-        _field("Corridor", dcc.Checklist(
-            id="route-show-corridor",
-            options=[{"label": " On", "value": "show"}],
-            value=["show"],
+        _field("Corridor", html.Span(
+            dcc.Checklist(
+                id="route-show-corridor",
+                options=[{"label": " On", "value": "show"}],
+                value=["show"],
+            ),
+            title=("Engine-out glide corridor — every point you could "
+                   "reach from cruise with the engine failed, drawn "
+                   "from this aircraft's glide ratio and Vbg, with "
+                   "live wind and DEM ridge-clipping applied. The "
+                   "master clip mask for the slope and suitable-land "
+                   "overlays."),
         )),
         _field("Live winds", dcc.Checklist(
             id="route-use-live-winds",
@@ -105,10 +113,30 @@ def route_layout(default_glide_ratio: float | None = None,
             options=[{"label": " On", "value": "on"}],
             value=[],
         )),
-        _field("Slope map", dcc.Checklist(
-            id="route-show-slope",
-            options=[{"label": " On", "value": "on"}],
-            value=[],
+        _field("Slope map", html.Span(
+            dcc.Checklist(
+                id="route-show-slope",
+                options=[{"label": " On", "value": "on"}],
+                value=[],
+            ),
+            title=("Green heatmap of terrain ≤ Max slope (default 3°) — "
+                   "DEM-derived. Pixels above the threshold render "
+                   "transparent, so what you see is just the landable "
+                   "surface. FAA AFH §18-4 names slope as one of three "
+                   "off-field landing factors (with wind + obstacles)."),
+        )),
+        _field("Suitable land", html.Span(
+            dcc.Checklist(
+                id="route-show-land-cover",
+                options=[{"label": " On", "value": "on"}],
+                value=[],
+            ),
+            title=("OSM polygons clipped to the glide corridor. "
+                   "Green = AFH §18-4 viable land (farmland, meadow, "
+                   "grass, pasture, grassland, heath). Blue = AFH §18-7 "
+                   "ditching option (lakes, rivers) — NOT equivalent "
+                   "to land; aircraft type and sea state matter. "
+                   "Source: OpenStreetMap."),
         )),
         # FAA AFH Chapter 18 names slope as one of three pillars of
         # off-field landing site selection (with wind + obstacles).

@@ -55,6 +55,9 @@ from core.multi_engine import (
     compute_route_se_corridor,
 )
 from core.terrain_slope import build_slope_heatmap_overlay
+from core.land_cover_osm import (
+    fetch_landing_options, SUITABLE_LAND_STYLE, WATER_STYLE,
+)
 
 
 import math
@@ -377,6 +380,7 @@ def register(app):
         State("route-engine-out-mode", "value"),
         State("route-show-slope", "value"),
         State("route-slope-threshold", "value"),
+        State("route-show-land-cover", "value"),
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
         State("aircraft-select", "value"),
@@ -388,6 +392,7 @@ def register(app):
                           glide_ratio, glide_ias, climb_ias, corridor_show,
                           use_live_winds, engine_out_mode,
                           show_slope, slope_threshold,
+                          show_land_cover,
                           wind_dir, wind_speed, aircraft_name,
                           fuel_load_gal):
         trigger = ctx.triggered_id
@@ -564,11 +569,37 @@ def register(app):
 
         layer: list = []
 
+        # ─── Landing-options fetch (Phase 8b, hoisted) ─────────────────
+        # The engine-out glide corridor is the master constraint; every
+        # other overlay (slope, suitable-land, water) is clipped to it
+        # at render time. Fetch the OSM polygons only if the user has
+        # the toggle on; we'll intersect each feature with
+        # corridor_shape before painting it.
+        #
+        # Two categories come back:
+        #   suitable — farmland/meadow/grass/etc. (green)
+        #   water    — lakes/rivers/etc., AFH §18-7 ditching (blue)
+        landing_opts: dict | None = None
+        want_suitable_render = bool(
+            show_land_cover and "on" in show_land_cover)
+        if want_suitable_render and waypoints:
+            _slats = [w["lat"] for w in waypoints]
+            _slons = [w["lon"] for w in waypoints]
+            _pad = 0.1
+            landing_opts = fetch_landing_options(
+                min(_slats) - _pad, min(_slons) - _pad,
+                max(_slats) + _pad, max(_slons) + _pad,
+            )
+
         # ─── Multi-leg corridor (under the polyline) ───────────────────
+        # The shapely corridor_shape is the master clip mask for every
+        # other overlay (slope heatmap, suitable-land polygons), so we
+        # always compute it. The visual Polygon render is the only
+        # thing the Corridor toggle gates.
         corridor_meta_agg = None
-        corridor_shape = None    # shapely geom, populated below; used to
-                                  # clip the slope heatmap to corridor shape
-        if corridor_show and "show" in corridor_show:
+        corridor_shape = None
+        corridor_visible = bool(corridor_show and "show" in corridor_show)
+        if waypoints and len(waypoints) >= 2:
             field_elev = max((w.get("elevation_ft") or 0.0) for w in waypoints)
             max_reach_nm = max(2.0,
                                (cruise_alt - field_elev) * glide_ratio / 6076.115)
@@ -639,10 +670,14 @@ def register(app):
             for ring in agg_rings:
                 if len(ring) >= 4:
                     # ring is [[lat, lon], ...]; shapely wants (lon, lat)
-                    poly_objs.append(_ShPolygon([(lon, lat) for lat, lon in ring]))
+                    p = _ShPolygon([(lon, lat) for lat, lon in ring])
+                    if not p.is_valid:
+                        p = p.buffer(0)
+                    if p.is_valid and not p.is_empty:
+                        poly_objs.append(p)
             if poly_objs:
                 merged = _unary_union(poly_objs)
-                corridor_shape = merged   # exposed for slope-heatmap clipping
+                corridor_shape = merged   # master clip mask for overlays
                 geoms = ([merged] if isinstance(merged, _ShPolygon)
                          else list(merged.geoms))
                 agg_rings = []
@@ -659,7 +694,7 @@ def register(app):
             ac_is_me = ac_for_me is not None and is_multi_engine(ac_for_me)
             mode = (engine_out_mode or "both").lower()
             show_glide = (not ac_is_me) or mode in ("glide", "both")
-            if show_glide:
+            if corridor_visible and show_glide:
                 for ring in agg_rings:
                     layer.append(dl.Polygon(
                         positions=ring,
@@ -725,12 +760,13 @@ def register(app):
                         max_minutes_after_failure=60.0,
                         sample_fuel_remaining_gal=sample_fuels,
                     )
-                    for ring in se_rings:
-                        layer.append(dl.Polygon(
-                            positions=ring,
-                            color="#7e22ce", weight=1,
-                            fillColor="#a855f7", fillOpacity=0.15,
-                        ))
+                    if corridor_visible:
+                        for ring in se_rings:
+                            layer.append(dl.Polygon(
+                                positions=ring,
+                                color="#7e22ce", weight=1,
+                                fillColor="#a855f7", fillOpacity=0.15,
+                            ))
 
         # ─── Divert airport reach analysis ─────────────────────────────
         # Per route sample, what airports could the aircraft glide to if
@@ -800,6 +836,74 @@ def register(app):
                     },
                     children=[dl.Tooltip(tip)],
                 ))
+
+        # ─── Landing-options render (Phase 8b, refined) ──────────────
+        # Paints the OSM "where a pilot has options" polygons, but ONLY
+        # within the engine-out glide corridor — the corridor is the
+        # master constraint, and a green patch 30 NM from the reachable
+        # polygon is just noise. Each feature is intersected with
+        # corridor_shape before being added.
+        #   suitable (farmland/meadow/grass/etc.) → green
+        #   water    (lakes/rivers)               → blue (ditching)
+        land_cover_meta = None
+        if want_suitable_render and landing_opts:
+            from shapely.geometry import (
+                shape as _shp_shape, mapping as _shp_mapping,
+            )
+
+            def _clip_features(fc: dict) -> list[dict]:
+                out: list[dict] = []
+                if corridor_shape is None:
+                    return out
+                for feat in fc.get("features", []):
+                    try:
+                        g = _shp_shape(feat["geometry"])
+                        if not g.is_valid:
+                            g = g.buffer(0)
+                        if not g.is_valid or g.is_empty:
+                            continue
+                        inter = g.intersection(corridor_shape)
+                        if inter.is_empty:
+                            continue
+                        subs = (list(inter.geoms)
+                                if hasattr(inter, "geoms") else [inter])
+                        for sub in subs:
+                            if (hasattr(sub, "exterior")
+                                    and not sub.is_empty):
+                                out.append({
+                                    "type": "Feature",
+                                    "geometry": _shp_mapping(sub),
+                                    "properties": feat.get("properties", {}),
+                                })
+                    except Exception:
+                        continue
+                return out
+
+            suitable_fc = landing_opts.get(
+                "suitable", {"features": []})
+            water_fc = landing_opts.get(
+                "water", {"features": []})
+            clipped_suitable = _clip_features(suitable_fc)
+            clipped_water = _clip_features(water_fc)
+
+            if clipped_suitable:
+                layer.append(dl.GeoJSON(
+                    data={"type": "FeatureCollection",
+                          "features": clipped_suitable},
+                    options=dict(style=SUITABLE_LAND_STYLE),
+                ))
+            if clipped_water:
+                layer.append(dl.GeoJSON(
+                    data={"type": "FeatureCollection",
+                          "features": clipped_water},
+                    options=dict(style=WATER_STYLE),
+                ))
+            land_cover_meta = {
+                "suitable_features": len(clipped_suitable),
+                "water_features": len(clipped_water),
+                "fetched_suitable": len(suitable_fc.get("features", [])),
+                "fetched_water": len(water_fc.get("features", [])),
+            }
 
         # ─── Slope heatmap (off-field landability proxy, Phase 8a) ────
         # Renders a translucent color-coded raster over the route bbox.
@@ -899,32 +1003,11 @@ def register(app):
                               f"{corridor_meta_agg['max_agl_ft']:.0f} ft",
                               className="route-summary-value")],
                          className="route-summary-row"),
-                html.Div([html.Span("Narrowest",
-                                    className="route-summary-label"),
-                          html.Span(f"{corridor_meta_agg['narrowest_nm']:.1f} NM",
-                                    className="route-summary-value")],
-                         className="route-summary-row"),
-                html.Div([html.Span("Widest",
-                                    className="route-summary-label"),
-                          html.Span(f"{corridor_meta_agg['widest_nm']:.1f} NM",
-                                    className="route-summary-value")],
-                         className="route-summary-row"),
-                html.Div([html.Span("Area",
-                                    className="route-summary-label"),
-                          html.Span(f"{corridor_meta_agg['area_nm2']:.0f} NM²",
-                                    className="route-summary-value")],
-                         className="route-summary-row"),
-                html.Div([html.Span("Ridge-clipped",
-                                    className="route-summary-label"),
-                          html.Span(
-                              f"{corridor_meta_agg['terrain_limited_samples']} / "
-                              f"{corridor_meta_agg['n_samples']} samples",
-                              className="route-summary-value")],
-                         className="route-summary-row"),
             ]
             if corridor_meta_agg["below_terrain_samples"] > 0:
                 rows.append(html.Div([
-                    html.Span("Below ridge", className="route-summary-label"),
+                    html.Span("Terrain conflict",
+                              className="route-summary-label"),
                     html.Span(f"{corridor_meta_agg['below_terrain_samples']} samples",
                               className="route-summary-value route-summary-warn"),
                 ], className="route-summary-row"))
@@ -1054,32 +1137,6 @@ def register(app):
                     ], className="route-summary-row"),
                 ])
 
-        # Slope-heatmap summary stats — surfaced when the layer is on.
-        slope_block = None
-        if slope_meta:
-            slope_block = html.Div(
-                className="route-slope-badge", children=[
-                    html.Div([
-                        html.Span(f"Off-field slope (≤{slope_meta['threshold_deg']:.0f}°)",
-                                  className="route-summary-label"),
-                        html.Span(
-                            f"{slope_meta['pct_landable']:.0f}% landable · "
-                            f"{slope_meta['pct_marginal']:.0f}% upslope-only · "
-                            f"{slope_meta['pct_steep']:.0f}% steep",
-                            className="route-summary-value"),
-                    ], className="route-summary-row"),
-                    html.Div([
-                        html.Span("Peak slope",
-                                  className="route-summary-label"),
-                        html.Span(f"{slope_meta['max_slope_deg']:.0f}°",
-                                  className="route-summary-value"),
-                    ], className="route-summary-row"),
-                    html.Div(
-                        "FAA AFH §18-4: slope is one of three off-field "
-                        "landing factors (with wind + obstacles). "
-                        "Slope alone — Phase 8b adds land-cover.",
-                        className="route-slope-caveat"),
-                ])
 
         # ─── Altitude profile side-view chart ─────────────────────────
         profile_series = build_profile_series(
@@ -1143,7 +1200,6 @@ def register(app):
                 extras,
                 divert_block,
                 terrain_block,
-                slope_block,
                 wind_pill,
                 profile_chart,
             ],
