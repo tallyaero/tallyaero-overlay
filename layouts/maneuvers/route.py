@@ -105,6 +105,25 @@ def route_layout(default_glide_ratio: float | None = None,
             options=[{"label": " On", "value": "on"}],
             value=[],
         )),
+        _field("Slope map", dcc.Checklist(
+            id="route-show-slope",
+            options=[{"label": " On", "value": "on"}],
+            value=[],
+        )),
+        # FAA AFH Chapter 18 names slope as one of three pillars of
+        # off-field landing site selection (with wind + obstacles).
+        # Default 3° matches operational consensus for "level enough
+        # to land without significant uphill/downhill penalty."
+        # 3-7° marginal (FAA: land upslope only); >7° steep.
+        _field("Max slope °", dcc.Input(
+            id="route-slope-threshold",
+            type="number", value=3, min=1, max=20, step=1,
+            style={"width": "55px"},
+            title="Max slope considered 'landable' (FAA AFH §18-4 "
+                  "names slope as one off-field landing factor). "
+                  "Default 3° matches operational consensus. "
+                  "3-7° = 'land upslope only'; >7° = too steep.",
+        )),
 
         html.Div(className="shelf-spacer"),
 
