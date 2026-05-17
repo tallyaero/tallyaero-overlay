@@ -351,6 +351,29 @@ short-field landing was 3 years ago, recommend KSWS instead with
 6500 ft and a headwind." Small-to-medium lift once currency data
 exists.
 
+### D16. Sidebar declutter by active maneuver (Phase 8d)
+**Status:** task #145, tracked. **Lift:** small.
+
+Left sidebar currently shows every control regardless of which
+maneuver is active. Route Planner doesn't use CG slider, power
+setting, or occupant weight (gross weight matters but not the
+breakdown). Hide controls each maneuver doesn't consume.
+
+Implementation sketch: each maneuver layout module declares
+`relevant_sidebar = ('engine', 'wind', 'oat', 'altim', 'fuel')`.
+Sidebar groups not in the active list collapse with a "hidden by
+maneuver" badge so pilots know nothing is broken — they're just out
+of scope.
+
+Per-maneuver relevance:
+  - route: engine, wind, OAT, altim, fuel, weight (for SE perf)
+  - impossible_turn / poweroff180: weight, CG, power (full envelope)
+  - steep_turn / chandelle / lazy8: weight (load factor matters)
+  - turns_around_point / s_turn / rect_course: wind primarily
+  - eights_on_pylons: weight, IAS  
+  - steep_spiral: glide ratio (handled separately)
+  - engineout: SE limits — basically all weight + power inputs
+
 ---
 
 ## How to use this document
