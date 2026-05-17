@@ -247,10 +247,17 @@ def test_fetch_land_cover_back_compat(tmp_path, monkeypatch):
     assert result["suitable"]["type"] == "FeatureCollection"
 
 
-def test_styles_are_green_only():
-    """Suitable land renders in the same green family as the slope
-    layer so both signals read as one composite "landable" wash."""
+def test_suitable_style_distinct_from_corridor():
+    """Suitable land is lime, not green — the glide corridor and
+    slope heatmap are both green-500, and stacking three identical
+    greens would make the suitable polygons invisible."""
     style = lc.SUITABLE_LAND_STYLE
-    # Tailwind green-500 family
-    assert style["fillColor"].lower() == "#22c55e"
-    assert 0 < style["fillOpacity"] < 0.5
+    assert style["fillColor"].lower() == "#84cc16"   # Tailwind lime-500
+    assert style["fillColor"].lower() != "#22c55e"   # NOT corridor green
+    assert 0 < style["fillOpacity"] < 1.0
+
+
+def test_water_style_is_blue():
+    """Water is the AFH §18-7 ditching layer — distinct blue family."""
+    style = lc.WATER_STYLE
+    assert style["fillColor"].lower() == "#3b82f6"   # Tailwind blue-500
