@@ -71,6 +71,9 @@ _OVERPASS_QUERY_TEMPLATE = """
   relation["natural"="grassland"]({s},{w},{n},{e});
   way["natural"="heath"]({s},{w},{n},{e});
   relation["natural"="heath"]({s},{w},{n},{e});
+  way["natural"="water"]({s},{w},{n},{e});
+  relation["natural"="water"]({s},{w},{n},{e});
+  way["waterway"="riverbank"]({s},{w},{n},{e});
 );
 out geom;
 """
@@ -127,17 +130,24 @@ _SUITABLE_NATURAL = {"grassland", "heath"}
 
 
 def classify_feature(tags: dict) -> Optional[str]:
-    """Return 'suitable' for tags a pilot would treat as a viable
-    off-field landing surface, else None. We deliberately exclude
-    things like recreation_ground (often has trees/fences) and
-    cemetery (headstones) even though they may look open from the
-    air."""
+    """Return one of:
+      - 'suitable' — open, level surface a pilot would aim for (FAA
+        AFH §18-4 "flat, firm, open" target list)
+      - 'water'    — ditching option per AFH §18-7. NOT the same as
+        suitable land; surfaced separately so the pilot sees the
+        option without it being mistaken for a wheat field.
+      - None       — everything else.
+    """
     if not tags:
         return None
     if tags.get("landuse", "") in _SUITABLE_LANDUSE:
         return "suitable"
     if tags.get("natural", "") in _SUITABLE_NATURAL:
         return "suitable"
+    if tags.get("natural", "") == "water":
+        return "water"
+    if tags.get("waterway", "") == "riverbank":
+        return "water"
     return None
 
 
@@ -176,57 +186,81 @@ def _element_to_geojson_geom(elem: dict) -> Optional[dict]:
 
 # === Public entry point =====================================================
 
-def fetch_suitable_land(
+def fetch_landing_options(
     lat_min: float, lon_min: float,
     lat_max: float, lon_max: float,
 ) -> dict:
-    """Return a GeoJSON FeatureCollection of OSM polygons that match
-    pilot-viable off-field landing surfaces (farmland, meadow, grass,
-    pasture, grassland, heath). Returns empty FeatureCollection on
-    fetch failure."""
+    """Return categorized GeoJSON FeatureCollections:
+
+        {
+          "suitable": FeatureCollection of farmland/meadow/etc.,
+          "water":    FeatureCollection of lakes/rivers/etc.,
+        }
+
+    Both buckets together are the visual options a pilot has if the
+    engine fails. Suitable = AFH §18-4 ideal target. Water = AFH
+    §18-7 ditching option (NOT equivalent to suitable land).
+
+    Returns both empty FeatureCollections on total fetch failure.
+    """
     key = _bbox_cache_key(lat_min, lon_min, lat_max, lon_max)
     cached = _read_cache(key)
-    if cached is not None:
+    if (cached is not None
+            and isinstance(cached, dict)
+            and "suitable" in cached
+            and "water" in cached):
         return cached
+    # Old single-FC cache shape — ignore and refetch into new shape.
 
     query = _OVERPASS_QUERY_TEMPLATE.format(
         s=lat_min, w=lon_min, n=lat_max, e=lon_max,
     )
     payload = _fetch_overpass(query)
 
-    features: list[dict] = []
+    buckets: dict[str, list[dict]] = {"suitable": [], "water": []}
     if payload and isinstance(payload.get("elements"), list):
         for elem in payload["elements"]:
             tags = elem.get("tags") or {}
-            if classify_feature(tags) is None:
+            cat = classify_feature(tags)
+            if cat is None:
                 continue
             geom = _element_to_geojson_geom(elem)
             if geom is None:
                 continue
-            features.append({
+            buckets[cat].append({
                 "type": "Feature",
                 "geometry": geom,
                 "properties": {
                     "name": tags.get("name", ""),
-                    "category": "suitable",
+                    "category": cat,
                     "landuse": tags.get("landuse", ""),
                     "natural": tags.get("natural", ""),
+                    "waterway": tags.get("waterway", ""),
                 },
             })
 
-    result = {"type": "FeatureCollection", "features": features}
+    result = {
+        cat: {"type": "FeatureCollection", "features": feats}
+        for cat, feats in buckets.items()
+    }
     _write_cache(key, result)
     return result
 
 
-# Back-compat shim — older callers used fetch_land_cover() and
-# expected a dict keyed by category. Keep the entrypoint name as a
-# thin wrapper so we don't have to touch every test in one go.
+# Back-compat: old name returns just the suitable bucket.
+def fetch_suitable_land(
+    lat_min: float, lon_min: float,
+    lat_max: float, lon_max: float,
+) -> dict:
+    return fetch_landing_options(
+        lat_min, lon_min, lat_max, lon_max)["suitable"]
+
+
 def fetch_land_cover(
     lat_min: float, lon_min: float,
     lat_max: float, lon_max: float,
 ) -> dict:
-    return {"suitable": fetch_suitable_land(lat_min, lon_min, lat_max, lon_max)}
+    return fetch_landing_options(lat_min, lon_min, lat_max, lon_max)
 
 
 # === Suitable-area styling ==================================================
@@ -239,5 +273,16 @@ SUITABLE_LAND_STYLE = {
     "fillColor": "#22c55e", "fillOpacity": 0.22,
 }
 
+# Water = AFH §18-7 ditching option. Blue, NOT red — AFH explicitly
+# states water is not worst-case. Distinct from the green suitable
+# wash so the pilot reads them as two separate decisions.
+WATER_STYLE = {
+    "color": "#1e3a8a", "weight": 1,
+    "fillColor": "#3b82f6", "fillOpacity": 0.30,
+}
+
 # Back-compat for code that still imports LAND_COVER_STYLES.
-LAND_COVER_STYLES = {"suitable": SUITABLE_LAND_STYLE}
+LAND_COVER_STYLES = {
+    "suitable": SUITABLE_LAND_STYLE,
+    "water": WATER_STYLE,
+}

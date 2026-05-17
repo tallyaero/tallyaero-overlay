@@ -36,9 +36,15 @@ def test_classify_natural_heath_is_suitable():
     assert lc.classify_feature({"natural": "heath"}) == "suitable"
 
 
-def test_classify_water_is_not_suitable():
-    """Hazard tags should NOT be returned as suitable."""
-    assert lc.classify_feature({"natural": "water"}) is None
+def test_classify_water_is_water_category():
+    """Water gets its own category (NOT 'suitable') so the UI can
+    paint it differently — AFH §18-7 treats ditching as a separate
+    decision from off-field land selection."""
+    assert lc.classify_feature({"natural": "water"}) == "water"
+
+
+def test_classify_riverbank_is_water_category():
+    assert lc.classify_feature({"waterway": "riverbank"}) == "water"
 
 
 def test_classify_forest_is_not_suitable():
@@ -187,37 +193,46 @@ def _mock_overpass_payload():
     }
 
 
-def test_fetch_suitable_land_classifies_correctly(tmp_path, monkeypatch):
+def test_fetch_landing_options_splits_categories(tmp_path, monkeypatch):
+    monkeypatch.setattr(lc, "_CACHE_ROOT", tmp_path)
+    with patch.object(lc, "_fetch_overpass",
+                      return_value=_mock_overpass_payload()):
+        result = lc.fetch_landing_options(33.0, -80.5, 33.5, -79.5)
+    assert "suitable" in result and "water" in result
+    assert result["suitable"]["type"] == "FeatureCollection"
+    assert result["water"]["type"] == "FeatureCollection"
+    # 2 suitable (farmland + grassland), 1 water
+    assert len(result["suitable"]["features"]) == 2
+    assert len(result["water"]["features"]) == 1
+
+
+def test_fetch_landing_options_handles_total_failure(tmp_path, monkeypatch):
+    """When Overpass is unreachable, both buckets are empty."""
+    monkeypatch.setattr(lc, "_CACHE_ROOT", tmp_path)
+    with patch.object(lc, "_fetch_overpass", return_value=None):
+        result = lc.fetch_landing_options(33.0, -80.5, 33.5, -79.5)
+    assert result["suitable"]["features"] == []
+    assert result["water"]["features"] == []
+
+
+def test_fetch_landing_options_cache_roundtrip(tmp_path, monkeypatch):
+    """Second call with same bbox hits cache, doesn't refetch."""
+    monkeypatch.setattr(lc, "_CACHE_ROOT", tmp_path)
+    with patch.object(lc, "_fetch_overpass",
+                      return_value=_mock_overpass_payload()) as mock:
+        lc.fetch_landing_options(33.0, -80.5, 33.5, -79.5)
+        lc.fetch_landing_options(33.0, -80.5, 33.5, -79.5)   # cache hit
+    assert mock.call_count == 1
+
+
+def test_fetch_suitable_land_back_compat(tmp_path, monkeypatch):
+    """Old name returns the suitable bucket only."""
     monkeypatch.setattr(lc, "_CACHE_ROOT", tmp_path)
     with patch.object(lc, "_fetch_overpass",
                       return_value=_mock_overpass_payload()):
         result = lc.fetch_suitable_land(33.0, -80.5, 33.5, -79.5)
     assert result["type"] == "FeatureCollection"
-    # Only farmland + grassland make it through; water is dropped
     assert len(result["features"]) == 2
-    cats = [f["properties"]["landuse"] or f["properties"]["natural"]
-            for f in result["features"]]
-    assert "farmland" in cats
-    assert "grassland" in cats
-
-
-def test_fetch_suitable_land_handles_total_failure(tmp_path, monkeypatch):
-    """When Overpass is unreachable, return empty FeatureCollection."""
-    monkeypatch.setattr(lc, "_CACHE_ROOT", tmp_path)
-    with patch.object(lc, "_fetch_overpass", return_value=None):
-        result = lc.fetch_suitable_land(33.0, -80.5, 33.5, -79.5)
-    assert result["type"] == "FeatureCollection"
-    assert result["features"] == []
-
-
-def test_fetch_suitable_land_cache_roundtrip(tmp_path, monkeypatch):
-    """Second call with same bbox hits cache, doesn't refetch."""
-    monkeypatch.setattr(lc, "_CACHE_ROOT", tmp_path)
-    with patch.object(lc, "_fetch_overpass",
-                      return_value=_mock_overpass_payload()) as mock:
-        lc.fetch_suitable_land(33.0, -80.5, 33.5, -79.5)
-        lc.fetch_suitable_land(33.0, -80.5, 33.5, -79.5)   # cache hit
-    assert mock.call_count == 1
 
 
 # === back-compat shim ======================================================
