@@ -207,6 +207,10 @@ def build_slope_heatmap_overlay(
             pass
 
     rgba = colorize_slope(slope, threshold_deg, fill_opacity)
+    # PNG / Leaflet convention: row 0 = top of image = lat_max (north).
+    # Our grid was sampled row 0 = lat_min, so flip vertically before
+    # encoding to align with dl.ImageOverlay's bounds interpretation.
+    rgba = rgba[::-1, :, :]
     data_url = encode_png_data_url(rgba)
 
     valid = slope[~np.isnan(slope)]
