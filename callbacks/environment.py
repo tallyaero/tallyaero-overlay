@@ -122,28 +122,31 @@ def register(app):
         Input("airport-search-input", "value"),
     )
     def search_airport_database(query):
-        """Search airports as user types. Results appear below input."""
+        """Search airports as user types. Results appear below input.
+
+        Delegates to core.airport_search so the top-bar search behaves
+        identically to the Route waypoint dropdown — same ranked
+        scoring (exact code > prefix > city > name > state), same
+        result label format. Previously this had its own substring
+        matcher with no ranking, which led to inconsistent results
+        between the two surfaces.
+        """
+        from core.airport_search import (
+            search_airports as _search_airports,
+            airport_label as _airport_label_v2,
+        )
         if not query or len(query.strip()) < 2:
             return [], [], 0
-
-        q = query.strip().lower()
-
-        matches = []
-        for ap in airport_data:
-            if _airport_matches(ap, q):
-                matches.append({"id": ap["id"], "label": _airport_label(ap)})
-            if len(matches) >= 10:
-                break
-
-        match_ids = [m["id"] for m in matches]
+        hits = _search_airports(airport_data, query, limit=10)
+        match_ids = [ap["id"] for ap in hits]
         results = [
             html.Div(
-                m["label"],
+                _airport_label_v2(ap),
                 className="airport-result",
-                id={"type": "airport-result", "index": m["id"]},
+                id={"type": "airport-result", "index": ap["id"]},
                 n_clicks=0,
             )
-            for m in matches
+            for ap in hits
         ]
         return results, match_ids, 0
 

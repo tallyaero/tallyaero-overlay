@@ -566,6 +566,8 @@ def register(app):
 
         # ─── Multi-leg corridor (under the polyline) ───────────────────
         corridor_meta_agg = None
+        corridor_shape = None    # shapely geom, populated below; used to
+                                  # clip the slope heatmap to corridor shape
         if corridor_show and "show" in corridor_show:
             field_elev = max((w.get("elevation_ft") or 0.0) for w in waypoints)
             max_reach_nm = max(2.0,
@@ -640,6 +642,7 @@ def register(app):
                     poly_objs.append(_ShPolygon([(lon, lat) for lat, lon in ring]))
             if poly_objs:
                 merged = _unary_union(poly_objs)
+                corridor_shape = merged   # exposed for slope-heatmap clipping
                 geoms = ([merged] if isinstance(merged, _ShPolygon)
                          else list(merged.geoms))
                 agg_rings = []
@@ -825,6 +828,7 @@ def register(app):
                 threshold_deg=threshold,
                 grid_size=128,
                 fill_opacity=0.45,
+                clip_polygon=corridor_shape,
             )
             layer.append(dl.ImageOverlay(
                 url=data_url,

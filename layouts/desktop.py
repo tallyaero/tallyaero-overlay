@@ -462,8 +462,13 @@ def desktop_layout():
 
                     dl.Map(
                         id="map",
-                        center=[33.0635, -80.2795],
-                        zoom=13.5,
+                        # CONUS overview at boot — geographic center
+                        # of the lower 48 is roughly Lebanon, KS
+                        # (~39.83°N, 98.58°W). Zoom 4 fits the
+                        # continental US comfortably in a 16:9 viewport;
+                        # auto-zoom takes over after Compute Route.
+                        center=[39.83, -98.58],
+                        zoom=4,
                         style={"width": "100%", "height": "100%"},
                         children=[
                             # Single base layer. dash-leaflet 1.0.15's
