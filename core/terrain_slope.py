@@ -168,8 +168,15 @@ def build_slope_heatmap_overlay(
     threshold_deg: float = 10.0,
     grid_size: int = 128,
     fill_opacity: float = 0.45,
+    clip_polygon=None,
 ) -> tuple[str, dict]:
     """End-to-end: sample DEM, compute slope, colorize, encode PNG.
+
+    When `clip_polygon` (a shapely Polygon or MultiPolygon) is
+    supplied, slope outside the polygon is masked to transparent so
+    the heatmap conforms to the engine-out corridor shape instead of
+    painting the entire bbox. The polygon is interpreted in (lon, lat)
+    coordinate order (shapely convention).
 
     Returns (data_url, metadata). metadata has:
         n_pixels, threshold_deg, pct_landable, pct_marginal, pct_steep,
@@ -180,6 +187,25 @@ def build_slope_heatmap_overlay(
         grid_w=grid_size, grid_h=grid_size,
     )
     slope = slope_grid_degrees(elev, lat_min, lon_min, lat_max, lon_max)
+
+    # Clip to the corridor polygon if supplied. shapely.vectorized
+    # checks every pixel against the polygon in one C call (~20 ms for
+    # 16k pixels) without Python-level Point construction.
+    if clip_polygon is not None and not clip_polygon.is_empty:
+        try:
+            from shapely import vectorized as _shp_vec
+            lats = np.linspace(lat_min, lat_max, slope.shape[0])
+            lons = np.linspace(lon_min, lon_max, slope.shape[1])
+            lat_grid, lon_grid = np.meshgrid(lats, lons, indexing="ij")
+            inside = _shp_vec.contains(
+                clip_polygon, lon_grid.ravel(), lat_grid.ravel()
+            ).reshape(slope.shape)
+            slope = np.where(inside, slope, np.nan)
+        except Exception:
+            # If anything goes wrong (legacy shapely, geometry quirks)
+            # fall back to the un-clipped raster rather than failing.
+            pass
+
     rgba = colorize_slope(slope, threshold_deg, fill_opacity)
     data_url = encode_png_data_url(rgba)
 

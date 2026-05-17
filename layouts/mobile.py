@@ -213,8 +213,8 @@ def mobile_layout():
         html.Div(className="mobile-map-wrapper", children=[
             dl.Map(
                 id="map",
-                center=[33.0635, -80.2795],
-                zoom=12,
+                center=[39.83, -98.58],
+                zoom=4,
                 style={"width": "100%", "height": "100%", "minHeight": "70vh"},
                 children=[
                     dl.TileLayer(
