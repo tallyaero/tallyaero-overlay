@@ -2302,6 +2302,342 @@ input[type="radio"] {
 
 /* Divert summary block — sits below the corridor badge in the route
    overlay. Subtle green-accent border to match the divert marker color. */
+/* === FAA Navigation Log Modal ========================================
+   Standard FAA-style checkpoint table the pilot can print and fill in
+   by hand. Print styles strip away everything except the document so
+   the printed page is a clean log sheet. */
+.nav-log-open-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--ta-brand-blue, #0d59f2);
+  background: rgba(13, 89, 242, 0.08);
+  color: var(--ta-brand-blue, #0d59f2);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.nav-log-open-btn:hover {
+  background: rgba(13, 89, 242, 0.18);
+}
+[data-theme="dark"] .nav-log-open-btn {
+  background: rgba(96, 165, 250, 0.15);
+  border-color: rgba(96, 165, 250, 0.6);
+  color: #93c5fd;
+}
+
+/* Widen the dialog so the multi-column checkpoint table fits without
+   horizontal scrolling. dialogClassName puts our class directly on
+   .modal-dialog, so .nav-log-modal IS the dialog (not its parent). */
+.nav-log-modal {
+  max-width: 96vw !important;
+  width: 96vw !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+@media (min-width: 1700px) {
+  .nav-log-modal {
+    max-width: 1600px !important;
+    width: 1600px !important;
+  }
+}
+.nav-log-modal .modal-content {
+  background: #fff;
+  color: #0f172a;
+}
+.nav-log-body { padding: 0 !important; }
+.nav-log-document {
+  padding: 24px 28px;
+  font-family: "Inter", system-ui, sans-serif;
+  color: #0f172a;
+  background: #fff;
+}
+.nav-log-section {
+  margin-top: 18px;
+  page-break-inside: avoid;
+}
+.nav-log-section-title {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #475569;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 4px;
+  margin: 0 0 10px 0;
+}
+.nav-log-header-strip {
+  display: flex;
+  align-items: baseline;
+  gap: 24px;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #0f172a;
+  flex-wrap: wrap;
+}
+.nav-log-form-title {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  background: #0f172a;
+  color: #fff;
+  border-radius: 3px;
+}
+.nav-log-hs-label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; }
+.nav-log-hs-val { font-size: 12px; font-weight: 700; color: #0f172a; }
+
+/* Vertical stack: table on top, airport panels in a horizontal row
+   beneath. Keeps the checkpoint table at full width without a side
+   column squeezing it. */
+.nav-log-form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+.nav-log-table-wrap { overflow-x: hidden; width: 100%; }
+.nav-log-table { table-layout: fixed; }
+
+.nav-log-stack-line { line-height: 1.25; padding: 1px 0; }
+.nav-log-stack-sep { height: 1px; background: rgba(15, 23, 42, 0.08); margin: 1px 0; }
+
+/* Below the legs table, lay the four airport panels in one
+   horizontal row (Dep ATIS · Dest ATIS · Dep Freqs · Dest Freqs).
+   Collapses to two columns under 1100px, single column under 700px. */
+.nav-log-side-panels {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+@media (max-width: 1100px) {
+  .nav-log-side-panels { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 700px) {
+  .nav-log-side-panels { grid-template-columns: 1fr; }
+}
+.nav-log-ap-panel,
+.nav-log-freq-panel {
+  border: 1px solid #94a3b8;
+  background: #f8fafc;
+}
+.nav-log-ap-panel-title {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 6px;
+  background: #0f172a;
+  color: #fff;
+}
+.nav-log-ap-subtitle {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 6px;
+  background: #e2e8f0;
+  border-bottom: 1px solid #94a3b8;
+}
+.nav-log-ap-table { width: 100%; font-size: 11px; border-collapse: collapse; }
+.nav-log-ap-table td {
+  border-bottom: 1px solid #cbd5e1;
+  padding: 3px 6px;
+  vertical-align: top;
+  min-height: 18px;
+}
+.nav-log-ap-key { color: #475569; font-weight: 600; width: 38%; font-size: 10px; text-transform: uppercase; letter-spacing: 0.03em; }
+.nav-log-ap-val { font-weight: 700; }
+
+.nav-log-foot-strip {
+  display: grid;
+  grid-template-columns: 110px 110px 110px 1fr;
+  gap: 8px;
+  margin-top: 12px;
+  border-top: 1px solid #cbd5e1;
+  padding-top: 8px;
+}
+.nav-log-foot-cell { display: flex; flex-direction: column; gap: 2px; }
+.nav-log-foot-label { font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
+.nav-log-foot-input {
+  min-height: 28px;
+  border: 1px solid #94a3b8;
+  background: #fff;
+}
+.nav-log-foot-notes .nav-log-foot-input { min-height: 60px; }
+
+.nav-log-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+.nav-log-meta-table { width: 100%; font-size: 12px; border-collapse: collapse; }
+.nav-log-meta-table td { padding: 4px 6px; border-bottom: 1px dotted #cbd5e1; }
+.nav-log-kv-key { color: #64748b; font-weight: 600; width: 45%; }
+.nav-log-kv-val { font-weight: 700; }
+
+.nav-log-table-wrap { overflow-x: auto; }
+.nav-log-table {
+  width: 100%;
+  font-size: 11px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+.nav-log-table th {
+  background: #f1f5f9;
+  border: 1px solid #94a3b8;
+  padding: 4px 6px;
+  font-weight: 700;
+  text-align: center;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.nav-log-table td {
+  border: 1px solid #cbd5e1;
+  padding: 6px;
+  text-align: center;
+  min-height: 20px;
+}
+.nav-log-table tr:nth-child(even) td { background: #f8fafc; }
+.nav-log-totals-row td {
+  font-weight: 800;
+  background: #e2e8f0 !important;
+  border-top: 2px solid #475569;
+}
+
+.nav-log-eo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 20px;
+}
+.nav-log-factors-heading {
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.nav-log-factors-table { width: 100%; font-size: 11.5px; border-collapse: collapse; }
+.nav-log-factors-table td { padding: 4px 6px; border-bottom: 1px dotted #cbd5e1; }
+.nav-log-factor-pts { font-weight: 700; color: #b91c1c; width: 50px; text-align: right; }
+.nav-log-factor-pos { color: #15803d; }
+.nav-log-factor-label { font-weight: 600; }
+.nav-log-factor-detail { color: #64748b; font-size: 10.5px; }
+
+.nav-log-notes-area {
+  min-height: 120px;
+  background:
+    repeating-linear-gradient(
+      to bottom, transparent 0 20px,
+      #e2e8f0 20px 21px
+    );
+  border: 1px solid #cbd5e1;
+}
+.nav-log-footer {
+  margin-top: 20px;
+  padding-top: 8px;
+  border-top: 1px solid #cbd5e1;
+  font-size: 10px;
+  color: #94a3b8;
+  text-align: right;
+}
+
+/* === Print: strip the chrome, leave just the nav log ============= */
+@page {
+  size: landscape;
+  margin: 0.4in;
+}
+@media print {
+  body * { visibility: hidden; }
+  /* Bootstrap's .modal element is the OUTER fixed-position wrapper
+     that contains .modal-dialog. We need to make THAT visible and
+     un-positioned so the dialog flows on the printed page. */
+  .modal, .modal *,
+  .nav-log-modal, .nav-log-modal * { visibility: visible; }
+
+  .modal {
+    position: static !important;
+    display: block !important;
+    overflow: visible !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: 0 !important;
+  }
+  .nav-log-modal {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none;
+  }
+  .nav-log-modal .modal-content {
+    border: none !important;
+    box-shadow: none !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .modal-backdrop { display: none !important; }
+  .nav-log-modal .modal-header,
+  .nav-log-modal .modal-footer { display: none !important; }
+  .nav-log-body {
+    overflow: visible !important;
+    max-height: none !important;
+    padding: 0 !important;
+  }
+  .nav-log-document {
+    padding: 6mm !important;
+    font-size: 10px !important;
+    width: 100% !important;
+  }
+  /* In print, stack the form-row vertically so the side panels go
+     BELOW the legs table — keeps the wide checkpoint table from
+     overflowing the right edge. */
+  .nav-log-form-row {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+  .nav-log-side-panels {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  .nav-log-table { font-size: 9px !important; table-layout: auto !important; }
+  .nav-log-table-wrap { overflow: visible !important; }
+  /* Allow long sections to flow naturally — but keep each table row
+     intact (don't split a leg row across a page break). Print engines
+     repeat <thead> on each page automatically when it's wrapped in
+     <thead>. */
+  thead { display: table-header-group; }
+  tbody tr, .nav-log-section { page-break-inside: avoid; }
+  .nav-log-section { break-inside: avoid; }
+}
+
+/* === Cruise alt quick-terrain-check chip ============================= */
+.shelf-cruise-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.shelf-chip-quiet  { display: none; }
+.shelf-chip-warn,
+.shelf-chip-ok {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.shelf-chip-warn {
+  background: rgba(220, 38, 38, 0.12);
+  color: #b91c1c;
+  border: 1px solid rgba(220, 38, 38, 0.35);
+}
+.shelf-chip-ok {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
 /* === Phase 9 polish · Toggle pills + segmented control =================
    Replace the stock dcc.Checklist / dcc.RadioItems in the route shelf
    with pill / segmented presentation. The underlying control is
@@ -2528,6 +2864,29 @@ input[type="radio"] {
   gap: 10px;
   padding: 8px 12px;
   font-size: 12px;
+}
+/* Compact variant — used after Phase 9 nav-log refactor, where the
+   detailed cells moved into the modal and the strip is just a
+   profile chart + actions cluster. */
+/* Actions column hugs its content (auto), profile chart takes all
+   remaining width so the user gets a clear terrain + flight-profile
+   read. */
+.route-strip-compact {
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+}
+.route-strip-compact .route-strip-cell-chart {
+  width: 100%;
+}
+.route-strip-compact .route-strip-cell-chart .route-profile-chart,
+.route-strip-compact .route-strip-cell-chart .js-plotly-plot {
+  width: 100% !important;
+}
+.route-strip-cell-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
 }
 @media (max-width: 1280px) {
   .route-below-strip-inner {

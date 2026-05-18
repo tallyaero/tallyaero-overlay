@@ -242,6 +242,43 @@ def _modals_block():
                 backdrop="static",
                 scrollable=True,
             ),
+
+            # Print trigger sink — clientside print callback writes
+            # a timestamp here so the Input/Output graph is clean
+            # (Dash dislikes a clientside callback whose Output equals
+            # its Input).
+            dcc.Store(id="nav-log-print-sink", data=0),
+
+            # === Navigation Log Modal (Phase 9-polish) ===
+            # FAA-style nav log populated by the route compute callback.
+            # Designed for screen review and printing — the body uses
+            # the standard checkpoint table format pilots fill in
+            # during flight planning.
+            dbc.Modal(
+                [
+                    dbc.ModalHeader(
+                        dbc.ModalTitle("Navigation Log"),
+                        close_button=True,
+                    ),
+                    dbc.ModalBody(
+                        id="nav-log-content",
+                        className="nav-log-body",
+                    ),
+                    dbc.ModalFooter([
+                        dbc.Button("Print", id="nav-log-print-btn",
+                                   className="green-button",
+                                   n_clicks=0),
+                        dbc.Button("Close", id="nav-log-close-btn",
+                                   className="green-button"),
+                    ]),
+                ],
+                id="nav-log-modal",
+                size="xl",
+                dialogClassName="tallyaero-modal nav-log-modal",
+                backdrop=True,
+                scrollable=True,
+                is_open=False,
+            ),
         ]
     )
 
@@ -458,7 +495,14 @@ def desktop_layout():
             # Route summary banner — full-width, sits ABOVE the map
             # and pushes it down. Carries the score + headline +
             # condensed factor row. Empty until a route is computed.
-            html.Div(id="route-top-banner"),
+            # Wrapped in dcc.Loading so the user sees a spinner during
+            # the 5-30s compute instead of being left guessing.
+            dcc.Loading(
+                children=html.Div(id="route-top-banner"),
+                type="default",
+                color="#0d59f2",
+                delay_show=200,
+            ),
 
             # Map wrapper — flex-grows to fill whatever's left between
             # the banner and the below-strip. position:relative keeps
@@ -561,7 +605,12 @@ def desktop_layout():
             # factor list, divert block, terrain block, wind, profile
             # chart. Populated by the route compute callback; empty
             # until a route is computed.
-            html.Div(id="route-below-strip"),
+            dcc.Loading(
+                children=html.Div(id="route-below-strip"),
+                type="default",
+                color="#0d59f2",
+                delay_show=200,
+            ),
 
             html.Div(id="click_debug", style={
                 "padding": "10px 12px",

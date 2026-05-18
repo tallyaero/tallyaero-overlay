@@ -57,30 +57,63 @@ def route_layout(default_glide_ratio: float | None = None,
     ci = default_climb_ias if default_climb_ias else (vy_kt or 76.0)
     vy_label = f"Vy {vy_kt:.0f}" if vy_kt else "Vy —"
     return [
-        # === Route (wide dropdown) ===
+        # === Route (wide dropdown) + Click-to-add pill, paired ===
+        # Wrapped together so the pill sits IMMEDIATELY to the right
+        # of the Route dropdown — both affect waypoint input, and
+        # they should never wrap apart.
         html.Div(
-            [html.Div("Route", className="shelf-field-label"),
-             dcc.Dropdown(
-                id="route-waypoints",
-                multi=True,
-                searchable=True,
-                clearable=True,
-                placeholder="Type ICAO, city, or name — e.g. KJFK, summerville, savannah",
-                options=[],
-                value=[],
-                className="route-waypoint-dropdown",
-             )],
-            className="shelf-field shelf-field-route",
+            [
+                html.Div(
+                    [html.Div("Route", className="shelf-field-label"),
+                     dcc.Dropdown(
+                        id="route-waypoints",
+                        multi=True,
+                        searchable=True,
+                        clearable=True,
+                        placeholder="Type ICAO, city, or name — e.g. KJFK, summerville, savannah",
+                        options=[],
+                        value=[],
+                        className="route-waypoint-dropdown",
+                     )],
+                    className="shelf-field shelf-field-route",
+                ),
+                _pill("route-click-build-mode", "Click to add",
+                      tooltip=("Click anywhere on the map to add a "
+                               "GPS turning point. Origin and "
+                               "destination must still be airports.")),
+            ],
+            className="shelf-route-with-pill",
+            style={"display": "flex", "alignItems": "flex-end",
+                   "gap": "8px", "minWidth": "0"},
         ),
 
         # === Numeric performance inputs ===
-        _field("Cruise Alt", dcc.Input(
-            id="route-cruise-alt", type="number",
-            value=5500, min=0, max=60000, step=500,
-        )),
-        _field("TAS", dcc.Input(
+        html.Div(
+            [html.Div("Cruise Alt", className="shelf-field-label"),
+             html.Div(
+                 [dcc.Input(id="route-cruise-alt", type="number",
+                            value=5500, min=0, max=60000, step=500,
+                            debounce=True),
+                  # Quick terrain-conflict heads-up: lights amber if
+                  # peak terrain along the great-circle exceeds the
+                  # typed cruise altitude minus a 1000 ft buffer.
+                  # Updates on debounce (no spam on every keystroke).
+                  html.Span(id="route-cruise-alt-check",
+                            className="shelf-chip-quiet")],
+                 className="shelf-cruise-row")],
+            className="shelf-field",
+        ),
+        _field("Cruise TAS", dcc.Input(
             id="route-tas", type="number",
             value=tas, min=40, max=600,
+            debounce=True,
+        )),
+        _field("Cruise IAS", html.Span(
+            dcc.Input(id="route-cruise-ias", type="number",
+                      min=40, max=400, debounce=True),
+            title=("Cruise indicated airspeed. Empty = compute "
+                   "automatically from Cruise TAS via the ISA density "
+                   "ratio at the cruise altitude (TAS = IAS / √σ)."),
         )),
         _field("Glide Ratio", dcc.Input(
             id="route-glide-ratio", type="number",
@@ -120,7 +153,8 @@ def route_layout(default_glide_ratio: float | None = None,
                        + ("" if is_multi_engine else " shelf-field-hidden")),
         ),
 
-        # === Display toggles (pills) ===
+        # === Display toggles (pills) — flow naturally left, just a
+        # small gap from the Compute/Clear cluster to the right. ===
         html.Div(className="shelf-pill-group", children=[
             _pill("route-show-corridor", "Corridor",
                   value="show", default_on=True,
@@ -132,12 +166,15 @@ def route_layout(default_glide_ratio: float | None = None,
                   default_on=True,
                   tooltip=("Use Open-Meteo per-sample winds aloft "
                            "instead of the manual wind in the sidebar.")),
-            _pill("route-show-slope", "Slope map",
-                  tooltip=("Green heatmap of terrain ≤ Max slope "
-                           "(default 3°). Steeper terrain is "
-                           "transparent. FAA AFH §18-4.")),
-            # Max slope numeric — lives with the slope pill since it
-            # only matters when Slope map is on.
+            _pill("route-show-landable", "Landable",
+                  tooltip=("Green raster where slope ≤ Max slope AND "
+                           "OSM-tagged suitable land AND inside the "
+                           "glide corridor. Blue polygons = AFH §18-7 "
+                           "water/ditching option inside the corridor. "
+                           "Single combined signal — replaces the old "
+                           "Slope map / Suitable land toggles.")),
+            # Max slope numeric — only matters when Landable is on,
+            # so it lives next to that pill.
             _field("Max slope °", html.Span(
                 dcc.Input(
                     id="route-slope-threshold",
@@ -149,19 +186,11 @@ def route_layout(default_glide_ratio: float | None = None,
                        "Default 3° matches operational consensus. "
                        "3-7° = 'land upslope only'; >7° = too steep."),
             )),
-            _pill("route-show-land-cover", "Suitable land",
-                  tooltip=("OSM farmland/meadow/grass/pasture clipped "
-                           "to the glide corridor. Green = AFH §18-4 "
-                           "viable land. Blue = AFH §18-7 ditching.")),
-            _pill("route-click-build-mode", "Click to add",
-                  tooltip=("Click anywhere on the map to add a "
-                           "GPS waypoint to the route.")),
         ]),
 
-        html.Div(className="shelf-spacer"),
-
         html.Button("Compute Route", id="compute-route-btn",
-                    className="shelf-action shelf-action-draw"),
+                    className="shelf-action shelf-action-draw",
+                    style={"marginLeft": "16px"}),
         html.Button("Clear", id="route-clear-btn",
                     className="shelf-action shelf-action-set"),
     ]
