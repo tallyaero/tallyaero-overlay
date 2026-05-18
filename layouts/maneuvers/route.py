@@ -6,12 +6,42 @@ Compute Route triggers the route callback (callbacks/route.py).
 
 Glide Ratio + Glide IAS + Climb IAS all default to the selected
 aircraft's published numbers (best_glide_ratio, best_glide, Vy).
+
+Layout order (left → right):
+
+    Route (wide dropdown)
+    numeric perf inputs  · Cruise Alt | TAS | Glide Ratio | Glide IAS | Climb IAS
+    Engine-out segmented (multi-engine only · SE / Glide / Both)
+    Pill toggles         · Corridor · Live winds · Slope map · Max slope · Suitable land · Click to add
+    Compute · Clear
+
+Display toggles are rendered as pill buttons via the shelf-pill-toggle
+class — the underlying control is still a dcc.Checklist so existing
+callback wiring works unchanged; only the visual treatment differs.
 """
 from __future__ import annotations
 
 from dash import dcc, html
 
 from layouts.maneuvers._shared import _field
+
+
+def _pill(checklist_id, label, value=None, default_on=False, tooltip=None):
+    """Toggle pill backed by a single-option Checklist.
+
+    The pill IS the option label, so the field name lives inside the
+    pill instead of above it — saves a label row in the shelf.
+    """
+    cl = dcc.Checklist(
+        id=checklist_id,
+        options=[{"label": f" {label}", "value": value or "on"}],
+        value=([value or "on"] if default_on else []),
+        className="shelf-pill-toggle",
+    )
+    if tooltip:
+        return html.Span(cl, title=tooltip,
+                         className="shelf-pill-tooltip-wrap")
+    return cl
 
 
 def route_layout(default_glide_ratio: float | None = None,
@@ -25,9 +55,9 @@ def route_layout(default_glide_ratio: float | None = None,
     gi = default_glide_ias if default_glide_ias else 75.0
     tas = default_tas if default_tas else 110.0
     ci = default_climb_ias if default_climb_ias else (vy_kt or 76.0)
-    # Vy reminder chip text (shown next to Climb IAS for context).
     vy_label = f"Vy {vy_kt:.0f}" if vy_kt else "Vy —"
     return [
+        # === Route (wide dropdown) ===
         html.Div(
             [html.Div("Route", className="shelf-field-label"),
              dcc.Dropdown(
@@ -42,6 +72,8 @@ def route_layout(default_glide_ratio: float | None = None,
              )],
             className="shelf-field shelf-field-route",
         ),
+
+        # === Numeric performance inputs ===
         _field("Cruise Alt", dcc.Input(
             id="route-cruise-alt", type="number",
             value=5500, min=0, max=60000, step=500,
@@ -70,90 +102,61 @@ def route_layout(default_glide_ratio: float | None = None,
                 className="shelf-climb-row")],
             className="shelf-field shelf-field-climb",
         ),
-        _field("Corridor", html.Span(
-            dcc.Checklist(
-                id="route-show-corridor",
-                options=[{"label": " On", "value": "show"}],
-                value=["show"],
-            ),
-            title=("Engine-out glide corridor — every point you could "
-                   "reach from cruise with the engine failed, drawn "
-                   "from this aircraft's glide ratio and Vbg, with "
-                   "live wind and DEM ridge-clipping applied. The "
-                   "master clip mask for the slope and suitable-land "
-                   "overlays."),
-        )),
-        _field("Live winds", dcc.Checklist(
-            id="route-use-live-winds",
-            options=[{"label": " On", "value": "on"}],
-            value=["on"],
-        )),
-        # Engine-out scenario toggle — only meaningful for ME aircraft
-        # but the id must always exist for the callback to bind. We
-        # hide via CSS when single-engine.
+
+        # === Engine-out segmented (multi-engine only) ===
         html.Div(
-            [html.Div("Engine-out", className="shelf-field-label"),
-             dcc.RadioItems(
+            dcc.RadioItems(
                 id="route-engine-out-mode",
                 options=[
-                    {"label": " SE", "value": "se"},
-                    {"label": " Glide", "value": "glide"},
-                    {"label": " Both", "value": "both"},
+                    {"label": "SE", "value": "se"},
+                    {"label": "Glide", "value": "glide"},
+                    {"label": "Both", "value": "both"},
                 ],
                 value="both" if is_multi_engine else "glide",
                 inline=True,
-                className="shelf-engine-out-radio",
-             )],
-            className=("shelf-field shelf-field-engine-out"
+                className="shelf-segmented",
+            ),
+            className=("shelf-segmented-wrap"
                        + ("" if is_multi_engine else " shelf-field-hidden")),
         ),
 
-        _field("Click to add", dcc.Checklist(
-            id="route-click-build-mode",
-            options=[{"label": " On", "value": "on"}],
-            value=[],
-        )),
-        _field("Slope map", html.Span(
-            dcc.Checklist(
-                id="route-show-slope",
-                options=[{"label": " On", "value": "on"}],
-                value=[],
-            ),
-            title=("Green heatmap of terrain ≤ Max slope (default 3°) — "
-                   "DEM-derived. Pixels above the threshold render "
-                   "transparent, so what you see is just the landable "
-                   "surface. FAA AFH §18-4 names slope as one of three "
-                   "off-field landing factors (with wind + obstacles)."),
-        )),
-        _field("Suitable land", html.Span(
-            dcc.Checklist(
-                id="route-show-land-cover",
-                options=[{"label": " On", "value": "on"}],
-                value=[],
-            ),
-            title=("OSM polygons clipped to the glide corridor. "
-                   "Green = AFH §18-4 viable land (farmland, meadow, "
-                   "grass, pasture, grassland, heath). Blue = AFH §18-7 "
-                   "ditching option (lakes, rivers) — NOT equivalent "
-                   "to land; aircraft type and sea state matter. "
-                   "Source: OpenStreetMap."),
-        )),
-        # FAA AFH Chapter 18 names slope as one of three pillars of
-        # off-field landing site selection (with wind + obstacles).
-        # Default 3° matches operational consensus for "level enough
-        # to land without significant uphill/downhill penalty."
-        # 3-7° marginal (FAA: land upslope only); >7° steep.
-        _field("Max slope °", html.Span(
-            dcc.Input(
-                id="route-slope-threshold",
-                type="number", value=3, min=1, max=20, step=1,
-                style={"width": "55px"},
-            ),
-            title=("Max slope considered 'landable' (FAA AFH §18-4 "
-                   "names slope as one off-field landing factor). "
-                   "Default 3° matches operational consensus. "
-                   "3-7° = 'land upslope only'; >7° = too steep."),
-        )),
+        # === Display toggles (pills) ===
+        html.Div(className="shelf-pill-group", children=[
+            _pill("route-show-corridor", "Corridor",
+                  value="show", default_on=True,
+                  tooltip=("Engine-out glide corridor — every point you "
+                           "could reach from cruise with the engine "
+                           "failed. Master clip mask for the slope and "
+                           "suitable-land overlays.")),
+            _pill("route-use-live-winds", "Live winds",
+                  default_on=True,
+                  tooltip=("Use Open-Meteo per-sample winds aloft "
+                           "instead of the manual wind in the sidebar.")),
+            _pill("route-show-slope", "Slope map",
+                  tooltip=("Green heatmap of terrain ≤ Max slope "
+                           "(default 3°). Steeper terrain is "
+                           "transparent. FAA AFH §18-4.")),
+            # Max slope numeric — lives with the slope pill since it
+            # only matters when Slope map is on.
+            _field("Max slope °", html.Span(
+                dcc.Input(
+                    id="route-slope-threshold",
+                    type="number", value=3, min=1, max=20, step=1,
+                    style={"width": "55px"},
+                ),
+                title=("Max slope considered 'landable' (FAA AFH §18-4 "
+                       "names slope as one off-field landing factor). "
+                       "Default 3° matches operational consensus. "
+                       "3-7° = 'land upslope only'; >7° = too steep."),
+            )),
+            _pill("route-show-land-cover", "Suitable land",
+                  tooltip=("OSM farmland/meadow/grass/pasture clipped "
+                           "to the glide corridor. Green = AFH §18-4 "
+                           "viable land. Blue = AFH §18-7 ditching.")),
+            _pill("route-click-build-mode", "Click to add",
+                  tooltip=("Click anywhere on the map to add a "
+                           "GPS waypoint to the route.")),
+        ]),
 
         html.Div(className="shelf-spacer"),
 

@@ -444,28 +444,40 @@ def desktop_layout():
         # === Map Column ===
         html.Div(id="engineout-click-status", style={"display": "none"}),
 
-        html.Div(className="graph-column", style={"display": "flex", "flexDirection": "column"}, children=[
+        html.Div(className="graph-column",
+                 style={
+                     "display": "flex",
+                     "flexDirection": "column",
+                     # 56px top-strip + ~56px shelf-row + small breathing
+                     # room. Was 180px (oversized) which left ~50px of
+                     # dead vertical space below the map.
+                     "height": "calc(100vh - 120px)",
+                 },
+                 children=[
+
+            # Route summary banner — full-width, sits ABOVE the map
+            # and pushes it down. Carries the score + headline +
+            # condensed factor row. Empty until a route is computed.
+            html.Div(id="route-top-banner"),
+
+            # Map wrapper — flex-grows to fill whatever's left between
+            # the banner and the below-strip. position:relative keeps
+            # the absolute-positioned map-controls-overlay anchored to
+            # the visible map area.
             html.Div(
                 style={
-                    "flexGrow": 1,
-                    "height": "calc(100vh - 180px)",
-                    "position": "relative"
+                    "flex": "1 1 auto",
+                    "minHeight": "300px",
+                    "position": "relative",
                 },
                 children=[
                     # Map-overlay controls — Reset/Undo float over the map
-                    # top-right, just left of the windsock. Lives inside the
-                    # relative-positioned map wrapper so the absolute position
-                    # anchors to the map, not the viewport.
+                    # top-right, just left of the windsock.
                     html.Div(className="map-controls-overlay", children=[
                         html.Button("Reset All", id="reset-all", className="map-overlay-btn"),
                         html.Button("Reset Clicks", id="reset-clicks", className="map-overlay-btn"),
                         html.Button("Undo", id="undo-last-click", className="map-overlay-btn map-overlay-btn-undo"),
                     ]),
-
-                    # Route summary overlay — top-left of the map. Populated
-                    # by the route compute callback; empty until a route is
-                    # computed.
-                    html.Div(id="route-summary-overlay"),
 
                     dl.Map(
                         id="map",
@@ -544,6 +556,12 @@ def desktop_layout():
                     )
                 ]
             ),
+
+            # Route detail strip — sits BELOW the map. Carries the
+            # factor list, divert block, terrain block, wind, profile
+            # chart. Populated by the route compute callback; empty
+            # until a route is computed.
+            html.Div(id="route-below-strip"),
 
             html.Div(id="click_debug", style={
                 "padding": "10px 12px",

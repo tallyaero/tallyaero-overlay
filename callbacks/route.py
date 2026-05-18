@@ -58,6 +58,7 @@ from core.terrain_slope import build_slope_heatmap_overlay
 from core.land_cover_osm import (
     fetch_landing_options, SUITABLE_LAND_STYLE, WATER_STYLE,
 )
+from core.route_critique import score_route
 
 
 import math
@@ -163,8 +164,9 @@ def _summary_card(legs: list[dict], waypoints: list[dict]) -> html.Div:
 
 
 def _empty_clear():
-    """Standard return when Clear is pressed."""
-    return None, [], no_update, None
+    """Standard return when Clear is pressed: empty banner, empty
+    below-strip, empty map layer, no viewport change, cleared store."""
+    return None, None, [], no_update, None
 
 
 def register(app):
@@ -361,9 +363,10 @@ def register(app):
             ))
         return markers
 
-    # === Compute route + render on map + render summary overlay ===
+    # === Compute route + render on map + render banner + below-strip ===
     @app.callback(
-        Output("route-summary-overlay", "children"),
+        Output("route-top-banner", "children"),
+        Output("route-below-strip", "children"),
         Output("route-layer", "children"),
         Output("map", "viewport"),
         Output("route-result-store", "data"),
@@ -405,7 +408,7 @@ def register(app):
         if not waypoint_ids or len(waypoint_ids) < 2:
             return (html.Div("Add at least two waypoints (origin → destination).",
                              className="route-summary-error"),
-                    no_update, no_update, no_update)
+                    None, no_update, no_update, no_update)
 
         try:
             cruise_alt = float(cruise_alt) if cruise_alt else 5500.0
@@ -416,7 +419,7 @@ def register(app):
         except (TypeError, ValueError):
             return (html.Div("Numeric fields must be numbers.",
                              className="route-summary-error"),
-                    no_update, no_update, no_update)
+                    None, no_update, no_update, no_update)
 
         # Aircraft-derived inputs for the climb model: Vy + Vno + class
         # baseline climb rate. Falls back to typical-single defaults if
@@ -898,9 +901,27 @@ def register(app):
                           "features": clipped_water},
                     options=dict(style=WATER_STYLE),
                 ))
+            # Suitable-area-as-fraction-of-corridor — fuels the
+            # survivability score. Pure shapely areas in (lon, lat)
+            # degree-units are not real m², but the RATIO is
+            # geometric-projection-invariant for the same bbox, so
+            # this is fine as a 0-1 coverage metric.
+            corridor_area_units = (corridor_shape.area
+                                   if corridor_shape is not None else 0.0)
+            if corridor_area_units > 0 and clipped_suitable:
+                _suitable_area = sum(
+                    _shp_shape(f["geometry"]).area
+                    for f in clipped_suitable
+                )
+                pct_corridor_suitable = (
+                    _suitable_area / corridor_area_units)
+            else:
+                pct_corridor_suitable = 0.0
+
             land_cover_meta = {
                 "suitable_features": len(clipped_suitable),
                 "water_features": len(clipped_water),
+                "pct_corridor_suitable": pct_corridor_suitable,
                 "fetched_suitable": len(suitable_fc.get("features", [])),
                 "fetched_water": len(water_fc.get("features", [])),
             }
@@ -1190,20 +1211,86 @@ def register(app):
             className="route-profile-chart",
         )
 
-        overlay = html.Div(
-            [
-                html.Div(className="route-overlay-header", children=[
-                    html.Span(" → ".join(w["id"] for w in waypoints),
-                              className="route-overlay-title"),
+        # ─── Survivability score (Phase 9) ─────────────────────────────
+        # Aggregate every per-route signal into one 0-100 verdict so
+        # the pilot reads "is this route survivable?" instead of
+        # decoding five separate stats. The factor list is sorted
+        # worst-first so the row beneath the score names exactly what
+        # cost the points.
+        n_route_samples = len(all_samples)
+        n_terrain_conflict = (corridor_meta_agg.get("below_terrain_samples", 0)
+                              if corridor_meta_agg else 0)
+        min_agl_for_score = (corridor_meta_agg.get("min_agl_ft", 0.0)
+                             if corridor_meta_agg else 0.0)
+        pct_landable_arg = (slope_meta.get("pct_landable")
+                            if slope_meta else None)
+        pct_corridor_suit_arg = (land_cover_meta.get("pct_corridor_suitable")
+                                 if land_cover_meta else None)
+        critique = score_route(
+            n_samples=n_route_samples,
+            n_terrain_conflict_samples=n_terrain_conflict,
+            n_no_divert_samples=no_cov,
+            longest_no_divert_nm=long_gap,
+            pct_landable_slope=pct_landable_arg,
+            pct_corridor_suitable_land=pct_corridor_suit_arg,
+            min_agl_ft=min_agl_for_score,
+        )
+        # Banner = score chip + route title + condensed factor chips.
+        # Full-width, sits above the map. The chip-row turns each
+        # critique factor into a one-glance chip so the pilot reads
+        # "what cost the points" without leaving the map view.
+        factor_chips = [
+            html.Div([
+                html.Span(f"{f.points:+.0f}",
+                          className=("route-critique-points"
+                                     + (" route-critique-pos"
+                                        if f.points > 0 else ""))),
+                html.Span(f.label,
+                          className="route-critique-factor-label"),
+            ], className="route-critique-chip",
+               title=f.detail)
+            for f in critique.factors
+        ]
+        banner = html.Div(
+            className=f"route-banner route-banner-{critique.band}",
+            style={"borderLeft": f"6px solid {critique.color_hex()}"},
+            children=[
+                html.Div(className="route-banner-score-wrap", children=[
+                    html.Span(f"{critique.score}",
+                              className="route-banner-score",
+                              style={"color": critique.color_hex()}),
+                    html.Span("/100",
+                              className="route-banner-score-suffix"),
                 ]),
-                card,
-                extras,
-                divert_block,
-                terrain_block,
-                wind_pill,
-                profile_chart,
+                html.Div(className="route-banner-mid", children=[
+                    html.Div(" → ".join(w["id"] for w in waypoints),
+                             className="route-banner-route-title"),
+                    html.Div(critique.headline,
+                             className="route-banner-headline"),
+                ]),
+                html.Div(className="route-banner-chip-row",
+                         children=factor_chips),
             ],
-            className="route-overlay-panel",
+        )
+
+        # Below-strip = the detail. Card (legs/dist/ETE), AGL extras,
+        # diverts, terrain conflict, wind pill, profile chart — laid
+        # out horizontally so the strip is short and scannable.
+        below_strip = html.Div(
+            className="route-below-strip-inner",
+            children=[
+                html.Div(className="route-strip-cell", children=[card]),
+                (html.Div(className="route-strip-cell", children=[extras])
+                 if extras else None),
+                (html.Div(className="route-strip-cell", children=[divert_block])
+                 if divert_block else None),
+                (html.Div(className="route-strip-cell", children=[terrain_block])
+                 if terrain_block else None),
+                (html.Div(className="route-strip-cell", children=[wind_pill])
+                 if wind_pill else None),
+                html.Div(className="route-strip-cell route-strip-cell-chart",
+                         children=[profile_chart]),
+            ],
         )
 
         store = {
@@ -1223,4 +1310,4 @@ def register(app):
             },
             "suggested_alt_ft": float(suggested_alt) if suggested_alt else None,
         }
-        return overlay, layer, viewport, store
+        return banner, below_strip, layer, viewport, store
