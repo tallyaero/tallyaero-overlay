@@ -57,13 +57,13 @@ def poweroff180_layout(default_elev=None):
             id="poweroff180-abeam-distance-nm",
             min=0.3, max=1.5, step=0.05, value=0.5,
             marks={0.3: "0.3", 0.75: "0.75", 1.5: "1.5"},
-            tooltip={"always_visible": True},
+            tooltip={"placement": "bottom", "always_visible": False},
         ), slider=True, tooltip="Lateral distance to the runway when abeam the touchdown point. 0.5 NM is typical pattern width."),
         _field("Residual power", dcc.Slider(
             id="poweroff180-residual-power",
             min=0.0, max=0.30, step=0.05, value=0.0,
             marks={0: "0", 0.15: "15%", 0.30: "30%"},
-            tooltip={"always_visible": True},
+            tooltip={"placement": "bottom", "always_visible": False},
         ), slider=True, tooltip="Residual partial-power for a partial-failure drill. Stock Power-Off 180 is 0% (idle, definitional). Above 0% is a deliberate off-design partial-failure scenario."),
         _field("Alt (ft)", dcc.Input(
             id="poweroff180-altitude",
