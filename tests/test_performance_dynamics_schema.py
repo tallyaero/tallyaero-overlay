@@ -113,8 +113,10 @@ def test_estimated_provenance_no_citation_required(minimal_dynamics):
 
 
 def test_dynamics_optional_on_aircraft(c172_dict):
-    # The existing 172S file (no performance_dynamics yet) must still parse.
-    assert c172_dict.get("performance_dynamics") is None
+    # Aircraft schema must accept files with no performance_dynamics block.
+    # (Strip the block from the on-disk 172S — after Phase B2 ran, every
+    # aircraft has one, but the schema must still parse a stripped dict.)
+    c172_dict.pop("performance_dynamics", None)
     ac = Aircraft.model_validate(c172_dict)
     assert ac.performance_dynamics is None
 
