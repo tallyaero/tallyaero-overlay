@@ -53,12 +53,10 @@ def poweroff180_layout(default_elev=None):
             ],
             value="idle", clearable=False,
         ), tooltip="Propeller condition during the glide. Idle = stock Power-Off 180."),
-        _field("Abeam (NM)", dcc.Slider(
+        _field("Abeam (NM)", dcc.Input(
             id="poweroff180-abeam-distance-nm",
-            min=0.3, max=1.5, step=0.05, value=0.5,
-            marks={0.3: "0.3", 0.75: "0.75", 1.5: "1.5"},
-            tooltip={"placement": "bottom", "always_visible": False},
-        ), slider=True, tooltip="Lateral distance to the runway when abeam the touchdown point. 0.5 NM is typical pattern width."),
+            type="number", value=0.5, min=0.3, max=1.5, step=0.05,
+        ), tooltip="Lateral distance to the runway when abeam the touchdown point (0.3-1.5 NM). 0.5 NM is typical pattern width."),
         _field("Resid pwr %", dcc.Input(
             id="poweroff180-residual-power",
             type="number", value=0, min=0, max=30, step=5,

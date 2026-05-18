@@ -93,8 +93,9 @@ def register(app):
           - User clicks a result row in the dropdown (existing).
           - User presses Enter in the search input → picks the top
             match from airport-search-matches (autocomplete behavior).
-        After selection, map auto-zooms to a terminal-area view
-        (zoom 11) so the airport is visible without manual pan/zoom.
+        After selection, map auto-zooms to an airport-area view
+        (zoom 14, ~2 NM radius around the airport) so runway+pattern
+        geometry is visible without manual pan/zoom.
         """
         trigger = ctx.triggered_id
         airport_id = None
@@ -129,9 +130,9 @@ def register(app):
             "marginBottom": "4px",
             "display": "block",
         }
-        # Terminal-area zoom — ~zoom 11 puts the airport + a few NM
-        # around it comfortably in the map view.
-        return ([lat, lon], 11, f"{elev} ft", airport_id, "",
+        # Airport-area zoom — zoom 14 gives ~2 NM radius around the
+        # airport so runway + traffic pattern geometry is visible.
+        return ([lat, lon], 14, f"{elev} ft", airport_id, "",
                 f"Selected: {name} ({airport_id})", display_style, [])
 
     @app.callback(
