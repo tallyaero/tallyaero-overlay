@@ -2505,6 +2505,16 @@ input[type="radio"] {
   background: #e2e8f0 !important;
   border-top: 2px solid #475569;
 }
+/* TOC / TOD virtual inflection rows — tinted lightly so the pilot
+   spots the phase change at a glance. Climb finishes (TOC) gets a
+   warm tint, descent starts (TOD) gets a cool tint. */
+.nav-log-toc-row td { background: #fef3c7 !important; }   /* amber-100 */
+.nav-log-tod-row td { background: #dbeafe !important; }   /* blue-100  */
+.nav-log-toc-row td:first-child,
+.nav-log-tod-row td:first-child {
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
 
 .nav-log-eo-grid {
   display: grid;

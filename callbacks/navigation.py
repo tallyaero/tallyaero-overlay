@@ -20,6 +20,28 @@ from layouts.mobile import mobile_layout
 def register(app):
     """Install navigation/shell callbacks against the given Dash app."""
 
+    # === Clear all map drawings + route UI when maneuver changes ====
+    # Selecting a new maneuver should give the user a clean slate —
+    # no leftover glide corridor, route polyline, scrubber path,
+    # pending GPS waypoint dots, or route summary banner/strip from
+    # whatever they were doing before. Per-maneuver dcc.Store point
+    # stores (e.g. engineout touchdown/start) are intentionally NOT
+    # cleared so the pilot can toggle back without redoing clicks.
+    @app.callback(
+        Output("layer", "children", allow_duplicate=True),
+        Output("scrubber-layer", "children", allow_duplicate=True),
+        Output("route-layer", "children", allow_duplicate=True),
+        Output("route-pending-markers", "children", allow_duplicate=True),
+        Output("route-top-banner", "children", allow_duplicate=True),
+        Output("route-below-strip", "children", allow_duplicate=True),
+        Output("nav-log-content", "children", allow_duplicate=True),
+        Output("route-result-store", "data", allow_duplicate=True),
+        Input("maneuver-select", "value"),
+        prevent_initial_call=True,
+    )
+    def clear_map_on_maneuver_switch(_maneuver):
+        return [], [], [], [], None, None, None, None
+
     # === Clientside: viewport width detector (fires on pathname change) ===
     app.clientside_callback(
         """

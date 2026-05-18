@@ -24,6 +24,9 @@ HIDE_BY_MANEUVER: dict[str, set[str]] = {
         "sidebar-agl-wrap",        # AGL of picked airport — irrelevant to route
         "sidebar-cg-block",        # CG slider — doesn't affect glide ratio
         "sidebar-power-section",   # Power setting — pilot picks cruise speed
+        "map-controls-overlay",    # Reset All / Reset Clicks / Undo —
+                                    # route planner doesn't use map clicks
+                                    # for point-setting maneuvers
     },
 }
 

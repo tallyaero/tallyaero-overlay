@@ -297,7 +297,8 @@ def _frequencies_panel(label: str, ap: dict | None) -> object:
 def _build_nav_log(*, waypoints, legs, totals, cruise_alt, aircraft_name,
                    tas_kt, total_weight, fuel_load_gal, wind_source,
                    critique, corridor_meta, divert_summary,
-                   airport_records=None, cas_kt_override=None):
+                   airport_records=None, cas_kt_override=None,
+                   profile=None):
     """Render a Jeppesen-style VFR navigation log.
 
     Layout mirrors the standard FAA/Jeppesen VFR Nav Log form: a multi-
@@ -363,14 +364,102 @@ def _build_nav_log(*, waypoints, legs, totals, cruise_alt, aircraft_name,
         for label, cls in th_cols
     ]))
 
+    # ─── Expand legs into segments at TOC / TOD inflection points ──────
+    # The user's waypoint-to-waypoint legs ignore where the airplane
+    # actually reaches cruise (Top of Climb) or starts descending
+    # (Top of Descent). A pilot's nav log shows TOC + TOD as
+    # explicit fix entries so the climb/cruise/descent phase of each
+    # row is unambiguous. We split each input leg into 1-3 segments
+    # based on whether d_toc / d_tod fall inside its distance range.
+    d_toc = float(profile.get("d_toc_nm")) if profile else None
+    d_tod = float(profile.get("d_tod_nm")) if profile else None
+    climb_gs = float(profile.get("climb_gs_kt")) if profile else None
+    descent_gs = float(profile.get("descent_gs_kt")) if profile else None
+    field_dest_ft = float(profile.get("field_dest_ft")) if profile else None
+    field_dep_ft = float(profile.get("field_dep_ft")) if profile else None
+
+    segments: list[dict] = []
+    _route_cum = 0.0
+    for leg in legs:
+        leg_dist = float(leg.get("distance_nm") or 0)
+        leg_ete = float(leg.get("ete_min") or 0)
+        leg_fuel = leg.get("fuel_burn_gal")
+        leg_start = _route_cum
+        leg_end = _route_cum + leg_dist
+
+        # Collect inflection points inside this leg (strictly between
+        # leg_start and leg_end so points at exact leg boundaries
+        # don't produce zero-length sub-segments).
+        inflections: list[tuple[str, float]] = []
+        if d_toc is not None and leg_start < d_toc < leg_end:
+            inflections.append(("TOC", d_toc))
+        if d_tod is not None and leg_start < d_tod < leg_end:
+            inflections.append(("TOD", d_tod))
+        inflections.sort(key=lambda x: x[1])
+
+        cur_origin = leg.get("origin_id", "—")
+        cur_pos = leg_start
+        for fix_name, fix_pos in inflections:
+            sub_dist = fix_pos - cur_pos
+            if sub_dist <= 0:
+                continue
+            frac = sub_dist / max(leg_dist, 0.001)
+            segments.append({
+                **leg,
+                "origin_id": cur_origin,
+                "dest_id": fix_name,
+                "distance_nm": sub_dist,
+                "ete_min": leg_ete * frac,
+                "fuel_burn_gal": (leg_fuel * frac) if leg_fuel else None,
+                "_is_toc": fix_name == "TOC",
+                "_is_tod": fix_name == "TOD",
+                # Altitude shown for this sub-segment's endpoint:
+                # cruise once we hit TOC, dest field elev at TOD.
+                "_endpoint_alt_ft": (cruise_alt if fix_name == "TOC"
+                                    else field_dest_ft),
+                "_phase": ("climb" if fix_name == "TOC" else "descent"),
+            })
+            cur_origin = fix_name
+            cur_pos = fix_pos
+
+        # Tail segment from the last inflection (or leg start) to the
+        # leg's real destination.
+        tail_dist = leg_end - cur_pos
+        if tail_dist > 0:
+            frac = tail_dist / max(leg_dist, 0.001)
+            # Phase = cruise if we already crossed TOC, descent if past
+            # TOD, else climb.
+            if d_tod is not None and cur_pos >= d_tod:
+                phase = "descent"
+                endpoint_alt = field_dest_ft
+            elif d_toc is None or cur_pos >= d_toc:
+                phase = "cruise"
+                endpoint_alt = cruise_alt
+            else:
+                phase = "climb"
+                endpoint_alt = cruise_alt
+            segments.append({
+                **leg,
+                "origin_id": cur_origin,
+                "distance_nm": tail_dist,
+                "ete_min": leg_ete * frac,
+                "fuel_burn_gal": (leg_fuel * frac) if leg_fuel else None,
+                "_is_toc": False,
+                "_is_tod": False,
+                "_endpoint_alt_ft": endpoint_alt,
+                "_phase": phase,
+            })
+
+        _route_cum = leg_end
+
     body_rows = []
     cum_dist = 0.0
     cum_ete = 0.0
     cum_fuel = 0.0
-    total_dist = sum(float(leg.get("distance_nm") or 0) for leg in legs)
+    total_dist = sum(float(s.get("distance_nm") or 0) for s in segments)
     fuel_rem = float(fuel_load_gal or 0)
 
-    for i, leg in enumerate(legs):
+    for i, leg in enumerate(segments):
         leg_dist = float(leg.get("distance_nm") or 0)
         leg_ete = float(leg.get("ete_min") or 0)
         leg_fuel = leg.get("fuel_burn_gal")
@@ -382,6 +471,18 @@ def _build_nav_log(*, waypoints, legs, totals, cruise_alt, aircraft_name,
         dist_rem = total_dist - cum_dist
         gph = (float(leg_fuel) / (leg_ete / 60.0)
                if leg_fuel and leg_ete > 0 else None)
+        # Use phase-appropriate GS for TOC/TOD virtual segments. The
+        # leg's stored ground_speed_kt is cruise GS; climb/descent are
+        # slower (climb at climb_ias, descent at descent_ias).
+        phase = leg.get("_phase", "cruise")
+        if phase == "climb" and climb_gs:
+            seg_gs = climb_gs
+        elif phase == "descent" and descent_gs:
+            seg_gs = descent_gs
+        else:
+            seg_gs = leg.get("ground_speed_kt")
+        # Endpoint altitude for the Alt column
+        seg_alt = leg.get("_endpoint_alt_ft", cruise_alt)
 
         # WCA: small-angle approximation works for typical XW/TAS ratios.
         xw = leg.get("crosswind_kt") or 0
@@ -404,9 +505,16 @@ def _build_nav_log(*, waypoints, legs, totals, cruise_alt, aircraft_name,
                 cas = float(tas_kt) * math.sqrt(sigma)
             except (TypeError, ValueError):
                 cas = tas_kt
-        gs = leg.get("ground_speed_kt")
+        gs = seg_gs
+        # TOC/TOD rows get a tinted row class so they read as
+        # inflection points, not normal fixes.
+        row_class = ""
+        if leg.get("_is_toc"):
+            row_class = "nav-log-toc-row"
+        elif leg.get("_is_tod"):
+            row_class = "nav-log-tod-row"
 
-        body_rows.append(html.Tr([
+        body_rows.append(html.Tr(className=row_class, children=[
             # Check Point — show the leg destination waypoint
             html.Td(_stacked(leg.get("dest_id", "—"),
                              leg.get("origin_id", "")
@@ -416,8 +524,8 @@ def _build_nav_log(*, waypoints, legs, totals, cruise_alt, aircraft_name,
             html.Td(_stacked("", "")),
             # Course (Route): direct great-circle by default
             html.Td(_stacked("Direct", "")),
-            # Altitude
-            html.Td(_stacked(_fmt(cruise_alt, "{:.0f}"), "")),
+            # Altitude — endpoint altitude for the phase
+            html.Td(_stacked(_fmt(seg_alt, "{:.0f}"), "")),
             # Wind dir/vel + Temp (blank — we don't have temp aloft yet)
             html.Td(_stacked(f"{wind_dir:03.0f} / {wind_vel:.0f}", "")),
             # CAS / TAS
@@ -1956,6 +2064,7 @@ def register(app):
             corridor_meta=corridor_meta_agg,
             divert_summary=divert_summary_for_log,
             airport_records=airport_records,
+            profile=profile.to_dict() if profile else None,
         )
 
         store = {

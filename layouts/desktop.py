@@ -516,8 +516,12 @@ def desktop_layout():
                 },
                 children=[
                     # Map-overlay controls — Reset/Undo float over the map
-                    # top-right, just left of the windsock.
-                    html.Div(className="map-controls-overlay", children=[
+                    # top-right, just left of the windsock. Hidden for
+                    # Route Planner via callbacks/sidebar.py (no click-
+                    # to-set points in routing).
+                    html.Div(id="map-controls-overlay",
+                             className="map-controls-overlay",
+                             children=[
                         html.Button("Reset All", id="reset-all", className="map-overlay-btn"),
                         html.Button("Reset Clicks", id="reset-clicks", className="map-overlay-btn"),
                         html.Button("Undo", id="undo-last-click", className="map-overlay-btn map-overlay-btn-undo"),
