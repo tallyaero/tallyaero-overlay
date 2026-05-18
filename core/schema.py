@@ -183,6 +183,64 @@ ThrustModel = Literal[
 ]
 
 
+# =============================================================================
+# Performance dynamics (Phase B — 2026-05-18)
+# =============================================================================
+# Per-aircraft "how does it actually fly" parameters that the maneuver
+# simulator needs but POHs don't always publish: roll rate, bank-response
+# time-constant, longitudinal speed-response time-constant, takeoff
+# acceleration ratio, inter-maneuver pause time.
+#
+# Three-tier provenance per the maneuver audit Theme C.4:
+#   poh           — hand-curated from the airframe's POH/AFM. Most reliable.
+#   class_derived — computed by scripts/classify_dynamics.py from G_limits
+#                   / aspect_ratio / engine_count / gear_type etc. Plausible
+#                   but unverified. Default for the 95+ non-reference fleet.
+#   estimated     — last-resort fallback used by core/dynamics.py when the
+#                   aircraft has no block at all. Generic light-single
+#                   constants.
+
+
+ProvenanceKind = Literal["poh", "class_derived", "estimated"]
+
+
+class PerformanceDynamics(BaseModel):
+    """Per-aircraft dynamic-response constants used by the maneuver sim.
+
+    Field ranges are deliberately wide — a Pitts S-2C rolls at 180+°/s,
+    a turbocharged twin needs 3-4s to spool, etc. Cross-validator below
+    enforces poh_citation when provenance="poh"."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    roll_rate_dps: float = Field(..., gt=0, le=200,
+        description="Maximum sustained roll rate (deg/s). Aerobatic singles "
+                    "up to ~180; trainers ~40-50; twins ~25-35.")
+    bank_response_tau_s: float = Field(..., gt=0, le=30,
+        description="First-order time constant for bank-angle command response (s).")
+    speed_response_tau_s: float = Field(..., gt=0, le=30,
+        description="First-order time constant for airspeed response to "
+                    "power/drag changes (s).")
+    takeoff_accel_factor: float = Field(..., gt=0, le=1.0,
+        description="Dimensionless ratio of takeoff acceleration to g, derived "
+                    "from horsepower / max_weight / Vlof.")
+    inter_maneuver_pause_s: float = Field(default=1.0, ge=0, le=30,
+        description="Realistic pause between sequenced maneuver phases (s). "
+                    "Used by the scrubber to space adjacent maneuvers.")
+    provenance: ProvenanceKind = Field(...,
+        description="poh = hand-curated from POH/AFM. class_derived = "
+                    "computed from class heuristics. estimated = generic "
+                    "fallback when no per-aircraft data exists.")
+    poh_citation: Optional[str] = Field(default=None,
+        description="POH page/section reference. Required when provenance='poh'.")
+
+    @model_validator(mode="after")
+    def _check_citation(self):
+        if self.provenance == "poh" and not self.poh_citation:
+            raise ValueError("provenance='poh' requires a non-empty poh_citation")
+        return self
+
+
 class PropThrustDecay(BaseModel):
     """Quadratic thrust-vs-V model parameters.
 
@@ -270,6 +328,11 @@ class Aircraft(BaseModel):
     verified_fields: List[str] = Field(default_factory=list)
     tcds_number: Optional[str] = None
     tcds_holder: Optional[str] = None
+
+    # Phase B — dynamic-response constants for the maneuver simulator.
+    # Optional so the existing 110 files keep parsing; populated by
+    # scripts/classify_dynamics.py (tier 1) + apply_poh_dynamics.py (tier 2).
+    performance_dynamics: Optional[PerformanceDynamics] = None
 
     # ------------------------------------------------------------------
     # Cross-field invariants
