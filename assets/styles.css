@@ -1654,13 +1654,18 @@ input[type="radio"] {
   border-radius: 3px;
   font-size: 12px;
 }
-/* Sliders inside a shelf-field — clamp width via a fixed-width wrapper */
+/* Sliders inside a shelf-field — clamp width via a fixed-width wrapper.
+   width + min-width + flex-shrink:0 because the parent shelf row uses
+   flex-wrap + justify-content:flex-end and otherwise lets the column
+   collapse to its rc-slider intrinsic width (which is 0). */
 .shelf-field-slider {
   width: 160px;
+  min-width: 160px;
+  flex-shrink: 0;
   padding: 4px 4px 0;
 }
 .shelf-field-slider .rc-slider {
-  width: 100%;
+  width: 100% !important;
   margin: 4px 0;
 }
 .shelf-field-slider .rc-slider-mark-text {
