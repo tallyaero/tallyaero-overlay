@@ -95,6 +95,7 @@ def mobile_layout():
                 dcc.Input(
                     id="airport-search-input",
                     type="text",
+                    value="",
                     placeholder="ICAO or name...",
                     className="mobile-input-full",
                     debounce=False,

@@ -56,6 +56,7 @@ def _top_strip():
                         dcc.Input(
                             id="airport-search-input",
                             type="text",
+                            value="",
                             placeholder="ICAO / name",
                             debounce=False,
                             className="topbar-airport-input",
