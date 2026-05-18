@@ -255,34 +255,32 @@ def register(app):
                             # All post-failure phases: reaction, turn1, straight, turn2, final
                             glide_pts.append(path[i])
 
-                # Draw takeoff (green)
+                # Theme B takeoff phase — start (green-500)
                 if len(takeoff_pts) >= 2:
-                    elements.append(dl.Polyline(positions=takeoff_pts, color="#00AA00", weight=4))
+                    elements.append(dl.Polyline(positions=takeoff_pts, color="#22c55e", weight=4, opacity=0.85))
 
-                # Draw climb (blue) - connect from last takeoff point
+                # Theme B climb phase — path-active (blue-600)
                 if len(climb_pts) >= 2:
-                    # Add connection from takeoff
                     if takeoff_pts:
                         climb_with_connection = [takeoff_pts[-1]] + climb_pts
                     else:
                         climb_with_connection = climb_pts
-                    elements.append(dl.Polyline(positions=climb_with_connection, color="#0066FF", weight=3))
+                    elements.append(dl.Polyline(positions=climb_with_connection, color="#0d59f2", weight=3, opacity=0.85))
 
-                # Draw glide (red) - entire path from engine failure to touchdown
+                # Theme B glide phase — intermediate (amber-500)
                 if len(glide_pts) >= 2:
-                    # Add connection from climb
                     if climb_pts:
                         glide_with_connection = [climb_pts[-1]] + glide_pts
                     else:
                         glide_with_connection = glide_pts
-                    elements.append(dl.Polyline(positions=glide_with_connection, color="#FF0000", weight=3))
+                    elements.append(dl.Polyline(positions=glide_with_connection, color="#f59e0b", weight=3, opacity=0.85))
 
-                # Add takeoff start marker (threshold)
+                # Takeoff threshold — start (green-500)
                 elements.append(
                     dl.CircleMarker(
                         center=[threshold_geopoint.latitude, threshold_geopoint.longitude],
                         radius=7,
-                        color="#00AA00",
+                        color="#22c55e",
                         fill=True,
                         fillOpacity=1.0,
                         children=dl.Tooltip("Takeoff point (runway threshold)"),
@@ -424,17 +422,17 @@ def register(app):
                     except Exception as e:
                         log.warning(f"Could not draw runway overlay: {e}")
             else:
-                # Legacy single-color visualization
+                # Legacy single-color visualization — Theme B
                 start_marker = dl.CircleMarker(
                     center=[threshold_geopoint.latitude, threshold_geopoint.longitude],
                     radius=7,
-                    color="green",
+                    color="#22c55e",
                     fill=True,
                     fillOpacity=1.0,
                     children=dl.Tooltip("Engine failure point"),
                 )
                 elements.append(start_marker)
-                arc_line = dl.Polyline(positions=path, color="red", weight=3)
+                arc_line = dl.Polyline(positions=path, color="#f59e0b", weight=3, opacity=0.85)
                 elements.append(arc_line)
 
             # End point marker - smiley for success, skull for failure

@@ -154,21 +154,21 @@ def register(app):
                 )
             )
 
-        # Start marker (green)
+        # Start marker — Theme B start (green-500)
         start_marker = dl.CircleMarker(
             center=[start["lat"], start["lon"]],
             radius=7,
-            color="green",
+            color="#22c55e",
             fill=True,
             fillOpacity=1.0,
             children=dl.Tooltip("Entry Point"),
         )
 
-        # End marker (red)
+        # End marker — Theme B end (red-500)
         end_marker = dl.CircleMarker(
             center=path[-1],
             radius=7,
-            color="red",
+            color="#ef4444",
             fill=True,
             fillOpacity=1.0,
             children=dl.Tooltip(f"Exit: {hover[-1].get('heading', 0):.0f}° hdg, {hover[-1].get('alt', 0):.0f} ft"),

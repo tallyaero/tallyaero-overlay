@@ -6,6 +6,20 @@
   --blue-dark: #1A5276;
   --navy-bg: #0B1729;
 
+  /* Theme B canonical maneuver-map palette (2026-05-18) */
+  --ta-start: #22c55e;        /* green-500 — start / entry / takeoff */
+  --ta-start-stroke: #15803d;
+  --ta-end: #ef4444;          /* red-500 — end / touchdown / exit */
+  --ta-end-stroke: #991b1b;
+  --ta-ref: #3b82f6;          /* blue-500 — reference / pivot / center */
+  --ta-ref-stroke: #1e40af;
+  --ta-intermediate: #f59e0b; /* amber-500 — intermediate / pylon */
+  --ta-intermediate-stroke: #b45309;
+  --ta-path-active: #0d59f2;  /* blue-600 — active flown path */
+  --ta-path-fail: #dc2626;    /* red-600 — failure / conflict */
+  --ta-path-marginal: #d97706;/* amber-600 — marginal status */
+  --ta-envelope: #84cc16;     /* lime-500 — envelope / corridor */
+
   /* UI Colors */
   --gray-bg: #f7f9fc;
   --text-dark: #1a202c;

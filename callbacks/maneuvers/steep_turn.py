@@ -132,25 +132,22 @@ def register(app):
         if not path or not hover:
             raise PreventUpdate
 
-        # Build elements matching other maneuvers' style
-        # Red polyline for the path
-        path_line = dl.Polyline(positions=path, color="red", weight=3)
+        # Build elements matching other maneuvers' style — Theme B
+        path_line = dl.Polyline(positions=path, color="#0d59f2", weight=3, opacity=0.85)
 
-        # Start marker (green, larger)
         start_marker = dl.CircleMarker(
             center=[start["lat"], start["lon"]],
             radius=7,
-            color="green",
+            color="#22c55e",
             fill=True,
             fillOpacity=1.0,
             children=dl.Tooltip("Start Point"),
         )
 
-        # End marker (red, larger)
         end_marker = dl.CircleMarker(
             center=path[-1],
             radius=7,
-            color="red",
+            color="#ef4444",
             fill=True,
             fillOpacity=1.0,
             children=dl.Tooltip("End Point"),

@@ -69,7 +69,7 @@ def register(app):
             pt_forward = point_from(ref_geo, calculated_bearing, line_length_nm)
             pt_backward = point_from(ref_geo, (calculated_bearing + 180) % 360, line_length_nm)
 
-            # Create the preview line
+            # Theme B preview reference line — path-active dashed
             preview_line = dl.Polyline(
                 id='sturn-ref-line-preview',
                 positions=[
@@ -77,29 +77,30 @@ def register(app):
                     [ref_lat, ref_lon],
                     [pt_forward.latitude, pt_forward.longitude]
                 ],
-                color="#ff6600",
-                weight=3,
-                dashArray="10, 5",
+                color="#0d59f2",
+                weight=2,
+                opacity=0.65,
+                dashArray="6,6",
                 children=dl.Tooltip(f"Reference Line: {calculated_bearing:.0f}°")
             )
             layer_children.append(preview_line)
 
-            # Add markers for the two click points
+            # Maneuver start — intermediate amber (will become entry green after Draw)
             ref_marker = dl.CircleMarker(
                 center=[ref_lat, ref_lon],
                 radius=8,
-                color="#ff6600",
+                color="#f59e0b",
                 fill=True,
-                fillColor="#ff6600",
+                fillColor="#f59e0b",
                 fillOpacity=0.8,
                 children=dl.Tooltip("Maneuver Start")
             )
             bearing_marker = dl.CircleMarker(
                 center=[bearing_lat, bearing_lon],
                 radius=6,
-                color="#ff9900",
+                color="#f59e0b",
                 fill=True,
-                fillColor="#ff9900",
+                fillColor="#f59e0b",
                 fillOpacity=0.6,
                 children=dl.Tooltip("Bearing Point")
             )
@@ -111,9 +112,9 @@ def register(app):
             ref_marker = dl.CircleMarker(
                 center=[ref_lat, ref_lon],
                 radius=8,
-                color="#ff6600",
+                color="#f59e0b",
                 fill=True,
-                fillColor="#ff6600",
+                fillColor="#f59e0b",
                 fillOpacity=0.8,
                 children=dl.Tooltip("Reference Point (click 2nd point to set bearing)")
             )
@@ -242,29 +243,30 @@ def register(app):
         if not path or not hover:
             raise PreventUpdate
 
-        # Single red path for consistency
-        path_line = dl.Polyline(positions=path, color="red", weight=3)
+        # Theme B path
+        path_line = dl.Polyline(positions=path, color="#0d59f2", weight=3, opacity=0.85)
 
-        # Reference point marker
+        # Theme B reference start point
         ref_marker = dl.CircleMarker(
             center=[ref_point["lat"], ref_point["lon"]],
             radius=8,
-            color="blue",
+            color="#3b82f6",
             fill=True,
             fillOpacity=0.7,
             children=dl.Tooltip("Maneuver Start"),
         )
 
-        # Draw the reference line from maneuver start point to exit point
+        # Theme B reference line (active path color, dashed)
         if path and len(path) >= 2:
             reference_line = dl.Polyline(
                 positions=[
                     [ref_point["lat"], ref_point["lon"]],
                     path[-1]  # Exit point
                 ],
-                color="#c0c0c0",  # Light gray for satellite visibility
-                weight=3,
-                dashArray="10, 5",
+                color="#0d59f2",
+                weight=2,
+                opacity=0.65,
+                dashArray="6,6",
                 children=dl.Tooltip(f"Reference Line ({line_bearing:.0f}°)"),
             )
         else:
@@ -278,18 +280,19 @@ def register(app):
                     [ref_point["lat"], ref_point["lon"]],
                     [pt_forward.latitude, pt_forward.longitude]
                 ],
-                color="#c0c0c0",
-                weight=3,
-                dashArray="10, 5",
+                color="#0d59f2",
+                weight=2,
+                opacity=0.65,
+                dashArray="6,6",
                 children=dl.Tooltip(f"Reference Line ({line_bearing:.0f}°)"),
             )
 
-        # Entry marker
+        # Theme B entry (green-500)
         if path:
             entry_marker = dl.CircleMarker(
                 center=path[0],
                 radius=7,
-                color="green",
+                color="#22c55e",
                 fill=True,
                 fillOpacity=1.0,
                 children=dl.Tooltip(f"Entry: {altitude:.0f} ft AGL"),
@@ -297,12 +300,12 @@ def register(app):
         else:
             entry_marker = None
 
-        # End marker
+        # Theme B end (red-500)
         if path:
             end_marker = dl.CircleMarker(
                 center=path[-1],
                 radius=7,
-                color="red",
+                color="#ef4444",
                 fill=True,
                 fillOpacity=1.0,
                 children=dl.Tooltip("Exit"),

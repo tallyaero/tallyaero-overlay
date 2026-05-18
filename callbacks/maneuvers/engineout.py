@@ -249,23 +249,23 @@ def register(app):
                 log.warning(f"Min altitude calc error: {min_err}")
                 min_alt_display = "Could not calculate minimum altitude"
 
-            # ---------- Core visuals: full glide track ----------
-            # Color-code path by phase if available
-            arc_line = dl.Polyline(positions=path, color="red", weight=3)
+            # ---------- Core visuals: full glide track (Theme B) ----------
+            arc_line = dl.Polyline(positions=path, color="#0d59f2", weight=3, opacity=0.85)
 
-            # Start / touchdown markers
+            # Start (engine failure) — green-500
             start_marker = dl.CircleMarker(
                 center=[start.latitude, start.longitude],
                 radius=7,
-                color="green",
+                color="#22c55e",
                 fill=True,
                 fillOpacity=1.0,
                 children=dl.Tooltip("Engine Failure Point"),
             )
+            # Touchdown — red-500
             touchdown_marker = dl.CircleMarker(
                 center=[touchdown.latitude, touchdown.longitude],
                 radius=7,
-                color="blue",
+                color="#ef4444",
                 fill=True,
                 fillOpacity=1.0,
                 children=dl.Tooltip("Target Touchdown"),
@@ -300,11 +300,14 @@ def register(app):
                 envelope_data = [[lat, lon] for lat, lon in envelope]
 
                 if envelope_data:
+                    # Theme B envelope — lime-500 dashed
                     envelope_polygon = dl.Polygon(
                         positions=envelope_data,
-                        color="orange",
-                        weight=2,
-                        fillColor="orange",
+                        color="#84cc16",
+                        weight=1,
+                        opacity=0.85,
+                        dashArray="4,4",
+                        fillColor="#84cc16",
                         fillOpacity=0.15,
                         children=dl.Tooltip("Max glide distance ring"),
                     )
@@ -316,7 +319,7 @@ def register(app):
                 impact_mark = dl.CircleMarker(
                     center=[impact_lat, impact_lon],
                     radius=7,
-                    color="black",
+                    color="#dc2626",
                     fill=True,
                     fillOpacity=1.0,
                     children=dl.Tooltip("Impact Point"),

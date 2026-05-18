@@ -117,34 +117,34 @@ def register(app):
         # Get entry point from warnings (calculated by simulation)
         entry_pt = warnings.get('entry_point', {})
 
-        # Single red path for consistency
-        path_line = dl.Polyline(positions=path, color="red", weight=3)
+        # Theme B path
+        path_line = dl.Polyline(positions=path, color="#0d59f2", weight=3, opacity=0.85)
 
-        # Reference point marker (blue target)
+        # Theme B reference point (spiral center)
         ref_marker = dl.CircleMarker(
             center=[ref_point["lat"], ref_point["lon"]],
             radius=10,
-            color="blue",
+            color="#3b82f6",
             fill=True,
             fillOpacity=0.5,
             children=dl.Tooltip(f"Reference Point (Spiral Center)\nRadius: {warnings.get('orbit_radius_ft', 0):.0f} ft"),
         )
 
-        # Entry marker (green) - calculated position
+        # Theme B entry (green-500)
         entry_marker = dl.CircleMarker(
             center=[entry_pt.get('lat', path[0][0]), entry_pt.get('lon', path[0][1])],
             radius=7,
-            color="green",
+            color="#22c55e",
             fill=True,
             fillOpacity=1.0,
             children=dl.Tooltip(f"Entry: {altitude_ft:.0f} ft AGL\nHeading: {warnings.get('entry_heading', 0):.0f}°"),
         )
 
-        # End marker
+        # Theme B end (red-500)
         end_marker = dl.CircleMarker(
             center=path[-1],
             radius=7,
-            color="red",
+            color="#ef4444",
             fill=True,
             fillOpacity=1.0,
             children=dl.Tooltip(f"Exit: {warnings.get('final_altitude_agl', 0):.0f} ft AGL"),

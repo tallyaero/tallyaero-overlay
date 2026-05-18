@@ -154,40 +154,40 @@ def register(app):
             # Build map elements
             elements = []
 
-            # Main path
-            path_line = dl.Polyline(positions=path, color="red", weight=3)
+            # Theme B glide path
+            path_line = dl.Polyline(positions=path, color="#0d59f2", weight=3, opacity=0.85)
             elements.append(path_line)
 
-            # Start marker (abeam position)
+            # Abeam start — green-500
             if path:
                 start_marker = dl.CircleMarker(
                     center=path[0],
                     radius=7,
-                    color="green",
+                    color="#22c55e",
                     fill=True,
                     fillOpacity=1.0,
                     children=dl.Tooltip("Abeam (Power Off)")
                 )
                 elements.append(start_marker)
 
-            # Touchdown/Aim marker
+            # Runway threshold (reference) — blue-500
             aim_marker = dl.CircleMarker(
                 center=[runway_threshold['lat'], runway_threshold['lon']],
                 radius=7,
-                color="blue",
+                color="#3b82f6",
                 fill=True,
                 fillOpacity=1.0,
                 children=dl.Tooltip(f"Runway {runway_select or 'threshold'}")
             )
             elements.append(aim_marker)
 
-            # Impact marker if failed
+            # Impact marker if failed — red-600 fail
             impact_point = results.get('impact_point')
             if impact_point:
                 impact_marker = dl.CircleMarker(
                     center=impact_point,
                     radius=8,
-                    color="black",
+                    color="#dc2626",
                     fill=True,
                     fillOpacity=1.0,
                     children=dl.Tooltip(f"Impact: {results.get('touchdown_error_ft', 0):.0f} ft short")

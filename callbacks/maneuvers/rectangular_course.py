@@ -65,14 +65,14 @@ def register(app):
         start_lat = dw_start['lat']
         start_lon = dw_start['lon']
 
-        # Add start marker
+        # Add start marker — Theme B start (green-500)
         start_marker = dl.CircleMarker(
             id='rectcourse-preview-start',
             center=[start_lat, start_lon],
             radius=8,
-            color="#00aa00",
+            color="#22c55e",
             fill=True,
-            fillColor="#00aa00",
+            fillColor="#22c55e",
             fillOpacity=0.8,
             children=dl.Tooltip("Downwind Start (Entry)")
         )
@@ -102,36 +102,37 @@ def register(app):
             mid_lat = (start_lat + end_lat) / 2
             mid_lon = (start_lon + end_lon) / 2
 
-            # Draw the downwind leg line
+            # Theme B downwind preview — path-active dashed
             edge_line = dl.Polyline(
                 id='rectcourse-preview-edge',
                 positions=[[start_lat, start_lon], [end_lat, end_lon]],
-                color="#cc0000",  # Red for downwind
-                weight=4,
-                dashArray="10, 5",  # Dashed to show it's a preview
+                color="#0d59f2",
+                weight=2,
+                opacity=0.65,
+                dashArray="6,6",
                 children=dl.Tooltip(f"Downwind Leg: {dist_nm:.2f} nm, Track {bearing:.0f}°")
             )
 
-            # End marker
+            # Theme B downwind end — end (red-500)
             end_marker = dl.CircleMarker(
                 id='rectcourse-preview-end',
                 center=[end_lat, end_lon],
                 radius=8,
-                color="#cc6600",
+                color="#ef4444",
                 fill=True,
-                fillColor="#cc6600",
+                fillColor="#ef4444",
                 fillOpacity=0.8,
                 children=dl.Tooltip("Downwind End")
             )
 
-            # Midpoint marker (on the downwind leg itself)
+            # Theme B midpoint — intermediate (amber-500)
             mid_marker = dl.CircleMarker(
                 id='rectcourse-preview-center',
                 center=[mid_lat, mid_lon],
                 radius=5,
-                color="#FFD700",
+                color="#f59e0b",
                 fill=True,
-                fillColor="#FFD700",
+                fillColor="#f59e0b",
                 fillOpacity=0.8,
                 children=dl.Tooltip("Downwind Midpoint")
             )
@@ -320,16 +321,16 @@ def register(app):
         if not path or not hover:
             raise PreventUpdate
 
-        # Single red path for consistency
-        path_line = dl.Polyline(positions=path, color="red", weight=3)
+        # Theme B path
+        path_line = dl.Polyline(positions=path, color="#0d59f2", weight=3, opacity=0.85)
 
-        # Entry/Exit marker (at the intercept point on downwind - path start and end)
+        # Theme B entry/exit (green-500)
         elements = [path_line]
         if path:
             entry_marker = dl.CircleMarker(
                 center=path[0],
                 radius=7,
-                color="green",
+                color="#22c55e",
                 fill=True,
                 fillOpacity=1.0,
                 children=dl.Tooltip(f"45° Entry/Exit: {altitude:.0f} ft AGL"),

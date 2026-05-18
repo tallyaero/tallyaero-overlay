@@ -133,14 +133,14 @@ def register(app):
         if not path or not hover:
             raise PreventUpdate
 
-        # Single red path for consistency
-        path_line = dl.Polyline(positions=path, color="red", weight=3)
+        # Theme B path
+        path_line = dl.Polyline(positions=path, color="#0d59f2", weight=3, opacity=0.85)
 
-        # Center point marker (the reference point)
+        # Center reference — blue-500 with fill
         center_marker = dl.CircleMarker(
             center=[center_point["lat"], center_point["lon"]],
             radius=8,
-            color="red",
+            color="#3b82f6",
             fill=True,
             fillOpacity=0.8,
             children=dl.Tooltip("Reference Point (center)"),
@@ -157,21 +157,22 @@ def register(app):
             lon = center_point["lon"] + (e_offset / (364567.2 * math.cos(math.radians(center_point["lat"]))))
             orbit_circle_points.append([lat, lon])
 
+        # Theme B target orbit — path-active dashed (not gray)
         orbit_circle = dl.Polyline(
             positions=orbit_circle_points,
-            color="gray",
-            weight=1,
-            dashArray="5, 5",
-            opacity=0.5,
+            color="#0d59f2",
+            weight=2,
+            opacity=0.65,
+            dashArray="6,6",
             children=dl.Tooltip(f"Target orbit: {radius_nm:.2f} nm ({orbit_radius_ft:.0f} ft)"),
         )
 
-        # Entry marker
+        # Theme B entry (green-500)
         if path:
             entry_marker = dl.CircleMarker(
                 center=path[0],
                 radius=7,
-                color="green",
+                color="#22c55e",
                 fill=True,
                 fillOpacity=1.0,
                 children=dl.Tooltip(f"Entry: {altitude:.0f} ft AGL, Hdg {sim_warnings.get('entry_heading', 0):.0f}°"),
@@ -179,12 +180,12 @@ def register(app):
         else:
             entry_marker = None
 
-        # Exit marker
+        # Theme B exit (red-500)
         if path:
             exit_marker = dl.CircleMarker(
                 center=path[-1],
                 radius=7,
-                color="darkred",
+                color="#ef4444",
                 fill=True,
                 fillOpacity=1.0,
                 children=dl.Tooltip("Exit"),
