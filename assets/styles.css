@@ -3195,3 +3195,8 @@ input[type="radio"] {
 .acs-metric:has(.acs-fail) {
   border-left-color: var(--acs-fail);
 }
+
+.maneuver-profile-chart {
+  width: 100%;
+  margin-top: 8px;
+}
