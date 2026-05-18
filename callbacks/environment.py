@@ -75,8 +75,7 @@ def register(app):
         return f"{total_round}", total
 
     @app.callback(
-        Output("map", "center"),
-        Output("map", "zoom"),
+        Output("map", "viewport"),
         Output("env-airport-agl", "children"),
         Output("selected-airport-id", "data"),
         Output("airport-search-input", "value"),
@@ -132,7 +131,10 @@ def register(app):
         }
         # Airport-area zoom — zoom 14 gives ~2 NM radius around the
         # airport so runway + traffic pattern geometry is visible.
-        return ([lat, lon], 14, f"{elev} ft", airport_id, "",
+        # dash-leaflet 1.0.15: `center`/`zoom` are initial-only props;
+        # programmatic re-centering requires the `viewport` dict.
+        viewport = {"center": [lat, lon], "zoom": 14, "transition": "flyTo"}
+        return (viewport, f"{elev} ft", airport_id, "",
                 f"Selected: {name} ({airport_id})", display_style, [])
 
     @app.callback(
@@ -211,13 +213,13 @@ def register(app):
         return f"Selected: {name} ({airport_id})", display_style, f"{elev} ft"
 
     @app.callback(
-        Output("map", "center", allow_duplicate=True),
+        Output("map", "viewport", allow_duplicate=True),
         Input("recenter-airport-btn", "n_clicks"),
         State("selected-airport-id", "data"),
         prevent_initial_call=True
     )
     def recenter_to_airport(n_clicks, selected_id):
-        """Recenter map to the selected airport."""
+        """Recenter map to the selected airport at airport-area zoom."""
         if not n_clicks or not selected_id:
             raise PreventUpdate
 
@@ -225,4 +227,4 @@ def register(app):
         if not ap:
             raise PreventUpdate
 
-        return [ap["lat"], ap["lon"]]
+        return {"center": [ap["lat"], ap["lon"]], "zoom": 14, "transition": "flyTo"}
