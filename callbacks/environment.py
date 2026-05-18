@@ -75,7 +75,7 @@ def register(app):
         return f"{total_round}", total
 
     @app.callback(
-        Output("map", "viewport"),
+        Output("map", "viewport", allow_duplicate=True),
         Output("env-airport-agl", "children"),
         Output("selected-airport-id", "data"),
         Output("airport-search-input", "value"),
