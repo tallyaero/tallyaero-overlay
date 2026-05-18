@@ -21,6 +21,11 @@
 
   /* Layout */
   --sidebar-width: 230px;
+
+  /* ACS tolerance badge palette (2026-05-18) */
+  --acs-pass: #22c55e;
+  --acs-marginal: #f59e0b;
+  --acs-fail: #ef4444;
 }
 
 /* === Global Reset === */
@@ -3149,4 +3154,44 @@ input[type="radio"] {
 .shelf-engine-out-radio input[type="radio"] {
   margin-right: 2px;
   cursor: pointer;
+}
+
+/* === ACS metric badges === */
+.acs-metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-left: 3px solid transparent;
+  font-size: 11px;
+  margin-right: 8px;
+}
+.acs-metric-label {
+  color: #475569;
+  font-weight: 600;
+}
+.acs-metric-value {
+  font-weight: 700;
+}
+.acs-metric-units {
+  color: #64748b;
+  font-size: 10px;
+}
+.acs-metric .acs-pass {
+  color: var(--acs-pass);
+}
+.acs-metric .acs-marginal {
+  color: var(--acs-marginal);
+}
+.acs-metric .acs-fail {
+  color: var(--acs-fail);
+}
+.acs-metric:has(.acs-pass) {
+  border-left-color: var(--acs-pass);
+}
+.acs-metric:has(.acs-marginal) {
+  border-left-color: var(--acs-marginal);
+}
+.acs-metric:has(.acs-fail) {
+  border-left-color: var(--acs-fail);
 }

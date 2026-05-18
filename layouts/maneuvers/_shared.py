@@ -25,3 +25,37 @@ def _field(label, control, slider=False):
 def _spacer():
     """Pushes the elements after it to the right of the shelf row."""
     return html.Div(className="shelf-spacer")
+
+
+def _grade(value, target, tol):
+    delta = abs(value - target)
+    if delta <= tol:
+        return "pass"
+    if delta <= tol * 1.5:
+        return "marginal"
+    return "fail"
+
+
+def _acs_metric(label, value, units, target, tol, cert_level="private"):
+    """Render an ACS-tolerance pass/fail/marginal badge.
+
+    pass     when abs(value - target) <= tol
+    marginal when abs(value - target) <= tol * 1.5
+    fail     otherwise
+
+    Returns an inline-flex html.Div with className="acs-metric" and a
+    data-cert-level attribute carrying the supplied cert_level verbatim
+    (e.g. "private", "commercial"). Used by per-maneuver info panels."""
+    grade = _grade(value, target, tol)
+    value_text = f"{value:.1f}" if isinstance(value, float) else str(value)
+    children = [
+        html.Span(label, className="acs-metric-label"),
+        html.Span(value_text, className=f"acs-metric-value acs-{grade}"),
+    ]
+    if units:
+        children.append(html.Span(units, className="acs-metric-units"))
+    return html.Div(
+        children,
+        className="acs-metric",
+        **{"data-cert-level": cert_level},
+    )
