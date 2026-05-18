@@ -21,7 +21,7 @@ def steep_turn_layout(default_elev=None):
                 {"label": "60°", "value": 60},
             ],
             value=45, clearable=False,
-        )),
+        ), tooltip="Target bank angle. 45° is the Private ACS standard, 50° Commercial."),
         _field("Sequence", dcc.Dropdown(
             id="steepturn-sequence",
             options=[
@@ -31,24 +31,26 @@ def steep_turn_layout(default_elev=None):
                 {"label": "R only", "value": "right"},
             ],
             value="left-right", clearable=False,
-        )),
+        ), tooltip="Direction order. L→R does a 360° left then a 360° right back-to-back."),
         _field("Entry Hdg", dcc.Input(
             id="steepturn-entry-heading", type="number", value=0,
-        )),
+        ), tooltip="Entry heading (degrees true)."),
         _field("Alt (ft)", dcc.Input(
             id="steepturn-altitude", type="number", placeholder="opt",
-        )),
+        ), tooltip="Entry altitude. Defaults to the aircraft's default if blank."),
         _field("IAS", dcc.Input(
             id="steepturn-ias", type="number", placeholder="Va",
-        )),
+        ), tooltip="Indicated airspeed. Default is Va (maneuvering speed) from the POH."),
 
         html.Div(className="shelf-spacer"),
 
         html.Button("Set Entry",
                     id={"type": "click-button", "m_id": "steep_turn", "role": "start"},
-                    className="shelf-action shelf-action-set"),
+                    className="shelf-action shelf-action-set",
+                    title="Click the map to mark the entry point."),
         html.Button("Draw", id="steepturn-draw-btn",
-                    className="shelf-action shelf-action-draw"),
+                    className="shelf-action shelf-action-draw",
+                    title="Simulate the steep turn(s)."),
 
         html.Div(id={"type": "click-status", "m_id": "steep_turn"}, style={"display": "none"}),
         html.Div(id="steepturn-info", style={"display": "none"}),

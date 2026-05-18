@@ -9,16 +9,22 @@ from __future__ import annotations
 from dash import html
 
 
-def _field(label, control, slider=False):
+def _field(label, control, slider=False, tooltip=None):
     """Compact labeled mini-column for the shelf.
 
     label slug appears as 9.5px uppercase letter-spaced text above
     the control. `slider=True` swaps to the wider `.shelf-field-slider`
-    wrapper that clamps the rc-slider to a fixed width."""
+    wrapper that clamps the rc-slider to a fixed width. `tooltip`
+    surfaces as a native-OS hover tooltip on both the label and the
+    control wrapper so pilots can pause-hover any field to learn what
+    a non-default value will do."""
     cls = "shelf-field shelf-field-slider" if slider else "shelf-field"
+    div_attrs = {"className": cls}
+    if tooltip:
+        div_attrs["title"] = tooltip
     return html.Div(
         [html.Div(label, className="shelf-field-label"), control],
-        className=cls,
+        **div_attrs,
     )
 
 

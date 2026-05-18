@@ -13,28 +13,28 @@ def impossible_turn_layout(default_elev=None):
             id="impossibleturn-direction",
             options=[{"label": "L", "value": "left"}, {"label": "R", "value": "right"}],
             value="left", inline=True, className="shelf-field-radio",
-        )),
+        ), tooltip="Which way you turn back. Choose the side toward the off-runway open area."),
         _field("Runway", dcc.Dropdown(
             id="impossibleturn-runway-select",
             placeholder="—", clearable=True, searchable=False,
-        )),
+        ), tooltip="Departing runway. Picks heading automatically."),
         _field("Heading", dcc.Input(
             id="impossibleturn-manual-heading",
             type="number", value=360, min=1, max=360, step=1,
-        )),
+        ), tooltip="Manual runway heading override if not in the dropdown."),
         _field("Alt (ft)", dcc.Input(
             id="impossibleturn-altitude",
             type="number", value=1000, min=0, step=10,
-        )),
+        ), tooltip="Altitude AGL at engine failure. Lower = less margin to make it back."),
         _field("Vy (kt)", dcc.Input(
             id="impossibleturn-climb-speed",
             type="number", value=75, min=40, max=200, step=1,
             persistence=True, persistence_type="local",
-        )),
+        ), tooltip="Best-rate-of-climb speed (KIAS). From the POH."),
         _field("Reaction (s)", dcc.Input(
             id="impossibleturn-reaction-sec",
             type="number", value=3.0, min=0.0, step=0.5,
-        )),
+        ), tooltip="Pilot reaction time before initiating the turn-back. 2-4 s realistic."),
         _field("Flap", dcc.Dropdown(
             id="impossibleturn-flap-config",
             options=[
@@ -43,7 +43,7 @@ def impossible_turn_layout(default_elev=None):
                 {"label": "Landing", "value": "landing"},
             ],
             value="clean", clearable=False, searchable=False,
-        )),
+        ), tooltip="Flap configuration at the moment of failure."),
         _field("Prop", dcc.Dropdown(
             id="impossibleturn-prop-config",
             options=[
@@ -53,15 +53,17 @@ def impossible_turn_layout(default_elev=None):
                 {"label": "Feathered", "value": "feathered"},
             ],
             value="windmilling", clearable=False, searchable=False,
-        )),
+        ), tooltip="Propeller condition after the failure. Windmilling is most common."),
 
         html.Div(className="shelf-spacer"),
 
         html.Button("Set Takeoff",
                     id={"type": "click-button", "m_id": "impossible_turn", "role": "start"},
-                    className="shelf-action shelf-action-set"),
+                    className="shelf-action shelf-action-set",
+                    title="Click on the runway threshold to mark the departure point."),
         html.Button("Draw", id="impossibleturn-draw-btn",
-                    className="shelf-action shelf-action-draw"),
+                    className="shelf-action shelf-action-draw",
+                    title="Run the impossible-turn simulation."),
 
         # Hidden helper containers (existing callbacks reference these)
         html.Div(id="impossibleturn-runway-info", style={"display": "none"}),

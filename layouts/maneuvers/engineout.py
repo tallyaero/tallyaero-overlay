@@ -12,11 +12,11 @@ def engineout_layout(default_elev=None):
         _field("Runway", dcc.Dropdown(
             id="engineout-runway-select",
             placeholder="—", clearable=True, searchable=False,
-        )),
+        ), tooltip="Target runway for the gliding approach."),
         _field("TD Hdg", dcc.Input(
             id="engineout-touchdown-heading",
             type="number", value=360, min=1, max=360, step=1,
-        )),
+        ), tooltip="Touchdown heading. Auto-set from the runway selection."),
         _field("Flap", dcc.Dropdown(
             id="engineout-flap-setting",
             options=[
@@ -25,7 +25,7 @@ def engineout_layout(default_elev=None):
                 {"label": "Landing", "value": "landing"},
             ],
             value="clean", clearable=False,
-        )),
+        ), tooltip="Flap configuration during the glide."),
         _field("Prop", dcc.Dropdown(
             id="engineout-prop-condition",
             options=[
@@ -35,40 +35,43 @@ def engineout_layout(default_elev=None):
                 {"label": "Feathered", "value": "feathered"},
             ],
             value="idle", clearable=False,
-        )),
+        ), tooltip="Propeller condition. Windmilling adds drag, feathered minimizes it (twins only)."),
         _field("TD Elev (ft)", dcc.Input(
             id="engineout-manual-elev", type="number", placeholder="from map",
-        )),
+        ), tooltip="Touchdown elevation (ft MSL). Auto-filled from the airport selection if blank."),
         _field("Start Hdg", dcc.Input(
             id="engineout-start-heading", type="number", value=240,
-        )),
+        ), tooltip="Initial heading at the engine-failure point."),
         _field("Start Alt (ft)", dcc.Input(
             id="engineout-altitude", type="number", value=5000,
-        )),
+        ), tooltip="Altitude AGL at engine failure."),
         _field("Reaction (s)", dcc.Input(
             id="engineout-reaction-time", type="number",
             value=2.0, min=0, max=10, step=0.5,
-        )),
+        ), tooltip="Pilot reaction time before establishing best-glide attitude."),
         _field("Max Bank °", dcc.Input(
             id="engineout-max-bank", type="number",
             value=45, min=15, max=60,
-        )),
+        ), tooltip="Maximum bank used in the glide turns. Steeper = tighter radius but more drag/altitude loss."),
         _field("Envelope", dcc.Checklist(
             id="engineout-show-envelope",
             options=[{"label": " Ring", "value": "show"}],
             value=[],
-        )),
+        ), tooltip="Show the reachable-glide envelope ring overlay."),
 
         html.Div(className="shelf-spacer"),
 
         html.Button("Set Touchdown",
                     id={"type": "click-button", "m_id": "engineout", "role": "touchdown"},
-                    className="shelf-action shelf-action-set"),
+                    className="shelf-action shelf-action-set",
+                    title="Click the touchdown spot on the map."),
         html.Button("Set Start",
                     id={"type": "click-button", "m_id": "engineout", "role": "start"},
-                    className="shelf-action shelf-action-set"),
+                    className="shelf-action shelf-action-set",
+                    title="Click the engine-failure spot on the map."),
         html.Button("Draw", id="engineout-draw-btn",
-                    className="shelf-action shelf-action-draw"),
+                    className="shelf-action shelf-action-draw",
+                    title="Run the glide simulation."),
 
         # Hidden helpers
         dcc.Input(id="engineout-speed-tau", type="hidden", value=4.0),

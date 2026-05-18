@@ -22,18 +22,18 @@ def poweroff180_layout(default_elev=None):
             id="poweroff180-runway-select",
             placeholder="—",
             clearable=True, searchable=False,
-        )),
+        ), tooltip="Target runway for the touchdown. Picks heading automatically."),
         _field("Heading", dcc.Input(
             id="poweroff180-manual-heading",
             type="number", value=360, min=1, max=360, step=1,
-        )),
+        ), tooltip="Manual runway heading override if not in the dropdown."),
         _field("Pattern", html.Div([
             dcc.RadioItems(
                 id="poweroff180-pattern",
                 options=[{"label": "L", "value": "left"}, {"label": "R", "value": "right"}],
                 value="left", inline=True, className="shelf-field-radio",
             ),
-        ])),
+        ]), tooltip="Traffic pattern direction. L = standard left pattern."),
         _field("Flap", dcc.Dropdown(
             id="poweroff180-flap-setting",
             options=[
@@ -42,7 +42,7 @@ def poweroff180_layout(default_elev=None):
                 {"label": "Landing", "value": "landing"},
             ],
             value="clean", clearable=False,
-        )),
+        ), tooltip="Flap configuration during the glide back."),
         _field("Prop", dcc.Dropdown(
             id="poweroff180-prop-condition",
             options=[
@@ -52,26 +52,34 @@ def poweroff180_layout(default_elev=None):
                 {"label": "Feathered", "value": "feathered"},
             ],
             value="idle", clearable=False,
-        )),
+        ), tooltip="Propeller condition during the glide. Idle = stock Power-Off 180."),
         _field("Abeam (NM)", dcc.Slider(
             id="poweroff180-abeam-distance-nm",
             min=0.3, max=1.5, step=0.05, value=0.5,
             marks={0.3: "0.3", 0.75: "0.75", 1.5: "1.5"},
             tooltip={"always_visible": True},
-        ), slider=True),
+        ), slider=True, tooltip="Lateral distance to the runway when abeam the touchdown point. 0.5 NM is typical pattern width."),
+        _field("Residual power", dcc.Slider(
+            id="poweroff180-residual-power",
+            min=0.0, max=0.30, step=0.05, value=0.0,
+            marks={0: "0", 0.15: "15%", 0.30: "30%"},
+            tooltip={"always_visible": True},
+        ), slider=True, tooltip="Residual partial-power for a partial-failure drill. Stock Power-Off 180 is 0% (idle, definitional). Above 0% is a deliberate off-design partial-failure scenario."),
         _field("Alt (ft)", dcc.Input(
             id="poweroff180-altitude",
             type="number", value=1000, min=500, max=2000, step=100,
-        )),
+        ), tooltip="Pattern altitude AGL at the abeam position."),
 
         html.Div(className="shelf-spacer"),
 
         html.Button("Set Touchdown",
                     id={"type": "click-button", "m_id": "poweroff180", "role": "touchdown"},
-                    className="shelf-action shelf-action-set"),
+                    className="shelf-action shelf-action-set",
+                    title="Click the runway threshold (the touchdown spot)."),
         html.Button("Draw",
                     id="poweroff180-draw-btn",
-                    className="shelf-action shelf-action-draw"),
+                    className="shelf-action shelf-action-draw",
+                    title="Run the glide-back simulation."),
 
         # Hidden helper containers that existing callbacks still reference.
         html.Div(id="poweroff180-runway-info", style={"display": "none"}),

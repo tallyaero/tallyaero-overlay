@@ -172,12 +172,18 @@ def _modals_block():
 
                         html.H5("Available Maneuvers", style={"color": "#E65C00", "marginTop": "20px", "marginBottom": "10px"}),
                         html.Ul([
+                            html.Li([html.Strong("Route Planner"), " - Cross-country leg with terrain conflict, engine-out corridor, and nav log."]),
                             html.Li([html.Strong("Impossible Turn"), " - Engine failure after takeoff: can you make it back?"]),
                             html.Li([html.Strong("Power-Off 180"), " - Accuracy approach from abeam the touchdown point."]),
-                            html.Li([html.Strong("Engine-Out Glide"), " - Glide distance and path to a landing spot."]),
-                            html.Li([html.Strong("Steep Turns"), " - 45° bank turns with load factor and stall speed changes."]),
-                            html.Li([html.Strong("Chandelle"), " - Maximum performance climbing turn."]),
-                            html.Li([html.Strong("Lazy Eight"), " - Symmetrical climbing/descending turns."]),
+                            html.Li([html.Strong("Engine-Out Glide"), " - Best-glide reach to a chosen touchdown spot."]),
+                            html.Li([html.Strong("Steep Turns"), " - 45°/50° bank turns with load factor and stall margin."]),
+                            html.Li([html.Strong("Chandelle"), " - Maximum-performance climbing 180° turn."]),
+                            html.Li([html.Strong("Lazy Eight"), " - Symmetrical climbing/descending S with oscillating altitude."]),
+                            html.Li([html.Strong("Steep Spiral"), " - Constant-radius descending orbit; idle power; bank modulates with wind."]),
+                            html.Li([html.Strong("S-Turns"), " - Equal semicircles across a road, perpendicular to wind."]),
+                            html.Li([html.Strong("Turns Around a Point"), " - Constant-radius orbit around a point; bank modulates with GS."]),
+                            html.Li([html.Strong("Rectangular Course"), " - Wind-corrected rectangle around a field."]),
+                            html.Li([html.Strong("Eights on Pylons"), " - Figure-8 with the wingtip pinned on each pylon at pivotal altitude."]),
                         ], style={"marginBottom": "15px"}),
 
                         html.Div([

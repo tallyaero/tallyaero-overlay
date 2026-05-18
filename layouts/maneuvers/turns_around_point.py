@@ -11,35 +11,37 @@ def turns_point_layout(default_elev=None):
     return [
         _field("Alt (ft)", dcc.Input(
             id="turnspoint-altitude", type="number", value=800, min=400, max=1500,
-        )),
+        ), tooltip="Altitude AGL for the orbit. 600-1000 ft is typical."),
         _field("IAS", dcc.Input(
             id="turnspoint-ias", type="number", value=100,
-        )),
+        ), tooltip="Indicated airspeed during the orbit."),
         _field("Radius (NM)", dcc.Input(
             id="turnspoint-radius", type="number",
             value=0.25, min=0.1, max=1.0, step=0.05,
-        )),
+        ), tooltip="Target orbit radius. Sim will modulate bank to hold this radius despite wind."),
         _field("Turns", dcc.Input(
             id="turnspoint-num-turns", type="number",
             value=2, min=1, max=5, step=1,
-        )),
+        ), tooltip="Number of full 360° orbits."),
         _field("Direction", dcc.RadioItems(
             id="turnspoint-direction",
             options=[{"label": "L", "value": "left"}, {"label": "R", "value": "right"}],
             value="left", inline=True, className="shelf-field-radio",
-        )),
+        ), tooltip="Orbit direction."),
         _field("Entry Hdg", dcc.Input(
             id="turnspoint-entry-heading", type="number",
             placeholder="auto",
-        )),
+        ), tooltip="Entry heading override. Auto = downwind (ACS preferred)."),
 
         html.Div(className="shelf-spacer"),
 
         html.Button("Set Center",
                     id={"type": "click-button", "m_id": "turns_point", "role": "center"},
-                    className="shelf-action shelf-action-set"),
+                    className="shelf-action shelf-action-set",
+                    title="Click the ground reference point to orbit."),
         html.Button("Draw", id="turnspoint-draw-btn",
-                    className="shelf-action shelf-action-draw"),
+                    className="shelf-action shelf-action-draw",
+                    title="Simulate the constant-radius orbit."),
 
         html.Div(id={"type": "click-status", "m_id": "turns_point"}, style={"display": "none"}),
         html.Div(id="turnspoint-info", style={"display": "none"}),

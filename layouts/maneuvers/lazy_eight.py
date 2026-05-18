@@ -11,29 +11,31 @@ def lazy8_layout(default_elev=None):
     return [
         _field("Entry Hdg", dcc.Input(
             id="lazy8-entry-heading", type="number", value=0,
-        )),
+        ), tooltip="Entry heading (degrees true)."),
         _field("Alt (ft)", dcc.Input(
             id="lazy8-entry-altitude", type="number", value=3000,
-        )),
+        ), tooltip="Entry altitude AGL."),
         _field("IAS", dcc.Input(
             id="lazy8-ias", type="number", placeholder="Va",
-        )),
+        ), tooltip="Entry IAS. Default Va (maneuvering speed) from the POH."),
         _field("Max Bank °", dcc.Input(
             id="lazy8-bank-angle", type="number", value=30, min=20, max=40,
-        )),
+        ), tooltip="Peak bank at the 90° and 270° points of each half-eight."),
         _field("First Turn", dcc.RadioItems(
             id="lazy8-direction-sequence",
             options=[{"label": "L", "value": "left"}, {"label": "R", "value": "right"}],
             value="left", inline=True, className="shelf-field-radio",
-        )),
+        ), tooltip="Which way the first half-eight rolls."),
 
         html.Div(className="shelf-spacer"),
 
         html.Button("Set Entry",
                     id={"type": "click-button", "m_id": "lazy8", "role": "start"},
-                    className="shelf-action shelf-action-set"),
+                    className="shelf-action shelf-action-set",
+                    title="Click the map to mark the entry point."),
         html.Button("Draw", id="lazy8-draw-btn",
-                    className="shelf-action shelf-action-draw"),
+                    className="shelf-action shelf-action-draw",
+                    title="Simulate the figure-8 with oscillating altitude."),
 
         html.Div(id={"type": "click-status", "m_id": "lazy8"}, style={"display": "none"}),
         html.Div(id="lazy8-info", style={"display": "none"}),

@@ -11,29 +11,31 @@ def chandelle_layout(default_elev=None):
     return [
         _field("Entry Hdg", dcc.Input(
             id="chandelle-entry-heading", type="number", value=0,
-        )),
+        ), tooltip="Entry heading (degrees true)."),
         _field("Bank °", dcc.Input(
             id="chandelle-bank-angle", type="number", value=30, min=15, max=45,
-        )),
+        ), tooltip="Bank used in the first 90°. 30° is the typical target; 45° is more aggressive."),
         _field("Direction", dcc.RadioItems(
             id="chandelle-direction",
             options=[{"label": "L", "value": "left"}, {"label": "R", "value": "right"}],
             value="right", inline=True, className="shelf-field-radio",
-        )),
+        ), tooltip="Which way the climbing turn rolls in."),
         _field("Alt (ft)", dcc.Input(
             id="chandelle-altitude", type="number", value=3000,
-        )),
+        ), tooltip="Entry altitude AGL."),
         _field("IAS", dcc.Input(
             id="chandelle-ias", type="number", placeholder="Va",
-        )),
+        ), tooltip="Entry IAS. Default Va (maneuvering speed) from the POH."),
 
         html.Div(className="shelf-spacer"),
 
         html.Button("Set Entry",
                     id={"type": "click-button", "m_id": "chandelle", "role": "start"},
-                    className="shelf-action shelf-action-set"),
+                    className="shelf-action shelf-action-set",
+                    title="Click the map to mark the entry point."),
         html.Button("Draw", id="chandelle-draw-btn",
-                    className="shelf-action shelf-action-draw"),
+                    className="shelf-action shelf-action-draw",
+                    title="Simulate the climbing 180° turn."),
 
         html.Div(id={"type": "click-status", "m_id": "chandelle"}, style={"display": "none"}),
         html.Div(id="chandelle-info", style={"display": "none"}),

@@ -11,7 +11,7 @@ def pylons_layout(default_elev=None):
     return [
         _field("IAS", dcc.Input(
             id="pylons-ias", type="number", value=100, min=60, max=150,
-        )),
+        ), tooltip="Indicated airspeed. Pivotal altitude grows with ground speed (PA = GS² / 11.3)."),
         _field("Bank °", dcc.Dropdown(
             id="pylons-bank-angle",
             options=[
@@ -22,12 +22,12 @@ def pylons_layout(default_elev=None):
                 {"label": "40°", "value": 40},
             ],
             value=30, clearable=False,
-        )),
+        ), tooltip="Reference bank — actual bank modulates with position to hold pivotal altitude."),
         _field("Eights", dcc.Dropdown(
             id="pylons-num-eights",
             options=[{"label": "1", "value": 1}, {"label": "2", "value": 2}, {"label": "3", "value": 3}],
             value=1, clearable=False,
-        )),
+        ), tooltip="Number of figure-8s."),
         _field("Entry", dcc.Dropdown(
             id="pylons-entry-direction",
             options=[
@@ -35,18 +35,21 @@ def pylons_layout(default_elev=None):
                 {"label": "Upwind", "value": "upwind"},
             ],
             value="downwind", clearable=False,
-        )),
+        ), tooltip="Whether you enter on a downwind or upwind leg."),
 
         html.Div(className="shelf-spacer"),
 
         html.Button("Set Pylon 1",
                     id={"type": "click-button", "m_id": "pylons", "role": "pylon_a"},
-                    className="shelf-action shelf-action-set"),
+                    className="shelf-action shelf-action-set",
+                    title="Click the first pylon (a visual reference point on the ground)."),
         html.Button("Set Pylon 2",
                     id={"type": "click-button", "m_id": "pylons", "role": "pylon_b"},
-                    className="shelf-action shelf-action-set"),
+                    className="shelf-action shelf-action-set",
+                    title="Click the second pylon. Both should be at the same elevation."),
         html.Button("Draw", id="pylons-draw-btn",
-                    className="shelf-action shelf-action-draw"),
+                    className="shelf-action shelf-action-draw",
+                    title="Simulate the figure-8 with pivotal-altitude visualization."),
 
         html.Div(id={"type": "click-status", "m_id": "pylons"}, style={"display": "none"}),
         html.Div(id="pylons-info", style={"display": "none"}),
