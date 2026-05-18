@@ -134,7 +134,11 @@ def register(app):
         # dash-leaflet 1.0.15: `center`/`zoom` are initial-only props;
         # programmatic re-centering requires the `viewport` dict.
         viewport = {"center": [lat, lon], "zoom": 14, "transition": "flyTo"}
-        return (viewport, f"{elev} ft", airport_id, "",
+        # Persist the picked airport's ICAO in the input so the pilot
+        # can see where they are / where they just recentered to.
+        # Prefer ICAO, fall back to id (covers FAA LIDs like 66B).
+        persisted_code = ap.get("icao") or ap.get("id") or airport_id
+        return (viewport, f"{elev} ft", airport_id, persisted_code,
                 f"Selected: {name} ({airport_id})", display_style, [])
 
     @app.callback(
