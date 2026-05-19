@@ -44,9 +44,9 @@ def rect_course_layout(default_elev=None):
                     className="shelf-action shelf-action-draw",
                     title="Simulate the wind-corrected rectangle around the field."),
 
-        html.Div(id="rectcourse-edge-visible-info", style={"display": "none"}),
+        html.Div(id="rectcourse-edge-visible-info", className="shelf-info-panel"),
         html.Div(id={"type": "click-status", "m_id": "rect_course"}, style={"display": "none"}),
-        html.Div(id="rectcourse-info", style={"display": "none"}),
+        html.Div(id="rectcourse-info", className="shelf-info-panel"),
         html.Div(id="rectcourse-slider-container",
                  style={"display": "none"},
                  children=[

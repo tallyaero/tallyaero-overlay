@@ -55,7 +55,7 @@ def steep_turn_layout(default_elev=None):
                     title="Simulate the steep turn(s)."),
 
         html.Div(id={"type": "click-status", "m_id": "steep_turn"}, style={"display": "none"}),
-        html.Div(id="steepturn-info", style={"display": "none"}),
+        html.Div(id="steepturn-info", className="shelf-info-panel"),
         html.Div(id="steepturn-slider-container",
                  style={"display": "none"},
                  children=[

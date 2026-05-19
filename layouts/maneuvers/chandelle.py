@@ -38,7 +38,7 @@ def chandelle_layout(default_elev=None):
                     title="Simulate the climbing 180° turn."),
 
         html.Div(id={"type": "click-status", "m_id": "chandelle"}, style={"display": "none"}),
-        html.Div(id="chandelle-info", style={"display": "none"}),
+        html.Div(id="chandelle-info", className="shelf-info-panel"),
         html.Div(id="chandelle-slider-container",
                  style={"display": "none"},
                  children=[

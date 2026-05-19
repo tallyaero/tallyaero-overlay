@@ -45,7 +45,7 @@ def turns_point_layout(default_elev=None):
                     title="Simulate the constant-radius orbit."),
 
         html.Div(id={"type": "click-status", "m_id": "turns_point"}, style={"display": "none"}),
-        html.Div(id="turnspoint-info", style={"display": "none"}),
+        html.Div(id="turnspoint-info", className="shelf-info-panel"),
         html.Div(id="turnspoint-slider-container",
                  style={"display": "none"},
                  children=[

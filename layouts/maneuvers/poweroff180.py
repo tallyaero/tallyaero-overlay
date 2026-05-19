@@ -99,5 +99,5 @@ def poweroff180_layout(default_elev=None):
         dcc.Store(id="poweroff180-path-store", data=[]),
         dcc.Store(id="poweroff180-results-store", data={}),
 
-        html.Div(id="poweroff180-info", style={"display": "none"}),
+        html.Div(id="poweroff180-info", className="shelf-info-panel"),
     ]

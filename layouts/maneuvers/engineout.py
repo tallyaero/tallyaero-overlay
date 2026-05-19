@@ -79,8 +79,8 @@ def engineout_layout(default_elev=None):
         html.Div(id="engineout-runway-info", style={"display": "none"}),
         html.Div(id="engineout-manual-heading-div", style={"display": "none"}),
         html.Div(id={"type": "click-status", "m_id": "engineout"}, style={"display": "none"}),
-        html.Div(id="engineout-min-alt-result", style={"display": "none"}),
-        html.Div(id="engineout-info", style={"display": "none"}),
+        html.Div(id="engineout-min-alt-result", className="shelf-info-panel"),
+        html.Div(id="engineout-info", className="shelf-info-panel"),
         html.Div(id="engineout-slider-container",
                  style={"display": "none"},
                  children=[

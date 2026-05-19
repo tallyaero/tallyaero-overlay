@@ -38,7 +38,7 @@ def lazy8_layout(default_elev=None):
                     title="Simulate the figure-8 with oscillating altitude."),
 
         html.Div(id={"type": "click-status", "m_id": "lazy8"}, style={"display": "none"}),
-        html.Div(id="lazy8-info", style={"display": "none"}),
+        html.Div(id="lazy8-info", className="shelf-info-panel"),
         html.Div(id="lazy8-slider-container",
                  style={"display": "none"},
                  children=[

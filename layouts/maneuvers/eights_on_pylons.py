@@ -52,7 +52,7 @@ def pylons_layout(default_elev=None):
                     title="Simulate the figure-8 with pivotal-altitude visualization."),
 
         html.Div(id={"type": "click-status", "m_id": "pylons"}, style={"display": "none"}),
-        html.Div(id="pylons-info", style={"display": "none"}),
+        html.Div(id="pylons-info", className="shelf-info-panel"),
         html.Div(id="pylons-slider-container",
                  style={"display": "none"},
                  children=[

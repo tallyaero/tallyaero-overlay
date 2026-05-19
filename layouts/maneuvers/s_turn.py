@@ -48,7 +48,7 @@ def s_turn_layout(default_elev=None):
 
         dcc.Store(id="sturn-line-bearing", data=90),
         html.Div(id={"type": "click-status", "m_id": "s_turn"}, style={"display": "none"}),
-        html.Div(id="sturn-info", style={"display": "none"}),
+        html.Div(id="sturn-info", className="shelf-info-panel"),
         html.Div(id="sturn-slider-container",
                  style={"display": "none"},
                  children=[

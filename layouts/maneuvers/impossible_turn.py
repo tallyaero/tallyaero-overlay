@@ -70,8 +70,8 @@ def impossible_turn_layout(default_elev=None):
         html.Div(id="impossibleturn-manual-heading-div", style={"display": "none"}),
         html.Div(id="impossibleturn-climb-tooltip", style={"display": "none"}),
         html.Div(id={"type": "click-status", "m_id": "impossible_turn"}, style={"display": "none"}),
-        html.Div(id="impossibleturn-result", style={"display": "none"}),
-        html.Div(id="impossibleturn-info", style={"display": "none"}),
+        html.Div(id="impossibleturn-result", className="shelf-info-panel"),
+        html.Div(id="impossibleturn-info", className="shelf-info-panel"),
         html.Div(id="impossibleturn-slider-container",
                  style={"display": "none"},
                  children=[

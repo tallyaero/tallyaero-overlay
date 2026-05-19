@@ -1613,6 +1613,19 @@ input[type="radio"] {
 }
 .maneuver-shelf-params:empty { display: none; }
 
+/* Per-maneuver info / result panel — wraps onto its own row below the
+   horizontal shelf controls. The May-15 shelf refactor accidentally
+   hid these via style={"display":"none"}; this class restores the
+   simulation-result accordion + status line that each callback writes. */
+.shelf-info-panel {
+  flex-basis: 100%;
+  width: 100%;
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ta-text-primary, #1e293b);
+}
+.shelf-info-panel:empty { display: none; }
+
 /* Each labeled control is a tight column */
 .shelf-field {
   display: flex;
@@ -1946,6 +1959,12 @@ input[type="radio"] {
   border-radius: 4px;
   box-shadow: 0 4px 14px rgba(0,0,0,0.08);
   margin-top: 4px;
+}
+/* Dismiss the suggestion list when the user clicks outside the
+   wrap (input + results). Hovering the results keeps them open
+   (so the click can land on a row). */
+.topbar-airport-wrap:not(:hover):not(:focus-within) .topbar-airport-results {
+  display: none;
 }
 .topbar-airport-selected {
   font-size: 11px;

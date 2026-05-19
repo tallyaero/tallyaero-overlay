@@ -45,7 +45,7 @@ def steep_spiral_layout(default_elev=None):
                     title="Run the descending spiral."),
 
         html.Div(id={"type": "click-status", "m_id": "steep_spiral"}, style={"display": "none"}),
-        html.Div(id="steepspiral-warnings", style={"display": "none"}),
+        html.Div(id="steepspiral-warnings", className="shelf-info-panel"),
         html.Div(id="steepspiral-slider-container",
                  style={"display": "none"},
                  children=[
