@@ -19,6 +19,25 @@ from core.data_loader import aircraft_data, airport_data
 log = get_logger(__name__)
 
 
+def _phase_transition_indices(hover):
+    """Return [(index, segment), ...] for each phase boundary in the hover list.
+
+    Phase C4 — ACS Gap 5. Walks the hover stream and emits one tuple
+    per detected segment change, plus an implicit entry for the first
+    seen segment at its first index. Entries with no "segment" field
+    are skipped (treated as continuations)."""
+    out = []
+    prev = None
+    for i, pt in enumerate(hover):
+        seg = pt.get("segment")
+        if seg is None:
+            continue
+        if seg != prev:
+            out.append((i, seg))
+            prev = seg
+    return out
+
+
 def register(app):
     """Install Power-Off 180 callbacks against the given Dash app."""
 
@@ -193,6 +212,32 @@ def register(app):
                     children=dl.Tooltip(f"Impact: {results.get('touchdown_error_ft', 0):.0f} ft short")
                 )
                 elements.append(impact_marker)
+
+            # Phase C4 — ACS Gap 5 — phase-transition markers on the map.
+            # Drop amber CircleMarkers at the abeam / 90°-turn / final
+            # boundaries so the geometry reads at a glance.
+            PHASE_LABELS = {
+                "downwind": "Abeam",
+                "turn": "90° turn",
+                "final": "45° / Final",
+                "touchdown": "Touchdown",
+            }
+            for idx, seg in _phase_transition_indices(hover_data):
+                if idx >= len(path):
+                    continue
+                lat, lon = path[idx]
+                label = PHASE_LABELS.get(seg, seg.title())
+                pt = hover_data[idx]
+                tooltip_text = (f"{label} — alt {pt.get('alt', 0):.0f} ft AGL"
+                                f", IAS {pt.get('ias', 0):.0f} kt")
+                elements.append(dl.CircleMarker(
+                    center=[lat, lon],
+                    radius=6,
+                    color="#f59e0b",
+                    fill=True,
+                    fillOpacity=0.85,
+                    children=dl.Tooltip(tooltip_text),
+                ))
 
             # Build status message
             success = results.get('success', False)
