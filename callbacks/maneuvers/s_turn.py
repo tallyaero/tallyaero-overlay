@@ -17,6 +17,18 @@ from callbacks.map import create_airplane_marker
 from core.data_loader import aircraft_data, airport_data
 
 
+def _wind_perp_offset_deg(line_bearing: float, wind_dir: float) -> float:
+    """Return angular offset (deg) between the reference line and the
+    wind-perpendicular axis, in the range [0, 90].
+
+    Phase C2 — ACS Gap 3. S-Turns is meant to be flown across the wind,
+    so the reference line should be perpendicular to wind. Offset 0
+    means the line is perfectly perpendicular; offset 90 means the line
+    is parallel to wind (worst case). Caller renders an amber chip
+    above the info panel when offset > 15°."""
+    return abs(((line_bearing - wind_dir) % 180) - 90)
+
+
 def register(app):
     """Install S-Turn callbacks against the given Dash app."""
 
@@ -321,6 +333,25 @@ def register(app):
 
         # Info display with warnings and performance data
         info_elements = []
+
+        # Phase C2 — ACS Gap 3 — wind-alignment chip.
+        # S-Turns is meant to be flown across the wind; flag any reference
+        # line off more than 15° from wind-perpendicular.
+        wind_dir_chip = float(wind_dir) if wind_dir not in [None, "", "null"] else 0.0
+        wind_perp = _wind_perp_offset_deg(line_bearing, wind_dir_chip)
+        if wind_perp > 15:
+            info_elements.append(html.Div(
+                f"Wind alignment off by {wind_perp:.0f}° — "
+                f"ACS expects reference line perpendicular to wind",
+                style={
+                    "borderLeft": "3px solid var(--acs-marginal)",
+                    "color": "var(--acs-marginal)",
+                    "padding": "4px 8px",
+                    "marginBottom": "6px",
+                    "fontSize": "11px",
+                    "backgroundColor": "rgba(245, 158, 11, 0.05)",
+                },
+            ))
 
         # Warnings section (if any)
         has_warnings = (
