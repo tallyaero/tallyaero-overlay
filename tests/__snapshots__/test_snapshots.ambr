@@ -2,38 +2,38 @@
 # name: test_engine_out_glide_kaus_5000ft_calm[hover_end]
   list([
     dict({
-      'alt': 78.3,
-      'aob': 0.9,
-      'drift': -0.0,
-      'glide_ratio': 8.0,
+      'alt': 75.8,
+      'aob': -0.6,
+      'drift': 0.0,
+      'glide_ratio': 8.1,
       'gs': 71.2,
-      'heading': 268.1,
+      'heading': 270.3,
       'ias': 65.0,
       'load_factor': 1.0,
       'phase': 'final',
       'segment': 'final',
-      'slip_pct': 14.0,
-      'tas': 71.2,
-      'time': 315.0,
-      'track': 268.1,
-      'vs': -898.0,
-    }),
-    dict({
-      'alt': 70.8,
-      'aob': 0.9,
-      'drift': -0.0,
-      'glide_ratio': 8.0,
-      'gs': 71.2,
-      'heading': 268.2,
-      'ias': 65.0,
-      'load_factor': 1.0,
-      'phase': 'final',
-      'segment': 'final',
-      'slip_pct': 14.0,
+      'slip_pct': 13.0,
       'tas': 71.2,
       'time': 315.5,
-      'track': 268.2,
-      'vs': -897.0,
+      'track': 270.3,
+      'vs': -895.0,
+    }),
+    dict({
+      'alt': 68.4,
+      'aob': -0.6,
+      'drift': 0.0,
+      'glide_ratio': 8.1,
+      'gs': 71.2,
+      'heading': 270.2,
+      'ias': 65.0,
+      'load_factor': 1.0,
+      'phase': 'final',
+      'segment': 'final',
+      'slip_pct': 13.0,
+      'tas': 71.2,
+      'time': 316.0,
+      'track': 270.2,
+      'vs': -893.0,
     }),
     dict({
       'alt': 0.0,
@@ -42,15 +42,15 @@
       'drift': 0.0,
       'glide_ratio': 8.5,
       'gs': 71.2,
-      'heading': 268.2,
+      'heading': 270.2,
       'ias': 65.0,
       'load_factor': 1.0,
       'phase': 'touchdown',
       'segment': 'touchdown',
       'slip_pct': 0,
       'tas': 71.2,
-      'time': 315.5,
-      'track': 268.2,
+      'time': 316.0,
+      'track': 270.2,
       'vs': 0.0,
     }),
   ])
@@ -112,7 +112,7 @@
   ])
 # ---
 # name: test_engine_out_glide_kaus_5000ft_calm[path_length]
-  633
+  634
 # ---
 # name: test_impossible_turn_1000ft_45deg[hover_end]
   list([

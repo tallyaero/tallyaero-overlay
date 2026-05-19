@@ -2323,14 +2323,28 @@ def run_simulation(
                 track_error = _angle_diff_deg(downwind_heading, track)
                 bank_target = max(-15.0, min(15.0, track_error * 0.4))
 
-                turn_radius_ft = pattern_offset_ft / 2.0
-                turn_arc_ft = math.pi * turn_radius_ft
-
                 xtrack_ft, along_ft = _cross_track_to_centerline_ft(
                     touchdown_point, cur_pos, touchdown_heading
                 )
                 distance_past_abeam = abs(along_ft)
                 final_leg_if_turn_now = distance_past_abeam
+
+                # Pick turn radius so the 180° arc displaces the aircraft
+                # *exactly* from its current cross-track back to the
+                # centerline. The abeam bucket is 2000 ft wide, so the
+                # aircraft enters anywhere from pattern_offset±1000 ft
+                # off CL; a fixed pattern_offset/2 radius leaves a
+                # 200-1000 ft residual cross-track at touchdown. Floor
+                # at the physical minimum-radius the aircraft can fly
+                # at its 45° bank limit, so we don't ask for impossibly
+                # tight turns when the aircraft was already near CL.
+                min_phys_radius = (tas_fps * tas_fps) / (
+                    G_FPS2 * math.tan(math.radians(45.0)))
+                turn_radius_ft = max(
+                    abs(xtrack_ft) / 2.0, min_phys_radius)
+                turn_arc_ft = math.pi * turn_radius_ft
+                # Save so the "turn" phase uses the same radius.
+                po180_turn_radius = turn_radius_ft
 
                 # Wind-correct the turn arc (average track is perpendicular to runway)
                 if pattern_side == "left":
@@ -2374,12 +2388,33 @@ def run_simulation(
                 # The GR correction above is the main fix; the buffer is
                 # kept modest (75 ft) so we don't bias toward overshoot.
                 turn_start_buffer_ft = 75
-                if alt_agl <= required_altitude + turn_start_buffer_ft:
+
+                # GATE: the 180° turn only ends back on the runway
+                # centerline if the aircraft enters it actually heading
+                # in the downwind direction. The spiral-exit tolerance
+                # is 90° — way too loose — so the aircraft can drop
+                # into the PO180 downwind phase still pointing nearly
+                # perpendicular to the runway. Require heading within
+                # ±20° of downwind before allowing the turn to start;
+                # otherwise stay in downwind (correcting heading via
+                # the bank_target above) and burn altitude until aligned.
+                downwind_track_err = abs(_angle_diff_deg(
+                    downwind_heading, track))
+                aligned_for_turn = downwind_track_err <= 20.0
+
+                if (aligned_for_turn
+                        and alt_agl <= required_altitude
+                            + turn_start_buffer_ft):
                     po180_phase = "turn"
                     po180_turn_accumulated = 0.0
 
             elif po180_phase == "turn":
-                required_radius_ft = pattern_offset_ft / 2.0
+                # Use the radius captured at turn-entry (sized to
+                # current cross-track), not the fixed pattern_offset/2
+                # — that's what guarantees the 180° turn ends on CL.
+                required_radius_ft = (
+                    po180_turn_radius if po180_turn_radius > 0
+                    else pattern_offset_ft / 2.0)
                 tan_bank = (tas_fps * tas_fps) / (G_FPS2 * required_radius_ft)
                 calculated_bank_deg = math.degrees(math.atan(tan_bank))
                 calculated_bank_deg = max(15.0, min(45.0, calculated_bank_deg))
