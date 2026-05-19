@@ -74,7 +74,7 @@ def engineout_layout(default_elev=None):
                     id={"type": "click-button", "m_id": "engineout", "role": "start"},
                     className="shelf-action shelf-action-set",
                     title="Click the engine-failure spot on the map."),
-        html.Button("Draw", id="engineout-draw-btn",
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "engineout"},
                     className="shelf-action shelf-action-draw",
                     title="Run the glide simulation."),
         *_results_modal_pair("engineout", "engineout-info",

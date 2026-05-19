@@ -47,7 +47,7 @@ def pylons_layout(default_elev=None):
                     id={"type": "click-button", "m_id": "pylons", "role": "pylon_b"},
                     className="shelf-action shelf-action-set",
                     title="Click the second pylon. Both should be at the same elevation."),
-        html.Button("Draw", id="pylons-draw-btn",
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "pylons"},
                     className="shelf-action shelf-action-draw",
                     title="Simulate the figure-8 with pivotal-altitude visualization."),
         *_results_modal_pair("pylons", "pylons-info",

@@ -33,7 +33,7 @@ def register(app):
         Output("pylons-time-slider", "max"),
         Output("pylons-time-slider", "marks"),
         Output("pylons-time-slider", "value"),
-        Input("pylons-draw-btn", "n_clicks"),
+        Input({"type": "draw-btn", "m_id": "pylons"}, "n_clicks"),
         State({"type": "point-store", "m_id": "pylons", "role": "pylon_a"}, "data"),
         State({"type": "point-store", "m_id": "pylons", "role": "pylon_b"}, "data"),
         State("pylons-ias", "value"),

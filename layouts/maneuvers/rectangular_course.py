@@ -40,7 +40,7 @@ def rect_course_layout(default_elev=None):
                     id={"type": "click-button", "m_id": "rect_course", "role": "dw_end"},
                     className="shelf-action shelf-action-set",
                     title="Click the second point on the downwind leg to define its length + bearing."),
-        html.Button("Draw", id="rectcourse-draw-btn",
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "rect_course"},
                     className="shelf-action shelf-action-draw",
                     title="Simulate the wind-corrected rectangle around the field."),
         *_results_modal_pair("rect_course", "rectcourse-info",

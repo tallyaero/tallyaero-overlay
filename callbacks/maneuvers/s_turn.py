@@ -144,7 +144,7 @@ def register(app):
         Output("sturn-time-slider", "max"),
         Output("sturn-time-slider", "marks"),
         Output("sturn-time-slider", "value"),
-        Input("sturn-draw-btn", "n_clicks"),
+        Input({"type": "draw-btn", "m_id": "s_turn"}, "n_clicks"),
         State({"type": "point-store", "m_id": "s_turn", "role": "ref"}, "data"),
         State("sturn-line-bearing", "data"),
         State("sturn-calculated-bearing", "data"),

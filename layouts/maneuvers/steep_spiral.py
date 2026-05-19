@@ -40,7 +40,7 @@ def steep_spiral_layout(default_elev=None):
                     id={"type": "click-button", "m_id": "steep_spiral", "role": "ref"},
                     className="shelf-action shelf-action-set",
                     title="Click the ground reference point for the spiral center."),
-        html.Button("Draw", id="steepspiral-draw-btn",
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "steep_spiral"},
                     className="shelf-action shelf-action-draw",
                     title="Run the descending spiral."),
         *_results_modal_pair("steep_spiral", "steepspiral-warnings",

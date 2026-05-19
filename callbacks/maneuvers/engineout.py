@@ -56,7 +56,7 @@ def register(app):
         Output("engineout-envelope-store", "data"),
         Output("engineout-min-alt-result", "children"),
         Output({"type": "sim-results-btn", "m_id": "engineout"}, "className", allow_duplicate=True),
-        Input("engineout-draw-btn", "n_clicks"),
+        Input({"type": "draw-btn", "m_id": "engineout"}, "n_clicks"),
         State({"type": "point-store", "m_id": "engineout", "role": "start"}, "data"),
         State({"type": "point-store", "m_id": "engineout", "role": "touchdown"}, "data"),
         State("aircraft-select", "value"),

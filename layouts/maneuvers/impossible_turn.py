@@ -61,7 +61,7 @@ def impossible_turn_layout(default_elev=None):
                     id={"type": "click-button", "m_id": "impossible_turn", "role": "start"},
                     className="shelf-action shelf-action-set",
                     title="Click on the runway threshold to mark the departure point."),
-        html.Button("Draw", id="impossibleturn-draw-btn",
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "impossible_turn"},
                     className="shelf-action shelf-action-draw",
                     title="Run the impossible-turn simulation."),
         *_results_modal_pair("impossible_turn", "impossibleturn-info",

@@ -33,7 +33,7 @@ def chandelle_layout(default_elev=None):
                     id={"type": "click-button", "m_id": "chandelle", "role": "start"},
                     className="shelf-action shelf-action-set",
                     title="Click the map to mark the entry point."),
-        html.Button("Draw", id="chandelle-draw-btn",
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "chandelle"},
                     className="shelf-action shelf-action-draw",
                     title="Simulate the climbing 180° turn."),
         *_results_modal_pair("chandelle", "chandelle-info",

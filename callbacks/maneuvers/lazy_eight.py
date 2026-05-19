@@ -35,7 +35,7 @@ def register(app):
         Output("lazy8-time-slider", "marks"),
         Output("lazy8-time-slider", "value"),
         Output("lazy8-info", "children"),
-        Input("lazy8-draw-btn", "n_clicks"),
+        Input({"type": "draw-btn", "m_id": "lazy8"}, "n_clicks"),
         State({"type": "point-store", "m_id": "lazy8", "role": "start"}, "data"),
         State("lazy8-entry-heading", "value"),
         State("lazy8-entry-altitude", "value"),

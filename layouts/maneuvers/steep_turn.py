@@ -50,7 +50,7 @@ def steep_turn_layout(default_elev=None):
                     id={"type": "click-button", "m_id": "steep_turn", "role": "start"},
                     className="shelf-action shelf-action-set",
                     title="Click the map to mark the entry point."),
-        html.Button("Draw", id="steepturn-draw-btn",
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "steep_turn"},
                     className="shelf-action shelf-action-draw",
                     title="Simulate the steep turn(s)."),
         *_results_modal_pair("steep_turn", "steepturn-info",

@@ -42,7 +42,7 @@ def s_turn_layout(default_elev=None):
                     id={"type": "click-button", "m_id": "s_turn", "role": "bearing"},
                     className="shelf-action shelf-action-set",
                     title="Click a second point that defines the reference line's bearing. The reference line should be near-perpendicular to wind."),
-        html.Button("Draw", id="sturn-draw-btn",
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "s_turn"},
                     className="shelf-action shelf-action-draw",
                     title="Simulate the S-turns. The reference line should be near-perpendicular to wind."),
         *_results_modal_pair("s_turn", "sturn-info",

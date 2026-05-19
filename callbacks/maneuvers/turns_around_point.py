@@ -33,7 +33,7 @@ def register(app):
         Output("turnspoint-time-slider", "max"),
         Output("turnspoint-time-slider", "marks"),
         Output("turnspoint-time-slider", "value"),
-        Input("turnspoint-draw-btn", "n_clicks"),
+        Input({"type": "draw-btn", "m_id": "turns_point"}, "n_clicks"),
         State({"type": "point-store", "m_id": "turns_point", "role": "center"}, "data"),
         State("turnspoint-altitude", "value"),
         State("turnspoint-ias", "value"),

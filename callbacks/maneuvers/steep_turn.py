@@ -34,7 +34,7 @@ def register(app):
         Output("steepturn-time-slider", "marks"),
         Output("steepturn-time-slider", "value"),
         Output("steepturn-info", "children"),
-        Input("steepturn-draw-btn", "n_clicks"),
+        Input({"type": "draw-btn", "m_id": "steep_turn"}, "n_clicks"),
         State({"type": "point-store", "m_id": "steep_turn", "role": "start"}, "data"),
         State("steepturn-bank-angle", "value"),
         State("steepturn-sequence", "value"),

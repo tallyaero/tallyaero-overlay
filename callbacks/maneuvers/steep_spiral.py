@@ -35,7 +35,7 @@ def register(app):
         Output("steepspiral-time-slider", "max"),
         Output("steepspiral-time-slider", "marks"),
         Output("steepspiral-time-slider", "value"),
-        Input("steepspiral-draw-btn", "n_clicks"),
+        Input({"type": "draw-btn", "m_id": "steep_spiral"}, "n_clicks"),
         State({"type": "point-store", "m_id": "steep_spiral", "role": "ref"}, "data"),
         State("steepspiral-turns", "value"),
         State("steepspiral-altitude", "value"),

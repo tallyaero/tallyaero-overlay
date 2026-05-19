@@ -35,7 +35,7 @@ def register(app):
         Output("chandelle-time-slider", "marks"),
         Output("chandelle-time-slider", "value"),
         Output("chandelle-info", "children"),
-        Input("chandelle-draw-btn", "n_clicks"),
+        Input({"type": "draw-btn", "m_id": "chandelle"}, "n_clicks"),
         State({"type": "point-store", "m_id": "chandelle", "role": "start"}, "data"),
         State("chandelle-entry-heading", "value"),
         State("chandelle-bank-angle", "value"),

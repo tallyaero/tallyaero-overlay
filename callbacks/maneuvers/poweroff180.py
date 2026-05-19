@@ -53,7 +53,7 @@ def register(app):
         Output("poweroff180-time-slider", "value"),
         Output("poweroff180-info", "children"),
         Output({"type": "sim-results-btn", "m_id": "poweroff180"}, "className", allow_duplicate=True),
-        Input("poweroff180-draw-btn", "n_clicks"),
+        Input({"type": "draw-btn", "m_id": "poweroff180"}, "n_clicks"),
         State({"type": "point-store", "m_id": "poweroff180", "role": "touchdown"}, "data"),
         State("poweroff180-runway-select", "value"),
         State("poweroff180-manual-heading", "value"),

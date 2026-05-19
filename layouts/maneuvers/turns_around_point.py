@@ -40,7 +40,7 @@ def turns_point_layout(default_elev=None):
                     id={"type": "click-button", "m_id": "turns_point", "role": "center"},
                     className="shelf-action shelf-action-set",
                     title="Click the ground reference point to orbit."),
-        html.Button("Draw", id="turnspoint-draw-btn",
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "turns_point"},
                     className="shelf-action shelf-action-draw",
                     title="Simulate the constant-radius orbit."),
         *_results_modal_pair("turns_point", "turnspoint-info",

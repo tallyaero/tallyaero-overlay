@@ -232,7 +232,7 @@ def register(app):
         Output("rectcourse-time-slider", "max"),
         Output("rectcourse-time-slider", "marks"),
         Output("rectcourse-time-slider", "value"),
-        Input("rectcourse-draw-btn", "n_clicks"),
+        Input({"type": "draw-btn", "m_id": "rect_course"}, "n_clicks"),
         State("rectcourse-calculated-edge", "data"),
         State("rectcourse-altitude", "value"),
         State("rectcourse-ias", "value"),

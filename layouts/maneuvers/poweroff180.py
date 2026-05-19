@@ -73,7 +73,7 @@ def poweroff180_layout(default_elev=None):
                     className="shelf-action shelf-action-set",
                     title="Click the runway threshold (the touchdown spot)."),
         html.Button("Draw",
-                    id="poweroff180-draw-btn",
+                    id={"type": "draw-btn", "m_id": "poweroff180"},
                     className="shelf-action shelf-action-draw",
                     title="Run the glide-back simulation."),
         *_results_modal_pair("poweroff180", "poweroff180-info",

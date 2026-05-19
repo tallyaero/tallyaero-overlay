@@ -44,7 +44,7 @@ def register(app):
         Output("impossibleturn-time-slider", "value"),
         Output("impossibleturn-info", "children"),
         Output({"type": "sim-results-btn", "m_id": "impossible_turn"}, "className", allow_duplicate=True),
-        Input("impossibleturn-draw-btn", "n_clicks"),
+        Input({"type": "draw-btn", "m_id": "impossible_turn"}, "n_clicks"),
         State({"type": "point-store", "m_id": "impossible_turn", "role": "start"}, "data"),
         State("aircraft-select", "value"),
         State("engine-select", "value"),
