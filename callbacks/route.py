@@ -2330,6 +2330,93 @@ def register(app):
                 ))
         return polygons
 
+    # === NAVAID + fix overlay (Phase 7N-e) ===
+    #
+    # Drops a CircleMarker per NAVAID or fix inside the current
+    # viewport. Zoom-gated so 17k fixes don't carpet the map at
+    # continent scale: VORs visible at zoom ≥ 7, fixes at zoom ≥ 9.
+    # Gated on maneuver-select == 'route' so the heavy bbox filter
+    # doesn't run during maneuver work.
+    @app.callback(
+        Output("waypoints-layer", "children"),
+        Input("map", "bounds"),
+        Input("map", "zoom"),
+        Input("route-show-waypoints", "value"),
+        Input("maneuver-select", "value"),
+        prevent_initial_call=False,
+    )
+    def render_waypoints_overlay(bounds, zoom, show_layers, maneuver):
+        if maneuver != "route":
+            return []
+        if not show_layers:
+            return []
+        if not bounds or len(bounds) != 2:
+            return []
+        try:
+            (south, west), (north, east) = bounds
+            zoom_int = int(zoom or 0)
+        except (ValueError, TypeError):
+            return []
+        # Zoom gates: showing 2200 VORs at zoom 4 is a wall of dots.
+        show_vors = "vor" in show_layers and zoom_int >= 7
+        show_fixes = "fix" in show_layers and zoom_int >= 9
+        if not show_vors and not show_fixes:
+            return []
+        markers: list = []
+
+        def _in_bbox(lat, lon):
+            return south <= lat <= north and west <= lon <= east
+
+        if show_vors:
+            # Cap at 200 visible markers — even zoomed in, no viewport
+            # has > ~50 NAVAIDs in CONUS; cap is a safety net.
+            count = 0
+            for nv in navaid_data:
+                lat = nv.get("lat")
+                lon = nv.get("lon")
+                if lat is None or lon is None:
+                    continue
+                if not _in_bbox(lat, lon):
+                    continue
+                freq = nv.get("freq_mhz")
+                freq_str = f"  {freq:.2f}" if isinstance(freq, (int, float)) else ""
+                label = f"{nv.get('ident', '?')} {freq_str} — {nv.get('name', '')}"
+                markers.append(dl.CircleMarker(
+                    center=[lat, lon],
+                    radius=5,
+                    color="#1d4ed8",
+                    weight=2,
+                    fillColor="#bfdbfe",
+                    fillOpacity=0.85,
+                    children=dl.Tooltip(label, sticky=True),
+                ))
+                count += 1
+                if count >= 200:
+                    break
+        if show_fixes:
+            count = 0
+            for fx in fix_data:
+                lat = fx.get("lat")
+                lon = fx.get("lon")
+                if lat is None or lon is None:
+                    continue
+                if not _in_bbox(lat, lon):
+                    continue
+                ident = fx.get("ident", "?")
+                markers.append(dl.CircleMarker(
+                    center=[lat, lon],
+                    radius=3,
+                    color="#7c3aed",
+                    weight=1,
+                    fillColor="#ddd6fe",
+                    fillOpacity=0.85,
+                    children=dl.Tooltip(ident, sticky=True),
+                ))
+                count += 1
+                if count >= 400:
+                    break
+        return markers
+
     # === Save / Open route (Phase A5) ===
     #
     # Save: serialize all the planning inputs (waypoints + perf inputs +

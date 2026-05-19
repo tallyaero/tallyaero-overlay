@@ -613,6 +613,29 @@ def desktop_layout():
                             title=("Show NASR airspace polygons on the map "
                                    "(Class B/C/D, SUA, standing TFRs)."),
                         ),
+                        # Phase 7N-e — VOR / fix overlay toggle. Same
+                        # always-mount + CSS-gated pattern as the
+                        # airspace toggle. Default off so the map
+                        # doesn't litter on first open.
+                        html.Div(
+                            dcc.Checklist(
+                                id="route-show-waypoints",
+                                options=[
+                                    {"label": "VORs", "value": "vor"},
+                                    {"label": "Fixes", "value": "fix"},
+                                ],
+                                value=[],
+                                className="waypoints-toggle-list "
+                                          "shelf-toggle-chip-checklist",
+                                inline=True,
+                            ),
+                            id="waypoints-toggle-wrap",
+                            className="shelf-toggle-chip waypoints-toggle-chip",
+                            title=("Show NASR NAVAIDs + intersections as map "
+                                   "dots (zoom in to see fixes). Click any "
+                                   "dot in Click-to-add mode to drop a "
+                                   "waypoint there."),
+                        ),
                         html.Div(id="maneuver-actions-container",
                                  className="map-overlay-actions"),
                         html.Div(className="map-overlay-divider"),
@@ -653,6 +676,12 @@ def desktop_layout():
                             # below the route + path layers so it
                             # acts as a backdrop, not a foreground.
                             dl.LayerGroup(id="airspace-layer"),
+                            # Phase 7N-e — NAVAID + fix point markers
+                            # (toggle-on layer, zoom-gated). Sits above
+                            # airspace but below the active path so a
+                            # VOR symbol doesn't get hidden under a
+                            # Class B fill.
+                            dl.LayerGroup(id="waypoints-layer"),
                             dl.LayerGroup(id="layer"),
                             dl.LayerGroup(id="scrubber-layer"),  # Dedicated layer for time scrubber marker
                             dl.LayerGroup(id="route-layer"),     # Phase 5 — great-circle route

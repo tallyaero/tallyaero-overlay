@@ -224,6 +224,7 @@ def mobile_layout():
                     ),
                     dl.LayerGroup(id="envelope-layer"),
                     dl.LayerGroup(id="airspace-layer"),
+                    dl.LayerGroup(id="waypoints-layer"),
                     dl.LayerGroup(id="layer"),
                     dl.LayerGroup(id="scrubber-layer"),
                     dl.LayerGroup(id="route-layer"),
@@ -293,5 +294,24 @@ def mobile_layout():
             dcc.Store(id={"type": "point-store", "m_id": "impossible_turn", "role": "start"}),
             dcc.Store(id="rectcourse-calculated-edge", data={}),
             html.Div(id="rectcourse-edge-info-display"),
+            # Hidden mounts for desktop-only route toggles so the shared
+            # render callbacks (airspace + waypoints) have stable Inputs
+            # even when the user is on a phone. The route planner is
+            # awkward on mobile so we don't surface the UI controls,
+            # but the layers still render with their default values.
+            html.Div(
+                style={"display": "none"},
+                children=[
+                    dcc.Checklist(id="route-show-airspace",
+                                  options=[{"label": "x", "value": "class"},
+                                           {"label": "x", "value": "sua"},
+                                           {"label": "x", "value": "tfr"}],
+                                  value=["class", "sua", "tfr"]),
+                    dcc.Checklist(id="route-show-waypoints",
+                                  options=[{"label": "x", "value": "vor"},
+                                           {"label": "x", "value": "fix"}],
+                                  value=[]),
+                ],
+            ),
         ]),
     ])
