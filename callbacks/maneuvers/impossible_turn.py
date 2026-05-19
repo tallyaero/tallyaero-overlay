@@ -43,6 +43,7 @@ def register(app):
         Output("impossibleturn-time-slider", "marks"),
         Output("impossibleturn-time-slider", "value"),
         Output("impossibleturn-info", "children"),
+        Output({"type": "sim-results-btn", "m_id": "impossible_turn"}, "className", allow_duplicate=True),
         Input("impossibleturn-draw-btn", "n_clicks"),
         State({"type": "point-store", "m_id": "impossible_turn", "role": "start"}, "data"),
         State("aircraft-select", "value"),
@@ -96,11 +97,13 @@ def register(app):
         if not n_clicks:
             raise PreventUpdate
 
+        BTN_BASE = "shelf-action shelf-action-results"
+
         if not failure_data:
-            return [], None, "Set takeoff point (runway threshold) first.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+            return [], None, "Set takeoff point (runway threshold) first.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", BTN_BASE
 
         if not ac_name or not engine_key:
-            return [], None, "Select aircraft and engine first.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+            return [], None, "Select aircraft and engine first.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", BTN_BASE
 
         try:
             states = dash.callback_context.states
@@ -151,7 +154,7 @@ def register(app):
                 total_wt,
             ]
             if any(x is None for x in required):
-                return [], None, "Missing or invalid inputs.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+                return [], None, "Missing or invalid inputs.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", BTN_BASE
 
             # The clicked point is now the runway threshold (takeoff start point)
             threshold_pt = {"lat": failure_data["lat"], "lon": failure_data["lon"]}
@@ -211,7 +214,7 @@ def register(app):
             )
 
             if not path:
-                return [], None, "No path generated. Check inputs.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+                return [], None, "No path generated. Check inputs.", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", BTN_BASE
 
             # Meta
             meta = meta or {}
@@ -583,11 +586,13 @@ def register(app):
             if winds_chip is not None:
                 info_content = html.Div([info_content, winds_chip])
 
-            return elements, bounds, status, result, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content
+            btn_class = (BTN_BASE + " shelf-action-success" if made_it
+                          else BTN_BASE + " shelf-action-failure")
+            return elements, bounds, status, result, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content, btn_class
 
         except Exception as e:
             log.error(f"EXCEPTION in draw_impossible_turn(): {e}")
-            return [], None, f"Error: {str(e)}", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+            return [], None, f"Error: {str(e)}", "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", BTN_BASE
 
     @app.callback(
         Output("scrubber-layer", "children", allow_duplicate=True),

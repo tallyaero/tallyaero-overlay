@@ -47,6 +47,7 @@ def register(app):
         Output("engineout-info", "children"),
         Output("engineout-envelope-store", "data"),
         Output("engineout-min-alt-result", "children"),
+        Output({"type": "sim-results-btn", "m_id": "engineout"}, "className", allow_duplicate=True),
         Input("engineout-draw-btn", "n_clicks"),
         State({"type": "point-store", "m_id": "engineout", "role": "start"}, "data"),
         State({"type": "point-store", "m_id": "engineout", "role": "touchdown"}, "data"),
@@ -110,14 +111,15 @@ def register(app):
         if not n_clicks:
             raise PreventUpdate
 
-        # 12 outputs: layer, bounds, status, hover_store, path_store, slider_style, max, marks, value, info, envelope, min_alt
-        empty_return = [], None, "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
+        # 13 outputs: layer, bounds, status, hover_store, path_store, slider_style, max, marks, value, info, envelope, min_alt, results_btn_class
+        BTN_BASE = "shelf-action shelf-action-results"
+        empty_return = [], None, "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], "", BTN_BASE
 
         if not start_data or not touchdown_data:
-            return [], None, "Set start and touchdown points first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
+            return [], None, "Set start and touchdown points first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], "", BTN_BASE
 
         if not ac_name or not engine_key:
-            return [], None, "Select aircraft and engine first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
+            return [], None, "Select aircraft and engine first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], "", BTN_BASE
 
         try:
             states = dash.callback_context.states
@@ -156,7 +158,7 @@ def register(app):
 
             heading_input = safe_float("engineout-touchdown-heading.value")
             if heading_input is None:
-                return [], None, "Enter a touchdown heading.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
+                return [], None, "Enter a touchdown heading.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], "", BTN_BASE
             if selected_airport_id:
                 from callbacks.aircraft import _airport_magvar, _mag_to_true
                 touchdown_heading = _mag_to_true(heading_input, _airport_magvar(selected_airport))
@@ -169,7 +171,7 @@ def register(app):
                 total_wt
             ]
             if any(x is None for x in required):
-                return [], None, "Missing or invalid input values.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
+                return [], None, "Missing or invalid input values.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], "", BTN_BASE
 
             start = GeoPoint(start_data["lat"], start_data["lon"])
             touchdown = GeoPoint(touchdown_data["lat"], touchdown_data["lon"])
@@ -223,7 +225,7 @@ def register(app):
             )
 
             if not path or not hover_data:
-                return [], None, "No glide path generated. Check inputs.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
+                return [], None, "No glide path generated. Check inputs.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], "", BTN_BASE
 
             # Extract success/impact info from meta
             success = meta.get("success", False)
@@ -271,14 +273,20 @@ def register(app):
                 fillOpacity=1.0,
                 children=dl.Tooltip("Engine Failure Point"),
             )
-            # Touchdown — red-500
+            # Touchdown — green for a successful landing, red for not.
+            # Red-dot-as-target made the result ambiguous: even when
+            # the aircraft actually landed on the runway, the marker
+            # still looked like a failure indicator.
+            td_color = "#22c55e" if success else "#ef4444"
+            td_tooltip = ("Touchdown" if success
+                            else "Target Touchdown (missed)")
             touchdown_marker = dl.CircleMarker(
                 center=[touchdown.latitude, touchdown.longitude],
                 radius=7,
-                color="#ef4444",
+                color=td_color,
                 fill=True,
                 fillOpacity=1.0,
-                children=dl.Tooltip("Target Touchdown"),
+                children=dl.Tooltip(td_tooltip),
             )
 
             elements = [start_marker, touchdown_marker, arc_line]
@@ -462,13 +470,15 @@ def register(app):
             if winds_chip is not None:
                 info_content = html.Div([info_content, winds_chip])
 
-            return elements, bounds, msg, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content, envelope_data, min_alt_display
+            btn_class = (BTN_BASE + " shelf-action-success" if success
+                          else BTN_BASE + " shelf-action-failure")
+            return elements, bounds, msg, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content, envelope_data, min_alt_display, btn_class
 
         except Exception as e:
             import traceback
             log.error(f"EXCEPTION in draw_engineout(): {e}")
             traceback.print_exc()
-            return [], None, f"Error generating path: {str(e)}", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
+            return [], None, f"Error generating path: {str(e)}", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], "", BTN_BASE
 
     @app.callback(
         Output("scrubber-layer", "children", allow_duplicate=True),

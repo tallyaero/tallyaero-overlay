@@ -52,6 +52,7 @@ def register(app):
         Output("poweroff180-time-slider", "marks"),
         Output("poweroff180-time-slider", "value"),
         Output("poweroff180-info", "children"),
+        Output({"type": "sim-results-btn", "m_id": "poweroff180"}, "className", allow_duplicate=True),
         Input("poweroff180-draw-btn", "n_clicks"),
         State({"type": "point-store", "m_id": "poweroff180", "role": "touchdown"}, "data"),
         State("poweroff180-runway-select", "value"),
@@ -93,15 +94,17 @@ def register(app):
         """Draw Power-Off 180 accuracy approach using energy-based simulation."""
         from simulation import simulate_power_off_180
 
+        BTN_BASE = "shelf-action shelf-action-results"
+
         if not n_clicks:
-            return [], None, "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+            return [], None, "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", BTN_BASE
 
         if not ac_name or not engine_key:
-            return [], None, "Select aircraft and engine first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+            return [], None, "Select aircraft and engine first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", BTN_BASE
 
         # Touchdown point is always required (user clicks on runway)
         if not touchdown_data:
-            return [], None, "Click 'Set Touchdown Point' then click on the runway where you want to land.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+            return [], None, "Click 'Set Touchdown Point' then click on the runway where you want to land.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", BTN_BASE
 
         try:
             # Get airport data for elevation
@@ -123,7 +126,7 @@ def register(app):
                     runway_length_ft = float(end["length_ft"])
 
             if manual_heading is None or manual_heading == "":
-                return [], None, "Enter a runway heading.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+                return [], None, "Enter a runway heading.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", BTN_BASE
             heading_mag_or_true = float(manual_heading)
             if selected_airport_id:
                 from callbacks.aircraft import _airport_magvar, _mag_to_true
@@ -170,7 +173,7 @@ def register(app):
             )
 
             if not path or not hover_data:
-                return [], None, "No glide path generated. Check inputs.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+                return [], None, "No glide path generated. Check inputs.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", BTN_BASE
 
             # Build map elements
             elements = []
@@ -191,14 +194,24 @@ def register(app):
                 )
                 elements.append(start_marker)
 
-            # Runway threshold (reference) — blue-500
+            # Runway threshold — green for successful touchdown, red
+            # for missed approach. Matches the convention in the other
+            # landing-maneuver renderers; the old fixed-blue marker
+            # made successes and failures look identical.
+            success_for_color = bool(results.get('success', False))
+            aim_color = "#22c55e" if success_for_color else "#ef4444"
+            aim_tooltip = (
+                f"Runway {runway_select or 'threshold'} — touchdown"
+                if success_for_color
+                else f"Runway {runway_select or 'threshold'} — missed"
+            )
             aim_marker = dl.CircleMarker(
                 center=[runway_threshold['lat'], runway_threshold['lon']],
                 radius=7,
-                color="#3b82f6",
+                color=aim_color,
                 fill=True,
                 fillOpacity=1.0,
-                children=dl.Tooltip(f"Runway {runway_select or 'threshold'}")
+                children=dl.Tooltip(aim_tooltip)
             )
             elements.append(aim_marker)
 
@@ -349,13 +362,15 @@ def register(app):
                 ], title="Simulation Results", style={"fontSize": "12px"}),
             ], start_collapsed=False, style={"marginTop": "8px"})
 
-            return elements, bounds, msg, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content
+            btn_class = (BTN_BASE + " shelf-action-success" if success
+                          else BTN_BASE + " shelf-action-failure")
+            return elements, bounds, msg, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content, btn_class
 
         except Exception as e:
             import traceback
             log.error(f"EXCEPTION in draw_poweroff180(): {e}")
             traceback.print_exc()
-            return [], None, f"Error: {str(e)}", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+            return [], None, f"Error: {str(e)}", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", BTN_BASE
 
     @app.callback(
         Output("scrubber-layer", "children", allow_duplicate=True),
