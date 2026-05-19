@@ -483,35 +483,38 @@ def _create_final_spiral_bucket(
     The bucket is positioned between the start position and final bucket,
     along the extended centerline.
     """
-    # Calculate cross-track and along-track from touchdown
-    xtrack_ft, along_ft = _cross_track_to_centerline_ft(
+    # Position the spiral bucket near the extended final centerline.
+    # The old version offset the bucket by up to ±2000 ft based on the
+    # aircraft's current cross-track, which left it well off-CL and
+    # forced an S-shaped transit across the runway after spiral exit.
+    # Tighten the cap to ±500 ft so the spiral is nearly on-CL — the
+    # aircraft does a short transit from its current xtrack toward the
+    # bucket, spirals there, then exits roughly aligned with final.
+    # The small remaining offset lets far-off-CL starts still reach the
+    # bucket within their glide budget.
+    xtrack_ft, _along_ft = _cross_track_to_centerline_ft(
         touchdown_point, start_pos, runway_heading
     )
+    lateral_offset = max(-500.0, min(500.0, xtrack_ft))
 
-    # Position the spiral bucket on extended final centerline
-    # Use the aircraft's cross-track position but cap it to stay near centerline
-    lateral_offset = max(-2000.0, min(2000.0, xtrack_ft))
-
-    # Position along-track: partway between start and final bucket
-    # Place it at about 2/3 of the way from final toward the start
     final_point = GeoPoint(final_bucket.lat, final_bucket.lon)
     dist_start_to_final = geo_dist(
         (start_pos.latitude, start_pos.longitude),
         (final_point.latitude, final_point.longitude)
     ).feet
 
-    # Place bucket 1/3 of the way from start toward final
+    # Place bucket 2/3 of the way from FINAL toward start.
     spiral_dist_from_final = dist_start_to_final * 0.67
     spiral_dist_from_final = max(2000.0, min(spiral_dist_from_final, 15000.0))
 
-    # Position on extended final (reciprocal heading from touchdown)
+    # Position on extended final, then apply the (small) lateral nudge.
     reciprocal = _wrap_360(runway_heading + 180.0)
     spiral_center = point_from(final_point, reciprocal, spiral_dist_from_final / FT_PER_NM)
-
-    # Apply lateral offset if aircraft is off-centerline
-    if abs(lateral_offset) > 100:
-        lateral_bearing = _wrap_360(runway_heading + 90.0) if lateral_offset > 0 else _wrap_360(runway_heading - 90.0)
-        spiral_center = point_from(spiral_center, lateral_bearing, abs(lateral_offset) / FT_PER_NM)
+    if abs(lateral_offset) > 50:
+        lateral_bearing = (_wrap_360(runway_heading + 90.0) if lateral_offset > 0
+                           else _wrap_360(runway_heading - 90.0))
+        spiral_center = point_from(
+            spiral_center, lateral_bearing, abs(lateral_offset) / FT_PER_NM)
 
     # Calculate altitude for the bucket center
     # The bucket should capture the aircraft at its current altitude
