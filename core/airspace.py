@@ -121,9 +121,11 @@ def styled_in_bbox(bbox: tuple[float, float, float, float],
     return out
 
 
-def _coerce_alt(val: Any) -> float | None:
+def _coerce_alt(val: Any, uom: Any = None) -> float | None:
     """NASR LOWER_VAL / UPPER_VAL: -9998 / -9999 = surface,
-    99998/99999 = unlimited. Otherwise raw feet."""
+    99998/99999 = unlimited. Otherwise the value is interpreted
+    according to UOM: 'FT' = feet, 'FL' = hundreds of feet
+    (e.g. FL180 stored as 180 → 18000 ft MSL)."""
     try:
         v = float(val)
     except (TypeError, ValueError):
@@ -132,6 +134,9 @@ def _coerce_alt(val: Any) -> float | None:
         return 0.0  # surface
     if v > 90000:
         return 99999.0  # unlimited
+    u = (str(uom).upper() if uom is not None else "").strip()
+    if u == "FL":
+        return v * 100.0
     return v
 
 
@@ -255,8 +260,8 @@ def _feature_to_record(layer: str, feat: dict) -> dict | None:
         "ident": props.get("IDENT") or "",
         "icao_id": props.get("ICAO_ID") or "",
         "city": props.get("CITY") or "",
-        "floor_ft": _coerce_alt(props.get("LOWER_VAL")),
-        "ceiling_ft": _coerce_alt(props.get("UPPER_VAL")),
+        "floor_ft": _coerce_alt(props.get("LOWER_VAL"), props.get("LOWER_UOM")),
+        "ceiling_ft": _coerce_alt(props.get("UPPER_VAL"), props.get("UPPER_UOM")),
         "floor_ref": (props.get("LOWER_UOM") or "").upper() or None,
         "ceiling_ref": (props.get("UPPER_UOM") or "").upper() or None,
         "floor_desc": props.get("LOWER_DESC") or "",

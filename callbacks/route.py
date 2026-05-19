@@ -2332,10 +2332,12 @@ def register(app):
         MAX_POLYS = 200
         if len(recs) > MAX_POLYS:
             recs = recs[:MAX_POLYS]
-        # Permanent altitude labels are useful but visually noisy at
-        # wide zoom. Show them only when the chart is zoomed in
-        # enough that polygons are distinct (~50 NM viewport).
-        show_band_labels = zoom_int >= 8
+        # Permanent altitude labels are useful but visually noisy when
+        # many airspaces overlap. Gate by both zoom AND count — at
+        # zoom < 10 the labels stack on top of each other illegibly;
+        # past ~15 polygons in view even at zoom 10 it's too busy.
+        # Pilot still gets altitudes on hover via the sticky tooltip.
+        show_band_labels = zoom_int >= 10 and len(recs) <= 15
         # Cold-state dimming follows the same zoom threshold — at low
         # zoom the dim/dash interplay looks like flicker; at ≥7 it's
         # a meaningful "this MOA isn't hot" cue.
