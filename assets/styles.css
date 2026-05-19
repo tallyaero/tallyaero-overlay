@@ -1873,6 +1873,23 @@ input[type="radio"] {
 .map-controls-overlay.overlay-for-engineout #glide-ring-toggle-wrap {
   display: inline-flex;
 }
+/* Route Planner airspace toggles — same pattern. The chip wraps
+   3 checkboxes (Class B/C/D, SUA, TFR) in a single pill so the
+   overlay stays compact. */
+#airspace-toggle-wrap {
+  display: none;
+}
+.map-controls-overlay.overlay-for-route #airspace-toggle-wrap {
+  display: inline-flex;
+}
+.airspace-toggle-chip .airspace-toggle-list {
+  display: inline-flex;
+  gap: 8px;
+}
+.airspace-toggle-chip label {
+  font-size: 10px;
+  padding: 3px 6px;
+}
 
 /* Toggle chip — replaces the old labeled checkbox "Envelope: Ring".
    Wraps a single-option dcc.Checklist into a pill-shaped chip that
@@ -2787,6 +2804,41 @@ input[type="radio"] {
 .nav-log-meta-table td { padding: 4px 6px; border-bottom: 1px dotted #cbd5e1; }
 .nav-log-kv-key { color: #64748b; font-weight: 600; width: 45%; }
 .nav-log-kv-val { font-weight: 700; }
+
+/* Airspace section (Phase 7f-D) */
+.nav-log-as-table {
+  width: 100%; font-size: 12px;
+  border-collapse: collapse; margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.nav-log-as-table th, .nav-log-as-table td {
+  padding: 4px 8px; border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+.nav-log-as-table th {
+  font-size: 10px; color: #64748b;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.nav-log-as-pierce {
+  color: #b91c1c; font-weight: 700; font-size: 10px;
+  letter-spacing: 0.05em;
+}
+.nav-log-as-overunder {
+  color: #475569; font-size: 10px;
+}
+.nav-log-as-chip {
+  display: inline-block; padding: 2px 8px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 4px;
+}
+.nav-log-as-name { font-weight: 600; }
+.nav-log-as-alt  { color: #334155; }
+.nav-log-as-times {
+  max-width: 220px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+  color: #64748b; font-size: 11px;
+}
 
 .nav-log-table-wrap { overflow-x: auto; }
 .nav-log-table {

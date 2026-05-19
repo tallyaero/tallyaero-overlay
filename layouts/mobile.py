@@ -223,6 +223,7 @@ def mobile_layout():
                         attribution="Tiles © Esri",
                     ),
                     dl.LayerGroup(id="envelope-layer"),
+                    dl.LayerGroup(id="airspace-layer"),
                     dl.LayerGroup(id="layer"),
                     dl.LayerGroup(id="scrubber-layer"),
                     dl.LayerGroup(id="route-layer"),

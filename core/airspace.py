@@ -1,0 +1,379 @@
+"""Airspace data loader + route-crossing math.
+
+Phase 7f-B. Loads the NASR-derived GeoJSON files produced by
+data/airspace/build_airspace.py, indexes polygons by bounding box for
+fast lookup, and computes which airspaces a given route enters.
+
+The runtime never hits the network — all data is bundled under
+data/airspace/. Re-run the build script after each NASR 28-day
+cycle to refresh.
+
+Public API:
+    load_airspaces() -> dict[str, list[Airspace]]
+        Lazy-cached load of all four layers. Keys: class_airspace,
+        special_use, tfr, schedule.
+
+    airspaces_in_bbox(bbox, layers=None) -> list[Airspace]
+        Quick spatial filter for rendering — returns every airspace
+        whose bounding box intersects the requested viewport.
+
+    route_crossings(path, planned_alt_msl_ft, layers=None) -> list[Crossing]
+        For each airspace polygon the great-circle path traverses
+        AND whose floor/ceiling range overlaps the planned altitude,
+        return a Crossing dict (see below) for the Results modal.
+
+Crossing schema (returned by route_crossings):
+    {
+      "name":        "Charleston Class C",
+      "type_code":   "C",      # B/C/D/E for class; SUA: M/P/R/W/A/D
+      "kind":        "class" | "sua" | "tfr",
+      "floor_ft":    0         # MSL or AGL — see "floor_ref"
+      "ceiling_ft":  4000,
+      "floor_ref":   "SFC" | "MSL" | "AGL" | "FL",
+      "ceiling_ref": ...,
+      "floor_desc":  "SFC",    # human-readable from NASR
+      "ceiling_desc":"4000 MSL",
+      "pierces":     bool,     # True if planned cruise enters the vertical band
+      "eff_times":   str | None,  # for SUA — when active
+      "controlling_agency": str | None,
+    }
+"""
+
+from __future__ import annotations
+
+import json
+from functools import lru_cache
+from pathlib import Path
+from typing import Any
+
+_DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "airspace"
+
+# Color spec — matches sectional chart conventions so the rendered
+# map "reads" like a sectional. Keys match the upstream TYPE_CODE /
+# CLASS strings exactly (after _classify_feature normalization), so
+# the rendering callback can look up styles with O(1) dict access.
+TYPE_STYLES = {
+    # Class airspaces
+    "B":   {"color": "#0050a0", "weight": 2, "dashArray": None,
+            "fillColor": "#0050a0", "fillOpacity": 0.04, "label": "Class B"},
+    "C":   {"color": "#8b2c8b", "weight": 2, "dashArray": None,
+            "fillColor": "#8b2c8b", "fillOpacity": 0.04, "label": "Class C"},
+    "D":   {"color": "#0050a0", "weight": 1, "dashArray": "5,3",
+            "fillColor": "#0050a0", "fillOpacity": 0.02, "label": "Class D"},
+    "E":   {"color": "#8b2c8b", "weight": 1, "dashArray": "1,4",
+            "fillColor": "#8b2c8b", "fillOpacity": 0.0,  "label": "Class E"},
+    # Special Use (NASR TYPE_CODE is a full word, not a letter)
+    "P":   {"color": "#cc0000", "weight": 2, "dashArray": None,
+            "fillColor": "#cc0000", "fillOpacity": 0.10, "label": "Prohibited"},
+    "R":   {"color": "#cc0000", "weight": 2, "dashArray": "4,4",
+            "fillColor": "#cc0000", "fillOpacity": 0.08, "label": "Restricted"},
+    "MOA": {"color": "#cc7700", "weight": 1, "dashArray": "6,4",
+            "fillColor": "#cc7700", "fillOpacity": 0.04, "label": "MOA"},
+    "W":   {"color": "#cc7700", "weight": 1, "dashArray": "4,4",
+            "fillColor": "#cc7700", "fillOpacity": 0.04, "label": "Warning"},
+    "A":   {"color": "#666666", "weight": 1, "dashArray": "2,4",
+            "fillColor": "#666666", "fillOpacity": 0.02, "label": "Alert"},
+    "D-sua": {"color": "#cc7700", "weight": 1, "dashArray": "8,2",
+              "fillColor": "#cc7700", "fillOpacity": 0.03, "label": "Danger"},
+    # TFR — striped red, can't be missed
+    "TFR": {"color": "#cc0000", "weight": 3, "dashArray": "8,4",
+            "fillColor": "#cc0000", "fillOpacity": 0.15, "label": "TFR"},
+}
+
+# Class A is the CONUS-wide cap above FL180; rendering its polygon
+# would shade the whole continent. Class E is omnipresent surface-E
+# coverage with no chart value at this layer. "Other" is the Mode C
+# Veil ring (B-airport identifier). All three are hidden by default.
+_CLASS_RENDER_ALLOW = {"B", "C", "D"}
+# Likewise for SUA — surface that's interesting to a VFR pilot.
+_SUA_RENDER_ALLOW = {"P", "R", "MOA", "W", "A", "D-sua"}
+
+
+def styled_in_bbox(bbox: tuple[float, float, float, float],
+                    layers: list[str]) -> list[dict]:
+    """Viewport-clipped + render-filtered list for the map callback.
+    `layers` is a list containing any of: 'class', 'sua', 'tfr'.
+
+    Returns records ready to render — each carries its `style` from
+    TYPE_STYLES. Records without a known style are dropped.
+    """
+    want_layers: list[str] = []
+    if "class" in layers: want_layers.append("class_airspace")
+    if "sua" in layers:   want_layers.append("special_use")
+    if "tfr" in layers:   want_layers.append("tfr")
+    if not want_layers:
+        return []
+    raw = airspaces_in_bbox(bbox, layers=want_layers)
+    out = []
+    for rec in raw:
+        kind = rec["kind"]
+        code = rec["type_code"]
+        if kind == "class" and code not in _CLASS_RENDER_ALLOW:
+            continue
+        if kind == "sua" and code not in _SUA_RENDER_ALLOW:
+            continue
+        style = TYPE_STYLES.get(code)
+        if style is None:
+            continue
+        out.append({**rec, "style": style})
+    return out
+
+
+def _coerce_alt(val: Any) -> float | None:
+    """NASR LOWER_VAL / UPPER_VAL: -9998 / -9999 = surface,
+    99998/99999 = unlimited. Otherwise raw feet."""
+    try:
+        v = float(val)
+    except (TypeError, ValueError):
+        return None
+    if v < -1000:
+        return 0.0  # surface
+    if v > 90000:
+        return 99999.0  # unlimited
+    return v
+
+
+def _bbox_of_geometry(geom: dict) -> tuple[float, float, float, float] | None:
+    """Return (minlon, minlat, maxlon, maxlat). None if empty."""
+    if not geom:
+        return None
+    coords = geom.get("coordinates")
+    if not coords:
+        return None
+    minlon = minlat = float("inf")
+    maxlon = maxlat = float("-inf")
+
+    def _walk(c):
+        nonlocal minlon, minlat, maxlon, maxlat
+        if isinstance(c, (list, tuple)) and len(c) >= 2 and \
+                isinstance(c[0], (int, float)):
+            lon, lat = c[0], c[1]
+            if lon < minlon: minlon = lon
+            if lon > maxlon: maxlon = lon
+            if lat < minlat: minlat = lat
+            if lat > maxlat: maxlat = lat
+        else:
+            for sub in c:
+                _walk(sub)
+
+    _walk(coords)
+    if minlon == float("inf"):
+        return None
+    return (minlon, minlat, maxlon, maxlat)
+
+
+def _point_in_ring(lat: float, lon: float, ring: list) -> bool:
+    """Ray-casting. ring is [[lon, lat], ...]."""
+    inside = False
+    j = len(ring) - 1
+    for i in range(len(ring)):
+        xi, yi = ring[i][0], ring[i][1]
+        xj, yj = ring[j][0], ring[j][1]
+        if ((yi > lat) != (yj > lat)) and \
+                (lon < (xj - xi) * (lat - yi) / (yj - yi + 1e-15) + xi):
+            inside = not inside
+        j = i
+    return inside
+
+
+def _point_in_polygon(lat: float, lon: float, geom: dict) -> bool:
+    """Geometry can be Polygon or MultiPolygon."""
+    t = geom.get("type")
+    coords = geom.get("coordinates")
+    if not coords:
+        return False
+    if t == "Polygon":
+        outer = coords[0]
+        if not _point_in_ring(lat, lon, outer):
+            return False
+        for hole in coords[1:]:
+            if _point_in_ring(lat, lon, hole):
+                return False
+        return True
+    if t == "MultiPolygon":
+        return any(_point_in_polygon(lat, lon, {"type": "Polygon",
+                                                  "coordinates": poly})
+                    for poly in coords)
+    return False
+
+
+def _classify_feature(layer: str, props: dict) -> tuple[str, str]:
+    """Return (kind, type_code) where kind is class/sua/tfr."""
+    if layer == "class_airspace":
+        return "class", (props.get("CLASS") or "").strip().upper()
+    if layer == "tfr":
+        return "tfr", "TFR"
+    if layer == "special_use":
+        code = (props.get("TYPE_CODE") or "").strip().upper()
+        # Danger SUA collides with Class D — disambiguate with suffix.
+        if code == "D":
+            code = "D-sua"
+        return "sua", code
+    return layer, "?"
+
+
+def _feature_to_record(layer: str, feat: dict) -> dict | None:
+    geom = feat.get("geometry")
+    bbox = _bbox_of_geometry(geom)
+    if bbox is None:
+        return None
+    props = feat.get("properties") or {}
+    kind, type_code = _classify_feature(layer, props)
+    # SUA exposes TIMESOFUSE / CONT_AGENT (not EFF_TIMES / CONTROLLING_AGENCY).
+    # Class airspace records have IDENT (the airport identifier) which joins
+    # to the schedule table's FAA_ID for hours-of-use lookup.
+    eff_times = props.get("TIMESOFUSE") or props.get("EFF_TIMES")
+    cont_agent = props.get("CONT_AGENT") or props.get("CONTROLLING_AGENCY")
+    return {
+        "kind": kind,
+        "type_code": type_code,
+        "name": props.get("NAME") or props.get("IDENT") or "?",
+        "ident": props.get("IDENT") or "",
+        "icao_id": props.get("ICAO_ID") or "",
+        "city": props.get("CITY") or "",
+        "floor_ft": _coerce_alt(props.get("LOWER_VAL")),
+        "ceiling_ft": _coerce_alt(props.get("UPPER_VAL")),
+        "floor_ref": (props.get("LOWER_UOM") or "").upper() or None,
+        "ceiling_ref": (props.get("UPPER_UOM") or "").upper() or None,
+        "floor_desc": props.get("LOWER_DESC") or "",
+        "ceiling_desc": props.get("UPPER_DESC") or "",
+        "eff_times": eff_times,
+        "controlling_agency": cont_agent,
+        "geometry": geom,
+        "bbox": bbox,
+    }
+
+
+@lru_cache(maxsize=1)
+def load_airspaces() -> dict[str, list[dict]]:
+    """Load airspace polygons from data/airspace/*.geojson and the
+    schedule join table from schedule.json.
+
+    Returns dict keyed by layer name (class_airspace / special_use /
+    tfr / schedule). The polygon layers are lists of record dicts (see
+    _feature_to_record); `schedule` is a dict keyed by FAA_ID. Empty
+    layers return empty containers — the loader is tolerant of missing
+    files so the app still boots before the ingest script has run.
+    """
+    out: dict[str, Any] = {
+        "class_airspace": [],
+        "special_use": [],
+        "tfr": [],
+        "schedule": {},
+    }
+    if not _DATA_DIR.is_dir():
+        return out
+    for layer in ("class_airspace", "special_use", "tfr"):
+        path = _DATA_DIR / f"{layer}.geojson"
+        if not path.is_file():
+            continue
+        try:
+            data = json.loads(path.read_text())
+        except Exception:
+            continue
+        for feat in data.get("features", []):
+            rec = _feature_to_record(layer, feat)
+            if rec is not None:
+                out[layer].append(rec)
+    # Schedule is a non-spatial join table keyed by FAA_ID.
+    sched_path = _DATA_DIR / "schedule.json"
+    if sched_path.is_file():
+        try:
+            rows = json.loads(sched_path.read_text())
+            out["schedule"] = {r["FAA_ID"]: r for r in rows if r.get("FAA_ID")}
+        except Exception:
+            pass
+    return out
+
+
+def _bbox_intersect(a: tuple, b: tuple) -> bool:
+    return not (a[2] < b[0] or a[0] > b[2] or a[3] < b[1] or a[1] > b[3])
+
+
+def airspaces_in_bbox(bbox: tuple[float, float, float, float],
+                       layers: list[str] | None = None) -> list[dict]:
+    """Return all airspaces whose bounding box intersects `bbox`.
+
+    `bbox` is (minlon, minlat, maxlon, maxlat) — matches GeoJSON
+    conventions. Used by the map renderer to filter to viewport so
+    we don't ship every Class B in the country to the browser.
+    """
+    if layers is None:
+        layers = ["class_airspace", "special_use", "tfr"]
+    data = load_airspaces()
+    out = []
+    for layer in layers:
+        for rec in data.get(layer, []):
+            if _bbox_intersect(rec["bbox"], bbox):
+                out.append(rec)
+    return out
+
+
+def _path_crosses_polygon(path: list[tuple[float, float]],
+                            geom: dict) -> bool:
+    """Path is [(lat, lon), ...]. Cheap: sample each segment at a
+    handful of intermediate points and run point-in-polygon. Good
+    enough for an MVP — accurate for any airspace bigger than a
+    couple NM, which all of them are."""
+    if len(path) < 2:
+        return False
+    # First check each waypoint; many crossings will hit here.
+    for lat, lon in path:
+        if _point_in_polygon(lat, lon, geom):
+            return True
+    # Then walk each segment with ~5 intermediate samples per pair.
+    # Linear interpolation in lat/lon is fine for legs under ~50 NM.
+    for i in range(len(path) - 1):
+        lat0, lon0 = path[i]
+        lat1, lon1 = path[i + 1]
+        for k in range(1, 6):
+            t = k / 6.0
+            lat = lat0 + t * (lat1 - lat0)
+            lon = lon0 + t * (lon1 - lon0)
+            if _point_in_polygon(lat, lon, geom):
+                return True
+    return False
+
+
+def _path_bbox(path: list[tuple[float, float]],
+                pad: float = 0.5) -> tuple[float, float, float, float]:
+    lats = [p[0] for p in path]
+    lons = [p[1] for p in path]
+    return (min(lons) - pad, min(lats) - pad,
+            max(lons) + pad, max(lats) + pad)
+
+
+def route_crossings(path: list[tuple[float, float]],
+                     planned_alt_msl_ft: float,
+                     layers: list[str] | None = None) -> list[dict]:
+    """Return airspaces that the route crosses AND whose vertical
+    band overlaps the planned cruise altitude.
+
+    `path` is a list of (lat, lon) tuples — typically the great-
+    circle samples produced by core.route.
+
+    `planned_alt_msl_ft` is the planned cruise altitude in MSL feet.
+    Airspaces are flagged with `pierces: True` when the planned
+    altitude is in [floor, ceiling]; otherwise the route passes
+    over or under them (still listed so the pilot is aware).
+    """
+    if not path:
+        return []
+    bbox = _path_bbox(path)
+    candidates = airspaces_in_bbox(bbox, layers=layers)
+    out = []
+    alt = float(planned_alt_msl_ft or 0.0)
+    for rec in candidates:
+        if not _path_crosses_polygon(path, rec["geometry"]):
+            continue
+        floor = rec["floor_ft"] if rec["floor_ft"] is not None else 0.0
+        ceiling = (rec["ceiling_ft"] if rec["ceiling_ft"] is not None
+                    else 99999.0)
+        pierces = floor <= alt <= ceiling
+        out.append({
+            **{k: v for k, v in rec.items() if k != "geometry"},
+            "pierces": pierces,
+        })
+    # Sort: pierces first, then by floor ascending.
+    out.sort(key=lambda r: (not r["pierces"], r["floor_ft"] or 0.0))
+    return out

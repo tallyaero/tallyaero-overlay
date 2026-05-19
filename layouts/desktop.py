@@ -626,6 +626,11 @@ def desktop_layout():
                             # without touching the main `layer` that
                             # carries the simulated path + markers.
                             dl.LayerGroup(id="envelope-layer"),
+                            # Phase 7f-follow — airspace polygons
+                            # (Class B/C/D, SUA, TFRs). Rendered
+                            # below the route + path layers so it
+                            # acts as a backdrop, not a foreground.
+                            dl.LayerGroup(id="airspace-layer"),
                             dl.LayerGroup(id="layer"),
                             dl.LayerGroup(id="scrubber-layer"),  # Dedicated layer for time scrubber marker
                             dl.LayerGroup(id="route-layer"),     # Phase 5 — great-circle route
