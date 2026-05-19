@@ -17,7 +17,7 @@ from utility import simulate_steep_spiral
 
 from callbacks.map import create_airplane_marker
 from layouts.maneuvers._charts import altitude_profile_chart
-from layouts.maneuvers._shared import _acs_metric, _power_verdict
+from layouts.maneuvers._shared import _acs_metric, _power_verdict, _winds_aloft_chip
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -298,6 +298,11 @@ def register(app):
             times, alts, chart_id="steepspiral-profile-chart",
             markers=markers, y_title="Altitude (ft AGL)",
         ))
+
+        # Phase H — live winds-aloft column chip.
+        chip = _winds_aloft_chip(wind_profile_data)
+        if chip is not None:
+            warning_elements.append(chip)
 
         # Prepare slider configuration
         num_points = len(hover)

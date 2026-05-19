@@ -17,6 +17,7 @@ import dash_leaflet as dl
 
 from core.log import get_logger
 
+from layouts.maneuvers._shared import _winds_aloft_chip
 from utility import (
     simulate_engineout_glide,
     find_minimum_altitude,
@@ -456,6 +457,10 @@ def register(app):
                     html.Div(f"Max bank: {max_bank:.0f}° | Bank τ: {bank_tau:.1f}s", style={"fontSize": "11px"}),
                 ], title="Simulation Results", style={"fontSize": "12px"}),
             ], start_collapsed=False, style={"marginTop": "8px"})
+
+            winds_chip = _winds_aloft_chip(wind_profile_data)
+            if winds_chip is not None:
+                info_content = html.Div([info_content, winds_chip])
 
             return elements, bounds, msg, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content, envelope_data, min_alt_display
 

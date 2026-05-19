@@ -21,6 +21,7 @@ from core.log import get_logger
 from utility import simulate_impossible_turn
 
 from callbacks.map import calculate_runway_geometry, create_airplane_marker
+from layouts.maneuvers._shared import _winds_aloft_chip
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -577,6 +578,10 @@ def register(app):
                     html.Div(f"Turn: {turn_dir.title()} {bank_txt} | Runway: {runway_heading:.0f}° | Time: {max_time:.0f}s", style={"fontSize": "11px"}),
                 ], title="Simulation Results", style={"fontSize": "12px"}),
             ], start_collapsed=False, style={"marginTop": "8px"})
+
+            winds_chip = _winds_aloft_chip(wind_profile_data)
+            if winds_chip is not None:
+                info_content = html.Div([info_content, winds_chip])
 
             return elements, bounds, status, result, hover_store, path, {"display": "block"}, int(max_time), slider_marks, 0, info_content
 

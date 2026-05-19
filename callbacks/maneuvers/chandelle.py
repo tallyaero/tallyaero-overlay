@@ -17,7 +17,7 @@ from utility import simulate_chandelle
 
 from callbacks.map import create_airplane_marker
 from layouts.maneuvers._charts import altitude_profile_chart
-from layouts.maneuvers._shared import _acs_metric, _power_verdict
+from layouts.maneuvers._shared import _acs_metric, _power_verdict, _winds_aloft_chip
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -297,7 +297,12 @@ def register(app):
         profile_chart = altitude_profile_chart(
             times, alts, chart_id="chandelle-profile-chart", markers=markers,
         )
-        info_content = html.Div([info_accordion, profile_chart])
+        winds_chip = _winds_aloft_chip(wind_profile_data)
+        info_content = html.Div(
+            [info_accordion]
+            + ([winds_chip] if winds_chip is not None else [])
+            + [profile_chart]
+        )
 
         # Calculate bounds for auto-zoom
         if path:

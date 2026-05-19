@@ -110,6 +110,46 @@ def _results_modal_pair(m_id, info_div_id, title="Simulation Results"):
     return [btn, modal]
 
 
+def _winds_aloft_chip(wind_profile_data):
+    """Render the live winds-aloft column chip for a results modal.
+
+    `wind_profile_data` is the dcc.Store payload from wind-profile-store
+    (set by the airport-pick callback in Phase H3). Returns None when
+    no live data is staged so the caller can skip rendering.
+    """
+    if not wind_profile_data:
+        return None
+    layers = (wind_profile_data or {}).get("layers") or []
+    if not layers:
+        return None
+    parts = []
+    for alt_ft, dir_deg, kt in layers:
+        if alt_ft <= 0:
+            label = "SFC"
+        elif alt_ft < 10000:
+            label = f"{int(alt_ft):,}ft"
+        else:
+            label = f"{int(alt_ft / 1000)}k"
+        parts.append(f"{label} {int(round(dir_deg)) % 360:03d}°/{int(round(kt))}")
+    return html.Div(
+        [
+            html.Span("Winds (live): ",
+                       style={"fontWeight": "600", "color": "#475569"}),
+            html.Span(" · ".join(parts)),
+        ],
+        className="winds-aloft-chip",
+        style={
+            "fontSize": "11px",
+            "marginTop": "6px",
+            "padding": "6px 10px",
+            "background": "rgba(13, 89, 242, 0.06)",
+            "borderLeft": "3px solid var(--ta-brand-blue, #0d59f2)",
+            "borderRadius": "3px",
+            "lineHeight": "1.5",
+        },
+    )
+
+
 def _power_verdict(power_pct, design_power, consequence_text, failure_reason):
     """Render the Design Directive power verdict for a maneuver (Phase D2).
 
