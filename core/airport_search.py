@@ -137,3 +137,94 @@ def resolve_waypoint(airport_data: list[dict], token: str) -> dict | None:
     # Fallback: best fuzzy hit
     hits = search_airports(airport_data, token, limit=1)
     return hits[0] if hits else None
+
+
+# === Phase 7N-bc: NAVAID + fix search ======================================
+#
+# These mirror the airport pipeline (exact ident, then ranked fuzzy hits)
+# but are kept separate so the search ranking stays predictable: airports
+# always rank above same-named NAVAIDs (SAV the IATA before SAV the VOR),
+# but NAVAID ident matches beat airport partial matches.
+
+# Map TYPE_CODE → short type label for display badges. Empty / unknown
+# codes fall through to a plain "NAVAID" label.
+NAVAID_TYPE_LABELS = {
+    "VOR": "VOR",
+    "VOR/DME": "VOR-DME",
+    "VORTAC": "VORTAC",
+    "TACAN": "TACAN",
+    "NDB": "NDB",
+    "NDB/DME": "NDB-DME",
+    "DME": "DME",
+}
+
+
+def _score_navaid(nv: dict, q: str) -> int:
+    """Same scoring shape as _score(airport) but with only ident + name
+    to match on. NAVAIDs are mostly known by their 3-letter ident."""
+    ident = (nv.get("ident") or "").lower()
+    name = (nv.get("name") or "").lower()
+    if ident == q:
+        return 950   # below airport icao (1000) so KSAV beats SAV
+    if ident.startswith(q):
+        return 700
+    if q in ident:
+        return 200
+    if name.startswith(q):
+        return 110
+    if q in name:
+        return 60
+    return 0
+
+
+def search_navaids(navaid_data: list[dict],
+                   query: str,
+                   limit: int = 10) -> list[dict]:
+    if not query or len(query.strip()) < 2 or not navaid_data:
+        return []
+    q = query.strip().lower()
+    scored: list[tuple[int, dict]] = []
+    for nv in navaid_data:
+        s = _score_navaid(nv, q)
+        if s > 0:
+            scored.append((s, nv))
+    scored.sort(key=lambda t: (
+        -t[0],
+        (t[1].get("ident") or "").upper(),
+    ))
+    return [nv for _, nv in scored[:limit]]
+
+
+def search_fixes(fix_data: list[dict],
+                 query: str,
+                 limit: int = 10) -> list[dict]:
+    """Fixes only support exact / prefix ident match — they're named
+    5-letter strings with no semantic content to fuzzy-search."""
+    if not query or len(query.strip()) < 2 or not fix_data:
+        return []
+    q = query.strip().upper()
+    out: list[dict] = []
+    for fx in fix_data:
+        ident = (fx.get("ident") or "").upper()
+        if ident == q or ident.startswith(q):
+            out.append(fx)
+            if len(out) >= limit * 4:  # keep some buffer for ranking
+                break
+    out.sort(key=lambda f: (
+        (f.get("ident") or "").upper() != q,  # exact first
+        f.get("ident") or "",
+    ))
+    return out[:limit]
+
+
+def navaid_label(nv: dict) -> str:
+    tlabel = NAVAID_TYPE_LABELS.get(nv.get("type_code", ""), "NAVAID")
+    name = nv.get("name") or ""
+    freq = nv.get("freq_mhz")
+    freq_str = f" ({freq:.2f})" if isinstance(freq, (int, float)) else ""
+    return f"{nv.get('ident', '')} · {tlabel} {name}{freq_str}"
+
+
+def fix_label(fx: dict) -> str:
+    state = fx.get("state") or ""
+    return f"{fx.get('ident', '')} · FIX{(' — ' + state) if state else ''}"

@@ -31,6 +31,8 @@ ROOT = Path(__file__).resolve().parent.parent
 aircraft_data: dict = {}
 available_aircraft: list = []
 airport_data: list = []
+navaid_data: list = []
+fix_data: list = []
 
 
 def load_aircraft_data(folder: str = "aircraft_data") -> dict:
@@ -52,19 +54,37 @@ def load_airport_data() -> list:
         return json.load(f)
 
 
+def _load_optional_json(rel_path: str) -> list:
+    """Returns [] if the bundle isn't present — keeps the app bootable
+    on a fresh checkout before data ingest has been run."""
+    path = ROOT / rel_path
+    if not path.is_file():
+        return []
+    try:
+        with open(path, "r") as f:
+            return json.load(f)
+    except Exception as e:
+        log.warning("Could not parse %s: %s", rel_path, e)
+        return []
+
+
 def init_data() -> None:
     """Populate the module-level caches IN PLACE.
 
-    Idempotent. Mutates `aircraft_data`, `available_aircraft`, `airport_data`
-    in place so callers that captured them at import time still see the
-    populated values. Reassignment would have broken that.
+    Idempotent. Mutates `aircraft_data`, `available_aircraft`, `airport_data`,
+    `navaid_data`, and `fix_data` in place so callers that captured them at
+    import time still see the populated values.
     """
     if aircraft_data:
         return  # already populated
     aircraft_data.update(load_aircraft_data())
     available_aircraft.extend(sorted(aircraft_data.keys()))
     airport_data.extend(load_airport_data())
-    log.info("Loaded %s aircraft + %s airports", len(aircraft_data), len(airport_data))
+    navaid_data.extend(_load_optional_json("data/navaids/navaids.json"))
+    fix_data.extend(_load_optional_json("data/navaids/fixes.json"))
+    log.info("Loaded %s aircraft + %s airports + %s NAVAIDs + %s fixes",
+             len(aircraft_data), len(airport_data),
+             len(navaid_data), len(fix_data))
 
 
 # Auto-init at import unless explicitly disabled (tests).

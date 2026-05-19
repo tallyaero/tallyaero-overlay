@@ -24,14 +24,17 @@ from dash.exceptions import PreventUpdate
 from datetime import datetime
 import dash_leaflet as dl
 
-from core.data_loader import aircraft_data, airport_data
+from core.data_loader import aircraft_data, airport_data, navaid_data, fix_data
 from core.route import compute_route_segment, magvar_west_positive, haversine_nm
 from core.corridor import compute_route_corridor, sample_route_points, FT_PER_M
 from core.terrain import (
     elevation_m as _terrain_elevation_m,
     prefetch_corridor, prefetch_bbox,
 )
-from core.airport_search import search_airports, airport_label, resolve_waypoint
+from core.airport_search import (
+    search_airports, airport_label, resolve_waypoint,
+    search_navaids, search_fixes, navaid_label, fix_label,
+)
 from core.waypoints import (
     resolve_any, nearest_airport_within, format_gps_ident,
     format_gps_display, parse_gps_coordinate,
@@ -40,6 +43,7 @@ from core.diverts import (
     divert_coverage_along_route_glide, gap_segments, longest_gap_nm,
 )
 from core.airspace import route_crossings, TYPE_STYLES
+from core.atmosphere import density_altitude_ft
 from core.flight_profile import (
     compute_flight_profile, altitude_at_distance,
     climb_rate_fpm as _climb_rate_fpm,
@@ -295,11 +299,37 @@ def _frequencies_panel(label: str, ap: dict | None) -> object:
     ])
 
 
+def _da_chip_inner(da_ft, dep_wp):
+    """Header chip for density altitude. Color-flags when DA is more
+    than 2000 ft above the field, the threshold where takeoff/climb
+    performance becomes a planning concern for typical-single GA."""
+    if da_ft is None:
+        return [
+            html.Span("DA  ", className="nav-log-hs-label"),
+            html.Span("—", className="nav-log-hs-val"),
+        ]
+    elev = float(dep_wp.get("elevation_ft") or 0.0)
+    delta = da_ft - elev
+    style: dict[str, str] = {}
+    if delta >= 3000:
+        style = {"color": "#b91c1c"}  # red — significant degradation
+    elif delta >= 2000:
+        style = {"color": "#d97706"}  # amber — keep an eye on it
+    return [
+        html.Span("DA  ", className="nav-log-hs-label"),
+        html.Span(f"{da_ft:.0f} ft",
+                  className="nav-log-hs-val", style=style,
+                  title=(f"Departure pressure alt: {elev:.0f} ft + ISA dev. "
+                         f"Δ = {delta:+.0f} ft vs field.")),
+    ]
+
+
 def _build_nav_log(*, waypoints, legs, totals, cruise_alt, aircraft_name,
                    tas_kt, total_weight, fuel_load_gal, wind_source,
                    critique, corridor_meta, divert_summary,
                    airport_records=None, cas_kt_override=None,
-                   profile=None, airspace_crossings=None):
+                   profile=None, airspace_crossings=None,
+                   density_altitude_ft=None):
     """Render a Jeppesen-style VFR navigation log.
 
     Layout mirrors the standard FAA/Jeppesen VFR Nav Log form: a multi-
@@ -336,6 +366,11 @@ def _build_nav_log(*, waypoints, legs, totals, cruise_alt, aircraft_name,
             html.Span(_fmt(fuel_load_gal, "{:.0f} gal"),
                       className="nav-log-hs-val"),
         ]),
+        # Density altitude — color-flagged when degraded performance kicks in.
+        # >2000 ft above field elev is a meaningful signal for a single-engine
+        # piston; >3000 ft is "you'll feel it" territory.
+        html.Div(_da_chip_inner(density_altitude_ft, waypoints[0]
+                                if waypoints else {})),
     ])
 
     # --- Main checkpoint table (Jeppesen column layout) --------------------
@@ -774,7 +809,8 @@ def register(app):
             # GPS waypoints have value of form "GPS:lat,lon"; render
             # them with a friendly pill label without going through
             # airport_data.
-            wp = resolve_any(v, airport_data=airport_data)
+            wp = resolve_any(v, airport_data=airport_data,
+                             navaid_data=navaid_data, fix_data=fix_data)
             if wp is not None and wp.kind == "gps":
                 kept.append({
                     "label": f"GPS {wp.lat:.2f},{wp.lon:.2f}",
@@ -788,6 +824,17 @@ def register(app):
                     "label": ap.get("id") or v,
                     "value": ap.get("id") or v,
                     "title": airport_label(ap),
+                })
+                continue
+            # NAVAID / FIX fallback — ident lookup against the runtime
+            # data. We use NAVAID:/FIX: prefixed values to avoid collision
+            # with a same-letter airport (e.g. SAV the IATA vs SAV the VOR).
+            if wp is not None and wp.kind in ("vor", "ndb", "fix"):
+                prefix = "FIX" if wp.kind == "fix" else "NAV"
+                kept.append({
+                    "label": f"{prefix} {wp.ident}",
+                    "value": v,
+                    "title": wp.name or wp.ident,
                 })
         # Also try parsing the typed query as a GPS coord — if it
         # parses, surface a "GPS lat,lon" option the user can pick.
@@ -804,7 +851,11 @@ def register(app):
                     })
         if not query or len(query.strip()) < 2:
             return kept
-        hits = search_airports(airport_data, query, limit=20)
+        # Multi-type search: airports first (highest tier), then NAVAIDs,
+        # then fixes. Values are prefixed with NAV:/FIX: for non-airports
+        # so the resolver can route them correctly even when an airport
+        # shares the same ident.
+        hits = search_airports(airport_data, query, limit=12)
         existing_ids = {o["value"] for o in kept}
         for ap in hits:
             wid = ap.get("id")
@@ -813,6 +864,24 @@ def register(app):
                     "label": airport_label(ap),
                     "value": wid,
                     "title": airport_label(ap),
+                })
+                existing_ids.add(wid)
+        for nv in search_navaids(navaid_data, query, limit=8):
+            wid = f"NAV:{nv['ident']}"
+            if wid not in existing_ids:
+                kept.append({
+                    "label": navaid_label(nv),
+                    "value": wid,
+                    "title": navaid_label(nv),
+                })
+                existing_ids.add(wid)
+        for fx in search_fixes(fix_data, query, limit=6):
+            wid = f"FIX:{fx['ident']}"
+            if wid not in existing_ids:
+                kept.append({
+                    "label": fix_label(fx),
+                    "value": wid,
+                    "title": fix_label(fx),
                 })
                 existing_ids.add(wid)
         return kept
@@ -964,7 +1033,8 @@ def register(app):
 
         points: list[tuple[float, float]] = []
         for wid in waypoint_ids:
-            wp = resolve_any(wid, airport_data=airport_data)
+            wp = resolve_any(wid, airport_data=airport_data,
+                             navaid_data=navaid_data, fix_data=fix_data)
             if wp and wp.lat is not None and wp.lon is not None:
                 points.append((wp.lat, wp.lon))
         if len(points) < 2:
@@ -1020,7 +1090,8 @@ def register(app):
         markers = []
         positions: list[list[float]] = []
         for i, wid in enumerate(waypoint_ids):
-            wp = resolve_any(wid, airport_data=airport_data)
+            wp = resolve_any(wid, airport_data=airport_data,
+                             navaid_data=navaid_data, fix_data=fix_data)
             if wp is None or wp.lat is None or wp.lon is None:
                 continue
             positions.append([wp.lat, wp.lon])
@@ -1078,6 +1149,8 @@ def register(app):
         State("env-wind-speed", "value"),
         State("aircraft-select", "value"),
         State("fuel-load", "value"),
+        State("env-oat", "value"),
+        State("env-altimeter", "value"),
         prevent_initial_call=True,
     )
     def compute_and_render(compute_clicks, clear_clicks,
@@ -1087,7 +1160,8 @@ def register(app):
                           engine_out_mode,
                           slope_threshold,
                           wind_dir, wind_speed, aircraft_name,
-                          fuel_load_gal):
+                          fuel_load_gal,
+                          env_oat_c, env_altimeter_inhg):
         trigger = ctx.triggered_id
         if trigger == "route-clear-btn":
             return _empty_clear()
@@ -1146,7 +1220,8 @@ def register(app):
         # MSL" semantics as an airport waypoint.
         waypoints: list[dict] = []
         for wid in waypoint_ids:
-            wp = resolve_any(wid, airport_data=airport_data)
+            wp = resolve_any(wid, airport_data=airport_data,
+                             navaid_data=navaid_data, fix_data=fix_data)
             if wp is None:
                 return (html.Div(f"Waypoint '{wid}' not found.",
                                  className="route-summary-error"),
@@ -2112,6 +2187,18 @@ def register(app):
         except Exception:
             airspace_xings = []
 
+        # Density altitude at the departure field. Tells the pilot how
+        # the field is performing today (climb rate / takeoff distance
+        # both degrade with DA) before they even taxi. Falls back to
+        # field elevation when OAT / altimeter aren't available.
+        try:
+            dep_elev = float(waypoints[0].get("elevation_ft") or 0.0)
+            da_ft = density_altitude_ft(dep_elev, env_altimeter_inhg, env_oat_c)
+            pa_ft = pressure_altitude_ft(dep_elev, env_altimeter_inhg)
+        except Exception:
+            da_ft = None
+            pa_ft = None
+
         nav_log_doc = _build_nav_log(
             waypoints=waypoints,
             legs=legs,
@@ -2129,6 +2216,7 @@ def register(app):
             airport_records=airport_records,
             profile=profile.to_dict() if profile else None,
             airspace_crossings=airspace_xings,
+            density_altitude_ft=da_ft,
         )
 
         store = {

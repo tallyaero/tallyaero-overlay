@@ -229,6 +229,38 @@ def airport_to_waypoint(airport: dict) -> Waypoint:
     )
 
 
+def _lookup_navaid(ident: str, navaid_data: list[dict]) -> Optional[Waypoint]:
+    """Exact-match ident lookup against the NAVAID table."""
+    t_up = ident.strip().upper()
+    for nv in navaid_data or ():
+        if (nv.get("ident") or "").upper() == t_up:
+            kind = "ndb" if (nv.get("type_code") or "").startswith("NDB") else "vor"
+            return Waypoint(
+                kind=kind,
+                ident=nv.get("ident"),
+                lat=nv.get("lat"),
+                lon=nv.get("lon"),
+                name=nv.get("name", ""),
+                freq_mhz=nv.get("freq_mhz"),
+                elevation_ft=nv.get("elevation_ft"),
+            )
+    return None
+
+
+def _lookup_fix(ident: str, fix_data: list[dict]) -> Optional[Waypoint]:
+    """Exact-match ident lookup against the FIX table."""
+    t_up = ident.strip().upper()
+    for fx in fix_data or ():
+        if (fx.get("ident") or "").upper() == t_up:
+            return Waypoint(
+                kind="fix",
+                ident=fx.get("ident"),
+                lat=fx.get("lat"),
+                lon=fx.get("lon"),
+            )
+    return None
+
+
 def resolve_any(
     token: str,
     *,
@@ -239,15 +271,25 @@ def resolve_any(
     """Try resolvers in priority order; return the first hit.
 
     Order:
+      0. Explicit NAV:/FIX: prefix — bypass the airport pass and look
+         up directly in the corresponding table. Used by the dropdown
+         to distinguish "SAV the airport" (no prefix) from "SAV the VOR"
+         (NAV:SAV) when both exist.
       1. GPS coordinate (any supported format)
       2. Airport exact / fuzzy (delegates to existing
          core.airport_search.resolve_waypoint)
-      3. NAVAID exact match (when navaid_data is supplied; future
-         pluggable lookup)
-      4. FIX exact match (when fix_data is supplied; future)
+      3. NAVAID exact match (when navaid_data is supplied)
+      4. FIX exact match (when fix_data is supplied)
     """
     if not token:
         return None
+
+    # 0. Explicit prefix routing — strip and route to the typed table.
+    t = token.strip()
+    if t.upper().startswith("NAV:") and navaid_data:
+        return _lookup_navaid(t[4:], navaid_data)
+    if t.upper().startswith("FIX:") and fix_data:
+        return _lookup_fix(t[4:], fix_data)
 
     # 1. GPS coordinate first — most specific patterns
     gps = gps_to_waypoint(token)
@@ -262,31 +304,15 @@ def resolve_any(
         if ap is not None:
             return airport_to_waypoint(ap)
 
-    # 3. NAVAID (future, when data ingested)
-    if navaid_data:
-        t_up = token.strip().upper()
-        for nv in navaid_data:
-            if (nv.get("ident") or "").upper() == t_up:
-                return Waypoint(
-                    kind="vor",  # or 'ndb' per nv.get('type')
-                    ident=nv.get("ident"),
-                    lat=nv.get("lat"),
-                    lon=nv.get("lon"),
-                    name=nv.get("name", ""),
-                    freq_mhz=nv.get("freq_mhz"),
-                )
+    # 3. NAVAID
+    nv_wp = _lookup_navaid(token, navaid_data) if navaid_data else None
+    if nv_wp is not None:
+        return nv_wp
 
-    # 4. FIX (future)
-    if fix_data:
-        t_up = token.strip().upper()
-        for fx in fix_data:
-            if (fx.get("ident") or "").upper() == t_up:
-                return Waypoint(
-                    kind="fix",
-                    ident=fx.get("ident"),
-                    lat=fx.get("lat"),
-                    lon=fx.get("lon"),
-                )
+    # 4. FIX
+    fx_wp = _lookup_fix(token, fix_data) if fix_data else None
+    if fx_wp is not None:
+        return fx_wp
 
     return None
 
