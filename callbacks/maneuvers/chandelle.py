@@ -16,6 +16,7 @@ import dash_leaflet as dl
 from utility import simulate_chandelle
 
 from callbacks.map import create_airplane_marker
+from layouts.maneuvers._charts import altitude_profile_chart
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -224,7 +225,7 @@ def register(app):
         min_ias = min([pt.get('tas', entry_ias) for pt in hover]) if hover else entry_ias
 
         # Build info panel with standardized format
-        info_content = dbc.Accordion([
+        info_accordion = dbc.Accordion([
             dbc.AccordionItem([
                 html.Div(f"Weight: {weight:.0f} lb | IAS: {entry_ias:.0f} kt | TAS: {avg_tas:.0f} kt | Wind: {wind_dir_val:.0f}°/{wind_speed_val:.0f} kt", style={"fontSize": "11px"}),
                 html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
@@ -240,6 +241,25 @@ def register(app):
                 ], style={"marginTop": "4px"}),
             ], title="Simulation Results", style={"fontSize": "12px"}),
         ], start_collapsed=False, style={"marginTop": "8px"})
+
+        # Phase C5 — altitude profile chart with phase markers at 90° pitch (transition
+        # from first_90 → second_90) and 180° exit. The student sees the characteristic
+        # Chandelle climbing profile rather than just an accordion full of numbers.
+        times = [pt.get("time", 0) for pt in hover]
+        alts = [pt.get("alt", 0) for pt in hover]
+        markers = []
+        prev_seg = None
+        for pt in hover:
+            seg = pt.get("segment")
+            if seg == "second_90" and prev_seg != "second_90":
+                markers.append((pt.get("time", 0), "90°"))
+            prev_seg = seg
+        if hover:
+            markers.append((hover[-1].get("time", 0), "Exit"))
+        profile_chart = altitude_profile_chart(
+            times, alts, chart_id="chandelle-profile-chart", markers=markers,
+        )
+        info_content = html.Div([info_accordion, profile_chart])
 
         # Calculate bounds for auto-zoom
         if path:
