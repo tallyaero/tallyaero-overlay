@@ -19,6 +19,40 @@ from callbacks.map import create_airplane_marker
 from core.data_loader import aircraft_data, airport_data
 
 
+_STRAIGHT_LEGS = ("downwind", "base", "upwind", "crosswind")
+
+
+def _per_leg_wca(hover):
+    """Group a Rectangular Course hover list by straight-leg segment and
+    return aggregate stats per leg (Phase C3 — ACS Gap 4).
+
+    Skips the entry leg and all turn segments (turn_to_base etc.).
+    Returns rows in canonical pattern order: downwind, base, upwind,
+    crosswind. Caller renders these as a 4-row mini-table in the info
+    accordion."""
+    buckets = {leg: {"gs": [], "drift": []} for leg in _STRAIGHT_LEGS}
+    for pt in hover:
+        seg = pt.get("segment")
+        if seg not in buckets:
+            continue
+        buckets[seg]["gs"].append(float(pt.get("gs", 0)))
+        buckets[seg]["drift"].append(float(pt.get("drift", 0)))
+
+    rows = []
+    for leg in _STRAIGHT_LEGS:
+        gs = buckets[leg]["gs"]
+        drift = buckets[leg]["drift"]
+        if not gs:
+            continue
+        rows.append({
+            "leg": leg,
+            "avg_gs": round(sum(gs) / len(gs), 1),
+            "avg_crab": round(sum(drift) / len(drift), 1),
+            "max_crab": round(max(abs(d) for d in drift), 1),
+        })
+    return rows
+
+
 def register(app):
     """Install Rectangular Course callbacks against the given Dash app."""
 
@@ -373,6 +407,26 @@ def register(app):
         else:
             avg_tas = ias
 
+        # Phase C3 — ACS Gap 4 — per-leg WCA breakdown table.
+        per_leg = _per_leg_wca(hover)
+        per_leg_table = html.Table([
+            html.Thead(html.Tr([
+                html.Th("Leg"),
+                html.Th("GS (kt)"),
+                html.Th("Crab (°)"),
+                html.Th("Max crab"),
+            ])),
+            html.Tbody([
+                html.Tr([
+                    html.Td(row["leg"].title()),
+                    html.Td(f"{row['avg_gs']:.0f}"),
+                    html.Td(f"{row['avg_crab']:+.1f}"),
+                    html.Td(f"{row['max_crab']:.1f}"),
+                ])
+                for row in per_leg
+            ]),
+        ], className="rect-per-leg-table", style={"width": "100%", "marginTop": "4px"}) if per_leg else None
+
         # Performance data - standardized format
         info_elements.append(
             dbc.Accordion([
@@ -381,6 +435,7 @@ def register(app):
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                     html.Div(f"AOB: {sim_warnings.get('min_bank_achieved', 0):.0f}-{max_bank:.0f}° | Load: {load_factor:.2f}G | GS: {sim_warnings.get('min_groundspeed', 0):.0f}-{sim_warnings.get('max_groundspeed', 0):.0f} kt", style={"fontSize": "11px"}),
                     html.Div(f"DW: {dw_length_nm:.2f} nm | Lateral: {lateral_nm:.2f} nm | Crab: {sim_warnings.get('max_crab_angle', 0):.1f}°", style={"fontSize": "11px"}),
+                    per_leg_table,
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                     html.Div(f"Vs turn: {vs_in_turn:.0f} kt | Margin: {min_ias_achieved - vs_in_turn:.0f} kt | Time: {sim_warnings.get('total_time_sec', 0):.0f}s", style={"fontSize": "11px"}),
                     html.Div(f"{direction.title()} pattern | {circuits} circuits", style={"fontSize": "11px"}),

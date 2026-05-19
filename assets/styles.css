@@ -3219,3 +3219,19 @@ input[type="radio"] {
   width: 100%;
   margin-top: 8px;
 }
+
+.rect-per-leg-table {
+  border-collapse: collapse;
+  font-size: 10px;
+}
+.rect-per-leg-table th,
+.rect-per-leg-table td {
+  padding: 2px 6px;
+  border-top: 1px solid #e2e8f0;
+  text-align: left;
+}
+.rect-per-leg-table thead th {
+  background: #f8fafc;
+  font-weight: 700;
+  color: #475569;
+}
