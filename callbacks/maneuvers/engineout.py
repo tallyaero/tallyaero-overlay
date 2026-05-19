@@ -8,7 +8,7 @@ info panel, min-altitude readout, scrubber state.
 from __future__ import annotations
 
 import dash
-from dash import html, Input, Output, State
+from dash import html, Input, Output, State, no_update
 from dash.exceptions import PreventUpdate
 from geopy.point import Point as GeoPoint
 from geopy.distance import distance as geo_distance
@@ -123,11 +123,15 @@ def register(app):
         BTN_BASE = "shelf-action shelf-action-results"
         empty_return = [], None, "", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], "", BTN_BASE
 
+        # Failure paths: keep the user's existing markers + map view
+        # in place (no_update for layer + bounds) so a half-set state
+        # (e.g. start placed, touchdown missing) doesn't blank out
+        # the user's work the moment they click Draw too early.
         if not start_data or not touchdown_data:
-            return [], None, "Set start and touchdown points first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], "", BTN_BASE
+            return no_update, no_update, "Set start and touchdown points first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], "", BTN_BASE
 
         if not ac_name or not engine_key:
-            return [], None, "Select aircraft and engine first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], "", BTN_BASE
+            return no_update, no_update, "Select aircraft and engine first.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], "", BTN_BASE
 
         try:
             states = dash.callback_context.states
@@ -583,7 +587,7 @@ def register(app):
     # error the callback during dispatch when a non-engineout
     # maneuver is the currently mounted one.
     @app.callback(
-        Output("envelope-layer", "children"),
+        Output("envelope-layer", "children", allow_duplicate=True),
         Input("engineout-show-envelope", "value"),
         Input({"type": "point-store", "m_id": "engineout", "role": "start"}, "data"),
         Input("aircraft-select", "value"),
@@ -623,30 +627,30 @@ def register(app):
                     prop_condition = entry.get("value") or "idle"
         except Exception:
             pass
-        """Draw the engine-out glide envelope onto the dedicated
-        envelope-layer whenever the toggle is on AND we have the
-        minimum inputs needed (start point, altitude, aircraft +
-        engine). Reactive to wind changes — including the live
-        winds-aloft column — so the user sees the ring deform as
-        they pick a different airport or change wind manually."""
         # Hide the ring outside engine-out so it doesn't bleed into
         # the other maneuver tabs.
         if maneuver != "engineout":
             return []
         if not show_envelope or "show" not in show_envelope:
+            log.info("Glide Ring: toggle off")
             return []
         if not start_data or not isinstance(start_data, dict):
+            log.info("Glide Ring: no start point set")
             return []
         if not ac_name or ac_name not in aircraft_data:
+            log.info(f"Glide Ring: aircraft not selected (got {ac_name!r})")
             return []
         if not engine_key:
+            log.info("Glide Ring: engine not selected")
             return []
 
         try:
             start_alt = float(start_alt_agl) if start_alt_agl else 0.0
         except (TypeError, ValueError):
+            log.info(f"Glide Ring: bad altitude {start_alt_agl!r}")
             return []
         if start_alt <= 0:
+            log.info(f"Glide Ring: zero altitude {start_alt}")
             return []
 
         try:
@@ -668,7 +672,8 @@ def register(app):
                 ac, engine_key, flap_setting or "clean",
                 prop_condition or "idle",
             )
-        except Exception:
+        except Exception as e:
+            log.warning(f"Glide Ring: best-glide lookup failed: {e}")
             return []
 
         # Honor live env so the ring matches the sim's altitude perf.
@@ -722,8 +727,10 @@ def register(app):
             return []
 
         if not envelope:
+            log.info("Glide Ring: compute returned empty envelope")
             return []
 
+        log.info(f"Glide Ring: drawing {len(envelope)}-pt polygon, alt={start_alt:.0f}, GR={gr_adj:.1f}, TAS={tas_kt:.0f}")
         tooltip = ("Max-glide reach (live winds aloft)" if wind_profile
                    else "Max-glide reach (surface wind only)")
         polygon = dl.Polygon(
