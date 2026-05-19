@@ -32,22 +32,6 @@ def s_turn_layout(default_elev=None):
             value="right", inline=True, className="shelf-field-radio",
         ), tooltip="Direction of the first semicircle."),
 
-        html.Div(className="shelf-spacer"),
-
-        html.Button("1. Start",
-                    id={"type": "click-button", "m_id": "s_turn", "role": "ref"},
-                    className="shelf-action shelf-action-set",
-                    title="Click the first point on the reference line (typically a road or section line)."),
-        html.Button("2. Ref Pt",
-                    id={"type": "click-button", "m_id": "s_turn", "role": "bearing"},
-                    className="shelf-action shelf-action-set",
-                    title="Click a second point that defines the reference line's bearing. The reference line should be near-perpendicular to wind."),
-        html.Button("Draw", id={"type": "draw-btn", "m_id": "s_turn"},
-                    className="shelf-action shelf-action-draw",
-                    title="Simulate the S-turns. The reference line should be near-perpendicular to wind."),
-        *_results_modal_pair("s_turn", "sturn-info",
-                             title="S-Turns — Simulation Results"),
-
         dcc.Store(id="sturn-line-bearing", data=90),
         html.Div(id={"type": "click-status", "m_id": "s_turn"}, style={"display": "none"}),
         html.Div(id="sturn-slider-container",
@@ -60,4 +44,22 @@ def s_turn_layout(default_elev=None):
                  ]),
         dcc.Store(id="sturn-hover-store", data=[]),
         dcc.Store(id="sturn-path-store", data=[]),
+    ]
+
+
+def s_turn_actions():
+    return [
+        html.Button("1. Start",
+                    id={"type": "click-button", "m_id": "s_turn", "role": "ref"},
+                    className="shelf-action shelf-action-set",
+                    title="Click the first point on the reference line (typically a road or section line)."),
+        html.Button("2. Ref Pt",
+                    id={"type": "click-button", "m_id": "s_turn", "role": "bearing"},
+                    className="shelf-action shelf-action-set",
+                    title="Click a second point that defines the reference line's bearing. The reference line should be near-perpendicular to wind."),
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "s_turn"},
+                    className="shelf-action shelf-action-draw",
+                    title="Simulate the S-turns."),
+        *_results_modal_pair("s_turn", "sturn-info",
+                             title="S-Turns — Simulation Results"),
     ]

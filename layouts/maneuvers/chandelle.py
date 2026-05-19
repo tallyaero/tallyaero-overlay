@@ -27,18 +27,6 @@ def chandelle_layout(default_elev=None):
             id="chandelle-ias", type="number", placeholder="Va",
         ), tooltip="Entry IAS. Default Va (maneuvering speed) from the POH."),
 
-        html.Div(className="shelf-spacer"),
-
-        html.Button("Set Entry",
-                    id={"type": "click-button", "m_id": "chandelle", "role": "start"},
-                    className="shelf-action shelf-action-set",
-                    title="Click the map to mark the entry point."),
-        html.Button("Draw", id={"type": "draw-btn", "m_id": "chandelle"},
-                    className="shelf-action shelf-action-draw",
-                    title="Simulate the climbing 180° turn."),
-        *_results_modal_pair("chandelle", "chandelle-info",
-                             title="Chandelle — Simulation Results"),
-
         html.Div(id={"type": "click-status", "m_id": "chandelle"}, style={"display": "none"}),
         html.Div(id="chandelle-slider-container",
                  style={"display": "none"},
@@ -50,4 +38,19 @@ def chandelle_layout(default_elev=None):
                  ]),
         dcc.Store(id="chandelle-hover-store", data=[]),
         dcc.Store(id="chandelle-path-store", data=[]),
+    ]
+
+
+def chandelle_actions():
+    """Action buttons + Results modal rendered into the overlay panel."""
+    return [
+        html.Button("Set Entry",
+                    id={"type": "click-button", "m_id": "chandelle", "role": "start"},
+                    className="shelf-action shelf-action-set",
+                    title="Click the map to mark the entry point."),
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "chandelle"},
+                    className="shelf-action shelf-action-draw",
+                    title="Simulate the climbing 180° turn."),
+        *_results_modal_pair("chandelle", "chandelle-info",
+                             title="Chandelle — Simulation Results"),
     ]

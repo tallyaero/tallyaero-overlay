@@ -29,23 +29,6 @@ def rect_course_layout(default_elev=None):
             value=1, min=1, max=3, step=1,
         ), tooltip="Number of full rectangle loops."),
 
-        html.Div(className="shelf-spacer"),
-
-        html.Button("1. DW Start",
-                    id={"type": "click-button", "m_id": "rect_course", "role": "dw_start"},
-                    className="shelf-action shelf-action-set",
-                    title="Click the first point on the downwind leg (flown faster with tailwind). "
-                          "Pick the leg parallel to wind so the rectangle's long sides are downwind/upwind."),
-        html.Button("2. DW End",
-                    id={"type": "click-button", "m_id": "rect_course", "role": "dw_end"},
-                    className="shelf-action shelf-action-set",
-                    title="Click the second point on the downwind leg to define its length + bearing."),
-        html.Button("Draw", id={"type": "draw-btn", "m_id": "rect_course"},
-                    className="shelf-action shelf-action-draw",
-                    title="Simulate the wind-corrected rectangle around the field."),
-        *_results_modal_pair("rect_course", "rectcourse-info",
-                             title="Rectangular Course — Simulation Results"),
-
         html.Div(id="rectcourse-edge-visible-info", className="shelf-info-panel"),
         html.Div(id={"type": "click-status", "m_id": "rect_course"}, style={"display": "none"}),
         html.Div(id="rectcourse-slider-container",
@@ -59,4 +42,22 @@ def rect_course_layout(default_elev=None):
         dcc.Store(id="rectcourse-hover-store", data=[]),
         dcc.Store(id="rectcourse-path-store", data=[]),
         dcc.Store(id="rectcourse-warnings-store", data={}),
+    ]
+
+
+def rect_course_actions():
+    return [
+        html.Button("1. DW Start",
+                    id={"type": "click-button", "m_id": "rect_course", "role": "dw_start"},
+                    className="shelf-action shelf-action-set",
+                    title="Click the first point on the downwind leg."),
+        html.Button("2. DW End",
+                    id={"type": "click-button", "m_id": "rect_course", "role": "dw_end"},
+                    className="shelf-action shelf-action-set",
+                    title="Click the second point on the downwind leg."),
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "rect_course"},
+                    className="shelf-action shelf-action-draw",
+                    title="Simulate the wind-corrected rectangle around the field."),
+        *_results_modal_pair("rect_course", "rectcourse-info",
+                             title="Rectangular Course — Simulation Results"),
     ]

@@ -11,17 +11,17 @@ from __future__ import annotations
 from dash import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from layouts.maneuvers.impossible_turn import impossible_turn_layout
-from layouts.maneuvers.poweroff180 import poweroff180_layout
-from layouts.maneuvers.engineout import engineout_layout
-from layouts.maneuvers.steep_turn import steep_turn_layout
-from layouts.maneuvers.chandelle import chandelle_layout
-from layouts.maneuvers.lazy_eight import lazy8_layout
-from layouts.maneuvers.steep_spiral import steep_spiral_layout
-from layouts.maneuvers.s_turn import s_turn_layout
-from layouts.maneuvers.turns_around_point import turns_point_layout
-from layouts.maneuvers.rectangular_course import rect_course_layout
-from layouts.maneuvers.eights_on_pylons import pylons_layout
+from layouts.maneuvers.impossible_turn import impossible_turn_layout, impossible_turn_actions
+from layouts.maneuvers.poweroff180 import poweroff180_layout, poweroff180_actions
+from layouts.maneuvers.engineout import engineout_layout, engineout_actions
+from layouts.maneuvers.steep_turn import steep_turn_layout, steep_turn_actions
+from layouts.maneuvers.chandelle import chandelle_layout, chandelle_actions
+from layouts.maneuvers.lazy_eight import lazy8_layout, lazy8_actions
+from layouts.maneuvers.steep_spiral import steep_spiral_layout, steep_spiral_actions
+from layouts.maneuvers.s_turn import s_turn_layout, s_turn_actions
+from layouts.maneuvers.turns_around_point import turns_point_layout, turns_point_actions
+from layouts.maneuvers.rectangular_course import rect_course_layout, rect_course_actions
+from layouts.maneuvers.eights_on_pylons import pylons_layout, pylons_actions
 from layouts.maneuvers.route import route_layout
 
 from core.data_loader import aircraft_data, airport_data
@@ -148,8 +148,27 @@ def _resolve_runway_end_magnetic(airport_id, end_id):
 def register(app):
     """Install every aircraft-config callback against the given Dash app."""
 
+    # Maneuvers ship their action buttons (Set X / Draw / Results)
+    # in a separate `*_actions()` function alongside their layout, so
+    # those buttons can be rendered into the floating overlay panel
+    # next to Reset/Undo while the form fields stay in the top shelf.
+    _ACTIONS_BY_MANEUVER = {
+        "impossible_turn": impossible_turn_actions,
+        "poweroff180": poweroff180_actions,
+        "engineout": engineout_actions,
+        "steep_turn": steep_turn_actions,
+        "chandelle": chandelle_actions,
+        "lazy8": lazy8_actions,
+        "steep_spiral": steep_spiral_actions,
+        "s_turn": s_turn_actions,
+        "turns_point": turns_point_actions,
+        "rect_course": rect_course_actions,
+        "pylons": pylons_actions,
+    }
+
     @app.callback(
         Output("maneuver-params-container", "children"),
+        Output("maneuver-actions-container", "children"),
         Input("maneuver-select", "value"),
         Input("aircraft-select", "value"),
         State("selected-airport-id", "data")
@@ -160,6 +179,12 @@ def register(app):
             ap = next((a for a in airport_data if a["id"] == airport_id), None)
             elev_ft = ap.get("elevation_ft", None) if ap else None
 
+        # Build the form fields (shelf) — same as before. Then look
+        # up the per-maneuver actions builder; route mode + the
+        # default fallthrough have no actions, so the overlay slot
+        # stays empty.
+        fields: list = []
+        actions: list = []
         if maneuver == "route":
             gr = gi = tas = ci = vx = vy = None
             if aircraft_name and aircraft_name in aircraft_data:
@@ -169,9 +194,6 @@ def register(app):
                 gi = sel.get("best_glide")
                 vx = ac.get("Vx")
                 vy = ac.get("Vy")
-                # Default planning TAS = 85% of Vno (top of green arc), a
-                # standard ~75% power cruise approximation. Vno is present
-                # on every aircraft via arcs.green[1] or top-level Vno.
                 vno = ac.get("Vno")
                 if not vno:
                     arcs = ac.get("arcs") or {}
@@ -179,37 +201,42 @@ def register(app):
                     if len(green) >= 2:
                         vno = green[1]
                 tas = round(vno * 0.85) if vno else None
-                ci = vy   # default climb IAS = Vy
+                ci = vy
             is_me = (ac.get("engine_count") or 1) >= 2 if ac else False
-            return route_layout(default_glide_ratio=gr,
-                                default_glide_ias=gi,
-                                default_tas=tas,
-                                default_climb_ias=ci,
-                                vx_kt=vx, vy_kt=vy,
-                                is_multi_engine=is_me)
-        if maneuver == "impossible_turn":
-            return impossible_turn_layout()
+            fields = route_layout(default_glide_ratio=gr,
+                                  default_glide_ias=gi,
+                                  default_tas=tas,
+                                  default_climb_ias=ci,
+                                  vx_kt=vx, vy_kt=vy,
+                                  is_multi_engine=is_me)
+        elif maneuver == "impossible_turn":
+            fields = impossible_turn_layout()
         elif maneuver == "poweroff180":
-            return poweroff180_layout(default_elev=elev_ft)
+            fields = poweroff180_layout(default_elev=elev_ft)
         elif maneuver == "engineout":
-            return engineout_layout()
+            fields = engineout_layout()
         elif maneuver == "steep_turn":
-            return steep_turn_layout()
+            fields = steep_turn_layout()
         elif maneuver == "chandelle":
-            return chandelle_layout()
+            fields = chandelle_layout()
         elif maneuver == "lazy8":
-            return lazy8_layout()
+            fields = lazy8_layout()
         elif maneuver == "steep_spiral":
-            return steep_spiral_layout()
+            fields = steep_spiral_layout()
         elif maneuver == "s_turn":
-            return s_turn_layout()
+            fields = s_turn_layout()
         elif maneuver == "turns_point":
-            return turns_point_layout()
+            fields = turns_point_layout()
         elif maneuver == "rect_course":
-            return rect_course_layout()
+            fields = rect_course_layout()
         elif maneuver == "pylons":
-            return pylons_layout()
-        return []
+            fields = pylons_layout()
+
+        actions_builder = _ACTIONS_BY_MANEUVER.get(maneuver)
+        if actions_builder is not None:
+            actions = actions_builder()
+
+        return fields, actions
 
     @app.callback(
         Output("pylons-ias-store", "data"),

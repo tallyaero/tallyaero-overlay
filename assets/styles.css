@@ -2319,11 +2319,51 @@ input[type="radio"] {
   z-index: 1000;
   display: flex;
   gap: 4px;
+  align-items: center;
   background: rgba(255, 255, 255, 0.92);
   padding: 4px;
   border-radius: 6px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   backdrop-filter: blur(4px);
+}
+/* Per-maneuver action buttons (Set X / Draw / Results) render
+   into this slot at the LEFT of the overlay, separated from the
+   Reset/Undo housekeeping buttons by a vertical divider. */
+.map-overlay-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.map-overlay-actions:empty {
+  display: none;
+}
+.map-overlay-actions:empty + .map-overlay-divider {
+  display: none;
+}
+.map-overlay-divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--ta-border-primary, #cbd5e1);
+  margin: 2px 4px;
+}
+[data-theme="dark"] .map-overlay-divider {
+  background: #334155;
+}
+/* Scale the shelf-action buttons down a touch to match the
+   overlay's compact map-overlay-btn sizing. The buttons keep
+   their existing `shelf-action shelf-action-{set,draw,results,
+   success,failure}` classNames so the per-callback color setters
+   (Phase I7) continue to work. */
+.map-overlay-actions .shelf-action {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 3px;
+  margin: 0;
+  line-height: 1;
 }
 .map-overlay-btn {
   height: 26px;

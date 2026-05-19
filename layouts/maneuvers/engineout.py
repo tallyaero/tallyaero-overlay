@@ -8,6 +8,9 @@ from layouts.maneuvers._shared import _field, _results_modal_pair
 
 
 def engineout_layout(default_elev=None):
+    """Form fields + hidden helpers + stores. Action buttons are
+    returned separately by `engineout_actions()` and rendered in
+    the floating overlay panel, not in the shelf."""
     return [
         _field("Runway", dcc.Dropdown(
             id="engineout-runway-select",
@@ -64,8 +67,36 @@ def engineout_layout(default_elev=None):
             title="Toggle the reachable-glide envelope ring overlay.",
         ),
 
-        html.Div(className="shelf-spacer"),
+        # Hidden helpers + stores. These have to exist in the DOM
+        # while the maneuver is active so the callbacks can read /
+        # write them; their visibility is controlled per-element.
+        dcc.Input(id="engineout-speed-tau", type="hidden", value=4.0),
+        dcc.Input(id="engineout-bank-tau", type="hidden", value=1.5),
+        html.Div(id="engineout-runway-info", style={"display": "none"}),
+        html.Div(id="engineout-manual-heading-div", style={"display": "none"}),
+        html.Div(id={"type": "click-status", "m_id": "engineout"}, style={"display": "none"}),
+        html.Div(id="engineout-min-alt-result", style={"display": "none"}),
+        html.Div(id="engineout-slider-container",
+                 style={"display": "none"},
+                 children=[
+                     dcc.Slider(id="engineout-time-slider",
+                                min=0, max=100, step=1, value=0,
+                                marks={0: "Start", 100: "End"},
+                                tooltip={"placement": "bottom", "always_visible": False}),
+                 ]),
+        dcc.Store(id="engineout-hover-store", data=[]),
+        dcc.Store(id="engineout-path-store", data=[]),
+        dcc.Store(id="engineout-envelope-store", data=[]),
+    ]
 
+
+def engineout_actions():
+    """Action buttons + Results modal — rendered into the floating
+    overlay panel by `render_maneuver_actions`. Buttons keep their
+    existing `shelf-action` classNames so the Results-button
+    success/failure colors from Phase I7 + the engineout callback's
+    className setter continue to work without changes."""
+    return [
         html.Button("Set Touchdown",
                     id={"type": "click-button", "m_id": "engineout", "role": "touchdown"},
                     className="shelf-action shelf-action-set",
@@ -79,25 +110,4 @@ def engineout_layout(default_elev=None):
                     title="Run the glide simulation."),
         *_results_modal_pair("engineout", "engineout-info",
                              title="Engine-Out Glide — Simulation Results"),
-
-        # Hidden helpers
-        dcc.Input(id="engineout-speed-tau", type="hidden", value=4.0),
-        dcc.Input(id="engineout-bank-tau", type="hidden", value=1.5),
-        html.Div(id="engineout-runway-info", style={"display": "none"}),
-        html.Div(id="engineout-manual-heading-div", style={"display": "none"}),
-        html.Div(id={"type": "click-status", "m_id": "engineout"}, style={"display": "none"}),
-        # Stash for the callback's min-altitude output — surfaced inside
-        # the Results modal now, not visible on the control strip.
-        html.Div(id="engineout-min-alt-result", style={"display": "none"}),
-        html.Div(id="engineout-slider-container",
-                 style={"display": "none"},
-                 children=[
-                     dcc.Slider(id="engineout-time-slider",
-                                min=0, max=100, step=1, value=0,
-                                marks={0: "Start", 100: "End"},
-                                tooltip={"placement": "bottom", "always_visible": False}),
-                 ]),
-        dcc.Store(id="engineout-hover-store", data=[]),
-        dcc.Store(id="engineout-path-store", data=[]),
-        dcc.Store(id="engineout-envelope-store", data=[]),
     ]

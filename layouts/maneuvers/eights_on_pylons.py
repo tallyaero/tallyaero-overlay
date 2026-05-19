@@ -37,8 +37,21 @@ def pylons_layout(default_elev=None):
             value="downwind", clearable=False,
         ), tooltip="Whether you enter on a downwind or upwind leg."),
 
-        html.Div(className="shelf-spacer"),
+        html.Div(id={"type": "click-status", "m_id": "pylons"}, style={"display": "none"}),
+        html.Div(id="pylons-slider-container",
+                 style={"display": "none"},
+                 children=[
+                     dcc.Slider(id="pylons-time-slider",
+                                min=0, max=100, step=1, value=0, marks={},
+                                tooltip={"placement": "bottom", "always_visible": False}),
+                 ]),
+        dcc.Store(id="pylons-hover-store", data=[]),
+        dcc.Store(id="pylons-path-store", data=[]),
+    ]
 
+
+def pylons_actions():
+    return [
         html.Button("Set Pylon 1",
                     id={"type": "click-button", "m_id": "pylons", "role": "pylon_a"},
                     className="shelf-action shelf-action-set",
@@ -52,15 +65,4 @@ def pylons_layout(default_elev=None):
                     title="Simulate the figure-8 with pivotal-altitude visualization."),
         *_results_modal_pair("pylons", "pylons-info",
                              title="Eights on Pylons — Simulation Results"),
-
-        html.Div(id={"type": "click-status", "m_id": "pylons"}, style={"display": "none"}),
-        html.Div(id="pylons-slider-container",
-                 style={"display": "none"},
-                 children=[
-                     dcc.Slider(id="pylons-time-slider",
-                                min=0, max=100, step=1, value=0, marks={},
-                                tooltip={"placement": "bottom", "always_visible": False}),
-                 ]),
-        dcc.Store(id="pylons-hover-store", data=[]),
-        dcc.Store(id="pylons-path-store", data=[]),
     ]

@@ -44,18 +44,6 @@ def steep_turn_layout(default_elev=None):
             id="steepturn-ias", type="number", placeholder="Va",
         ), tooltip="Indicated airspeed. Default is Va (maneuvering speed) from the POH."),
 
-        html.Div(className="shelf-spacer"),
-
-        html.Button("Set Entry",
-                    id={"type": "click-button", "m_id": "steep_turn", "role": "start"},
-                    className="shelf-action shelf-action-set",
-                    title="Click the map to mark the entry point."),
-        html.Button("Draw", id={"type": "draw-btn", "m_id": "steep_turn"},
-                    className="shelf-action shelf-action-draw",
-                    title="Simulate the steep turn(s)."),
-        *_results_modal_pair("steep_turn", "steepturn-info",
-                             title="Steep Turn — Simulation Results"),
-
         html.Div(id={"type": "click-status", "m_id": "steep_turn"}, style={"display": "none"}),
         html.Div(id="steepturn-slider-container",
                  style={"display": "none"},
@@ -67,4 +55,18 @@ def steep_turn_layout(default_elev=None):
                  ]),
         dcc.Store(id="steepturn-hover-store", data=[]),
         dcc.Store(id="steepturn-path-store", data=[]),
+    ]
+
+
+def steep_turn_actions():
+    return [
+        html.Button("Set Entry",
+                    id={"type": "click-button", "m_id": "steep_turn", "role": "start"},
+                    className="shelf-action shelf-action-set",
+                    title="Click the map to mark the entry point."),
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "steep_turn"},
+                    className="shelf-action shelf-action-draw",
+                    title="Simulate the steep turn(s)."),
+        *_results_modal_pair("steep_turn", "steepturn-info",
+                             title="Steep Turn — Simulation Results"),
     ]

@@ -27,18 +27,6 @@ def lazy8_layout(default_elev=None):
             value="left", inline=True, className="shelf-field-radio",
         ), tooltip="Which way the first half-eight rolls."),
 
-        html.Div(className="shelf-spacer"),
-
-        html.Button("Set Entry",
-                    id={"type": "click-button", "m_id": "lazy8", "role": "start"},
-                    className="shelf-action shelf-action-set",
-                    title="Click the map to mark the entry point."),
-        html.Button("Draw", id={"type": "draw-btn", "m_id": "lazy8"},
-                    className="shelf-action shelf-action-draw",
-                    title="Simulate the figure-8 with oscillating altitude."),
-        *_results_modal_pair("lazy8", "lazy8-info",
-                             title="Lazy 8 — Simulation Results"),
-
         html.Div(id={"type": "click-status", "m_id": "lazy8"}, style={"display": "none"}),
         html.Div(id="lazy8-slider-container",
                  style={"display": "none"},
@@ -50,4 +38,18 @@ def lazy8_layout(default_elev=None):
                  ]),
         dcc.Store(id="lazy8-hover-store", data=[]),
         dcc.Store(id="lazy8-path-store", data=[]),
+    ]
+
+
+def lazy8_actions():
+    return [
+        html.Button("Set Entry",
+                    id={"type": "click-button", "m_id": "lazy8", "role": "start"},
+                    className="shelf-action shelf-action-set",
+                    title="Click the map to mark the entry point."),
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "lazy8"},
+                    className="shelf-action shelf-action-draw",
+                    title="Simulate the figure-8 with oscillating altitude."),
+        *_results_modal_pair("lazy8", "lazy8-info",
+                             title="Lazy 8 — Simulation Results"),
     ]

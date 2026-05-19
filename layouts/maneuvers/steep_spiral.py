@@ -34,18 +34,6 @@ def steep_spiral_layout(default_elev=None):
             value="left", inline=True, className="shelf-field-radio",
         ), tooltip="Spiral direction."),
 
-        html.Div(className="shelf-spacer"),
-
-        html.Button("Set Ref",
-                    id={"type": "click-button", "m_id": "steep_spiral", "role": "ref"},
-                    className="shelf-action shelf-action-set",
-                    title="Click the ground reference point for the spiral center."),
-        html.Button("Draw", id={"type": "draw-btn", "m_id": "steep_spiral"},
-                    className="shelf-action shelf-action-draw",
-                    title="Run the descending spiral."),
-        *_results_modal_pair("steep_spiral", "steepspiral-warnings",
-                             title="Steep Spiral — Simulation Results"),
-
         html.Div(id={"type": "click-status", "m_id": "steep_spiral"}, style={"display": "none"}),
         html.Div(id="steepspiral-slider-container",
                  style={"display": "none"},
@@ -57,4 +45,18 @@ def steep_spiral_layout(default_elev=None):
                  ]),
         dcc.Store(id="steepspiral-hover-store", data=[]),
         dcc.Store(id="steepspiral-path-store", data=[]),
+    ]
+
+
+def steep_spiral_actions():
+    return [
+        html.Button("Set Ref",
+                    id={"type": "click-button", "m_id": "steep_spiral", "role": "ref"},
+                    className="shelf-action shelf-action-set",
+                    title="Click the ground reference point for the spiral center."),
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "steep_spiral"},
+                    className="shelf-action shelf-action-draw",
+                    title="Run the descending spiral."),
+        *_results_modal_pair("steep_spiral", "steepspiral-warnings",
+                             title="Steep Spiral — Simulation Results"),
     ]

@@ -568,6 +568,15 @@ def desktop_layout():
                     html.Div(id="map-controls-overlay",
                              className="map-controls-overlay",
                              children=[
+                        # Active-maneuver action buttons (Set X / Draw /
+                        # Results) — rendered by `render_maneuver_actions`
+                        # based on the current maneuver-select value.
+                        # Lives above the Reset row so the user sees the
+                        # forward-progress actions first, with the
+                        # housekeeping actions below.
+                        html.Div(id="maneuver-actions-container",
+                                 className="map-overlay-actions"),
+                        html.Div(className="map-overlay-divider"),
                         html.Button("Reset All", id="reset-all", className="map-overlay-btn"),
                         html.Button("Reset Clicks", id="reset-clicks", className="map-overlay-btn"),
                         html.Button("Undo", id="undo-last-click", className="map-overlay-btn map-overlay-btn-undo"),

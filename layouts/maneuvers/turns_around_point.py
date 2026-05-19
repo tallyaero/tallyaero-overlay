@@ -34,18 +34,6 @@ def turns_point_layout(default_elev=None):
         ), tooltip="Entry heading. Leave blank for auto downwind entry (ACS preferred). "
                   "Override only if the prevailing wind isn't representative."),
 
-        html.Div(className="shelf-spacer"),
-
-        html.Button("Set Center",
-                    id={"type": "click-button", "m_id": "turns_point", "role": "center"},
-                    className="shelf-action shelf-action-set",
-                    title="Click the ground reference point to orbit."),
-        html.Button("Draw", id={"type": "draw-btn", "m_id": "turns_point"},
-                    className="shelf-action shelf-action-draw",
-                    title="Simulate the constant-radius orbit."),
-        *_results_modal_pair("turns_point", "turnspoint-info",
-                             title="Turns Around a Point — Simulation Results"),
-
         html.Div(id={"type": "click-status", "m_id": "turns_point"}, style={"display": "none"}),
         html.Div(id="turnspoint-slider-container",
                  style={"display": "none"},
@@ -58,4 +46,18 @@ def turns_point_layout(default_elev=None):
         dcc.Store(id="turnspoint-hover-store", data=[]),
         dcc.Store(id="turnspoint-path-store", data=[]),
         dcc.Store(id="turnspoint-warnings-store", data={}),
+    ]
+
+
+def turns_point_actions():
+    return [
+        html.Button("Set Center",
+                    id={"type": "click-button", "m_id": "turns_point", "role": "center"},
+                    className="shelf-action shelf-action-set",
+                    title="Click the ground reference point to orbit."),
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "turns_point"},
+                    className="shelf-action shelf-action-draw",
+                    title="Simulate the constant-radius orbit."),
+        *_results_modal_pair("turns_point", "turnspoint-info",
+                             title="Turns Around a Point — Simulation Results"),
     ]

@@ -66,19 +66,6 @@ def poweroff180_layout(default_elev=None):
             type="number", value=1000, min=500, max=2000, step=100,
         ), tooltip="Pattern altitude AGL at the abeam position."),
 
-        html.Div(className="shelf-spacer"),
-
-        html.Button("Set Touchdown",
-                    id={"type": "click-button", "m_id": "poweroff180", "role": "touchdown"},
-                    className="shelf-action shelf-action-set",
-                    title="Click the runway threshold (the touchdown spot)."),
-        html.Button("Draw",
-                    id={"type": "draw-btn", "m_id": "poweroff180"},
-                    className="shelf-action shelf-action-draw",
-                    title="Run the glide-back simulation."),
-        *_results_modal_pair("poweroff180", "poweroff180-info",
-                             title="Power-Off 180 — Simulation Results"),
-
         # Hidden helper containers that existing callbacks still reference.
         html.Div(id="poweroff180-runway-info", style={"display": "none"}),
         html.Div(id="poweroff180-manual-heading-div", style={"display": "none"}),
@@ -101,4 +88,19 @@ def poweroff180_layout(default_elev=None):
         dcc.Store(id="poweroff180-path-store", data=[]),
         dcc.Store(id="poweroff180-results-store", data={}),
 
+    ]
+
+
+def poweroff180_actions():
+    return [
+        html.Button("Set Touchdown",
+                    id={"type": "click-button", "m_id": "poweroff180", "role": "touchdown"},
+                    className="shelf-action shelf-action-set",
+                    title="Click the runway threshold (the touchdown spot)."),
+        html.Button("Draw",
+                    id={"type": "draw-btn", "m_id": "poweroff180"},
+                    className="shelf-action shelf-action-draw",
+                    title="Run the glide-back simulation."),
+        *_results_modal_pair("poweroff180", "poweroff180-info",
+                             title="Power-Off 180 — Simulation Results"),
     ]

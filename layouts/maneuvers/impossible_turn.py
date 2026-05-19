@@ -55,18 +55,6 @@ def impossible_turn_layout(default_elev=None):
             value="windmilling", clearable=False, searchable=False,
         ), tooltip="Propeller condition after the failure. Windmilling is most common."),
 
-        html.Div(className="shelf-spacer"),
-
-        html.Button("Set Takeoff",
-                    id={"type": "click-button", "m_id": "impossible_turn", "role": "start"},
-                    className="shelf-action shelf-action-set",
-                    title="Click on the runway threshold to mark the departure point."),
-        html.Button("Draw", id={"type": "draw-btn", "m_id": "impossible_turn"},
-                    className="shelf-action shelf-action-draw",
-                    title="Run the impossible-turn simulation."),
-        *_results_modal_pair("impossible_turn", "impossibleturn-info",
-                             title="Impossible Turn — Simulation Results"),
-
         # Hidden helper containers (existing callbacks reference these)
         html.Div(id="impossibleturn-runway-info", style={"display": "none"}),
         html.Div(id="impossibleturn-manual-heading-div", style={"display": "none"}),
@@ -83,4 +71,18 @@ def impossible_turn_layout(default_elev=None):
                  ]),
         dcc.Store(id="impossibleturn-hover-store", data=[]),
         dcc.Store(id="impossibleturn-path-store", data=[]),
+    ]
+
+
+def impossible_turn_actions():
+    return [
+        html.Button("Set Takeoff",
+                    id={"type": "click-button", "m_id": "impossible_turn", "role": "start"},
+                    className="shelf-action shelf-action-set",
+                    title="Click on the runway threshold to mark the departure point."),
+        html.Button("Draw", id={"type": "draw-btn", "m_id": "impossible_turn"},
+                    className="shelf-action shelf-action-draw",
+                    title="Run the impossible-turn simulation."),
+        *_results_modal_pair("impossible_turn", "impossibleturn-info",
+                             title="Impossible Turn — Simulation Results"),
     ]
