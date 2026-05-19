@@ -267,39 +267,130 @@ def register(app):
         prevent_initial_call=True,
     )
 
-    # === Reset-all / reset-clicks: wipe every point-store + drawing layer ===
-    # Uses module-level @callback (not @app.callback) to match the original
-    # signature in app.py before Phase 1i extraction.
+    # === Reset-all / reset-clicks: ===
+    #
+    # Reset Clicks: clears the click-armed state + every dropped point
+    # marker, but KEEPS the simulation result (path, scrubber, info,
+    # results modal contents). For when the user just wants to re-pick
+    # the start/touchdown points without re-running the sim.
+    #
+    # Reset All: clears EVERYTHING — point stores, the drawn path on
+    # the map, all per-maneuver hover/path/result stores, the scrubber
+    # slider container visibility, info panels, click-status messages,
+    # and the Results button colors. Puts the page back to the same
+    # state as a fresh page load. Originally only cleared the same
+    # five outputs as Reset Clicks, which left every maneuver's hover
+    # store, slider visibility, button color, and info panel stale —
+    # the user reported that after Reset All they couldn't drop a new
+    # start point because some of that lingering state was interfering.
+    #
+    # Both buttons go through a single callback that switches behavior
+    # on ctx.triggered_id.
+
+    MANEUVER_PREFIXES = (
+        "engineout", "poweroff180", "impossibleturn",
+        "chandelle", "lazy8", "steepspiral", "steepturn",
+        "turnspoint", "sturn", "rectcourse", "pylons",
+    )
+    SLIDER_DEFAULT_MARKS = {0: "Start", 100: "End"}
+    BTN_BASE_CLASS = "shelf-action shelf-action-results"
+
+    # Build per-maneuver Output lists so the callback signature stays
+    # readable. Order matters and must match the return tuple.
+    _maneuver_outputs = []
+    for _p in MANEUVER_PREFIXES:
+        _maneuver_outputs.extend([
+            Output(f"{_p}-hover-store", "data", allow_duplicate=True),
+            Output(f"{_p}-path-store", "data", allow_duplicate=True),
+            Output(f"{_p}-info", "children", allow_duplicate=True),
+            Output(f"{_p}-slider-container", "style", allow_duplicate=True),
+            Output(f"{_p}-time-slider", "value", allow_duplicate=True),
+            Output(f"{_p}-time-slider", "max", allow_duplicate=True),
+            Output(f"{_p}-time-slider", "marks", allow_duplicate=True),
+        ])
+
     @callback(
+        # Shared targets — both Reset buttons write these.
         Output({"type": "point-store", "m_id": ALL, "role": ALL}, "data", allow_duplicate=True),
         Output("active-click-target", "data", allow_duplicate=True),
         Output("layer", "children", allow_duplicate=True),
         Output("map", "bounds", allow_duplicate=True),
         Output("scrubber-layer", "children", allow_duplicate=True),
+        Output("last-click-info", "data", allow_duplicate=True),
+        # Reset-All-only targets: per-maneuver UI state, results
+        # buttons, status messages, plus engineout/impossible-turn
+        # /rectcourse one-off readouts.
+        Output({"type": "click-status", "m_id": ALL}, "children", allow_duplicate=True),
+        Output({"type": "sim-results-btn", "m_id": ALL}, "className", allow_duplicate=True),
+        Output("engineout-envelope-store", "data", allow_duplicate=True),
+        Output("engineout-min-alt-result", "children", allow_duplicate=True),
+        Output("impossibleturn-result", "children", allow_duplicate=True),
+        Output("rectcourse-edge-visible-info", "children", allow_duplicate=True),
+        *_maneuver_outputs,
         Input("reset-all", "n_clicks"),
         Input("reset-clicks", "n_clicks"),
         State({"type": "point-store", "m_id": ALL, "role": ALL}, "id"),
+        State({"type": "click-status", "m_id": ALL}, "id"),
+        State({"type": "sim-results-btn", "m_id": ALL}, "id"),
         prevent_initial_call=True,
     )
-    def handle_resets(n_reset_all, n_reset_clicks, store_ids):
+    def handle_resets(n_reset_all, n_reset_clicks,
+                       store_ids, status_ids, btn_ids):
         trigger = ctx.triggered_id
         if trigger not in ("reset-all", "reset-clicks"):
             raise PreventUpdate
 
-        # Clear every point-store, regardless of maneuver
+        # ----- Shared cleanup (both buttons) -----
         cleared_points = [None] * len(store_ids)
-
-        # Clear click target so map clicks do not overwrite anything until re-armed
         cleared_target = None
-
-        # Clear the drawing layer and bounds
-        cleared_layer = []
+        cleared_layer: list = []
         cleared_bounds = None
+        cleared_scrubber: list = []
+        cleared_last_click = None
 
-        # Clear scrubber layer
-        cleared_scrubber = []
+        shared = (cleared_points, cleared_target, cleared_layer,
+                  cleared_bounds, cleared_scrubber, cleared_last_click)
 
-        return cleared_points, cleared_target, cleared_layer, cleared_bounds, cleared_scrubber
+        if trigger == "reset-clicks":
+            # Reset Clicks: keep simulation results — feed no_update
+            # for every per-maneuver / results-button / status output.
+            status_passthrough = [no_update] * len(status_ids)
+            btn_passthrough = [no_update] * len(btn_ids)
+            maneuver_passthrough = [no_update] * len(_maneuver_outputs)
+            return (
+                *shared,
+                status_passthrough, btn_passthrough,
+                no_update,  # engineout-envelope-store
+                no_update,  # engineout-min-alt-result
+                no_update,  # impossibleturn-result
+                no_update,  # rectcourse-edge-visible-info
+                *maneuver_passthrough,
+            )
+
+        # ----- Reset All: full wipe -----
+        status_cleared = [""] * len(status_ids)
+        btn_cleared = [BTN_BASE_CLASS] * len(btn_ids)
+        maneuver_cleared: list = []
+        for _ in MANEUVER_PREFIXES:
+            maneuver_cleared.extend([
+                [],                              # hover-store
+                [],                              # path-store
+                "",                              # info
+                {"display": "none"},             # slider-container style
+                0,                               # time-slider value
+                100,                             # time-slider max
+                SLIDER_DEFAULT_MARKS,            # time-slider marks
+            ])
+
+        return (
+            *shared,
+            status_cleared, btn_cleared,
+            [],   # engineout-envelope-store
+            "",   # engineout-min-alt-result
+            "",   # impossibleturn-result
+            "",   # rectcourse-edge-visible-info
+            *maneuver_cleared,
+        )
 
     # === Legal modal stack: disclaimer / terms-policy / quickstart ===
     @app.callback(
