@@ -35,6 +35,12 @@
 
     // Handle keyboard events
     function handleKeyDown(event) {
+        // Bail on the synthetic keydown we re-dispatch to the slider
+        // handle below — otherwise the bubbling event re-enters this
+        // capture-phase listener on document and recurses until the
+        // call stack overflows. Only the real user keypress is trusted.
+        if (!event.isTrusted) return;
+
         // Only handle left/right arrow keys for sliders
         if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
 
