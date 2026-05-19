@@ -135,6 +135,28 @@ def _coerce_alt(val: Any) -> float | None:
     return v
 
 
+def _format_alt(val: float | None) -> str:
+    """Pilot-readable altitude string from a coerced NASR value.
+    SFC for surface, Unlimited for the upper sentinel, FL### for
+    >= FL180, otherwise '{val:,} ft MSL'."""
+    if val is None:
+        return "—"
+    if val <= 0.0:
+        return "SFC"
+    if val >= 99000:
+        return "Unlimited"
+    if val >= 18000:
+        return f"FL{int(round(val / 100)):03d}"
+    return f"{int(round(val)):,} ft MSL"
+
+
+def format_alt_band(rec: dict) -> str:
+    """One-line floor → ceiling string for a polygon record. Used
+    by tooltips + nav-log rows so encoded NASR descriptor codes
+    (TI/AA/TNI/ANI) never reach the pilot."""
+    return f"{_format_alt(rec.get('floor_ft'))} → {_format_alt(rec.get('ceiling_ft'))}"
+
+
 def _bbox_of_geometry(geom: dict) -> tuple[float, float, float, float] | None:
     """Return (minlon, minlat, maxlon, maxlat). None if empty."""
     if not geom:

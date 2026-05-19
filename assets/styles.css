@@ -1908,6 +1908,26 @@ input[type="radio"] {
   padding: 3px 6px;
 }
 
+/* Airspace altitude-band label rendered as a div-icon inside each
+   polygon. Reads ceiling-over-floor like a sectional chart. Painted
+   over the centroid of the outer ring. */
+.asp-band-icon { background: none !important; border: 0 !important; }
+.asp-band-label {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+  text-shadow: 0 0 2px #fff, 0 0 2px #fff, 0 0 2px #fff;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.asp-band-label hr {
+  border: 0;
+  border-top: 1px solid currentColor;
+  margin: 1px 4px;
+}
+
 /* Toggle chip — replaces the old labeled checkbox "Envelope: Ring".
    Wraps a single-option dcc.Checklist into a pill-shaped chip that
    highlights when checked. The native checkbox input is hidden; the

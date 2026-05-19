@@ -42,7 +42,7 @@ from core.waypoints import (
 from core.diverts import (
     divert_coverage_along_route_glide, gap_segments, longest_gap_nm,
 )
-from core.airspace import route_crossings, TYPE_STYLES
+from core.airspace import route_crossings, TYPE_STYLES, _format_alt
 from core.atmosphere import density_altitude_ft
 from core.flight_profile import (
     compute_flight_profile, altitude_at_distance,
@@ -753,9 +753,9 @@ def _build_nav_log(*, waypoints, legs, totals, cruise_alt, aircraft_name,
                                   style={"backgroundColor": color,
                                          "color": "#fff"})),
                 html.Td(x["name"], className="nav-log-as-name"),
-                html.Td(x.get("floor_desc") or "—",
+                html.Td(_format_alt(x.get("floor_ft")),
                         className="nav-log-as-alt"),
-                html.Td(x.get("ceiling_desc") or "—",
+                html.Td(_format_alt(x.get("ceiling_ft")),
                         className="nav-log-as-alt"),
                 html.Td(times_text,
                         className="nav-log-as-times",
@@ -2287,11 +2287,12 @@ def register(app):
     @app.callback(
         Output("airspace-layer", "children"),
         Input("map", "bounds"),
+        Input("map", "zoom"),
         Input("route-show-airspace", "value"),
         Input("maneuver-select", "value"),
         prevent_initial_call=False,
     )
-    def render_airspace_overlay(bounds, show_layers, maneuver):
+    def render_airspace_overlay(bounds, zoom, show_layers, maneuver):
         # Off when not on the route planner.
         if maneuver != "route":
             return []
@@ -2302,6 +2303,7 @@ def register(app):
         # dash-leaflet bounds = [[south, west], [north, east]].
         try:
             (south, west), (north, east) = bounds
+            zoom_int = int(zoom or 0)
         except (ValueError, TypeError):
             return []
         # Convert to GeoJSON-order bbox (minlon, minlat, maxlon, maxlat).
@@ -2311,14 +2313,18 @@ def register(app):
         # blob into solid color and Leaflet's rendering cost spikes.
         if (bbox[2] - bbox[0]) > 25.0 or (bbox[3] - bbox[1]) > 18.0:
             return []
-        from core.airspace import styled_in_bbox
+        from core.airspace import styled_in_bbox, format_alt_band
         recs = styled_in_bbox(bbox, list(show_layers))
+        # Permanent altitude labels are useful but visually noisy at
+        # wide zoom. Show them only when the chart is zoomed in
+        # enough that polygons are distinct (~50 NM viewport).
+        show_band_labels = zoom_int >= 8
         polygons = []
         for r in recs:
             geom = r["geometry"]
             style = r["style"]
-            label = (f"{style['label']} — {r['name']}  "
-                     f"{r['floor_desc'] or ''} → {r['ceiling_desc'] or ''}")
+            alt_band = format_alt_band(r)
+            label = f"{style['label']} — {r['name']}  {alt_band}"
             # Phase A3-fwup — append schedule summary when the airspace
             # has a known schedule attached.
             if r.get("schedule_summary"):
@@ -2344,6 +2350,27 @@ def register(app):
                     fillOpacity=style["fillOpacity"],
                     children=dl.Tooltip(label, sticky=True),
                 ))
+                # Permanent altitude-band label centered over the
+                # outer ring's centroid. Tiny chart-style "ceiling /
+                # floor" text — small enough not to dominate the map.
+                if show_band_labels and ring:
+                    clat = sum(p[1] for p in ring) / len(ring)
+                    clon = sum(p[0] for p in ring) / len(ring)
+                    ceil_s = format_alt_band(r).split(" → ")[1]
+                    floor_s = format_alt_band(r).split(" → ")[0]
+                    inner_html = (f"<div class='asp-band-label' "
+                                  f"style='color:{style['color']}'>"
+                                  f"{ceil_s}<hr/>{floor_s}</div>")
+                    polygons.append(dl.Marker(
+                        position=[clat, clon],
+                        icon={
+                            "html": inner_html,
+                            "className": "asp-band-icon",
+                            "iconSize": [60, 28],
+                            "iconAnchor": [30, 14],
+                        },
+                        interactive=False,
+                    ))
         return polygons
 
     # === NAVAID + fix overlay (Phase 7N-e) ===
