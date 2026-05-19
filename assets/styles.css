@@ -2398,6 +2398,16 @@ input[type="radio"] {
   background: var(--ta-border-primary, #cbd5e1);
   margin: 2px 4px;
 }
+/* Route Planner doesn't write to the point-stores those buttons
+   clear, so Reset All / Reset Clicks / Undo would be no-ops here.
+   Hide them in route mode, keeping just the overlay toggles. */
+.map-controls-overlay.overlay-for-route #reset-all,
+.map-controls-overlay.overlay-for-route #reset-clicks,
+.map-controls-overlay.overlay-for-route #undo-last-click,
+.map-controls-overlay.overlay-for-route .map-overlay-divider,
+.map-controls-overlay.overlay-for-route #maneuver-actions-container {
+  display: none;
+}
 [data-theme="dark"] .map-overlay-divider {
   background: #334155;
 }

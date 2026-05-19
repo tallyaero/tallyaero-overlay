@@ -310,7 +310,7 @@ def mobile_layout():
                     dcc.Checklist(id="route-show-waypoints",
                                   options=[{"label": "x", "value": "vor"},
                                            {"label": "x", "value": "fix"}],
-                                  value=[]),
+                                  value=["vor", "fix"]),
                 ],
             ),
         ]),

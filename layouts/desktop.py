@@ -615,8 +615,10 @@ def desktop_layout():
                         ),
                         # Phase 7N-e — VOR / fix overlay toggle. Same
                         # always-mount + CSS-gated pattern as the
-                        # airspace toggle. Default off so the map
-                        # doesn't litter on first open.
+                        # airspace toggle. Both default ON; the zoom
+                        # gates inside render_waypoints_overlay keep
+                        # the map readable until the user zooms in
+                        # (VORs ≥ z7, fixes ≥ z9).
                         html.Div(
                             dcc.Checklist(
                                 id="route-show-waypoints",
@@ -624,7 +626,7 @@ def desktop_layout():
                                     {"label": "VORs", "value": "vor"},
                                     {"label": "Fixes", "value": "fix"},
                                 ],
-                                value=[],
+                                value=["vor", "fix"],
                                 className="waypoints-toggle-list "
                                           "shelf-toggle-chip-checklist",
                                 inline=True,
