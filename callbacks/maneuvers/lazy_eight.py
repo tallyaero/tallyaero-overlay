@@ -165,17 +165,50 @@ def register(app):
             children=dl.Tooltip("Entry Point"),
         )
 
-        # End marker — Theme B end (red-500)
+        # End marker — Theme B end (red-500) + Phase C8c roll-out target hint.
+        # A full Lazy 8 returns to the entry heading (8 reversal points back to start).
+        exit_hdg_v = float(hover[-1].get('heading', heading)) if hover else float(heading)
         end_marker = dl.CircleMarker(
             center=path[-1],
             radius=7,
             color="#ef4444",
             fill=True,
             fillOpacity=1.0,
-            children=dl.Tooltip(f"Exit: {hover[-1].get('heading', 0):.0f}° hdg, {hover[-1].get('alt', 0):.0f} ft"),
+            children=dl.Tooltip(
+                f"Roll-out: {exit_hdg_v:.0f}° "
+                f"(target {float(heading):.0f}°) at "
+                f"{hover[-1].get('alt', 0):.0f} ft"
+            ),
         )
 
-        elements = [start_marker, end_marker] + path_segments
+        # Phase C8c — drop amber CircleMarkers at the 8 reversal points within
+        # the figure-8 (turn_progress = 45/90/135 in each half). The map then
+        # shows where the bank peaks and pitch reverses.
+        reversal_markers = []
+        seen_keys = set()
+        for i, pt in enumerate(hover):
+            prog = float(pt.get("turn_progress", 0))
+            seg = pt.get("segment", "")
+            half = "1" if "half_1" in seg or "first" in seg else "2"
+            for target in (45, 90, 135):
+                if abs(prog - target) < 3:
+                    key = (half, target)
+                    if key in seen_keys:
+                        continue
+                    seen_keys.add(key)
+                    reversal_markers.append(dl.CircleMarker(
+                        center=path[i],
+                        radius=5,
+                        color="#f59e0b",
+                        fill=True,
+                        fillOpacity=0.85,
+                        children=dl.Tooltip(
+                            f"H{half} {target}° — bank {abs(pt.get('aob', 0)):.0f}°"
+                            f", alt {pt.get('alt', 0):.0f} ft"
+                        ),
+                    ))
+
+        elements = [start_marker, end_marker] + path_segments + reversal_markers
 
         # Prepare slider configuration
         num_points = len(hover)
