@@ -561,9 +561,28 @@ def register(app):
                 avg_vs = sum(vs_values) / len(vs_values) if vs_values else 0
                 avg_gs = sum(gs_values) / len(gs_values) if gs_values else 0
 
+            # Headline result line (used to live in `impossibleturn-
+            # result` on the shelf; moved into the modal now). Brand-
+            # blue background so the user sees the punchline above
+            # the per-section diagnostics.
+            headline = html.Div(
+                result,
+                style={
+                    "fontSize": "12px",
+                    "fontWeight": "600",
+                    "padding": "8px 10px",
+                    "marginBottom": "8px",
+                    "background": "rgba(13, 89, 242, 0.08)",
+                    "borderLeft": "3px solid var(--ta-brand-blue, #0d59f2)",
+                    "borderRadius": "3px",
+                    "color": "var(--ta-text-primary, #1e293b)",
+                },
+            )
+
             # Info content - standardized format with glide data
             info_content = dbc.Accordion([
                 dbc.AccordionItem([
+                    headline,
                     html.Div([html.Strong("Aircraft & Environment")], style={"marginBottom": "4px"}),
                     html.Div(f"Weight: {total_wt:.0f} lb | Entry IAS: {entry_ias:.0f} kt", style={"fontSize": "11px"}),
                     html.Div(f"Wind: {wind_dir:.0f}° at {wind_speed:.0f} kt", style={"fontSize": "11px"}),

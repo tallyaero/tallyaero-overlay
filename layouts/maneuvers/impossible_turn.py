@@ -60,7 +60,12 @@ def impossible_turn_layout(default_elev=None):
         html.Div(id="impossibleturn-manual-heading-div", style={"display": "none"}),
         html.Div(id="impossibleturn-climb-tooltip", style={"display": "none"}),
         html.Div(id={"type": "click-status", "m_id": "impossible_turn"}, style={"display": "none"}),
-        html.Div(id="impossibleturn-result", className="shelf-info-panel"),
+        # Hidden — the callback still writes "Recommended constant
+        # bank …" text into this div for any consumer that needs it,
+        # but it's no longer shown on the shelf. The same summary
+        # is prepended into the Results modal so the user sees it
+        # where the rest of the per-run diagnostics live.
+        html.Div(id="impossibleturn-result", style={"display": "none"}),
         html.Div(id="impossibleturn-slider-container",
                  style={"display": "none"},
                  children=[
