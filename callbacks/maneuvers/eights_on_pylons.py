@@ -238,6 +238,29 @@ def register(app):
         if sim_warnings.get("transition_time_warning"):
             warning_elements.append(html.Div(f"ℹ {sim_warnings['transition_time_warning']}", style={"color": "#3498db"}))
 
+        # Phase C8f — min/max safe altitude warning. The standard ACS
+        # Eights on Pylons targets 600-1000 ft AGL pivotal altitude. PA
+        # outside that range means the chosen IAS yields a PA the pilot
+        # can't actually fly safely (too low = obstacles/regulation, too
+        # high = no longer the standard maneuver).
+        pa_avg = float(sim_warnings.get("pivotal_alt_avg", 0))
+        if pa_avg > 0 and (pa_avg < 600 or pa_avg > 1000):
+            if pa_avg < 600:
+                tip = "increase IAS to lift PA into 600-1000 ft band"
+            else:
+                tip = "reduce IAS to lower PA into 600-1000 ft band"
+            warning_elements.append(html.Div(
+                f"PA avg {pa_avg:.0f} ft outside typical 600-1000 AGL — {tip}",
+                style={
+                    "borderLeft": "3px solid var(--acs-marginal, #f59e0b)",
+                    "color": "var(--acs-marginal, #f59e0b)",
+                    "padding": "4px 8px",
+                    "marginBottom": "6px",
+                    "fontSize": "11px",
+                    "backgroundColor": "rgba(245, 158, 11, 0.05)",
+                },
+            ))
+
         # Calculate stall margins
         vs_clean = sim_warnings.get('stall_speed_clean', 48)
         vs_in_turn = sim_warnings.get('stall_speed_in_turn', vs_clean)
@@ -268,7 +291,15 @@ def register(app):
                     html.Div(f"Weight: {sim_warnings.get('weight_lb', 0):.0f} lb | IAS: {sim_warnings.get('ias_knots', 0):.0f} kt | TAS: {avg_tas:.0f} kt | Wind: {sim_warnings.get('wind_dir', 0):.0f}°/{sim_warnings.get('wind_speed', 0):.0f} kt", style={"fontSize": "11px"}),
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                     html.Div(f"AOB: {sim_warnings.get('min_bank_achieved', 0):.0f}-{max_bank:.0f}° | Load: {load_factor:.2f}G | GS: {sim_warnings.get('min_groundspeed', 0):.0f}-{sim_warnings.get('max_groundspeed', 0):.0f} kt", style={"fontSize": "11px"}),
-                    html.Div(f"Pylon sep: {sim_warnings.get('pylon_distance_nm', 0):.2f} nm | Trans: {sim_warnings.get('transition_time_avg_sec', 0):.1f}s", style={"fontSize": "11px"}),
+                    html.Div(
+                        f"Pylon sep: {sim_warnings.get('pylon_distance_nm', 0):.2f} nm "
+                        f"({sim_warnings.get('pylon_distance_ft', 0):.0f} ft) "
+                        f"| Trans: {sim_warnings.get('transition_time_avg_sec', 0):.1f}s",
+                        style={"fontSize": "11px"},
+                        title="Pylon separation in NM and ft. ACS Commercial expects "
+                              "the pilot to choose pylons spaced appropriately for the "
+                              "chosen pivotal altitude (typically 0.4-0.7 NM at GA IAS).",
+                    ),
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                     html.Div(f"Stall margin: {min_ias_achieved - vs_in_turn:.0f} kt | Time: {sim_warnings.get('total_time_sec', 0):.0f}s | {n_eights} eights", style={"fontSize": "11px"}),
                     html.Div([
