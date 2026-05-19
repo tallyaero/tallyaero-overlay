@@ -22,6 +22,7 @@ route within the same hour is a cache hit.
 """
 from __future__ import annotations
 
+import bisect
 import math
 from datetime import datetime, timezone
 from functools import lru_cache
@@ -269,3 +270,119 @@ def fetch_winds_aloft(
 def clear_cache() -> None:
     """Drop the in-memory LRU. For testing."""
     _cached_batch_fetch.cache_clear()
+
+
+# === Phase H · WindProfile: column with in-memory interpolation ============
+#
+# `fetch_winds_aloft` is point-and-altitude shaped — fine for a route
+# (each sample asks for its cruise altitude). Maneuver sims need a
+# COLUMN at one point so a per-tick alt lookup is cheap (no second API
+# call). WindProfile holds the column and interpolates linearly between
+# layers; direction interpolates circularly via unit-vector blend so
+# we don't get a 350°→10° wrap-around averaging to 180°.
+
+_PROFILE_ALTS_FT: tuple[float, ...] = (0.0, 1500.0, 3000.0, 6000.0, 9000.0, 12000.0)
+
+
+class WindProfile:
+    """A column of (alt_ft_MSL → (dir_deg, speed_kt)).
+
+    .at(alt_ft) returns the interpolated wind at any altitude. Clamps
+    to the nearest endpoint outside the column's range so a maneuver
+    drifting slightly above the model's ceiling still gets a sensible
+    answer instead of a hard fail.
+
+    The layers list is sorted ascending by altitude at construction
+    time. Use `.layers()` to get a copy for serialization (e.g., into a
+    dcc.Store)."""
+    __slots__ = ("_alts", "_dirs", "_kts")
+
+    def __init__(self, layers: list[tuple[float, float, float]]):
+        sorted_layers = sorted(
+            [(float(a), float(d), float(k)) for a, d, k in layers],
+            key=lambda t: t[0],
+        )
+        self._alts = [a for a, _, _ in sorted_layers]
+        self._dirs = [d for _, d, _ in sorted_layers]
+        self._kts = [k for _, _, k in sorted_layers]
+
+    def at(self, alt_ft: float) -> tuple[float, float]:
+        """Return (wind_dir_deg, wind_speed_kt) at `alt_ft` MSL.
+        Clamps to first/last layer outside the column."""
+        if not self._alts:
+            return (0.0, 0.0)
+        if alt_ft <= self._alts[0]:
+            return (self._dirs[0], self._kts[0])
+        if alt_ft >= self._alts[-1]:
+            return (self._dirs[-1], self._kts[-1])
+        i = bisect.bisect_left(self._alts, alt_ft)
+        a0, a1 = self._alts[i - 1], self._alts[i]
+        d0, d1 = self._dirs[i - 1], self._dirs[i]
+        k0, k1 = self._kts[i - 1], self._kts[i]
+        span = a1 - a0
+        f = 0.0 if span <= 0 else (alt_ft - a0) / span
+        # Circular interpolation on direction (treat as unit vectors).
+        ang0 = math.radians(d0)
+        ang1 = math.radians(d1)
+        x = (1.0 - f) * math.cos(ang0) + f * math.cos(ang1)
+        y = (1.0 - f) * math.sin(ang0) + f * math.sin(ang1)
+        d = (math.degrees(math.atan2(y, x)) + 360.0) % 360.0
+        return (d, (1.0 - f) * k0 + f * k1)
+
+    def layers(self) -> list[tuple[float, float, float]]:
+        """Copy of the underlying layers (alt_ft, dir_deg, kt)."""
+        return list(zip(self._alts, self._dirs, self._kts))
+
+    def to_store(self) -> dict:
+        """JSON-serializable shape for a dcc.Store."""
+        return {"layers": [[a, d, k] for a, d, k in self.layers()]}
+
+    @classmethod
+    def from_store(cls, data: Optional[dict]) -> Optional["WindProfile"]:
+        """Hydrate from dcc.Store data. Returns None for falsy input."""
+        if not data:
+            return None
+        layers = data.get("layers") or []
+        if not layers:
+            return None
+        return cls([(a, d, k) for a, d, k in layers])
+
+    def __repr__(self) -> str:
+        cells = ", ".join(
+            f"{a:.0f}:{d:.0f}/{k:.0f}"
+            for a, d, k in zip(self._alts, self._dirs, self._kts)
+        )
+        return f"WindProfile({cells})"
+
+
+def wind_column_at_point(
+    lat: float, lon: float,
+    surface_metar: Optional[dict] = None,
+    alts_ft: tuple[float, ...] = _PROFILE_ALTS_FT,
+    forecast_hour_utc: Optional[datetime] = None,
+) -> Optional[WindProfile]:
+    """Fetch a column of winds aloft at one geographic point.
+
+    One Open-Meteo call → up to 6 layers (SFC, 1500, 3000, 6000, 9000,
+    12000 ft by default). The SFC layer is OVERWRITTEN by
+    `surface_metar` if provided so the model's coarse boundary-layer
+    estimate doesn't outweigh the real reported surface wind.
+
+    Returns None if the API call fails. Caller falls back to single-
+    layer wind from the sidebar.
+    """
+    latlons = [(float(lat), float(lon))] * len(alts_ft)
+    raw = fetch_winds_aloft(
+        latlons, list(alts_ft), forecast_hour_utc=forecast_hour_utc,
+    )
+    if not raw or len(raw) != len(alts_ft):
+        return None
+    layers: list[tuple[float, float, float]] = []
+    for alt, (d, k) in zip(alts_ft, raw):
+        if alt <= 0 and surface_metar:
+            md = surface_metar.get("wind_dir_deg")
+            ms = surface_metar.get("wind_speed_kt")
+            if md is not None and ms is not None:
+                d, k = float(md), float(ms)
+        layers.append((float(alt), float(d), float(k)))
+    return WindProfile(layers)
