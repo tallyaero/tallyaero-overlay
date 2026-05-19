@@ -21,7 +21,9 @@ def steep_turn_layout(default_elev=None):
                 {"label": "60°", "value": 60},
             ],
             value=45, clearable=False,
-        ), tooltip="Target bank angle. 45° is the Private ACS standard, 50° Commercial."),
+        ), tooltip="Target bank angle. 45° is the Private ACS standard, 50° Commercial. "
+                  "Roll rate from the POH determines how fast you reach it "
+                  "(~45°/s for trainers, ~120°/s for aerobatic singles)."),
         _field("Sequence", dcc.Dropdown(
             id="steepturn-sequence",
             options=[

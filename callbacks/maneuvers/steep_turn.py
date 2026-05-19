@@ -144,13 +144,19 @@ def register(app):
             children=dl.Tooltip("Start Point"),
         )
 
+        # Phase C8a — exit/target heading delta in the end-marker tooltip
+        # so the student can see whether they rolled out on the entry
+        # heading (ACS target = entry + 360° = entry).
+        exit_hdg = float(hover[-1].get("heading", entry_heading)) if hover else float(entry_heading)
         end_marker = dl.CircleMarker(
             center=path[-1],
             radius=7,
             color="#ef4444",
             fill=True,
             fillOpacity=1.0,
-            children=dl.Tooltip("End Point"),
+            children=dl.Tooltip(
+                f"Exit hdg {exit_hdg:.0f}° (target = entry {float(entry_heading):.0f}°)"
+            ),
         )
 
         elements = [start_marker, end_marker, path_line]
@@ -201,6 +207,17 @@ def register(app):
             vs_clean = vs_in_turn = 0
             wind_dir_val = wind_speed_val = 0
 
+        # Phase C8a — turn rate in deg/s for the current bank + TAS.
+        # ω = g·tan(φ) / V (rad/s); convert to deg/s.
+        if bank_angle and avg_tas > 0:
+            turn_rate_dps = (
+                (180.0 / math.pi)
+                * (32.2 * math.tan(math.radians(float(bank_angle))))
+                / (avg_tas * 1.68781)
+            )
+        else:
+            turn_rate_dps = 0.0
+
         # Build info panel with standardized format
         info_content = dbc.Accordion([
             dbc.AccordionItem([
@@ -208,6 +225,7 @@ def register(app):
                 html.Div(f"Wind: {wind_dir_val:.0f}° at {wind_speed_val:.0f} kt", style={"fontSize": "11px"}),
                 html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                 html.Div(f"AOB: {max_bank:.0f}° | Load: {load_factor:.2f}G | Radius: {turn_radius_ft:.0f} ft", style={"fontSize": "11px"}),
+                html.Div(f"Turn rate: {turn_rate_dps:.1f} °/s", style={"fontSize": "11px"}),
                 html.Div(f"GS: {min_gs:.0f}-{max_gs:.0f} kt | Vs turn: {vs_in_turn:.0f} kt | Margin: {entry_ias - vs_in_turn:.0f} kt", style={"fontSize": "11px"}),
                 html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                 html.Div(f"Time: {total_time:.0f}s | {sequence.replace('-', ' → ').title()}", style={"fontSize": "11px"}),
