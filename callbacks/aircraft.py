@@ -446,6 +446,46 @@ def register(app):
             raise PreventUpdate
         return {"lat": float(end["lat"]), "lon": float(end["lon"])}
 
+    # ---------- Phase F · Hide Set Takeoff / Touchdown when runway picked ----------
+    # Runway auto-fill already stages the threshold point; the Set button
+    # becomes redundant. The user can still re-show it by clearing the
+    # runway dropdown (clearable=True) to fall back to manual map-click.
+
+    _HIDDEN = {"display": "none"}
+    _SHOWN = {}  # let the default .shelf-action styles apply
+
+    @app.callback(
+        Output(
+            {"type": "click-button", "m_id": "impossible_turn", "role": "start"},
+            "style",
+        ),
+        Input("impossibleturn-runway-select", "value"),
+    )
+    def toggle_impossibleturn_set_btn(end_id):
+        return _HIDDEN if end_id else _SHOWN
+
+    @app.callback(
+        Output(
+            {"type": "click-button", "m_id": "poweroff180", "role": "touchdown"},
+            "style",
+        ),
+        Input("poweroff180-runway-select", "value"),
+    )
+    def toggle_poweroff180_set_btn(end_id):
+        return _HIDDEN if end_id else _SHOWN
+
+    @app.callback(
+        Output(
+            {"type": "click-button", "m_id": "engineout", "role": "touchdown"},
+            "style",
+        ),
+        Input("engineout-runway-select", "value"),
+    )
+    def toggle_engineout_set_td_btn(end_id):
+        # Engine-Out's Set Start button stays — engine-failure point is
+        # not on a runway. Only Set Touchdown hides.
+        return _HIDDEN if end_id else _SHOWN
+
     @app.callback(
         Output("engineout-runway-select", "options"),
         Output("engineout-runway-select", "value"),
