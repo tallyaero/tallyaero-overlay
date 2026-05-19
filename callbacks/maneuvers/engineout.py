@@ -665,7 +665,7 @@ def register(app):
         try:
             from simulation.engine_out import _get_best_glide_and_ratio
             from physics.atmosphere import compute_pressure_altitude, compute_air_density
-            from physics.aero import compute_true_airspeed
+            from physics.aerodynamics import compute_true_airspeed
             from simulation.engine_out import adjust_glide_ratio_for_density
             ac = aircraft_data[ac_name]
             best_glide_kias, straight_gr = _get_best_glide_and_ratio(
