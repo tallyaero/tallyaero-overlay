@@ -110,6 +110,7 @@ def simulate_lazy_eight(
     weight_lb: float = None,
     timestep_sec: float = 0.5,
     power_setting: float = 0.625,
+    wind_profile=None,
 ) -> tuple:
     """
     Simulate a lazy eight maneuver with proper wind effects and aircraft data.
@@ -155,6 +156,18 @@ def simulate_lazy_eight(
     max_bank_angle_deg = float(max_bank_angle_deg or 30.0)
     entry_heading_deg = _wrap_360(float(entry_heading_deg or 0.0))
     wind_dir_deg = float(wind_dir_deg or 0.0)
+
+    # Phase H — when a column profile is provided, use its mid-altitude
+    # wind. Lazy 8 oscillates ±500 ft, so the maneuver's effective
+    # column average is the entry altitude.
+    if wind_profile is not None:
+        try:
+            mean_alt_msl = float(field_elev_ft) + float(entry_altitude_ft)
+            wd_eff, ws_eff = wind_profile.at(mean_alt_msl)
+            wind_dir_deg = float(wd_eff)
+            wind_speed_kt = float(ws_eff)
+        except Exception:
+            pass
     wind_speed_kt = float(wind_speed_kt or 0.0)
     oat_c = float(oat_c if oat_c is not None else 15.0)
     altimeter_inhg = float(altimeter_inhg if altimeter_inhg is not None else 29.92)

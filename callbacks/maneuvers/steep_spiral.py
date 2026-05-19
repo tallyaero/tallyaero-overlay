@@ -50,6 +50,7 @@ def register(app):
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
         State("power-setting", "value"),
+        State("wind-profile-store", "data"),
         prevent_initial_call=True
     )
     def draw_steep_spiral(
@@ -68,6 +69,7 @@ def register(app):
         selected_airport_id,
         weight_lb,
         power_setting,
+        wind_profile_data,
     ):
         if not n_clicks or not ref_point or not aircraft_name:
             raise PreventUpdate
@@ -107,6 +109,15 @@ def register(app):
             power_pct = 0.0
         residual_pwr = power_pct if power_pct > 0.05 else 0.0
 
+        # Phase H — hydrate live winds-aloft column when staged.
+        wind_profile = None
+        if wind_profile_data:
+            try:
+                from core.winds_aloft import WindProfile
+                wind_profile = WindProfile.from_store(wind_profile_data)
+            except Exception:
+                wind_profile = None
+
         # Run simulation
         path, hover, warnings = simulate_steep_spiral(
             reference_point={"lat": ref_point["lat"], "lon": ref_point["lon"]},
@@ -123,6 +134,7 @@ def register(app):
             ac=ac,
             weight_lb=weight,
             residual_power=residual_pwr,
+            wind_profile=wind_profile,
         )
 
         if not path or not hover:

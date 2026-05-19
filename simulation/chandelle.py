@@ -221,6 +221,7 @@ def simulate_chandelle(
     weight_lb: float = None,
     timestep_sec: float = 0.5,
     power_setting: float = 1.0,
+    wind_profile=None,
 ) -> tuple:
     """
     Simulate a chandelle maneuver with proper wind effects and aircraft data.
@@ -264,6 +265,18 @@ def simulate_chandelle(
     bank_angle_deg = float(bank_angle_deg or 30.0)
     entry_heading_deg = _wrap_360(float(entry_heading_deg or 0.0))
     wind_dir_deg = float(wind_dir_deg or 0.0)
+
+    # Phase H — when a column profile is provided, use its mid-altitude
+    # wind. Chandelle climbs ~500-1000 ft so mid-alt captures the bulk
+    # of the maneuver's column without per-tick overhead.
+    if wind_profile is not None:
+        try:
+            mean_alt_msl = float(field_elev_ft) + float(entry_altitude_ft) + 250.0
+            wd_eff, ws_eff = wind_profile.at(mean_alt_msl)
+            wind_dir_deg = float(wd_eff)
+            wind_speed_kt = float(ws_eff)
+        except Exception:
+            pass
     wind_speed_kt = float(wind_speed_kt or 0.0)
     oat_c = float(oat_c if oat_c is not None else 15.0)
     altimeter_inhg = float(altimeter_inhg if altimeter_inhg is not None else 29.92)

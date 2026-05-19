@@ -50,6 +50,7 @@ def register(app):
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
         State("power-setting", "value"),
+        State("wind-profile-store", "data"),
         prevent_initial_call=True
     )
     def draw_chandelle(
@@ -68,6 +69,7 @@ def register(app):
         selected_airport_id,
         weight_lb,
         power_setting,
+        wind_profile_data,
     ):
         if not n_clicks or not start or not aircraft_name:
             raise PreventUpdate
@@ -113,6 +115,15 @@ def register(app):
         except (TypeError, ValueError):
             power_pct = 1.0
 
+        # Phase H — hydrate live winds-aloft column when staged.
+        wind_profile = None
+        if wind_profile_data:
+            try:
+                from core.winds_aloft import WindProfile
+                wind_profile = WindProfile.from_store(wind_profile_data)
+            except Exception:
+                wind_profile = None
+
         path, hover = simulate_chandelle(
             entry_point={"lat": start["lat"], "lon": start["lon"]},
             entry_heading_deg=heading,
@@ -128,6 +139,7 @@ def register(app):
             ac=ac,
             weight_lb=weight,
             power_setting=power_pct,
+            wind_profile=wind_profile,
         )
 
         if not path or not hover:

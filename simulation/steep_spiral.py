@@ -63,6 +63,7 @@ def simulate_steep_spiral(
     timestep_sec: float = 0.5,
     min_completion_agl: float = 1500.0,
     residual_power: float = 0.0,
+    wind_profile=None,
 ) -> tuple:
     """
     Simulate a steep spiral maneuver with constant ground track and wind compensation.
@@ -105,6 +106,21 @@ def simulate_steep_spiral(
     bank_angle_deg = max(20.0, min(60.0, bank_angle_deg))
     wind_dir_deg = float(wind_dir_deg or 0.0)
     wind_speed_kt = float(wind_speed_kt or 0.0)
+
+    # Phase H — when a column profile is provided, use the wind at the
+    # spiral's MEAN altitude (midpoint between entry and min completion
+    # AGL, plus field elev to convert AGL→MSL). Steep spiral descends
+    # ~3500 ft over 3 turns; the mid-altitude wind is a fair average
+    # for the wind-corrected ground track the sim renders.
+    if wind_profile is not None:
+        try:
+            mid_agl = (float(entry_altitude_ft) + float(min_completion_agl)) / 2.0
+            mid_msl = float(field_elev_ft) + mid_agl
+            wd_eff, ws_eff = wind_profile.at(mid_msl)
+            wind_dir_deg = float(wd_eff)
+            wind_speed_kt = float(ws_eff)
+        except Exception:
+            pass
     oat_c = float(oat_c if oat_c is not None else 15.0)
     altimeter_inhg = float(altimeter_inhg if altimeter_inhg is not None else 29.92)
     field_elev_ft = float(field_elev_ft or 0.0)
