@@ -13,6 +13,7 @@ import dash_bootstrap_components as dbc
 import dash_leaflet as dl
 
 from callbacks.map import create_airplane_marker
+from layouts.maneuvers._shared import _acs_metric
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -404,6 +405,12 @@ def register(app):
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                     html.Div(f"Vs turn: {vs_in_turn:.0f} kt | Margin: {min_ias_achieved - vs_in_turn:.0f} kt | Time: {sim_warnings.get('total_time_sec', 0):.0f}s", style={"fontSize": "11px"}),
                     html.Div(f"S-Turns: {num_turns} | Ref: {line_bearing:.0f}° | {entry_side.title()} entry", style={"fontSize": "11px"}),
+                    # Phase C9 — Private ACS tolerances.
+                    html.Div([
+                        _acs_metric("Altitude", 0, "ft", target=0, tol=100, cert_level="private"),
+                        _acs_metric("Track radius", 0, "%", target=0, tol=10, cert_level="private"),
+                        _acs_metric("Wing-level crossing", 0, "°", target=0, tol=10, cert_level="private"),
+                    ], style={"display": "flex", "flexWrap": "wrap", "marginTop": "6px"}),
                 ], title="Simulation Results", style={"fontSize": "12px"}),
             ], start_collapsed=False, style={"marginTop": "8px"})
         )

@@ -17,6 +17,7 @@ from utility import simulate_steep_spiral
 
 from callbacks.map import create_airplane_marker
 from layouts.maneuvers._charts import altitude_profile_chart
+from layouts.maneuvers._shared import _acs_metric
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -267,6 +268,11 @@ def register(app):
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                     html.Div(f"Alt: {altitude_ft:.0f}→{warnings.get('final_altitude_agl', 0):.0f} ft | Loss: {altitude_ft - warnings.get('final_altitude_agl', 0):.0f} ft ({warnings.get('altitude_per_turn', 0):.0f}/turn)", style={"fontSize": "11px"}),
                     html.Div(f"Vs turn: {vs_in_turn:.0f} kt | Margin: {min_ias - vs_in_turn:.0f} kt | Time: {total_time:.0f}s", style={"fontSize": "11px"}),
+                    # Phase C9 — Commercial ACS tolerances.
+                    html.Div([
+                        _acs_metric("Exit heading", 0, "°", target=0, tol=10, cert_level="commercial"),
+                        _acs_metric("Altitude at exit", 0, "ft", target=0, tol=100, cert_level="commercial"),
+                    ], style={"display": "flex", "flexWrap": "wrap", "marginTop": "6px"}),
                 ], title="Simulation Results", style={"fontSize": "12px"}),
             ], start_collapsed=False, style={"marginTop": "8px"})
         )

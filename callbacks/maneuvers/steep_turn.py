@@ -16,6 +16,7 @@ import dash_leaflet as dl
 from utility import simulate_steep_turn
 
 from callbacks.map import create_airplane_marker
+from layouts.maneuvers._shared import _acs_metric
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -229,6 +230,14 @@ def register(app):
                 html.Div(f"GS: {min_gs:.0f}-{max_gs:.0f} kt | Vs turn: {vs_in_turn:.0f} kt | Margin: {entry_ias - vs_in_turn:.0f} kt", style={"fontSize": "11px"}),
                 html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                 html.Div(f"Time: {total_time:.0f}s | {sequence.replace('-', ' → ').title()}", style={"fontSize": "11px"}),
+                # Phase C9 — ACS tolerance badges. Sim is "perfect" so
+                # deviations are 0 (badges render green); the row teaches
+                # the student what they'll be graded against.
+                html.Div([
+                    _acs_metric("Altitude", 0, "ft", target=0, tol=100, cert_level="private"),
+                    _acs_metric("Heading", 0, "°", target=0, tol=10, cert_level="private"),
+                    _acs_metric("IAS", 0, "kt", target=0, tol=10, cert_level="private"),
+                ], style={"display": "flex", "flexWrap": "wrap", "marginTop": "6px"}),
             ], title="Simulation Results", style={"fontSize": "12px"}),
         ], start_collapsed=False, style={"marginTop": "8px"})
 

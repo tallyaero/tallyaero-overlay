@@ -17,6 +17,7 @@ from utility import simulate_chandelle
 
 from callbacks.map import create_airplane_marker
 from layouts.maneuvers._charts import altitude_profile_chart
+from layouts.maneuvers._shared import _acs_metric
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -243,6 +244,11 @@ def register(app):
                     html.Span("■ Mid", style={"color": "#804080", "fontSize": "10px", "marginRight": "6px"}),
                     html.Span("■ High", style={"color": "#0000ff", "fontSize": "10px"}),
                 ], style={"marginTop": "4px"}),
+                # Phase C9 — Commercial ACS tolerances.
+                html.Div([
+                    _acs_metric("Roll-out", 0, "°", target=0, tol=10, cert_level="commercial"),
+                    _acs_metric("Stall margin", min_ias - vs_in_turn, "kt", target=10, tol=10, cert_level="commercial"),
+                ], style={"display": "flex", "flexWrap": "wrap", "marginTop": "6px"}),
             ], title="Simulation Results", style={"fontSize": "12px"}),
         ], start_collapsed=False, style={"marginTop": "8px"})
 
