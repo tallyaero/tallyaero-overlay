@@ -1752,28 +1752,32 @@ input[type="radio"] {
    stealing a row inside the maneuver shelf. The Dash-injected
    slider container keeps its id so the existing draw callbacks
    continue flipping its inline display style; we override its
-   layout box. */
+   layout box. Height is fixed (slider + marks ≈ 48 px) to stop
+   the box from auto-stretching when rc-slider's internal absolute-
+   positioned mark labels resolve against the fixed-position parent. */
 [id$="-slider-container"] {
   position: fixed;
   bottom: 16px;
   left: 50%;
   transform: translateX(-50%);
   width: min(640px, 80vw);
+  height: 56px;
   z-index: 800;
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid var(--ta-border-primary, #e2e8f0);
   border-radius: 8px;
-  padding: 10px 18px 4px 18px;
+  padding: 8px 22px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
   margin: 0 !important;
+  box-sizing: border-box;
+  overflow: visible;
+}
+[id$="-slider-container"] .rc-slider {
+  margin-top: 4px;
 }
 [data-theme="dark"] [id$="-slider-container"] {
   background: rgba(15, 23, 42, 0.95);
   border-color: #334155;
-}
-/* Sidebar-collapsed mode shifts the map further left — keep the
-   scrubber centered over the visible map area. */
-.resizable-sidebar.collapsed ~ * [id$="-slider-container"] { /* noop guard */
 }
 
 /* Push action buttons to the right side of the row */
