@@ -139,6 +139,8 @@ def register(app):
                 "Constant bank in the first 90°, then constant pitch as bank "
                 "reduces to wings-level at the 180° point.",
                 "Completion near power-on stall, within ±10° of target.",
+                "Design power: 100%. Reduced power lowers altitude gained "
+                "and can fail to reach the 180° exit at target IAS.",
             ],
         ),
         "lazy8": (

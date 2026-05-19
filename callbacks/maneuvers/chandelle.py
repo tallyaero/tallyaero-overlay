@@ -172,7 +172,11 @@ def register(app):
             color="#ef4444",
             fill=True,
             fillOpacity=1.0,
-            children=dl.Tooltip(f"Exit: {hover[-1].get('heading', 0):.0f}° hdg, {hover[-1].get('alt', 0):.0f} ft"),
+            children=dl.Tooltip(
+                f"Roll-out: {hover[-1].get('heading', 0):.0f}° "
+                f"(target {(float(heading) + 180) % 360:.0f}°) "
+                f"at {hover[-1].get('alt', 0):.0f} ft"
+            ),
         )
 
         elements = [start_marker, end_marker] + path_segments
