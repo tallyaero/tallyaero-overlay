@@ -1908,29 +1908,29 @@ input[type="radio"] {
   padding: 3px 6px;
 }
 
-/* Airspace altitude-band label rendered as a div-icon inside each
-   polygon. Reads ceiling-over-floor like a sectional chart. Painted
-   over the centroid of the outer ring. */
-.asp-band-icon { background: none !important; border: 0 !important; }
-.asp-band-label {
+/* Airspace altitude-band label — rendered as a permanent
+   leaflet-tooltip centered on each polygon at zoom ≥ 8. Reads
+   ceiling / floor like a sectional chart. */
+.leaflet-tooltip.asp-band-tooltip {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
   text-align: center;
   font-size: 10px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   line-height: 1.05;
+  color: #0f172a;
   text-shadow: 0 0 2px #fff, 0 0 2px #fff, 0 0 2px #fff;
   pointer-events: none;
   white-space: nowrap;
 }
-.asp-band-label hr {
-  border: 0;
-  border-top: 1px solid currentColor;
-  margin: 1px 4px;
-}
+.leaflet-tooltip.asp-band-tooltip::before { display: none !important; }
 /* Cold (inactive at present time) airspace — desaturated grey so the
-   pilot can tell at a glance the MOA / restricted area isn't hot,
-   without losing the on-map altitude info. */
-.asp-band-label.asp-band-cold {
+   pilot can tell at a glance the MOA / restricted area isn't hot. */
+.leaflet-tooltip.asp-band-tooltip.asp-band-cold {
+  color: #475569;
   font-weight: 600;
   opacity: 0.75;
   text-decoration: line-through;

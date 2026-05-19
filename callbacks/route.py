@@ -2391,6 +2391,26 @@ def register(app):
             for ring in rings_to_draw:
                 # GeoJSON is [lon, lat]; Leaflet wants [lat, lon].
                 positions = [[pt[1], pt[0]] for pt in ring]
+                # Polygon children: hover tooltip + (at zoom ≥ 8) a
+                # permanent altitude-band label. Using a permanent
+                # Tooltip in centered-direction avoids dl.DivMarker
+                # entirely — that component has a known cleanup crash
+                # in dash-leaflet 1.0.15 when many markers are removed
+                # on viewport pan.
+                children: list = [dl.Tooltip(label, sticky=True)]
+                if show_band_labels:
+                    ceil_s = alt_band.split(" → ")[1]
+                    floor_s = alt_band.split(" → ")[0]
+                    band_text = f"{ceil_s} / {floor_s}"
+                    cls = "asp-band-tooltip"
+                    if not active:
+                        cls += " asp-band-cold"
+                    children.append(dl.Tooltip(
+                        band_text,
+                        permanent=True,
+                        direction="center",
+                        className=cls,
+                    ))
                 polygons.append(dl.Polygon(
                     positions=positions,
                     color=poly_color,
@@ -2399,31 +2419,8 @@ def register(app):
                     dashArray=poly_dash,
                     fillColor=poly_fill,
                     fillOpacity=poly_fill_op,
-                    children=dl.Tooltip(label, sticky=True),
+                    children=children,
                 ))
-                # Permanent altitude-band label centered over the
-                # outer ring's centroid. Tiny chart-style "ceiling /
-                # floor" text — small enough not to dominate the map.
-                if show_band_labels and ring:
-                    clat = sum(p[1] for p in ring) / len(ring)
-                    clon = sum(p[0] for p in ring) / len(ring)
-                    ceil_s = alt_band.split(" → ")[1]
-                    floor_s = alt_band.split(" → ")[0]
-                    label_color = poly_color if active else "#94a3b8"
-                    inner_html = (f"<div class='asp-band-label "
-                                  f"{'asp-band-cold' if not active else ''}' "
-                                  f"style='color:{label_color}'>"
-                                  f"{ceil_s}<hr/>{floor_s}</div>")
-                    polygons.append(dl.DivMarker(
-                        position=[clat, clon],
-                        iconOptions={
-                            "html": inner_html,
-                            "className": "asp-band-icon",
-                            "iconSize": [60, 28],
-                            "iconAnchor": [30, 14],
-                        },
-                        interactive=False,
-                    ))
         return polygons
 
     # === NAVAID + fix overlay (Phase 7N-e) ===
