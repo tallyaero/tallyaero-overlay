@@ -116,12 +116,17 @@ def _winds_aloft_chip(wind_profile_data):
     `wind_profile_data` is the dcc.Store payload from wind-profile-store
     (set by the airport-pick callback in Phase H3). Returns None when
     no live data is staged so the caller can skip rendering.
+
+    Directions displayed in MAGNETIC (pilots think magnetic, the
+    sidebar inputs are magnetic). Stored values stay TRUE; the sim
+    consumes them in TRUE so we don't need to round-trip.
     """
     if not wind_profile_data:
         return None
     layers = (wind_profile_data or {}).get("layers") or []
     if not layers:
         return None
+    magvar_w = float((wind_profile_data or {}).get("magvar_w", 0.0))
     parts = []
     for alt_ft, dir_deg, kt in layers:
         if alt_ft <= 0:
@@ -130,10 +135,11 @@ def _winds_aloft_chip(wind_profile_data):
             label = f"{int(alt_ft):,}ft"
         else:
             label = f"{int(alt_ft / 1000)}k"
-        parts.append(f"{label} {int(round(dir_deg)) % 360:03d}°/{int(round(kt))}")
+        mag = int(round((float(dir_deg) + magvar_w) % 360.0))
+        parts.append(f"{label} {mag:03d}°/{int(round(kt))}")
     return html.Div(
         [
-            html.Span("Winds (live): ",
+            html.Span("Winds (live, mag): ",
                        style={"fontWeight": "600", "color": "#475569"}),
             html.Span(" · ".join(parts)),
         ],

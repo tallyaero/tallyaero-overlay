@@ -174,6 +174,15 @@ def register(app):
                                             surface_metar=metar)
             if profile is not None:
                 wind_profile_data = profile.to_store()
+                try:
+                    from core.route import magvar_west_positive
+                    wind_profile_data["magvar_w"] = float(
+                        magvar_west_positive(
+                            float(lat), float(lon),
+                            float(ap.get("elevation_ft", 0.0) or 0.0),
+                        ))
+                except Exception:
+                    wind_profile_data["magvar_w"] = 0.0
         except Exception as e:
             log.warning(f"Winds-aloft column fetch failed for {airport_id}: {e}")
 
@@ -237,9 +246,19 @@ def register(app):
         """Sidebar Live Weather panel — renders the parsed METAR + the
         winds-aloft column the sims will consume. Empty when no live
         data is staged (no airport picked, or both fetches failed).
+
+        Displayed wind directions are in MAGNETIC; pilots think in
+        magnetic and the input fields in the sidebar are magnetic too.
+        Stored values (and what the sim consumes) stay TRUE so the
+        physics math doesn't need to undo a display conversion.
         """
         if not metar and not wind_profile_data:
             return None
+
+        magvar_w = float((wind_profile_data or {}).get("magvar_w", 0.0))
+
+        def _true_to_mag(true_deg):
+            return int(round((float(true_deg) + magvar_w) % 360.0))
 
         children = [html.Div("Live Weather", className="lw-title")]
 
@@ -267,7 +286,7 @@ def register(app):
             ]
             wind_str = ""
             if wind_d is not None and wind_s is not None:
-                wind_str = f"{int(wind_d):03d}°/{int(wind_s)}"
+                wind_str = f"{_true_to_mag(wind_d):03d}°/{int(wind_s)}"
                 if wind_g:
                     wind_str += f"G{int(wind_g)}"
             elif wind_s is not None:
@@ -294,7 +313,7 @@ def register(app):
                 "margin": "6px 0",
                 "borderTop": "1px dashed var(--ta-border-primary, #e2e8f0)",
             }))
-            children.append(html.Div("Winds aloft (true)",
+            children.append(html.Div("Winds aloft (mag)",
                                       className="lw-title"))
             for alt_ft, dir_deg, kt in layers:
                 if alt_ft <= 0:
@@ -303,7 +322,7 @@ def register(app):
                     label = f"{int(alt_ft):,} ft"
                 else:
                     label = f"{int(alt_ft / 1000)}k"
-                value = (f"{int(round(dir_deg)) % 360:03d}°/"
+                value = (f"{_true_to_mag(dir_deg):03d}°/"
                          f"{int(round(kt))} kt")
                 children.append(html.Div(
                     [
