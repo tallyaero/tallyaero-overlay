@@ -58,7 +58,13 @@ def engineout_layout(default_elev=None):
         ), tooltip="Maximum bank used in the glide turns. Steeper = tighter radius but more drag/altitude loss."),
         html.Div(
             dcc.Checklist(
-                id="engineout-show-envelope",
+                # Pattern-matched id so `render_glide_ring` can use
+                # this as an Input even when the engine-out layout
+                # isn't currently mounted in maneuver-params-container.
+                # Plain string ids fail Dash's input gathering when
+                # the component isn't in the DOM; pattern-matched ids
+                # with an empty match set simply don't trigger.
+                id={"type": "envelope-toggle", "m_id": "engineout"},
                 options=[{"label": "Glide Ring", "value": "show"}],
                 value=[],
                 className="shelf-toggle-chip-checklist",
