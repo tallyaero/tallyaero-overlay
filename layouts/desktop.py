@@ -591,6 +591,28 @@ def desktop_layout():
                             className="shelf-toggle-chip",
                             title="Toggle the reachable-glide envelope ring overlay.",
                         ),
+                        # Phase 7f-C — airspace overlay toggle. Permanent
+                        # mount; CSS hides it when the active maneuver
+                        # isn't 'route' via the .overlay-for-route class
+                        # the reflector callback writes onto the parent
+                        # map-controls-overlay.
+                        html.Div(
+                            dcc.Checklist(
+                                id="route-show-airspace",
+                                options=[
+                                    {"label": "Class B/C/D", "value": "class"},
+                                    {"label": "SUA", "value": "sua"},
+                                    {"label": "TFR", "value": "tfr"},
+                                ],
+                                value=["class", "sua", "tfr"],
+                                className="airspace-toggle-list shelf-toggle-chip-checklist",
+                                inline=True,
+                            ),
+                            id="airspace-toggle-wrap",
+                            className="shelf-toggle-chip airspace-toggle-chip",
+                            title=("Show NASR airspace polygons on the map "
+                                   "(Class B/C/D, SUA, standing TFRs)."),
+                        ),
                         html.Div(id="maneuver-actions-container",
                                  className="map-overlay-actions"),
                         html.Div(className="map-overlay-divider"),
