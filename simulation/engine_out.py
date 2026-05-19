@@ -1406,6 +1406,7 @@ def run_simulation(
     bank_tau_sec: float = DEFAULT_BANK_TAU_SEC,
     timestep_sec: float = DEFAULT_TIMESTEP_SEC,
     force_pattern_side: Optional[str] = None,
+    wind_profile: Optional["WindProfile"] = None,  # noqa: F821
 ) -> Tuple[List[List[float]], List[Dict[str, Any]], Dict[str, Any]]:
     """
     Run the engine-out simulation using bucket-based navigation.
@@ -1430,6 +1431,29 @@ def run_simulation(
 
     tas_knots = compute_true_airspeed(best_glide_kias, pressure_alt_ft, float(oat_c))
     tas_fps = max(1.0, knots_to_fps(tas_knots))
+
+    # Phase H · use the live winds-aloft column when provided. The
+    # engine_out sim is segment-based (not tick-based), so threading
+    # per-tick wind through every helper would be a deep refactor.
+    # Iteration 1: compute the wind at the GLIDE'S MEAN altitude
+    # (midpoint between failure alt and touchdown elev MSL) and use
+    # that for the whole simulation. That picks up real boundary-layer
+    # shear when the column has it. Future iterations can do per-bucket
+    # wind for finer accuracy.
+    wind_layers_used: list[tuple[float, float, float]] = []
+    if wind_profile is not None:
+        try:
+            wind_layers_used = wind_profile.layers()
+        except Exception:
+            wind_layers_used = []
+        # Mean glide altitude MSL: (touchdown_elev + failure_alt_msl)/2.
+        mean_alt_msl = (float(touchdown_elev_ft) + alt_msl_ft) / 2.0
+        try:
+            wd_eff, ws_eff = wind_profile.at(mean_alt_msl)
+            wind_dir = float(wd_eff)
+            wind_speed = float(ws_eff)
+        except Exception:
+            pass  # fall through to the static args
 
     wn_fps, we_fps = _wind_components_from_dir(float(wind_dir), float(wind_speed))
 
@@ -2568,6 +2592,12 @@ def run_simulation(
         "used_opposite_spiral": use_opposite_spiral,
         "used_final_spiral": any(b.name == "FINAL_SPIRAL" for b in buckets),
         "bucket_chain": [b.name for b in buckets],
+        # Phase H — surface the live winds-aloft layers used (empty
+        # when the static sidebar wind was used) so the results modal
+        # can show the column the sim consumed.
+        "wind_layers_used": wind_layers_used,
+        "wind_dir_effective_deg": float(wind_dir),
+        "wind_speed_effective_kt": float(wind_speed),
     }
 
     return path, hover_data, metadata

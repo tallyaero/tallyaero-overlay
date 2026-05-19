@@ -73,6 +73,7 @@ def register(app):
         State("engineout-show-envelope", "value"),
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
+        State("wind-profile-store", "data"),
         prevent_initial_call=True,
     )
     def draw_engineout(
@@ -102,7 +103,8 @@ def register(app):
         bank_tau,
         show_envelope,
         selected_airport_id,
-        runtime_weight
+        runtime_weight,
+        wind_profile_data,
     ):
         if not n_clicks:
             raise PreventUpdate
@@ -185,6 +187,16 @@ def register(app):
 
             oat_c = (float(oat_f) - 32.0) * 5.0 / 9.0
 
+            # Phase H — hydrate the WindProfile from the dcc.Store if
+            # the airport-pick callback fetched live winds aloft.
+            wind_profile = None
+            if wind_profile_data:
+                try:
+                    from core.winds_aloft import WindProfile
+                    wind_profile = WindProfile.from_store(wind_profile_data)
+                except Exception:
+                    wind_profile = None
+
             path, hover_data, meta = simulate_engineout_glide(
                 start_point=start,
                 start_heading=float(start_heading),
@@ -199,6 +211,7 @@ def register(app):
                 altimeter_inhg=float(altimeter),
                 wind_dir=float(wind_dir),
                 wind_speed=float(wind_speed),
+                wind_profile=wind_profile,
                 altitude_agl=float(start_alt_agl),
                 touchdown_elev_ft=float(touchdown_elev_ft),
                 max_bank_deg=float(max_bank),
