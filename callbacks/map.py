@@ -377,14 +377,23 @@ def register(app):
 
         marker_id = {"type": "pt-marker", "m_id": m_id, "role": role}
 
-        kept = []
-        for child in layer_children:
-            try:
-                # Drop any existing marker for this exact (m_id, role)
-                if getattr(child, "id", None) != marker_id:
-                    kept.append(child)
-            except Exception:
-                kept.append(child)
+        # Dash hands us layer.children back as SERIALIZED dicts of the
+        # form {"type": "...", "namespace": "...", "props": {"id": ...,
+        # "children": ...}}, NOT live component objects. `getattr(child,
+        # "id", None)` was returning None for every child because dicts
+        # don't have attributes — so the dedup quietly failed and a
+        # fresh CircleMarker was appended on every Set-and-click cycle.
+        # React then warned "two children with the same key" and
+        # dropped subsequent renders, which is why the Glide Ring
+        # quit drawing and why repeat clicks after Reset looked dead.
+        # Fix: peek the id out of the dict (or fall back to attribute
+        # access for the rare live-component case).
+        def _child_id(c):
+            if isinstance(c, dict):
+                return (c.get("props") or {}).get("id")
+            return getattr(c, "id", None)
+
+        kept = [c for c in layer_children if _child_id(c) != marker_id]
 
         # Color convention
         color = "green"
@@ -494,10 +503,17 @@ def register(app):
                 updated[i] = None
                 break
 
-        # Remove marker from layer
+        # Remove marker from layer — handle both serialized-dict and
+        # live-component child shapes (see write_point_to_scoped_store).
         marker_id = {"type": "pt-marker", "m_id": m_id, "role": role}
         layer_children = layer_children or []
-        new_layer = [c for c in layer_children if getattr(c, "id", None) != marker_id]
+
+        def _child_id(c):
+            if isinstance(c, dict):
+                return (c.get("props") or {}).get("id")
+            return getattr(c, "id", None)
+
+        new_layer = [c for c in layer_children if _child_id(c) != marker_id]
 
         # Feedback (minimal)
         role_display = role.replace("_", " ").title()
