@@ -121,15 +121,7 @@ def _top_strip():
             html.Div(
                 [
                     html.Div(id="maneuver-shelf-status", className="maneuver-shelf-status"),
-                    html.Div(
-                        [
-                            html.A("Quick Start", href="#", id="open-quickstart", className="quick-link", style={"color": "#E65C00", "fontWeight": "bold"}),
-                            html.Span(" · ", className="quick-link-sep"),
-                            html.A("Contact", href="mailto:info@tallyaero.com", className="quick-link"),
-                        ],
-                        className="top-strip-quicklinks",
-                    ),
-                    _theme_toggle(),
+                    _top_menu(),
                 ],
                 className="top-strip-right",
             ),
@@ -319,6 +311,62 @@ def _theme_toggle():
     )
 
 
+def _top_menu():
+    """Consolidated top-right dropdown — Edit/Create, Load File, Quick
+    Start, Contact, and the Light/Dark theme toggle. Replaces the
+    separate links + inline theme buttons that used to live in
+    top-strip-right and the Edit/Load buttons that lived in the
+    sidebar bottom. All callback-bearing ids (open-quickstart,
+    upload-aircraft, theme-btn-*) are preserved so the existing
+    callbacks wire without changes."""
+    return dbc.DropdownMenu(
+        label="Menu",
+        align_end=True,
+        in_navbar=False,
+        toggleClassName="top-menu-toggle",
+        className="top-menu",
+        direction="down",
+        menu_variant=None,
+        children=[
+            dbc.DropdownMenuItem(
+                "Edit / Create",
+                href="https://app.flyaeroedge.com/edit-aircraft",
+                target="_blank",
+                external_link=True,
+            ),
+            html.Div(
+                dcc.Upload(
+                    html.Div("Load File…", className="top-menu-upload-label"),
+                    id="upload-aircraft",
+                    accept=".json",
+                    className="top-menu-upload",
+                ),
+                className="top-menu-upload-wrap",
+            ),
+            dbc.DropdownMenuItem(divider=True),
+            dbc.DropdownMenuItem(
+                "Quick Start",
+                id="open-quickstart",
+                n_clicks=0,
+                style={"color": "#E65C00", "fontWeight": "600"},
+            ),
+            dbc.DropdownMenuItem(
+                "Contact",
+                href="mailto:info@tallyaero.com",
+                external_link=True,
+            ),
+            dbc.DropdownMenuItem(divider=True),
+            html.Div(
+                [
+                    html.Span("Theme", className="top-menu-section-label"),
+                    _theme_toggle(),
+                ],
+                className="top-menu-theme-row",
+            ),
+        ],
+    )
+
+
 def _maneuver_action_shelf():
     """Single thin row that only appears when a maneuver is selected —
     holds the per-maneuver params + Set Point / Draw / Erase buttons.
@@ -463,19 +511,6 @@ def desktop_layout():
                 ]),
 
                 # --- Maneuver params moved to the top shelf ---
-
-                # Bottom section — aircraft CRUD buttons (out of the way)
-                html.Div(className="sidebar-section sidebar-section-bottom", children=[
-                    html.Div(className="action-buttons-row", children=[
-                        html.A("Edit/Create", href="https://app.flyaeroedge.com/edit-aircraft",
-                               target="_blank", className="btn-action-orange"),
-                        dcc.Upload(
-                            html.Button("Load File", className="btn-action-orange"),
-                            id="upload-aircraft",
-                            accept=".json",
-                        ),
-                    ]),
-                ]),
 
                 # Store for tracking last clicked point (for undo)
                 dcc.Store(id="last-click-info", data=None),
