@@ -16,6 +16,7 @@ import dash_leaflet as dl
 from utility import simulate_steep_spiral
 
 from callbacks.map import create_airplane_marker
+from layouts.maneuvers._charts import altitude_profile_chart
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -47,6 +48,7 @@ def register(app):
         State("aircraft-select", "value"),
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
+        State("power-setting", "value"),
         prevent_initial_call=True
     )
     def draw_steep_spiral(
@@ -63,7 +65,8 @@ def register(app):
         wind_speed,
         aircraft_name,
         selected_airport_id,
-        weight_lb
+        weight_lb,
+        power_setting,
     ):
         if not n_clicks or not ref_point or not aircraft_name:
             raise PreventUpdate
@@ -94,6 +97,15 @@ def register(app):
         # Get weight
         weight = float(weight_lb) if weight_lb not in [None, "", "null"] else ac.get("max_takeoff_weight", 2300.0)
 
+        # Phase C7 — global power slider becomes residual_power for Steep
+        # Spiral. Stock ACS is idle (0); any value > 5% is off-design and
+        # the sim surfaces it as a warning.
+        try:
+            power_pct = float(power_setting) if power_setting not in [None, "", "null"] else 0.0
+        except (TypeError, ValueError):
+            power_pct = 0.0
+        residual_pwr = power_pct if power_pct > 0.05 else 0.0
+
         # Run simulation
         path, hover, warnings = simulate_steep_spiral(
             reference_point={"lat": ref_point["lat"], "lon": ref_point["lon"]},
@@ -109,6 +121,7 @@ def register(app):
             field_elev_ft=field_elev_ft,
             ac=ac,
             weight_lb=weight,
+            residual_power=residual_pwr,
         )
 
         if not path or not hover:
@@ -140,20 +153,56 @@ def register(app):
             children=dl.Tooltip(f"Entry: {altitude_ft:.0f} ft AGL\nHeading: {warnings.get('entry_heading', 0):.0f}°"),
         )
 
-        # Theme B end (red-500)
+        # Theme B end (red-500) + Phase C7 exit-heading enrichment
+        exit_hdg = warnings.get('exit_heading', 0)
         end_marker = dl.CircleMarker(
             center=path[-1],
             radius=7,
             color="#ef4444",
             fill=True,
             fillOpacity=1.0,
-            children=dl.Tooltip(f"Exit: {warnings.get('final_altitude_agl', 0):.0f} ft AGL"),
+            children=dl.Tooltip(
+                f"Exit: {warnings.get('final_altitude_agl', 0):.0f} ft AGL — "
+                f"hdg {exit_hdg:.0f}° (entry {warnings.get('entry_heading', 0):.0f}°)"
+            ),
         )
 
         elements = [ref_marker, entry_marker, end_marker, path_line]
 
         # Build warnings display
         warning_elements = []
+
+        # Phase C7 — tier-3 verdict banner when the required (unclamped)
+        # bank exceeded 60° at any step.
+        if warnings.get('peak_bank_exceeded_60'):
+            warning_elements.append(html.Div([
+                html.Strong("Peak bank exceeded 60° — "),
+                html.Span("required bank for the chosen orbit + wind would exceed the ACS allowable. "
+                          "Reduce bank or increase orbit radius."),
+            ], style={
+                "color": "white",
+                "backgroundColor": "var(--ta-path-fail, #dc2626)",
+                "padding": "8px",
+                "borderRadius": "4px",
+                "marginBottom": "5px",
+                "fontSize": "12px",
+            }))
+
+        # Phase C7 — tier-2 amber chip for off-design residual power.
+        if warnings.get('off_design_residual_power'):
+            rp = warnings['off_design_residual_power']
+            warning_elements.append(html.Div(
+                f"Off-design power: {rp:.0f}% — Steep Spiral is an idle-power maneuver. "
+                f"Descent rate reduced; may not reach 1500 ft AGL completion.",
+                style={
+                    "borderLeft": "3px solid var(--acs-marginal, #f59e0b)",
+                    "color": "var(--acs-marginal, #f59e0b)",
+                    "padding": "4px 8px",
+                    "marginBottom": "6px",
+                    "fontSize": "11px",
+                    "backgroundColor": "rgba(245, 158, 11, 0.05)",
+                },
+            ))
 
         # Ground impact warning (critical)
         if warnings.get('ground_impact'):
@@ -221,6 +270,21 @@ def register(app):
                 ], title="Simulation Results", style={"fontSize": "12px"}),
             ], start_collapsed=False, style={"marginTop": "8px"})
         )
+
+        # Phase C7 — altitude profile chart with one marker per completed turn.
+        times = [pt.get("time", 0) for pt in hover]
+        alts = [pt.get("alt", 0) for pt in hover]
+        markers = []
+        prev_turn = 0
+        for pt in hover:
+            tn = int(pt.get("turn_number", 1))
+            if tn != prev_turn and prev_turn > 0:
+                markers.append((pt.get("time", 0), f"T{tn}"))
+            prev_turn = tn
+        warning_elements.append(altitude_profile_chart(
+            times, alts, chart_id="steepspiral-profile-chart",
+            markers=markers, y_title="Altitude (ft AGL)",
+        ))
 
         # Prepare slider configuration
         num_points = len(hover)

@@ -62,6 +62,7 @@ def simulate_steep_spiral(
     weight_lb: float = None,
     timestep_sec: float = 0.5,
     min_completion_agl: float = 1500.0,
+    residual_power: float = 0.0,
 ) -> tuple:
     """
     Simulate a steep spiral maneuver with constant ground track and wind compensation.
@@ -193,13 +194,26 @@ def simulate_steep_spiral(
     turn_altitude_losses = []
     current_turn = 0
 
+    # Phase C7 — residual power reduces descent rate. Stock Steep Spiral
+    # is idle (0.0); above 0.05 is off-design (surfaced via warnings). At
+    # the design assumption of idle the formula is identical to the
+    # pre-rework version.
+    res_pwr = float(residual_power or 0.0)
+    res_pwr_clamped = max(0.0, min(0.5, res_pwr))
+
     def compute_descent_rate(bank_deg: float, tas_knots: float) -> float:
-        """Compute descent rate in fpm based on glide ratio and bank-induced load factor."""
+        """Compute descent rate in fpm based on glide ratio and bank-induced load factor.
+
+        residual_power (closure capture) scales descent down linearly:
+        at residual_power=0 (idle, ACS design), no scaling. At 0.5 (50%
+        residual), descent halved. Above 0.5 we still report a descent
+        (the maneuver is no longer Steep Spiral, but the sim shouldn't
+        crash)."""
         n = compute_load_factor(bank_deg)
         effective_gr = base_glide_ratio / max(n, 1.0)
         effective_gr = max(2.0, effective_gr)
         tas_fpm = tas_knots * 101.269
-        return tas_fpm / effective_gr
+        return (tas_fpm / effective_gr) * (1.0 - res_pwr_clamped)
 
     while total_angle_traveled < target_angle:
         # Check for ground impact
@@ -280,8 +294,13 @@ def simulate_steep_spiral(
 
         required_centripetal = (gs_fps ** 2) / orbit_radius_ft
         tan_bank = required_centripetal / G_FPS2
-        actual_bank_deg = math.degrees(math.atan(tan_bank))
-        actual_bank_deg = max(15.0, min(60.0, actual_bank_deg))  # Safety limits
+        unclamped_bank_deg = math.degrees(math.atan(tan_bank))
+        # Phase C7 — track if the *unclamped* required bank ever exceeded
+        # the 60° ACS limit. If so, the maneuver is technically out of
+        # spec even though we cap it at 60° for safety.
+        if unclamped_bank_deg > 60.0:
+            warnings['peak_bank_exceeded_60'] = True
+        actual_bank_deg = max(15.0, min(60.0, unclamped_bank_deg))  # Safety limits
 
         # Compute descent rate at this bank angle
         descent_fpm = compute_descent_rate(actual_bank_deg, glide_tas_knots)
@@ -378,5 +397,14 @@ def simulate_steep_spiral(
     # Include entry point info for the callback
     warnings['entry_point'] = {'lat': entry_pt.latitude, 'lon': entry_pt.longitude}
     warnings['entry_heading'] = round(entry_heading, 0)
+
+    # Phase C7 — exit heading from the last simulated hover entry.
+    if hover:
+        warnings['exit_heading'] = round(float(hover[-1].get('heading', 0)), 0)
+
+    # Phase C7 — off-design power flag (any residual_power > 0.05 is "not
+    # idle" and outside the ACS Steep Spiral assumption).
+    if res_pwr > 0.05:
+        warnings['off_design_residual_power'] = round(res_pwr * 100, 0)
 
     return path, hover, warnings
