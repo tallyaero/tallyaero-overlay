@@ -9,6 +9,7 @@ selection into per-maneuver UI."""
 from __future__ import annotations
 
 from dash import Input, Output, State
+from dash.exceptions import PreventUpdate
 
 from layouts.maneuvers.impossible_turn import impossible_turn_layout
 from layouts.maneuvers.poweroff180 import poweroff180_layout
@@ -24,6 +25,124 @@ from layouts.maneuvers.eights_on_pylons import pylons_layout
 from layouts.maneuvers.route import route_layout
 
 from core.data_loader import aircraft_data, airport_data
+
+
+# ---------- Phase F · Runway-end auto-fill helpers ----------
+
+def _airport_magvar(airport):
+    """Magnetic variation at the airport (W-positive). Returns 0.0 if
+    the airport has no lat/lon or the WMM lookup raises."""
+    if not airport:
+        return 0.0
+    try:
+        from core.route import magvar_west_positive
+        return float(magvar_west_positive(
+            float(airport.get("lat", 0.0)),
+            float(airport.get("lon", 0.0)),
+            float(airport.get("elevation_ft", 0.0)),
+        ))
+    except Exception:
+        return 0.0
+
+
+def _true_to_mag(true_deg, magvar_w):
+    return int(round((float(true_deg) + float(magvar_w)) % 360.0))
+
+
+def _mag_to_true(mag_deg, magvar_w):
+    return float((float(mag_deg) - float(magvar_w)) % 360.0)
+
+
+def _runway_end_options(airport):
+    """Build (options, default_value) for a runway-select dropdown.
+
+    Lists each runway END (e.g. "06" and "24" as separate rows), not
+    the pair "06/24". The end id is the dropdown value so downstream
+    callbacks can resolve lat/lon/heading from the picked end directly.
+
+    Labels carry the magnetic heading (the number pilots read on their
+    compass and on the runway designator). The raw `heading` stored on
+    each end is TRUE — we convert to magnetic via the WMM at the
+    airport's lat/lon. Falls back to pair-level entries for airports
+    whose runway records don't carry an `ends` list.
+    """
+    runways = (airport or {}).get("runways", []) or []
+    magvar_w = _airport_magvar(airport)
+    options = []
+    for rwy in runways:
+        length = rwy.get("length_ft", 0) or 0
+        ends = rwy.get("ends") or []
+        if ends:
+            for end in ends:
+                eid = end.get("id", "?")
+                hdg = end.get("heading")
+                if hdg is not None:
+                    mag = _true_to_mag(hdg, magvar_w)
+                    label = f"{eid} ({mag:03d}° mag — {length:,} ft)"
+                else:
+                    label = f"{eid} ({length:,} ft)"
+                options.append({"label": label, "value": eid})
+        else:
+            rid = rwy.get("id", "?")
+            hdg = rwy.get("heading")
+            if hdg is not None:
+                mag = _true_to_mag(hdg, magvar_w)
+                label = f"{rid} ({mag:03d}° mag — {length:,} ft)"
+            else:
+                label = f"{rid} ({length:,} ft)"
+            options.append({"label": label, "value": rid})
+
+    def _sort_key(opt):
+        v = str(opt["value"])
+        digits = "".join(c for c in v if c.isdigit())
+        return (int(digits) if digits else 99, v)
+
+    options.sort(key=_sort_key)
+    default_value = options[0]["value"] if options else None
+    return options, default_value
+
+
+def _resolve_runway_end(airport_id, end_id):
+    """Return the runway-end dict for the given airport + end id.
+
+    Walks airport["runways"][*]["ends"] looking for a matching end.
+    Falls back to matching pair-level id for legacy airports without
+    `ends` records. The `heading` field on the returned dict is TRUE
+    (matching what the data stores). Callers that need magnetic should
+    convert via `_true_to_mag` with `_airport_magvar(airport)`.
+    Returns None when nothing matches.
+    """
+    if not airport_id or not end_id:
+        return None
+    airport = next((a for a in airport_data if a.get("id") == airport_id), None)
+    if not airport:
+        return None
+    for rwy in airport.get("runways", []) or []:
+        for end in rwy.get("ends") or []:
+            if str(end.get("id")) == str(end_id):
+                merged = dict(end)
+                merged.setdefault("length_ft", rwy.get("length_ft", 0))
+                return merged
+        if str(rwy.get("id")) == str(end_id):
+            return rwy
+    return None
+
+
+def _resolve_runway_end_magnetic(airport_id, end_id):
+    """Same as _resolve_runway_end but with `heading` converted to magnetic.
+
+    Used by the auto-fill callbacks that write the heading number into a
+    visible input field — pilots think in magnetic, the data stores true.
+    """
+    end = _resolve_runway_end(airport_id, end_id)
+    if not end or end.get("heading") is None:
+        return end
+    airport = next((a for a in airport_data if a.get("id") == airport_id), None)
+    magvar_w = _airport_magvar(airport)
+    merged = dict(end)
+    merged["heading_true"] = float(end["heading"])
+    merged["heading"] = _true_to_mag(end["heading"], magvar_w)
+    return merged
 
 
 def register(app):
@@ -190,54 +309,22 @@ def register(app):
         prevent_initial_call=False
     )
     def update_runway_options(airport_id, maneuver):
-        """Populate runway dropdown when airport is selected or maneuver changes."""
+        """Populate the runway-end dropdown when an airport is selected."""
         if not airport_id:
             return [], None, "Select airport first...", "", {"display": "block"}
 
-        # Find airport in data
         airport = next((a for a in airport_data if a.get("id") == airport_id), None)
         if not airport:
             return [], None, "Airport not found", "", {"display": "block"}
 
-        # Get runways
-        runways = airport.get("runways", [])
-        if not runways:
+        options, default_value = _runway_end_options(airport)
+        if not options:
             return [], None, "No runway data available", "Use manual heading below", {"display": "block"}
 
-        # Build options - format: "17 (170° - 5,500 ft)"
-        options = []
-        for rwy in runways:
-            rwy_id = rwy.get("id", "?")
-            heading = rwy.get("heading")
-            length = rwy.get("length_ft", 0)
-
-            if heading is not None:
-                label = f"{rwy_id} ({heading:03d}° - {length:,} ft)"
-            else:
-                label = f"{rwy_id} ({length:,} ft)"
-
-            options.append({"label": label, "value": rwy_id})
-
-        # Sort by runway ID
-        options.sort(key=lambda x: x["value"])
-
-        # Default to first runway with valid heading
-        default_value = None
-        for opt in options:
-            rwy = next((r for r in runways if r.get("id") == opt["value"]), None)
-            if rwy and rwy.get("heading") is not None:
-                default_value = opt["value"]
-                break
-
-        if not default_value and options:
-            default_value = options[0]["value"]
-
-        info_text = f"{airport.get('name', airport_id)} - {len(runways)} runway(s)"
-
-        # Hide manual heading when runway dropdown has options
-        manual_style = {"display": "none"} if options else {"display": "block"}
-
-        return options, default_value, "Select runway...", info_text, manual_style
+        info_text = f"{airport.get('name', airport_id)} - {len(options)} runway end(s)"
+        # Manual-heading override stays hidden as long as we have ends.
+        manual_style = {"display": "none"}
+        return options, default_value, "Departure runway...", info_text, manual_style
 
     @app.callback(
         Output("poweroff180-runway-select", "options"),
@@ -250,54 +337,114 @@ def register(app):
         prevent_initial_call=False
     )
     def update_poweroff180_runway_options(airport_id, maneuver):
-        """Populate runway dropdown for heading selection in Power-Off 180."""
+        """Populate the runway-end dropdown for Power-Off 180."""
         if not airport_id:
-            return [], None, "Select airport for runway heading...", "Or use manual heading below", {"display": "block"}
+            return [], None, "Select airport for runway...", "Or use manual heading below", {"display": "block"}
 
-        # Find airport in data
         airport = next((a for a in airport_data if a.get("id") == airport_id), None)
         if not airport:
             return [], None, "Airport not found", "Use manual heading below", {"display": "block"}
 
-        # Get runways
-        runways = airport.get("runways", [])
-        if not runways:
+        options, default_value = _runway_end_options(airport)
+        if not options:
             return [], None, "No runway data", "Use manual heading below", {"display": "block"}
 
-        # Build options - format: "17 (170° - 5,500 ft)"
-        options = []
-        for rwy in runways:
-            rwy_id = rwy.get("id", "?")
-            heading = rwy.get("heading")
-            length = rwy.get("length_ft", 0)
+        info_text = f"{airport.get('name', airport_id)} - landing runway end"
+        manual_style = {"display": "none"}
+        return options, default_value, "Landing runway...", info_text, manual_style
 
-            if heading is not None:
-                label = f"{rwy_id} ({heading:03d}° - {length:,} ft)"
-            else:
-                label = f"{rwy_id} ({length:,} ft)"
+    # ---------- Phase F2 · Heading auto-fill from runway end ----------
 
-            options.append({"label": label, "value": rwy_id})
+    @app.callback(
+        Output("impossibleturn-manual-heading", "value", allow_duplicate=True),
+        Input("impossibleturn-runway-select", "value"),
+        State("selected-airport-id", "data"),
+        prevent_initial_call=True,
+    )
+    def fill_impossibleturn_heading(end_id, airport_id):
+        end = _resolve_runway_end_magnetic(airport_id, end_id)
+        if not end or end.get("heading") is None:
+            raise PreventUpdate
+        return int(end["heading"])
 
-        # Sort by runway ID
-        options.sort(key=lambda x: x["value"])
+    @app.callback(
+        Output("poweroff180-manual-heading", "value", allow_duplicate=True),
+        Input("poweroff180-runway-select", "value"),
+        State("selected-airport-id", "data"),
+        prevent_initial_call=True,
+    )
+    def fill_poweroff180_heading(end_id, airport_id):
+        end = _resolve_runway_end_magnetic(airport_id, end_id)
+        if not end or end.get("heading") is None:
+            raise PreventUpdate
+        return int(end["heading"])
 
-        # Default to first runway with valid heading
-        default_value = None
-        for opt in options:
-            rwy = next((r for r in runways if r.get("id") == opt["value"]), None)
-            if rwy and rwy.get("heading") is not None:
-                default_value = opt["value"]
-                break
+    @app.callback(
+        Output("engineout-touchdown-heading", "value", allow_duplicate=True),
+        Input("engineout-runway-select", "value"),
+        State("selected-airport-id", "data"),
+        prevent_initial_call=True,
+    )
+    def fill_engineout_touchdown_heading(end_id, airport_id):
+        end = _resolve_runway_end_magnetic(airport_id, end_id)
+        if not end or end.get("heading") is None:
+            raise PreventUpdate
+        return int(end["heading"])
 
-        if not default_value and options:
-            default_value = options[0]["value"]
+    # ---------- Phase F3 · Point-store auto-set from runway end ----------
+    # When the user picks a runway end, place the relevant takeoff /
+    # touchdown point at that end's threshold lat/lon. Eliminates the
+    # need to manually click the runway on the map. The user can still
+    # override by clicking the map after picking the runway (the click
+    # handler writes to the same store).
 
-        info_text = f"{airport.get('name', airport_id)} - select runway for heading"
+    @app.callback(
+        Output(
+            {"type": "point-store", "m_id": "impossible_turn", "role": "start"},
+            "data",
+            allow_duplicate=True,
+        ),
+        Input("impossibleturn-runway-select", "value"),
+        State("selected-airport-id", "data"),
+        prevent_initial_call=True,
+    )
+    def fill_impossibleturn_start(end_id, airport_id):
+        end = _resolve_runway_end(airport_id, end_id)
+        if not end or end.get("lat") is None or end.get("lon") is None:
+            raise PreventUpdate
+        return {"lat": float(end["lat"]), "lon": float(end["lon"])}
 
-        # Hide manual heading when runway dropdown has valid options
-        manual_style = {"display": "none"} if options else {"display": "block"}
+    @app.callback(
+        Output(
+            {"type": "point-store", "m_id": "poweroff180", "role": "touchdown"},
+            "data",
+            allow_duplicate=True,
+        ),
+        Input("poweroff180-runway-select", "value"),
+        State("selected-airport-id", "data"),
+        prevent_initial_call=True,
+    )
+    def fill_poweroff180_touchdown(end_id, airport_id):
+        end = _resolve_runway_end(airport_id, end_id)
+        if not end or end.get("lat") is None or end.get("lon") is None:
+            raise PreventUpdate
+        return {"lat": float(end["lat"]), "lon": float(end["lon"])}
 
-        return options, default_value, "Select runway...", info_text, manual_style
+    @app.callback(
+        Output(
+            {"type": "point-store", "m_id": "engineout", "role": "touchdown"},
+            "data",
+            allow_duplicate=True,
+        ),
+        Input("engineout-runway-select", "value"),
+        State("selected-airport-id", "data"),
+        prevent_initial_call=True,
+    )
+    def fill_engineout_touchdown(end_id, airport_id):
+        end = _resolve_runway_end(airport_id, end_id)
+        if not end or end.get("lat") is None or end.get("lon") is None:
+            raise PreventUpdate
+        return {"lat": float(end["lat"]), "lon": float(end["lon"])}
 
     @app.callback(
         Output("engineout-runway-select", "options"),
@@ -310,51 +457,18 @@ def register(app):
         prevent_initial_call=False
     )
     def update_engineout_runway_options(airport_id, maneuver):
-        """Populate runway dropdown for Engine-Out Glide Simulator."""
+        """Populate the runway-end dropdown for Engine-Out Glide."""
         if not airport_id:
             return [], None, "Select airport for runway...", "Or use manual heading below", {"display": "block"}
 
-        # Find airport in data
         airport = next((a for a in airport_data if a.get("id") == airport_id), None)
         if not airport:
             return [], None, "Airport not found", "Use manual heading below", {"display": "block"}
 
-        # Get runways
-        runways = airport.get("runways", [])
-        if not runways:
+        options, default_value = _runway_end_options(airport)
+        if not options:
             return [], None, "No runway data", "Use manual heading below", {"display": "block"}
 
-        # Build options - format: "17 (170° - 5,500 ft)"
-        options = []
-        for rwy in runways:
-            rwy_id = rwy.get("id", "?")
-            heading = rwy.get("heading")
-            length = rwy.get("length_ft", 0)
-
-            if heading is not None:
-                label = f"{rwy_id} ({heading:03d}° - {length:,} ft)"
-            else:
-                label = f"{rwy_id} ({length:,} ft)"
-
-            options.append({"label": label, "value": rwy_id})
-
-        # Sort by runway ID
-        options.sort(key=lambda x: x["value"])
-
-        # Default to first runway with valid heading
-        default_value = None
-        for opt in options:
-            rwy = next((r for r in runways if r.get("id") == opt["value"]), None)
-            if rwy and rwy.get("heading") is not None:
-                default_value = opt["value"]
-                break
-
-        if not default_value and options:
-            default_value = options[0]["value"]
-
-        info_text = f"{airport.get('name', airport_id)} - select runway for heading"
-
-        # Hide manual heading when runway dropdown has valid options
-        manual_style = {"display": "none"} if options else {"display": "block"}
-
-        return options, default_value, "Select runway...", info_text, manual_style
+        info_text = f"{airport.get('name', airport_id)} - landing runway end"
+        manual_style = {"display": "none"}
+        return options, default_value, "Landing runway...", info_text, manual_style

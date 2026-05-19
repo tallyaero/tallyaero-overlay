@@ -144,25 +144,21 @@ def register(app):
             if total_wt is None:
                 total_wt = float(runtime_weight) if runtime_weight not in [None, "", "null"] else None
 
-            # Get touchdown heading from runway dropdown or manual input
-            touchdown_heading = None
+            # Phase F — touchdown-heading input is the source of truth.
+            # When an airport is selected, the value is interpreted as
+            # magnetic (pilot convention) and converted to true for
+            # geometry. With no airport selected we treat as true.
             selected_airport = next((a for a in airport_data if a.get("id") == selected_airport_id), None)
             airport_elev_ft = float(selected_airport.get("elevation_ft", 0.0)) if selected_airport else 0.0
 
-            if runway_select and selected_airport:
-                # Get heading from selected runway
-                runways = selected_airport.get("runways", [])
-                selected_rwy = next((r for r in runways if r.get("id") == runway_select), None)
-                if selected_rwy:
-                    touchdown_heading = float(selected_rwy.get("heading", 0))
-
-            # Fall back to manual heading if no runway selected
-            if touchdown_heading is None:
-                manual_hdg = safe_float("engineout-touchdown-heading.value")
-                if manual_hdg is not None:
-                    touchdown_heading = manual_hdg
-                else:
-                    return [], None, "Select a runway or enter manual heading.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
+            heading_input = safe_float("engineout-touchdown-heading.value")
+            if heading_input is None:
+                return [], None, "Enter a touchdown heading.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, "", [], ""
+            if selected_airport_id:
+                from callbacks.aircraft import _airport_magvar, _mag_to_true
+                touchdown_heading = _mag_to_true(heading_input, _airport_magvar(selected_airport))
+            else:
+                touchdown_heading = float(heading_input)
 
             required = [
                 start_heading, start_alt_agl, touchdown_heading,

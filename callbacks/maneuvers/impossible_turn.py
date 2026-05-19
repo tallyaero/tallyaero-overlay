@@ -106,23 +106,27 @@ def register(app):
                 v = states.get(state_key)
                 return float(v) if v not in [None, "", "null"] else None
 
-            # Get runway heading from dropdown selection or manual input
-            runway_heading = None
+            # Phase F — runway-select drives the runway length + threshold
+            # point only. The heading input is the single source of truth,
+            # interpreted as magnetic when an airport is selected (pilot
+            # convention) and converted to true for the geometry.
             runway_length_ft = 5000  # Default
             runway_id_selected = states.get("impossibleturn-runway-select.value")
-
             if runway_id_selected and selected_airport_id:
-                # Get heading from airport runway data
-                airport = next((a for a in airport_data if a.get("id") == selected_airport_id), None)
-                if airport and "runways" in airport:
-                    runway = next((r for r in airport["runways"] if r.get("id") == runway_id_selected), None)
-                    if runway:
-                        runway_heading = runway.get("heading")
-                        runway_length_ft = runway.get("length_ft", 5000)
+                from callbacks.aircraft import _resolve_runway_end
+                end = _resolve_runway_end(selected_airport_id, runway_id_selected)
+                if end and end.get("length_ft"):
+                    runway_length_ft = float(end["length_ft"])
 
-            # Fallback to manual heading if no runway selected or no heading data
-            if runway_heading is None:
-                runway_heading = safe_float("impossibleturn-manual-heading.value")
+            heading_input = safe_float("impossibleturn-manual-heading.value")
+            if heading_input is None:
+                runway_heading = None
+            elif selected_airport_id:
+                from callbacks.aircraft import _airport_magvar, _mag_to_true
+                airport = next((a for a in airport_data if a.get("id") == selected_airport_id), None)
+                runway_heading = _mag_to_true(heading_input, _airport_magvar(airport))
+            else:
+                runway_heading = float(heading_input)
 
             failure_alt_agl = safe_float("impossibleturn-altitude.value")
             reaction_sec    = safe_float("impossibleturn-reaction-sec.value")

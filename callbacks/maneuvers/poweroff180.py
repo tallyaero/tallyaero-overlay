@@ -112,23 +112,25 @@ def register(app):
             runway_threshold = touchdown_data
             runway_length_ft = 5000.0
 
-            # Get runway heading from dropdown or manual input
-            runway_heading = None
+            # Phase F — runway-select drives the runway length. The
+            # heading input is the source of truth and is interpreted as
+            # magnetic whenever an airport is selected; we convert to true
+            # for the geometry the sim renders.
+            if selected_airport_id and runway_select:
+                from callbacks.aircraft import _resolve_runway_end
+                end = _resolve_runway_end(selected_airport_id, runway_select)
+                if end and end.get("length_ft"):
+                    runway_length_ft = float(end["length_ft"])
 
-            if selected_airport_id and runway_select and selected_airport:
-                # Get heading from selected runway
-                runways = selected_airport.get("runways", [])
-                runway = next((r for r in runways if r.get("id") == runway_select), None)
-                if runway:
-                    runway_heading = runway.get("heading")
-                    runway_length_ft = runway.get("length_ft", 5000.0)
-
-            # Fallback to manual heading
-            if runway_heading is None:
-                if manual_heading:
-                    runway_heading = float(manual_heading)
-                else:
-                    return [], None, "Select a runway or enter manual heading.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+            if manual_heading is None or manual_heading == "":
+                return [], None, "Enter a runway heading.", [], [], {"display": "none"}, 100, {0: "Start", 100: "End"}, 0, ""
+            heading_mag_or_true = float(manual_heading)
+            if selected_airport_id:
+                from callbacks.aircraft import _airport_magvar, _mag_to_true
+                airport = next((a for a in airport_data if a.get("id") == selected_airport_id), None)
+                runway_heading = _mag_to_true(heading_mag_or_true, _airport_magvar(airport))
+            else:
+                runway_heading = heading_mag_or_true
 
             # Get values
             pattern_alt = float(pattern_alt_agl) if pattern_alt_agl else 1000.0
