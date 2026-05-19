@@ -15,7 +15,7 @@ import dash_bootstrap_components as dbc
 import dash_leaflet as dl
 
 from callbacks.map import create_airplane_marker
-from layouts.maneuvers._shared import _acs_metric, _power_verdict
+from layouts.maneuvers._shared import _acs_metric
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -319,12 +319,6 @@ def register(app):
                     html.Div([
                         _acs_metric("Heading", 0, "°", target=0, tol=10, cert_level="commercial"),
                     ], style={"display": "flex", "flexWrap": "wrap", "marginTop": "6px"}),
-                    # Phase D2 — Design Directive power verdict.
-                    _power_verdict(
-                        power_pct, 0.625,
-                        "wider arcs (PA shifts as GS changes)",
-                        "could not hold pivotal altitude — pylon slipped off wing tip",
-                    ),
                 ], title="Simulation Results", style={"fontSize": "12px"}),
             ], start_collapsed=False, style={"marginTop": "8px"})
         )
