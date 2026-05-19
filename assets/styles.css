@@ -2363,9 +2363,11 @@ input[type="radio"] {
   position: absolute;
   top: 10px;
   right: 200px;
-  /* Leaflet's control panes go up to 1000; push above so the
-     overlay sits on top of the map at every interaction. */
-  z-index: 1500;
+  /* Sits above Leaflet's control-container (z-index 1000) but
+     BELOW Bootstrap modal stack (.modal-backdrop = 1050,
+     .modal = 1055) so the Nav Log doesn't get covered by the
+     overlay chips when it opens. */
+  z-index: 1010;
   display: flex;
   gap: 4px;
   align-items: center;
