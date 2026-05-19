@@ -56,22 +56,12 @@ def engineout_layout(default_elev=None):
             id="engineout-max-bank", type="number",
             value=45, min=15, max=60,
         ), tooltip="Maximum bank used in the glide turns. Steeper = tighter radius but more drag/altitude loss."),
-        html.Div(
-            dcc.Checklist(
-                # Pattern-matched id so `render_glide_ring` can use
-                # this as an Input even when the engine-out layout
-                # isn't currently mounted in maneuver-params-container.
-                # Plain string ids fail Dash's input gathering when
-                # the component isn't in the DOM; pattern-matched ids
-                # with an empty match set simply don't trigger.
-                id={"type": "envelope-toggle", "m_id": "engineout"},
-                options=[{"label": "Glide Ring", "value": "show"}],
-                value=[],
-                className="shelf-toggle-chip-checklist",
-            ),
-            className="shelf-toggle-chip",
-            title="Toggle the reachable-glide envelope ring overlay.",
-        ),
+        # NOTE: the Glide Ring toggle (id="engineout-show-envelope")
+        # used to live here. It's now a permanent component in the
+        # map-controls overlay (layouts/desktop.py) so the
+        # render_glide_ring callback can reference it as a string-id
+        # Input without failing when a non-engineout maneuver is
+        # mounted. CSS hides the toggle when maneuver != engineout.
 
         # Hidden helpers + stores. These have to exist in the DOM
         # while the maneuver is active so the callbacks can read /

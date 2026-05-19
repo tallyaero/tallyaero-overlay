@@ -80,7 +80,7 @@ def register(app):
         State("engineout-max-bank", "value"),
         State("engineout-speed-tau", "value"),
         State("engineout-bank-tau", "value"),
-        State({"type": "envelope-toggle", "m_id": "engineout"}, "value"),
+        State("engineout-show-envelope", "value"),
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
         State("wind-profile-store", "data"),
@@ -574,16 +574,17 @@ def register(app):
     # ------------------------------------------------------------------
     # Phase I2 — Glide Ring toggle auto-draw + wind-aloft awareness.
     # ------------------------------------------------------------------
-    # Inputs only reference IDs that ALWAYS exist (always-on sidebar
-    # fields + pattern-matched ids). The engine-out-specific fields
-    # are pulled out of dash.callback_context.states when the callback
-    # actually fires — using callback_context.states means we don't
-    # need to declare them as State on the callback, which avoids
-    # callback-registration failures when those ids aren't in the
-    # current layout (i.e. when a non-engineout maneuver is mounted).
+    # The toggle + the point-store are always-present in the DOM:
+    # the toggle lives in the desktop overlay (layouts/desktop.py),
+    # the point-store is pattern-matched. The engine-out-only
+    # form fields (altitude / flap / prop) are pulled out of the
+    # live Dash request body so we don't have to declare them as
+    # State on the callback — a missing State id would otherwise
+    # error the callback during dispatch when a non-engineout
+    # maneuver is the currently mounted one.
     @app.callback(
         Output("envelope-layer", "children"),
-        Input({"type": "envelope-toggle", "m_id": "engineout"}, "value"),
+        Input("engineout-show-envelope", "value"),
         Input({"type": "point-store", "m_id": "engineout", "role": "start"}, "data"),
         Input("aircraft-select", "value"),
         Input("engine-select", "value"),
@@ -600,31 +601,28 @@ def register(app):
                            ac_name, engine_key, wind_dir, wind_speed,
                            wind_profile_data, oat_f, altimeter,
                            maneuver, airport_id):
-        # Engine-out-only fields aren't declared as State above; pull
-        # them out of the live request body via Flask. When the
-        # engineout layout isn't mounted these requests return None
-        # naturally because the components aren't there.
+        # Engine-out-only fields fetched from the request body so
+        # they don't appear in the Input/State declaration above.
+        # Falls back to layout defaults when not mounted.
+        start_alt_agl = 5000.0
+        flap_setting = "clean"
+        prop_condition = "idle"
         try:
             from flask import request
             body = request.get_json(silent=True) or {}
+            for entry in body.get("state", []) or []:
+                sid = entry.get("id")
+                if sid == "engineout-altitude":
+                    try:
+                        start_alt_agl = float(entry.get("value")) if entry.get("value") not in (None, "") else 5000.0
+                    except (TypeError, ValueError):
+                        pass
+                elif sid == "engineout-flap-setting":
+                    flap_setting = entry.get("value") or "clean"
+                elif sid == "engineout-prop-condition":
+                    prop_condition = entry.get("value") or "idle"
         except Exception:
-            body = {}
-        # The Dash request body has a "state" list of {id, property, value}.
-        # We can also rely on the engineout layout's defaults below.
-        start_alt_agl = 5000.0       # matches layout default
-        flap_setting = "clean"       # layout default
-        prop_condition = "idle"      # layout default
-        for entry in body.get("state", []) or []:
-            sid = entry.get("id")
-            if sid == "engineout-altitude":
-                try:
-                    start_alt_agl = float(entry.get("value")) if entry.get("value") not in (None, "") else 5000.0
-                except (TypeError, ValueError):
-                    pass
-            elif sid == "engineout-flap-setting":
-                flap_setting = entry.get("value") or "clean"
-            elif sid == "engineout-prop-condition":
-                prop_condition = entry.get("value") or "idle"
+            pass
         """Draw the engine-out glide envelope onto the dedicated
         envelope-layer whenever the toggle is on AND we have the
         minimum inputs needed (start point, altitude, aircraft +

@@ -574,6 +574,23 @@ def desktop_layout():
                         # Lives above the Reset row so the user sees the
                         # forward-progress actions first, with the
                         # housekeeping actions below.
+                        # Glide Ring toggle lives here permanently so
+                        # the engine-out auto-draw callback can use
+                        # this id as a stable string-id Input. CSS
+                        # hides it when the active maneuver isn't
+                        # engineout (see #glide-ring-toggle-wrap
+                        # rules in assets/styles.css).
+                        html.Div(
+                            dcc.Checklist(
+                                id="engineout-show-envelope",
+                                options=[{"label": "Glide Ring", "value": "show"}],
+                                value=[],
+                                className="shelf-toggle-chip-checklist",
+                            ),
+                            id="glide-ring-toggle-wrap",
+                            className="shelf-toggle-chip",
+                            title="Toggle the reachable-glide envelope ring overlay.",
+                        ),
                         html.Div(id="maneuver-actions-container",
                                  className="map-overlay-actions"),
                         html.Div(className="map-overlay-divider"),

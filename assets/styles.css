@@ -1861,6 +1861,19 @@ input[type="radio"] {
   border-color: #7f1d1d;
 }
 
+/* Glide Ring toggle lives permanently in the map-controls overlay
+   so the engine-out auto-draw callback can reference its id from
+   any maneuver context. CSS hides it when the active maneuver
+   isn't engine-out — controlled by the `overlay-for-<maneuver>`
+   class on #map-controls-overlay (set by a Python callback on
+   the maneuver-select value). */
+#glide-ring-toggle-wrap {
+  display: none;
+}
+.map-controls-overlay.overlay-for-engineout #glide-ring-toggle-wrap {
+  display: inline-flex;
+}
+
 /* Toggle chip — replaces the old labeled checkbox "Envelope: Ring".
    Wraps a single-option dcc.Checklist into a pill-shaped chip that
    highlights when checked. The native checkbox input is hidden; the
