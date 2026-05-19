@@ -42,6 +42,8 @@ Crossing schema (returned by route_crossings):
 from __future__ import annotations
 
 import json
+import re
+from datetime import datetime, timedelta, timezone
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -283,6 +285,22 @@ def load_airspaces() -> dict[str, list[dict]]:
             out["schedule"] = {r["FAA_ID"]: r for r in rows if r.get("FAA_ID")}
         except Exception:
             pass
+    # Join schedule into class records by IDENT — so every downstream
+    # consumer (renderer tooltip, route-crossings list) sees the
+    # parsed sheets + summary without re-doing the lookup.
+    sched = out["schedule"]
+    if sched:
+        for r in out["class_airspace"]:
+            ident = (r.get("ident") or "").strip().upper()
+            row = sched.get(ident)
+            if not row:
+                continue
+            applies = row.get("APPLIES") or ""
+            sheets = parse_applies(applies)
+            if not sheets:
+                continue
+            r["schedule_sheets"] = sheets
+            r["schedule_summary"] = summarize_sheets(sheets)
     return out
 
 
@@ -345,7 +363,8 @@ def _path_bbox(path: list[tuple[float, float]],
 
 def route_crossings(path: list[tuple[float, float]],
                      planned_alt_msl_ft: float,
-                     layers: list[str] | None = None) -> list[dict]:
+                     layers: list[str] | None = None,
+                     when_utc: datetime | None = None) -> list[dict]:
     """Return airspaces that the route crosses AND whose vertical
     band overlaps the planned cruise altitude.
 
@@ -363,6 +382,8 @@ def route_crossings(path: list[tuple[float, float]],
     candidates = airspaces_in_bbox(bbox, layers=layers)
     out = []
     alt = float(planned_alt_msl_ft or 0.0)
+    if when_utc is None:
+        when_utc = datetime.utcnow()
     for rec in candidates:
         if not _path_crosses_polygon(path, rec["geometry"]):
             continue
@@ -370,10 +391,206 @@ def route_crossings(path: list[tuple[float, float]],
         ceiling = (rec["ceiling_ft"] if rec["ceiling_ft"] is not None
                     else 99999.0)
         pierces = floor <= alt <= ceiling
+        # Schedule-aware: if the airspace has a parsed schedule, evaluate
+        # whether it's active at the planned crossing time. Class B/C/D
+        # surface areas have schedules; everything else defaults to
+        # "always active" (no schedule attached → assume active).
+        sheets = rec.get("schedule_sheets") or []
+        if sheets:
+            active = schedule_active_at(sheets, when_utc)
+        else:
+            active = True
         out.append({
             **{k: v for k, v in rec.items() if k != "geometry"},
             "pierces": pierces,
+            "active": active,
         })
     # Sort: pierces first, then by floor ascending.
     out.sort(key=lambda r: (not r["pierces"], r["floor_ft"] or 0.0))
     return out
+
+
+# === Phase A3-followup — Airspace_Schedule APPLIES parser ====================
+
+# Day-of-week tokens FAA uses in the APPLIES XML. ANY = all 7 days.
+_DAYS_BY_TOKEN = {
+    "ANY": (0, 1, 2, 3, 4, 5, 6),
+    "MON": (0,), "TUE": (1,), "WED": (2,), "THU": (3,),
+    "FRI": (4,), "SAT": (5,), "SUN": (6,),
+    "WD":  (0, 1, 2, 3, 4),   # weekdays
+    "WE":  (5, 6),             # weekend
+}
+
+
+def _tz_offset_minutes(token: str) -> int | None:
+    """Parse 'UTC-5' → -300 minutes. Returns None on unknown."""
+    if not token:
+        return None
+    m = re.match(r"^UTC([+-]?)(\d+)(?::(\d+))?$", token.strip().upper())
+    if not m:
+        return None
+    sign = -1 if m.group(1) == "-" else 1
+    h = int(m.group(2))
+    mm = int(m.group(3) or 0)
+    return sign * (h * 60 + mm)
+
+
+def parse_applies(applies_xml: str) -> list[dict]:
+    """Parse an Airspace_Schedule.APPLIES XML string into a list of
+    Timesheet dicts. No external XML deps — regex is enough for the
+    flat structure this feed uses.
+
+    Each Timesheet dict has:
+        days: tuple of weekday ints (Monday=0)
+        start_time: (h, m) 24h tuple
+        end_time:   (h, m) 24h tuple
+        start_date: (month, day) or None
+        end_date:   (month, day) or None
+        tz_offset_min: int minutes from UTC (negative = west) or None
+        dst: bool — whether the source flags DST adjustment
+    """
+    if not applies_xml:
+        return []
+    out: list[dict] = []
+    for ts in re.findall(r"<Timesheet>(.*?)</Timesheet>", applies_xml, re.S):
+        def _g(tag):
+            m = re.search(rf"<{tag}>([^<]*)</{tag}>", ts)
+            return (m.group(1).strip() if m else "")
+
+        day_token = _g("day").upper() or "ANY"
+        days = _DAYS_BY_TOKEN.get(day_token)
+        if days is None:
+            continue
+        start_t = _g("startTime")
+        end_t = _g("endTime")
+
+        def _hm(s):
+            mm = re.match(r"^(\d{1,2}):(\d{2})$", s)
+            if not mm:
+                return None
+            return int(mm.group(1)), int(mm.group(2))
+
+        s_hm = _hm(start_t)
+        e_hm = _hm(end_t)
+        if s_hm is None or e_hm is None:
+            continue
+
+        def _md(s):
+            # NASR uses DD-MM (day-month), e.g. "01-01" or "14-05".
+            mm = re.match(r"^(\d{1,2})-(\d{1,2})$", s.strip())
+            if not mm:
+                return None
+            return int(mm.group(2)), int(mm.group(1))  # (month, day)
+
+        out.append({
+            "days": tuple(days),
+            "start_time": s_hm,
+            "end_time": e_hm,
+            "start_date": _md(_g("startDate")),
+            "end_date": _md(_g("endDate")),
+            "tz_offset_min": _tz_offset_minutes(_g("timeReference")),
+            "dst": _g("daylightSavingAdjust").upper() == "YES",
+        })
+    return out
+
+
+_DAY_NAMES = ("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+
+
+def summarize_sheets(sheets: list[dict]) -> str:
+    """One-line human summary. Multiple Timesheets are joined with '; '.
+    Truncates at 3 sheets to keep it tooltip-friendly."""
+    pieces: list[str] = []
+    for s in sheets[:3]:
+        days = s["days"]
+        if days == (0, 1, 2, 3, 4, 5, 6):
+            day_s = "Daily"
+        elif days == (0, 1, 2, 3, 4):
+            day_s = "Mon-Fri"
+        elif days == (5, 6):
+            day_s = "Sat-Sun"
+        elif len(days) == 1:
+            day_s = _DAY_NAMES[days[0]]
+        else:
+            day_s = ",".join(_DAY_NAMES[d] for d in days)
+        sh, sm = s["start_time"]
+        eh, em = s["end_time"]
+        time_s = f"{sh:02d}{sm:02d}-{eh:02d}{em:02d}"
+        tz = s["tz_offset_min"]
+        if tz is None:
+            tz_s = ""
+        else:
+            sign = "-" if tz < 0 else "+"
+            tz_s = f" UTC{sign}{abs(tz)//60}"
+        pieces.append(f"{day_s} {time_s}{tz_s}")
+    if len(sheets) > 3:
+        pieces.append(f"+{len(sheets) - 3} more")
+    return "; ".join(pieces)
+
+
+def _in_date_window(when_local: datetime, start_md, end_md) -> bool:
+    """start_md / end_md are (month, day) or None. None means open-ended.
+    Handles the wrap-around case (e.g. Nov 15 - Mar 14)."""
+    if start_md is None and end_md is None:
+        return True
+    if start_md is None or end_md is None:
+        return True
+    s_m, s_d = start_md
+    e_m, e_d = end_md
+    cur = (when_local.month, when_local.day)
+    start = (s_m, s_d)
+    end = (e_m, e_d)
+    if start <= end:
+        return start <= cur <= end
+    # Wraps year boundary: e.g. (11, 1) - (2, 28) means Nov 1 → Feb 28
+    return cur >= start or cur <= end
+
+
+def schedule_active_at(sheets: list[dict], when_utc: datetime) -> bool:
+    """Is any of these Timesheets active at the given UTC moment?
+
+    DST adjustment is approximated by adding +60 min to the offset
+    between the second Sunday in March and the first Sunday in November
+    (US rule) when the sheet flags DST. Good enough for VFR planning;
+    edge-of-DST flights are not the intended use case.
+    """
+    if not sheets:
+        return False
+    for s in sheets:
+        tz = s.get("tz_offset_min")
+        if tz is None:
+            # Without a timezone we can't pin local time — be
+            # conservative and say active so the user double-checks.
+            return True
+        offset = timedelta(minutes=tz)
+        if s.get("dst") and _is_us_dst(when_utc + offset):
+            offset += timedelta(hours=1)
+        local = when_utc + offset
+        if not _in_date_window(local, s.get("start_date"), s.get("end_date")):
+            continue
+        if local.weekday() not in s["days"]:
+            continue
+        sh, sm = s["start_time"]
+        eh, em = s["end_time"]
+        cur_min = local.hour * 60 + local.minute
+        start_min = sh * 60 + sm
+        end_min = eh * 60 + em
+        if start_min <= end_min:
+            if start_min <= cur_min <= end_min:
+                return True
+        else:
+            # Wraps midnight — e.g. 2200-0600
+            if cur_min >= start_min or cur_min <= end_min:
+                return True
+    return False
+
+
+def _is_us_dst(local_dt: datetime) -> bool:
+    """Cheap US DST window: 2nd Sun of March through 1st Sun of Nov."""
+    y = local_dt.year
+    march_first = datetime(y, 3, 1)
+    # Second Sunday of March
+    dst_start = march_first + timedelta(days=(6 - march_first.weekday()) % 7 + 7)
+    nov_first = datetime(y, 11, 1)
+    dst_end = nov_first + timedelta(days=(6 - nov_first.weekday()) % 7)
+    return dst_start.replace(hour=2) <= local_dt < dst_end.replace(hour=2)

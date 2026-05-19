@@ -731,9 +731,21 @@ def _build_nav_log(*, waypoints, legs, totals, cruise_alt, aircraft_name,
             style = TYPE_STYLES.get(code, {})
             color = style.get("color", "#666")
             label = style.get("label", code or "?")
-            verdict = "PIERCE" if x["pierces"] else "over/under"
-            verdict_cls = ("nav-log-as-pierce" if x["pierces"]
-                           else "nav-log-as-overunder")
+            # Pierce + activation cell. A "cold" (inactive) airspace at
+            # the planned crossing time is far less of a concern than a
+            # hot one, even when the route geometrically pierces it.
+            active = x.get("active", True)
+            if x["pierces"]:
+                verdict = "PIERCE" if active else "PIERCE (cold)"
+                verdict_cls = ("nav-log-as-pierce" if active
+                               else "nav-log-as-pierce-cold")
+            else:
+                verdict = "over/under"
+                verdict_cls = "nav-log-as-overunder"
+            # Times text: schedule summary if known, eff_times otherwise.
+            times_text = (x.get("schedule_summary")
+                          or x.get("eff_times")
+                          or ("active" if active else "inactive"))
             return html.Tr([
                 html.Td(verdict, className=verdict_cls),
                 html.Td(html.Span(label,
@@ -745,9 +757,9 @@ def _build_nav_log(*, waypoints, legs, totals, cruise_alt, aircraft_name,
                         className="nav-log-as-alt"),
                 html.Td(x.get("ceiling_desc") or "—",
                         className="nav-log-as-alt"),
-                html.Td(x.get("eff_times") or "—",
+                html.Td(times_text,
                         className="nav-log-as-times",
-                        title=x.get("eff_times") or ""),
+                        title=times_text),
             ])
 
         body_rows = [_xing_row(x) for x in pierces + over_under]
@@ -2307,6 +2319,10 @@ def register(app):
             style = r["style"]
             label = (f"{style['label']} — {r['name']}  "
                      f"{r['floor_desc'] or ''} → {r['ceiling_desc'] or ''}")
+            # Phase A3-fwup — append schedule summary when the airspace
+            # has a known schedule attached.
+            if r.get("schedule_summary"):
+                label += f"  · {r['schedule_summary']}"
             t = geom.get("type")
             rings_to_draw: list[list] = []
             if t == "Polygon":

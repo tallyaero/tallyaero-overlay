@@ -694,7 +694,7 @@ def desktop_layout():
                                     "position": "absolute",
                                     "top": "10px",
                                     "right": "10px",
-                                    "zIndex": "1000",
+                                    "zIndex": "1500",
                                     "backgroundColor": "rgba(255,255,255,0.9)",
                                     "padding": "4px 10px",
                                     "borderRadius": "6px",
