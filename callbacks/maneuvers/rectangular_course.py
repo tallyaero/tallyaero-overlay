@@ -436,6 +436,13 @@ def register(app):
                     html.Div(f"AOB: {sim_warnings.get('min_bank_achieved', 0):.0f}-{max_bank:.0f}° | Load: {load_factor:.2f}G | GS: {sim_warnings.get('min_groundspeed', 0):.0f}-{sim_warnings.get('max_groundspeed', 0):.0f} kt", style={"fontSize": "11px"}),
                     html.Div(f"DW: {dw_length_nm:.2f} nm | Lateral: {lateral_nm:.2f} nm | Crab: {sim_warnings.get('max_crab_angle', 0):.1f}°", style={"fontSize": "11px"}),
                     per_leg_table,
+                    html.Div(
+                        f"Turn radius at corners (30° bank): "
+                        f"{((avg_tas * 1.68781) ** 2 / (32.2 * math.tan(math.radians(30.0)))):.0f} ft",
+                        style={"fontSize": "11px"},
+                        title="Geometric radius required at the four corners assuming "
+                              "a typical 30° pattern bank. Tighter bank shrinks this.",
+                    ),
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                     html.Div(f"Vs turn: {vs_in_turn:.0f} kt | Margin: {min_ias_achieved - vs_in_turn:.0f} kt | Time: {sim_warnings.get('total_time_sec', 0):.0f}s", style={"fontSize": "11px"}),
                     html.Div(f"{direction.title()} pattern | {circuits} circuits", style={"fontSize": "11px"}),

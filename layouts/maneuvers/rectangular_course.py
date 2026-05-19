@@ -34,7 +34,8 @@ def rect_course_layout(default_elev=None):
         html.Button("1. DW Start",
                     id={"type": "click-button", "m_id": "rect_course", "role": "dw_start"},
                     className="shelf-action shelf-action-set",
-                    title="Click the first point on the downwind leg (the long leg parallel to wind)."),
+                    title="Click the first point on the downwind leg (flown faster with tailwind). "
+                          "Pick the leg parallel to wind so the rectangle's long sides are downwind/upwind."),
         html.Button("2. DW End",
                     id={"type": "click-button", "m_id": "rect_course", "role": "dw_end"},
                     className="shelf-action shelf-action-set",
