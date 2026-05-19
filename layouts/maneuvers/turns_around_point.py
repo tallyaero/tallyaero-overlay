@@ -30,8 +30,9 @@ def turns_point_layout(default_elev=None):
         ), tooltip="Orbit direction."),
         _field("Entry Hdg", dcc.Input(
             id="turnspoint-entry-heading", type="number",
-            placeholder="auto",
-        ), tooltip="Entry heading override. Auto = downwind (ACS preferred)."),
+            placeholder="auto = downwind",
+        ), tooltip="Entry heading. Leave blank for auto downwind entry (ACS preferred). "
+                  "Override only if the prevailing wind isn't representative."),
 
         html.Div(className="shelf-spacer"),
 

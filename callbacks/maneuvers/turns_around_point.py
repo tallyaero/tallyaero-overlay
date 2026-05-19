@@ -249,7 +249,15 @@ def register(app):
                     html.Div(f"Weight: {sim_warnings.get('weight_lb', 0):.0f} lb | IAS: {ias:.0f} kt | TAS: {avg_tas:.0f} kt | Wind: {wind_dir_val:.0f}°/{wind_speed_val:.0f} kt", style={"fontSize": "11px"}),
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                     html.Div(f"AOB: {sim_warnings.get('min_bank_achieved', 0):.0f}-{max_bank:.0f}° | Load: {load_factor:.2f}G | GS: {sim_warnings.get('min_groundspeed', 0):.0f}-{sim_warnings.get('max_groundspeed', 0):.0f} kt", style={"fontSize": "11px"}),
-                    html.Div(f"Orbit: {sim_warnings.get('orbit_radius_ft', 0):.0f} ft | Alt loss: {sim_warnings.get('altitude_loss_ft', 0):.0f} ft", style={"fontSize": "11px"}),
+                    html.Div(
+                        f"Orbit: {sim_warnings.get('orbit_radius_ft', 0):.0f} ft "
+                        f"| Min r @60°: "
+                        f"{((avg_tas * 1.68781) ** 2 / (32.2 * math.tan(math.radians(60)))):.0f} ft "
+                        f"| Alt loss: {sim_warnings.get('altitude_loss_ft', 0):.0f} ft",
+                        style={"fontSize": "11px"},
+                        title="Min turn radius is the geometric floor at 60° bank — "
+                              "your orbit can't be smaller without exceeding 60°.",
+                    ),
                     html.Div(
                         f"PA: {sim_warnings.get('pivotal_alt_min', 0):.0f}-"
                         f"{sim_warnings.get('pivotal_alt_max', 0):.0f} ft AGL "
@@ -331,6 +339,10 @@ def register(app):
             html.Div(f"Heading: {pt.get('heading', 0):.0f}°"),
             html.Div(f"Track: {pt.get('track', 0):.0f}°"),
             html.Div(f"Crab: {'R ' if pt.get('drift', 0) < 0 else ('L ' if pt.get('drift', 0) > 0 else '')}{abs(pt.get('drift', 0)):.1f}°"),
+            html.Div(
+                f"Wind correction: {pt.get('wind_correction', 0):+.1f}° "
+                f"(orbit phase {pt.get('turn_progress', 0):.0f}°)"
+            ),
             html.Div(f"PA at this GS: {pt.get('pivotal_alt', 0):.0f} ft AGL"),
         ]
 
