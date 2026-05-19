@@ -45,13 +45,15 @@ _CG_ONLY = {_CG_HIDDEN}
 
 HIDE_BY_MANEUVER: dict[str, set[str]] = {
     "route": {
-        "sidebar-thermo-row",      # OAT + altimeter — no density alt in route
+        # OAT + altimeter feed the route's density-altitude chip now
+        # (Phase A2), so keep them visible.
         "sidebar-agl-wrap",        # AGL of picked airport — irrelevant to route
         _CG_HIDDEN,                # CG — doesn't affect glide ratio
         _POWER_HIDDEN,             # Power — pilot picks cruise IAS instead
-        "map-controls-overlay",    # Reset All / Reset Clicks / Undo —
-                                    # route planner doesn't use map clicks
-                                    # for point-setting maneuvers
+        # NOTE: do NOT hide map-controls-overlay — Route Planner now uses
+        # this container for the airspace + VOR/fix overlay toggles
+        # (Phase 7f-follow + 7N-e). The Reset/Undo buttons inside are
+        # harmless when no map clicks have happened.
     },
     # Engine-out family — full / idle / feathered power is definitional;
     # CG isn't even read by the sim.
