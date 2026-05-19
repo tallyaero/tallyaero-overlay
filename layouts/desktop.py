@@ -120,7 +120,6 @@ def _top_strip():
             ),
             html.Div(
                 [
-                    html.Div(id="maneuver-shelf-status", className="maneuver-shelf-status"),
                     _top_menu(),
                 ],
                 className="top-strip-right",

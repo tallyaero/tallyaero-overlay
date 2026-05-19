@@ -1256,7 +1256,13 @@ input[type="radio"] {
   min-width: 220px;
   padding: 6px 0;
   font-size: 12px;
+  /* Sit above the map overlays (.map-controls-overlay = 1000,
+     windsock = 1000, scrubber = 800). */
+  z-index: 2000;
 }
+/* Keep the menu hugging the right edge of the strip. */
+.top-strip-right { margin-right: 0; }
+.top-menu { margin-left: auto; }
 .top-menu .dropdown-item {
   padding: 7px 14px;
   color: var(--ta-text-primary, #1e293b);
