@@ -2414,9 +2414,9 @@ def register(app):
                                   f"{'asp-band-cold' if not active else ''}' "
                                   f"style='color:{label_color}'>"
                                   f"{ceil_s}<hr/>{floor_s}</div>")
-                    polygons.append(dl.Marker(
+                    polygons.append(dl.DivMarker(
                         position=[clat, clon],
-                        icon={
+                        iconOptions={
                             "html": inner_html,
                             "className": "asp-band-icon",
                             "iconSize": [60, 28],
