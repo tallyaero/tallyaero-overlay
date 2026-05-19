@@ -2315,11 +2315,31 @@ def register(app):
             return []
         from core.airspace import (styled_in_bbox, format_alt_band,
                                      schedule_active_at)
-        recs = styled_in_bbox(bbox, list(show_layers))
+        active_layers = list(show_layers)
+        # SUA at continental zoom carpets the screen and the schedule-
+        # aware dimming only adds noise. Drop it until the user is at
+        # least at sectional scale.
+        if zoom_int < 6 and "sua" in active_layers:
+            active_layers.remove("sua")
+        recs = styled_in_bbox(bbox, active_layers)
+        # Cap the render so the map stays interactive even when a
+        # viewport intersects hundreds of airspaces. Sort by severity
+        # so the safety-critical layers (TFR, Prohibited, Restricted,
+        # Class B) survive the cap.
+        _SEVERITY = {"TFR": 0, "P": 1, "R": 2, "B": 3, "C": 4, "D": 5,
+                     "MOA": 6, "W": 7, "D-sua": 8, "A": 9}
+        recs.sort(key=lambda x: _SEVERITY.get(x.get("type_code"), 99))
+        MAX_POLYS = 200
+        if len(recs) > MAX_POLYS:
+            recs = recs[:MAX_POLYS]
         # Permanent altitude labels are useful but visually noisy at
         # wide zoom. Show them only when the chart is zoomed in
         # enough that polygons are distinct (~50 NM viewport).
         show_band_labels = zoom_int >= 8
+        # Cold-state dimming follows the same zoom threshold — at low
+        # zoom the dim/dash interplay looks like flicker; at ≥7 it's
+        # a meaningful "this MOA isn't hot" cue.
+        dim_inactive = zoom_int >= 7
         # Evaluate "is this airspace hot right now?" once per render.
         # Records without a schedule (Class B 24/7, most P/R, MOAs with
         # only NOTAM activation) are treated as always-active.
@@ -2343,14 +2363,17 @@ def register(app):
                 label += f"  · {r['schedule_summary']}"
             # Inactive polygons dim down + dash the outline so a cold
             # MOA is visually distinct from a hot MOA without losing
-            # type identity (color stays).
+            # type identity (color stays). Only applied at zoom ≥ 7
+            # because at wider zoom the dim/dash flicker between
+            # different airspaces in different regions reads as noise
+            # rather than information.
             poly_color = style["color"]
             poly_weight = style["weight"]
             poly_dash = style.get("dashArray")
             poly_fill = style["fillColor"]
             poly_fill_op = style["fillOpacity"]
             poly_stroke_op = 1.0
-            if not active:
+            if not active and dim_inactive:
                 poly_fill_op = poly_fill_op * 0.4
                 poly_stroke_op = 0.55
                 # Force a dash even on Prohibited/Class B style solids
