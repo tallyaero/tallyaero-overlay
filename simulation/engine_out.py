@@ -2599,12 +2599,37 @@ def run_simulation(
         if time_sec > MAX_SIM_TIME_SEC:
             break
 
+    # Success = "landed on the runway, on heading." The old check was just
+    # straight-line distance from TD < 400 ft + alt < 100 ft, which let
+    # off-heading splats next to the threshold count as success (e.g.
+    # final heading 54° off runway) and rejected on-centerline overshoots
+    # by 100 ft. Rewrite in runway-relative coordinates: the touchdown
+    # zone is a rectangle along the runway extending from slightly short
+    # of the threshold to ~1500 ft past, runway-width-wide, with the
+    # aircraft heading within ±15° of the runway.
     final_bucket = buckets[-1] if buckets else None
-    if final_bucket and final_bucket.name == "TOUCHDOWN":
-        dist_to_td = geo_dist((lat, lon), (final_bucket.lat, final_bucket.lon)).feet
-        success = dist_to_td < BUCKET_TOUCHDOWN_DEPTH * 2 and alt_agl < BUCKET_TOUCHDOWN_HEIGHT
-    else:
-        success = False
+    success = False
+    if final_bucket and final_bucket.name == "TOUCHDOWN" and hover_data:
+        end_pt = GeoPoint(lat, lon)
+        td_pt = GeoPoint(final_bucket.lat, final_bucket.lon)
+        xtrack_ft, along_ft = _cross_track_to_centerline_ft(
+            td_pt, end_pt, touchdown_heading)
+        end_heading = hover_data[-1].get("heading", 0.0)
+        hdg_err = abs(_angle_diff_deg(end_heading, touchdown_heading))
+
+        # Sign convention from _cross_track_to_centerline_ft: along > 0
+        # means the aircraft is *past* TD in the landing direction —
+        # i.e. on the rolling-out portion of the runway, which is
+        # exactly where you want to touch down. along < 0 means short
+        # of the threshold (still on approach). Accept up to ~250 ft
+        # short of threshold (high-flare margin near the numbers) and
+        # up to ~1500 ft past (the usable landing zone of a typical
+        # 3000-5000 ft runway).
+        on_runway_along = -250.0 <= along_ft <= 1500.0
+        on_runway_cross = abs(xtrack_ft) <= 75.0  # ~runway half-width
+        aligned = hdg_err <= 15.0
+        low_enough = alt_agl < BUCKET_TOUCHDOWN_HEIGHT
+        success = on_runway_along and on_runway_cross and aligned and low_enough
 
     if success:
         reason = "touchdown"
