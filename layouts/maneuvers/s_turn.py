@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dash import dcc, html
 
-from layouts.maneuvers._shared import _field
+from layouts.maneuvers._shared import _field, _results_modal_pair
 
 
 def s_turn_layout(default_elev=None):
@@ -45,10 +45,11 @@ def s_turn_layout(default_elev=None):
         html.Button("Draw", id="sturn-draw-btn",
                     className="shelf-action shelf-action-draw",
                     title="Simulate the S-turns. The reference line should be near-perpendicular to wind."),
+        *_results_modal_pair("s_turn", "sturn-info",
+                             title="S-Turns — Simulation Results"),
 
         dcc.Store(id="sturn-line-bearing", data=90),
         html.Div(id={"type": "click-status", "m_id": "s_turn"}, style={"display": "none"}),
-        html.Div(id="sturn-info", className="shelf-info-panel"),
         html.Div(id="sturn-slider-container",
                  style={"display": "none"},
                  children=[

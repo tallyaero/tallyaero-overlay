@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dash import dcc, html
 
-from layouts.maneuvers._shared import _field
+from layouts.maneuvers._shared import _field, _results_modal_pair
 
 
 def rect_course_layout(default_elev=None):
@@ -43,10 +43,11 @@ def rect_course_layout(default_elev=None):
         html.Button("Draw", id="rectcourse-draw-btn",
                     className="shelf-action shelf-action-draw",
                     title="Simulate the wind-corrected rectangle around the field."),
+        *_results_modal_pair("rect_course", "rectcourse-info",
+                             title="Rectangular Course — Simulation Results"),
 
         html.Div(id="rectcourse-edge-visible-info", className="shelf-info-panel"),
         html.Div(id={"type": "click-status", "m_id": "rect_course"}, style={"display": "none"}),
-        html.Div(id="rectcourse-info", className="shelf-info-panel"),
         html.Div(id="rectcourse-slider-container",
                  style={"display": "none"},
                  children=[

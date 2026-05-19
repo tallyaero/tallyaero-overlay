@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dash import dcc, html
 
-from layouts.maneuvers._shared import _field
+from layouts.maneuvers._shared import _field, _results_modal_pair
 
 
 def impossible_turn_layout(default_elev=None):
@@ -64,6 +64,8 @@ def impossible_turn_layout(default_elev=None):
         html.Button("Draw", id="impossibleturn-draw-btn",
                     className="shelf-action shelf-action-draw",
                     title="Run the impossible-turn simulation."),
+        *_results_modal_pair("impossible_turn", "impossibleturn-info",
+                             title="Impossible Turn — Simulation Results"),
 
         # Hidden helper containers (existing callbacks reference these)
         html.Div(id="impossibleturn-runway-info", style={"display": "none"}),
@@ -71,7 +73,6 @@ def impossible_turn_layout(default_elev=None):
         html.Div(id="impossibleturn-climb-tooltip", style={"display": "none"}),
         html.Div(id={"type": "click-status", "m_id": "impossible_turn"}, style={"display": "none"}),
         html.Div(id="impossibleturn-result", className="shelf-info-panel"),
-        html.Div(id="impossibleturn-info", className="shelf-info-panel"),
         html.Div(id="impossibleturn-slider-container",
                  style={"display": "none"},
                  children=[

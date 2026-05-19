@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dash import dcc, html
 
-from layouts.maneuvers._shared import _field
+from layouts.maneuvers._shared import _field, _results_modal_pair
 
 
 def engineout_layout(default_elev=None):
@@ -72,6 +72,8 @@ def engineout_layout(default_elev=None):
         html.Button("Draw", id="engineout-draw-btn",
                     className="shelf-action shelf-action-draw",
                     title="Run the glide simulation."),
+        *_results_modal_pair("engineout", "engineout-info",
+                             title="Engine-Out Glide — Simulation Results"),
 
         # Hidden helpers
         dcc.Input(id="engineout-speed-tau", type="hidden", value=4.0),
@@ -80,7 +82,6 @@ def engineout_layout(default_elev=None):
         html.Div(id="engineout-manual-heading-div", style={"display": "none"}),
         html.Div(id={"type": "click-status", "m_id": "engineout"}, style={"display": "none"}),
         html.Div(id="engineout-min-alt-result", className="shelf-info-panel"),
-        html.Div(id="engineout-info", className="shelf-info-panel"),
         html.Div(id="engineout-slider-container",
                  style={"display": "none"},
                  children=[

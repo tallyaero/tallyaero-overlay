@@ -9,7 +9,7 @@ component: the URL bar, the modal stack, the windsock corner widget.
 from __future__ import annotations
 
 from dash import (
-    html, Input, Output, State, ALL, ctx, no_update, callback,
+    html, Input, Output, State, ALL, MATCH, ctx, no_update, callback,
 )
 from dash.exceptions import PreventUpdate
 
@@ -220,6 +220,25 @@ def register(app):
             body = html.Ul([html.Li(b) for b in bullets], style={"fontSize": "13px", "lineHeight": "1.5"})
             return True, title, body
         return is_open, no_update, no_update
+
+    # === Pattern-matched: per-maneuver Simulation Results modal toggle.
+    # The button + close-button + modal each carry the same m_id so MATCH
+    # routes the click to the right modal. Triggered by either button, we
+    # just flip is_open; the modal's own close-X button keeps working too.
+    @app.callback(
+        Output({"type": "sim-results-modal", "m_id": MATCH}, "is_open"),
+        Input({"type": "sim-results-btn", "m_id": MATCH}, "n_clicks"),
+        Input({"type": "sim-results-close-btn", "m_id": MATCH}, "n_clicks"),
+        State({"type": "sim-results-modal", "m_id": MATCH}, "is_open"),
+        prevent_initial_call=True,
+    )
+    def toggle_sim_results_modal(open_clicks, close_clicks, is_open):
+        trig = ctx.triggered_id or {}
+        if trig.get("type") == "sim-results-btn":
+            return True
+        if trig.get("type") == "sim-results-close-btn":
+            return False
+        return is_open
 
     # === Clientside: sidebar collapse (DOM-class toggle) ===
     app.clientside_callback(

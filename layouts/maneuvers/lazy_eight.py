@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dash import dcc, html
 
-from layouts.maneuvers._shared import _field
+from layouts.maneuvers._shared import _field, _results_modal_pair
 
 
 def lazy8_layout(default_elev=None):
@@ -36,9 +36,10 @@ def lazy8_layout(default_elev=None):
         html.Button("Draw", id="lazy8-draw-btn",
                     className="shelf-action shelf-action-draw",
                     title="Simulate the figure-8 with oscillating altitude."),
+        *_results_modal_pair("lazy8", "lazy8-info",
+                             title="Lazy 8 — Simulation Results"),
 
         html.Div(id={"type": "click-status", "m_id": "lazy8"}, style={"display": "none"}),
-        html.Div(id="lazy8-info", className="shelf-info-panel"),
         html.Div(id="lazy8-slider-container",
                  style={"display": "none"},
                  children=[

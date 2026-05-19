@@ -7,6 +7,7 @@ callbacks reference.
 from __future__ import annotations
 
 from dash import html
+import dash_bootstrap_components as dbc
 
 
 def _field(label, control, slider=False, tooltip=None):
@@ -65,6 +66,48 @@ def _acs_metric(label, value, units, target, tol, cert_level="private"):
         className="acs-metric",
         **{"data-cert-level": cert_level},
     )
+
+
+def _results_modal_pair(m_id, info_div_id, title="Simulation Results"):
+    """Render the (Results button, Results modal) pair for a maneuver.
+
+    The modal's body wraps `html.Div(id=info_div_id)` so existing
+    per-maneuver draw callbacks continue to write their accordion +
+    chart content into that id without changes. The button + modal
+    use pattern-matched ids so one shared toggle callback handles all
+    twelve maneuvers.
+    """
+    btn = html.Button(
+        "Results",
+        id={"type": "sim-results-btn", "m_id": m_id},
+        className="shelf-action shelf-action-results",
+        title="Open the full simulation-results panel.",
+        n_clicks=0,
+    )
+    modal = dbc.Modal(
+        [
+            dbc.ModalHeader(dbc.ModalTitle(title), close_button=True),
+            dbc.ModalBody(
+                html.Div(id=info_div_id, className="sim-results-modal-body"),
+                className="sim-results-modal-scroll",
+            ),
+            dbc.ModalFooter(
+                dbc.Button(
+                    "Close",
+                    id={"type": "sim-results-close-btn", "m_id": m_id},
+                    className="green-button",
+                    n_clicks=0,
+                ),
+            ),
+        ],
+        id={"type": "sim-results-modal", "m_id": m_id},
+        size="lg",
+        is_open=False,
+        scrollable=True,
+        centered=True,
+        dialogClassName="tallyaero-modal sim-results-modal",
+    )
+    return [btn, modal]
 
 
 def _power_verdict(power_pct, design_power, consequence_text, failure_reason):

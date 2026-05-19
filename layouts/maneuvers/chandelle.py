@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dash import dcc, html
 
-from layouts.maneuvers._shared import _field
+from layouts.maneuvers._shared import _field, _results_modal_pair
 
 
 def chandelle_layout(default_elev=None):
@@ -36,9 +36,10 @@ def chandelle_layout(default_elev=None):
         html.Button("Draw", id="chandelle-draw-btn",
                     className="shelf-action shelf-action-draw",
                     title="Simulate the climbing 180° turn."),
+        *_results_modal_pair("chandelle", "chandelle-info",
+                             title="Chandelle — Simulation Results"),
 
         html.Div(id={"type": "click-status", "m_id": "chandelle"}, style={"display": "none"}),
-        html.Div(id="chandelle-info", className="shelf-info-panel"),
         html.Div(id="chandelle-slider-container",
                  style={"display": "none"},
                  children=[

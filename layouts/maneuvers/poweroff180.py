@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from dash import dcc, html
 
-from layouts.maneuvers._shared import _field
+from layouts.maneuvers._shared import _field, _results_modal_pair
 
 
 def poweroff180_layout(default_elev=None):
@@ -76,6 +76,8 @@ def poweroff180_layout(default_elev=None):
                     id="poweroff180-draw-btn",
                     className="shelf-action shelf-action-draw",
                     title="Run the glide-back simulation."),
+        *_results_modal_pair("poweroff180", "poweroff180-info",
+                             title="Power-Off 180 — Simulation Results"),
 
         # Hidden helper containers that existing callbacks still reference.
         html.Div(id="poweroff180-runway-info", style={"display": "none"}),
@@ -99,5 +101,4 @@ def poweroff180_layout(default_elev=None):
         dcc.Store(id="poweroff180-path-store", data=[]),
         dcc.Store(id="poweroff180-results-store", data={}),
 
-        html.Div(id="poweroff180-info", className="shelf-info-panel"),
     ]

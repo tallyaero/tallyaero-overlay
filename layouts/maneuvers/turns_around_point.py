@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dash import dcc, html
 
-from layouts.maneuvers._shared import _field
+from layouts.maneuvers._shared import _field, _results_modal_pair
 
 
 def turns_point_layout(default_elev=None):
@@ -43,9 +43,10 @@ def turns_point_layout(default_elev=None):
         html.Button("Draw", id="turnspoint-draw-btn",
                     className="shelf-action shelf-action-draw",
                     title="Simulate the constant-radius orbit."),
+        *_results_modal_pair("turns_point", "turnspoint-info",
+                             title="Turns Around a Point — Simulation Results"),
 
         html.Div(id={"type": "click-status", "m_id": "turns_point"}, style={"display": "none"}),
-        html.Div(id="turnspoint-info", className="shelf-info-panel"),
         html.Div(id="turnspoint-slider-container",
                  style={"display": "none"},
                  children=[

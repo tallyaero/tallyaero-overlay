@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dash import dcc, html
 
-from layouts.maneuvers._shared import _field
+from layouts.maneuvers._shared import _field, _results_modal_pair
 
 
 def steep_spiral_layout(default_elev=None):
@@ -43,9 +43,10 @@ def steep_spiral_layout(default_elev=None):
         html.Button("Draw", id="steepspiral-draw-btn",
                     className="shelf-action shelf-action-draw",
                     title="Run the descending spiral."),
+        *_results_modal_pair("steep_spiral", "steepspiral-warnings",
+                             title="Steep Spiral — Simulation Results"),
 
         html.Div(id={"type": "click-status", "m_id": "steep_spiral"}, style={"display": "none"}),
-        html.Div(id="steepspiral-warnings", className="shelf-info-panel"),
         html.Div(id="steepspiral-slider-container",
                  style={"display": "none"},
                  children=[

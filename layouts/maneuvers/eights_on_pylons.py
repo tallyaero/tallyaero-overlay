@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dash import dcc, html
 
-from layouts.maneuvers._shared import _field
+from layouts.maneuvers._shared import _field, _results_modal_pair
 
 
 def pylons_layout(default_elev=None):
@@ -50,9 +50,10 @@ def pylons_layout(default_elev=None):
         html.Button("Draw", id="pylons-draw-btn",
                     className="shelf-action shelf-action-draw",
                     title="Simulate the figure-8 with pivotal-altitude visualization."),
+        *_results_modal_pair("pylons", "pylons-info",
+                             title="Eights on Pylons — Simulation Results"),
 
         html.Div(id={"type": "click-status", "m_id": "pylons"}, style={"display": "none"}),
-        html.Div(id="pylons-info", className="shelf-info-panel"),
         html.Div(id="pylons-slider-container",
                  style={"display": "none"},
                  children=[

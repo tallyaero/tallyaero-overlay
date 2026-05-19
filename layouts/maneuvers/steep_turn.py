@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dash import dcc, html
 
-from layouts.maneuvers._shared import _field
+from layouts.maneuvers._shared import _field, _results_modal_pair
 
 
 def steep_turn_layout(default_elev=None):
@@ -53,9 +53,10 @@ def steep_turn_layout(default_elev=None):
         html.Button("Draw", id="steepturn-draw-btn",
                     className="shelf-action shelf-action-draw",
                     title="Simulate the steep turn(s)."),
+        *_results_modal_pair("steep_turn", "steepturn-info",
+                             title="Steep Turn — Simulation Results"),
 
         html.Div(id={"type": "click-status", "m_id": "steep_turn"}, style={"display": "none"}),
-        html.Div(id="steepturn-info", className="shelf-info-panel"),
         html.Div(id="steepturn-slider-container",
                  style={"display": "none"},
                  children=[
