@@ -1797,7 +1797,28 @@ def run_simulation(
                 if final_bucket:
                     final_top = final_bucket.altitude_ft + final_bucket.height_ft / 2
 
-                    if alt_agl > final_top + 200:  # Need to spiral down
+                    # Don't spiral if a straight glide from here would
+                    # arrive at FINAL's altitude band. The old check
+                    # only compared current altitude to final_top — it
+                    # didn't account for how far away FINAL is. Result:
+                    # if the aircraft reached the FINAL_SPIRAL bucket
+                    # with excess altitude but ALSO with a lot of
+                    # ground still to cover (because FINAL is 1.5+ NM
+                    # ahead), the spiral fired unnecessarily and burned
+                    # off the altitude the aircraft actually needed for
+                    # the long glide-in. Use _can_arrive_at_bucket_altitude
+                    # — same tolerance the bucket builder uses for
+                    # Option A — to short-circuit when direct glide
+                    # already lands at the right altitude.
+                    can_direct = _can_arrive_at_bucket_altitude(
+                        cur_pos, alt_agl, final_bucket, straight_gr,
+                        tolerance_ft=500.0,
+                        tas_kt=fps_to_knots(tas_fps),
+                        wind_dir=wind_dir,
+                        wind_speed_kt=wind_speed,
+                    )
+
+                    if alt_agl > final_top + 200 and not can_direct:
                         in_final_spiral = True
                         final_spiral_turns = 0.0
                         final_spiral_target_alt = final_bucket.altitude_ft + final_bucket.height_ft / 4
