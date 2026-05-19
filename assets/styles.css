@@ -1927,6 +1927,15 @@ input[type="radio"] {
   border-top: 1px solid currentColor;
   margin: 1px 4px;
 }
+/* Cold (inactive at present time) airspace — desaturated grey so the
+   pilot can tell at a glance the MOA / restricted area isn't hot,
+   without losing the on-map altitude info. */
+.asp-band-label.asp-band-cold {
+  font-weight: 600;
+  opacity: 0.75;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
 
 /* Toggle chip — replaces the old labeled checkbox "Envelope: Ring".
    Wraps a single-option dcc.Checklist into a pill-shaped chip that

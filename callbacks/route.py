@@ -2313,22 +2313,49 @@ def register(app):
         # blob into solid color and Leaflet's rendering cost spikes.
         if (bbox[2] - bbox[0]) > 25.0 or (bbox[3] - bbox[1]) > 18.0:
             return []
-        from core.airspace import styled_in_bbox, format_alt_band
+        from core.airspace import (styled_in_bbox, format_alt_band,
+                                     schedule_active_at)
         recs = styled_in_bbox(bbox, list(show_layers))
         # Permanent altitude labels are useful but visually noisy at
         # wide zoom. Show them only when the chart is zoomed in
         # enough that polygons are distinct (~50 NM viewport).
         show_band_labels = zoom_int >= 8
+        # Evaluate "is this airspace hot right now?" once per render.
+        # Records without a schedule (Class B 24/7, most P/R, MOAs with
+        # only NOTAM activation) are treated as always-active.
+        now_utc = datetime.utcnow()
         polygons = []
         for r in recs:
             geom = r["geometry"]
             style = r["style"]
             alt_band = format_alt_band(r)
+            sheets = r.get("schedule_sheets") or []
+            # Only flag inactive when we have an actual schedule that
+            # says so. No schedule → "active" (or unknown — safer to
+            # assume hot).
+            active = True if not sheets else schedule_active_at(sheets, now_utc)
             label = f"{style['label']} — {r['name']}  {alt_band}"
+            if not active:
+                label = f"{label}  · COLD"
             # Phase A3-fwup — append schedule summary when the airspace
             # has a known schedule attached.
             if r.get("schedule_summary"):
                 label += f"  · {r['schedule_summary']}"
+            # Inactive polygons dim down + dash the outline so a cold
+            # MOA is visually distinct from a hot MOA without losing
+            # type identity (color stays).
+            poly_color = style["color"]
+            poly_weight = style["weight"]
+            poly_dash = style.get("dashArray")
+            poly_fill = style["fillColor"]
+            poly_fill_op = style["fillOpacity"]
+            poly_stroke_op = 1.0
+            if not active:
+                poly_fill_op = poly_fill_op * 0.4
+                poly_stroke_op = 0.55
+                # Force a dash even on Prohibited/Class B style solids
+                # so the cold-state visual cue is consistent.
+                poly_dash = poly_dash or "4,4"
             t = geom.get("type")
             rings_to_draw: list[list] = []
             if t == "Polygon":
@@ -2343,11 +2370,12 @@ def register(app):
                 positions = [[pt[1], pt[0]] for pt in ring]
                 polygons.append(dl.Polygon(
                     positions=positions,
-                    color=style["color"],
-                    weight=style["weight"],
-                    dashArray=style.get("dashArray"),
-                    fillColor=style["fillColor"],
-                    fillOpacity=style["fillOpacity"],
+                    color=poly_color,
+                    weight=poly_weight,
+                    opacity=poly_stroke_op,
+                    dashArray=poly_dash,
+                    fillColor=poly_fill,
+                    fillOpacity=poly_fill_op,
                     children=dl.Tooltip(label, sticky=True),
                 ))
                 # Permanent altitude-band label centered over the
@@ -2356,10 +2384,12 @@ def register(app):
                 if show_band_labels and ring:
                     clat = sum(p[1] for p in ring) / len(ring)
                     clon = sum(p[0] for p in ring) / len(ring)
-                    ceil_s = format_alt_band(r).split(" → ")[1]
-                    floor_s = format_alt_band(r).split(" → ")[0]
-                    inner_html = (f"<div class='asp-band-label' "
-                                  f"style='color:{style['color']}'>"
+                    ceil_s = alt_band.split(" → ")[1]
+                    floor_s = alt_band.split(" → ")[0]
+                    label_color = poly_color if active else "#94a3b8"
+                    inner_html = (f"<div class='asp-band-label "
+                                  f"{'asp-band-cold' if not active else ''}' "
+                                  f"style='color:{label_color}'>"
                                   f"{ceil_s}<hr/>{floor_s}</div>")
                     polygons.append(dl.Marker(
                         position=[clat, clon],
