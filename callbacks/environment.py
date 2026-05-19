@@ -205,7 +205,15 @@ def register(app):
         if metar:
             md = metar.get("wind_dir_deg")
             ms = metar.get("wind_speed_kt")
-            if md is not None:
+            # md may be the string "VRB" (variable wind, light & shifting)
+            # — skip the magnetic conversion in that case; the sim treats
+            # variable as "no useful direction" and the input field stays
+            # blank rather than getting a misleading numeric value.
+            try:
+                md_num = float(md) if md is not None else None
+            except (TypeError, ValueError):
+                md_num = None
+            if md_num is not None:
                 try:
                     from core.route import magvar_west_positive
                     magvar_w = float(magvar_west_positive(
@@ -214,7 +222,7 @@ def register(app):
                     ))
                 except Exception:
                     magvar_w = 0.0
-                wind_dir_fill = int(round((float(md) - magvar_w) % 360.0))
+                wind_dir_fill = int(round((md_num - magvar_w) % 360.0))
                 wind_dir_cls = LIVE_CLS
             if ms is not None:
                 wind_speed_fill = int(round(float(ms)))
@@ -284,9 +292,17 @@ def register(app):
                 html.Span(icao, className="lw-icao"),
                 html.Span(f"  {obs_short}", className="lw-time"),
             ]
+            # wind_d may be the string "VRB" (variable, no fixed
+            # direction). Treat that as if direction is missing so the
+            # display falls through to the "VRB/<kt>" branch instead of
+            # exploding inside the magnetic conversion.
+            try:
+                wind_d_num = float(wind_d) if wind_d is not None else None
+            except (TypeError, ValueError):
+                wind_d_num = None
             wind_str = ""
-            if wind_d is not None and wind_s is not None:
-                wind_str = f"{_true_to_mag(wind_d):03d}°/{int(wind_s)}"
+            if wind_d_num is not None and wind_s is not None:
+                wind_str = f"{_true_to_mag(wind_d_num):03d}°/{int(wind_s)}"
                 if wind_g:
                     wind_str += f"G{int(wind_g)}"
             elif wind_s is not None:

@@ -60,6 +60,18 @@ def test_parse_handles_missing_altim():
     assert out["altimeter_inhg"] is None
 
 
+def test_parse_passes_through_vrb_wind_direction():
+    """AWC returns 'VRB' (string) when winds are variable. The parser
+    keeps the value verbatim — downstream display + sim must handle
+    the non-numeric string so the airport-pick callback doesn't crash
+    inside the magnetic conversion."""
+    raw = dict(_SAMPLE_KDYB, wdir="VRB", wspd=4,
+                rawOb="KDYB 191600Z VRB04KT 10SM CLR 25/18 A2992")
+    out = parse_metar_json([raw])
+    assert out["wind_dir_deg"] == "VRB"
+    assert out["wind_speed_kt"] == 4
+
+
 def test_parse_returns_none_on_empty():
     assert parse_metar_json([]) is None
     assert parse_metar_json([None, None]) is None  # type: ignore[list-item]
