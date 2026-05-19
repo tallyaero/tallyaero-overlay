@@ -193,4 +193,19 @@ def route_layout(default_glide_ratio: float | None = None,
                     style={"marginLeft": "16px"}),
         html.Button("Clear", id="route-clear-btn",
                     className="shelf-action shelf-action-set"),
+        # Phase A5 — Save/Open route to JSON. The Download element is
+        # always-mounted; the Upload component disguises itself as a
+        # plain button via the shelf-action style.
+        html.Button("Save Route", id="route-save-btn",
+                    className="shelf-action shelf-action-set",
+                    title="Download the current route + perf inputs as JSON"),
+        dcc.Upload(
+            id="route-upload",
+            children=html.Span("Open Route",
+                                className="shelf-action shelf-action-set"),
+            accept=".json",
+            multiple=False,
+            style={"display": "inline-block"},
+        ),
+        dcc.Download(id="route-download"),
     ]

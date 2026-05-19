@@ -2306,3 +2306,105 @@ def register(app):
                     children=dl.Tooltip(label, sticky=True),
                 ))
         return polygons
+
+    # === Save / Open route (Phase A5) ===
+    #
+    # Save: serialize all the planning inputs (waypoints + perf inputs +
+    # aircraft selection + env) into a JSON file. The pilot keeps the
+    # file locally; opening it later re-populates the same form.
+    # Wind / weather snapshot is not persisted — it changes hourly and
+    # re-pulling live is the right behavior.
+    @app.callback(
+        Output("route-download", "data"),
+        Input("route-save-btn", "n_clicks"),
+        State("route-waypoints", "value"),
+        State("route-cruise-alt", "value"),
+        State("route-tas", "value"),
+        State("route-cruise-ias", "value"),
+        State("route-glide-ratio", "value"),
+        State("route-glide-ias", "value"),
+        State("route-climb-ias", "value"),
+        State("route-engine-out-mode", "value"),
+        State("route-slope-threshold", "value"),
+        State("aircraft-select", "value"),
+        State("fuel-load", "value"),
+        prevent_initial_call=True,
+    )
+    def save_route(n_clicks, waypoint_ids, cruise_alt, tas, cruise_ias,
+                   glide_ratio, glide_ias, climb_ias,
+                   engine_out_mode, slope_threshold,
+                   aircraft_name, fuel_load_gal):
+        if not n_clicks:
+            raise PreventUpdate
+        if not waypoint_ids:
+            raise PreventUpdate
+        payload = {
+            "schema": "tallyaero.route.v1",
+            "saved_at": datetime.now().isoformat(timespec="seconds"),
+            "aircraft": aircraft_name,
+            "waypoints": waypoint_ids,
+            "perf": {
+                "cruise_alt_ft": cruise_alt,
+                "tas_kt": tas,
+                "cruise_ias_kt": cruise_ias,
+                "glide_ratio": glide_ratio,
+                "glide_ias_kt": glide_ias,
+                "climb_ias_kt": climb_ias,
+                "engine_out_mode": engine_out_mode,
+                "slope_threshold_deg": slope_threshold,
+            },
+            "fuel_load_gal": fuel_load_gal,
+        }
+        # Filename: TYY_origin-dest_YYYYMMDD.json so a pilot can keep
+        # a folder of routes and recognize them at a glance.
+        wps = "-".join(w.replace("/", "_")[:6] for w in (waypoint_ids[:1]
+                                                           + waypoint_ids[-1:]))
+        fname = f"tallyaero_{wps}_{datetime.now().strftime('%Y%m%d')}.json"
+        import json as _json
+        return {"content": _json.dumps(payload, indent=2),
+                "filename": fname, "type": "application/json"}
+
+    # Open: parse the uploaded JSON and push waypoints + perf inputs
+    # back into their respective controls. Aircraft selection is also
+    # restored (the user can override afterward).
+    @app.callback(
+        Output("route-waypoints", "value", allow_duplicate=True),
+        Output("route-cruise-alt", "value", allow_duplicate=True),
+        Output("route-tas", "value", allow_duplicate=True),
+        Output("route-cruise-ias", "value", allow_duplicate=True),
+        Output("route-glide-ratio", "value", allow_duplicate=True),
+        Output("route-glide-ias", "value", allow_duplicate=True),
+        Output("route-climb-ias", "value", allow_duplicate=True),
+        Output("route-engine-out-mode", "value", allow_duplicate=True),
+        Output("route-slope-threshold", "value", allow_duplicate=True),
+        Output("aircraft-select", "value", allow_duplicate=True),
+        Input("route-upload", "contents"),
+        State("route-upload", "filename"),
+        prevent_initial_call=True,
+    )
+    def open_route(contents, filename):
+        if not contents:
+            raise PreventUpdate
+        import base64
+        import json as _json
+        # dcc.Upload returns 'data:application/json;base64,<payload>'
+        try:
+            _, b64 = contents.split(",", 1)
+            data = _json.loads(base64.b64decode(b64).decode("utf-8"))
+        except Exception:
+            raise PreventUpdate
+        if data.get("schema") not in (None, "tallyaero.route.v1"):
+            raise PreventUpdate
+        perf = data.get("perf") or {}
+        return (
+            data.get("waypoints") or [],
+            perf.get("cruise_alt_ft"),
+            perf.get("tas_kt"),
+            perf.get("cruise_ias_kt"),
+            perf.get("glide_ratio"),
+            perf.get("glide_ias_kt"),
+            perf.get("climb_ias_kt"),
+            perf.get("engine_out_mode"),
+            perf.get("slope_threshold_deg"),
+            data.get("aircraft"),
+        )
