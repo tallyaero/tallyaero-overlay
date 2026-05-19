@@ -49,10 +49,18 @@ def _http_get(icao: str) -> list[dict]:
     return data
 
 
+_HPA_PER_INHG = 33.8639
+
+
 def parse_metar_json(raw: list[dict]) -> Optional[dict]:
     """Pick the most-recent record and shape it for the env panel.
 
     Returns None for empty input or when no record has obs_time.
+
+    The AWC JSON `altim` field is returned in hPa (hectopascals) for all
+    stations, even US ones whose raw observations are inHg. We detect
+    values > 100 as hPa and convert to inHg so the rest of the app can
+    treat the field uniformly (sim physics, altimeter input box, etc.).
     """
     if not raw:
         return None
@@ -62,6 +70,16 @@ def parse_metar_json(raw: list[dict]) -> Optional[dict]:
         return None
     recs.sort(key=lambda r: r.get("obsTime") or "", reverse=True)
     m = recs[0]
+
+    altim_raw = m.get("altim")
+    altim_inhg = None
+    if altim_raw is not None:
+        try:
+            v = float(altim_raw)
+            altim_inhg = v / _HPA_PER_INHG if v > 100.0 else v
+        except (TypeError, ValueError):
+            altim_inhg = None
+
     return {
         "icao": m.get("icaoId"),
         "obs_time": m.get("obsTime"),
@@ -70,7 +88,7 @@ def parse_metar_json(raw: list[dict]) -> Optional[dict]:
         "wind_gust_kt": m.get("wgst"),
         "temp_c": m.get("temp"),
         "dew_c": m.get("dewp"),
-        "altimeter_inhg": m.get("altim"),
+        "altimeter_inhg": altim_inhg,
         "raw_ob": m.get("rawOb"),            # original text for displays/tooltips
     }
 

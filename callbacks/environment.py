@@ -92,6 +92,11 @@ def register(app):
         Output("env-altimeter", "value", allow_duplicate=True),
         Output("wind-profile-store", "data", allow_duplicate=True),
         Output("active-metar-store", "data", allow_duplicate=True),
+        # Phase H follow-up — green tint on fields filled from METAR.
+        Output("env-wind-dir", "className", allow_duplicate=True),
+        Output("env-wind-speed", "className", allow_duplicate=True),
+        Output("env-oat", "className", allow_duplicate=True),
+        Output("env-altimeter", "className", allow_duplicate=True),
         Input({"type": "airport-result", "index": ALL}, "n_clicks"),
         Input("airport-search-input", "n_submit"),
         State("airport-search-matches", "data"),
@@ -179,10 +184,16 @@ def register(app):
         oat_fill = no_update
         altim_fill = no_update
         metar_store = no_update
+        # className outputs default to base; flip to '...field-live'
+        # when METAR provides the value. Reset to base when METAR
+        # didn't fill so a previous green tint clears on a new pick.
+        BASE_CLS = "input-small"
+        LIVE_CLS = "input-small field-live"
+        wind_dir_cls = BASE_CLS
+        wind_speed_cls = BASE_CLS
+        oat_cls = BASE_CLS
+        altim_cls = BASE_CLS
         if metar:
-            # METAR wind direction is MAGNETIC — convert to TRUE for the
-            # sim, since the env-wind-dir field is interpreted as the
-            # geometric wind direction by every maneuver callback.
             md = metar.get("wind_dir_deg")
             ms = metar.get("wind_speed_kt")
             if md is not None:
@@ -195,14 +206,18 @@ def register(app):
                 except Exception:
                     magvar_w = 0.0
                 wind_dir_fill = int(round((float(md) - magvar_w) % 360.0))
+                wind_dir_cls = LIVE_CLS
             if ms is not None:
                 wind_speed_fill = int(round(float(ms)))
+                wind_speed_cls = LIVE_CLS
             temp_c = metar.get("temp_c")
             if temp_c is not None:
                 oat_fill = int(round(float(temp_c) * 9.0 / 5.0 + 32.0))
+                oat_cls = LIVE_CLS
             altim = metar.get("altimeter_inhg")
             if altim is not None:
                 altim_fill = round(float(altim), 2)
+                altim_cls = LIVE_CLS
             metar_store = metar
 
         return (
@@ -210,7 +225,95 @@ def register(app):
             f"Selected: {name} ({airport_id})", display_style, [],
             wind_dir_fill, wind_speed_fill, oat_fill, altim_fill,
             wind_profile_data, metar_store,
+            wind_dir_cls, wind_speed_cls, oat_cls, altim_cls,
         )
+
+    @app.callback(
+        Output("sidebar-live-weather", "children"),
+        Input("active-metar-store", "data"),
+        Input("wind-profile-store", "data"),
+    )
+    def render_live_weather_panel(metar, wind_profile_data):
+        """Sidebar Live Weather panel — renders the parsed METAR + the
+        winds-aloft column the sims will consume. Empty when no live
+        data is staged (no airport picked, or both fetches failed).
+        """
+        if not metar and not wind_profile_data:
+            return None
+
+        children = [html.Div("Live Weather", className="lw-title")]
+
+        if metar:
+            icao = metar.get("icao") or ""
+            obs_time = metar.get("obs_time") or ""
+            wind_d = metar.get("wind_dir_deg")
+            wind_s = metar.get("wind_speed_kt")
+            wind_g = metar.get("wind_gust_kt")
+            temp_c = metar.get("temp_c")
+            altim = metar.get("altimeter_inhg")
+            raw_ob = metar.get("raw_ob") or ""
+
+            obs_short = ""
+            if obs_time:
+                # ISO "2026-05-19T13:55:00Z" → "13:55Z"
+                try:
+                    obs_short = obs_time[11:16] + "Z"
+                except Exception:
+                    obs_short = ""
+
+            line1_parts = [
+                html.Span(icao, className="lw-icao"),
+                html.Span(f"  {obs_short}", className="lw-time"),
+            ]
+            wind_str = ""
+            if wind_d is not None and wind_s is not None:
+                wind_str = f"{int(wind_d):03d}°/{int(wind_s)}"
+                if wind_g:
+                    wind_str += f"G{int(wind_g)}"
+            elif wind_s is not None:
+                wind_str = f"VRB/{int(wind_s)}"
+
+            stat_bits = []
+            if wind_str:
+                stat_bits.append(f"Wind {wind_str} kt")
+            if temp_c is not None:
+                stat_bits.append(f"OAT {int(round(temp_c))}°C")
+            if altim is not None:
+                stat_bits.append(f"Altim {altim:.2f}″")
+
+            children.append(html.Div(line1_parts))
+            if stat_bits:
+                children.append(html.Div(" · ".join(stat_bits)))
+            if raw_ob:
+                children.append(html.Div(raw_ob, className="lw-raw"))
+
+        # Winds-aloft layers — show up to ~4 useful layers (skip empty).
+        layers = (wind_profile_data or {}).get("layers") or []
+        if layers:
+            children.append(html.Hr(style={
+                "margin": "6px 0",
+                "borderTop": "1px dashed var(--ta-border-primary, #e2e8f0)",
+            }))
+            children.append(html.Div("Winds aloft (true)",
+                                      className="lw-title"))
+            for alt_ft, dir_deg, kt in layers:
+                if alt_ft <= 0:
+                    label = "SFC"
+                elif alt_ft < 10000:
+                    label = f"{int(alt_ft):,} ft"
+                else:
+                    label = f"{int(alt_ft / 1000)}k"
+                value = (f"{int(round(dir_deg)) % 360:03d}°/"
+                         f"{int(round(kt))} kt")
+                children.append(html.Div(
+                    [
+                        html.Span(label, className="lw-aloft-alt"),
+                        html.Span(value),
+                    ],
+                    className="lw-aloft-row",
+                ))
+
+        return html.Div(children, className="live-weather-panel")
 
     @app.callback(
         Output("airport-search-results", "children"),

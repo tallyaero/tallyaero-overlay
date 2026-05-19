@@ -454,6 +454,11 @@ def desktop_layout():
                         html.Div(id="env-airport-agl", className="weight-box",
                                  style={"marginTop": "8px", "fontSize": "11px"}),
                     ]),
+
+                    # Live weather panel (METAR + winds aloft column).
+                    # Populated when an airport pick succeeds; empty
+                    # otherwise so the section collapses to zero height.
+                    html.Div(id="sidebar-live-weather"),
                 ]),
 
                 # === Weight & CG section ===

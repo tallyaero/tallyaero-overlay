@@ -3319,6 +3319,75 @@ input[type="radio"] {
   cursor: pointer;
 }
 
+/* === Phase H · live-data field tint =========================
+   Env inputs (wind dir/speed, OAT, altimeter) get the .field-live
+   class when the airport-pick callback filled them from METAR. The
+   tint sticks until the next airport pick — user edits keep the
+   tint (the field still reflects live data plus their adjustment).
+   Pick a different airport to recompute; clear the airport to reset.
+*/
+.input-small.field-live,
+input.field-live {
+  background-color: rgba(34, 197, 94, 0.14) !important;
+  border-color: #22c55e !important;
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.20);
+}
+[data-theme="dark"] .input-small.field-live,
+[data-theme="dark"] input.field-live {
+  background-color: rgba(34, 197, 94, 0.20) !important;
+  border-color: #34d399 !important;
+}
+
+/* === Phase H · sidebar live weather panel === */
+.live-weather-panel {
+  margin-top: 8px;
+  padding: 8px 10px;
+  font-size: 11px;
+  background: var(--ta-surface-elevated, #f8fafc);
+  border: 1px solid var(--ta-border-primary, #e2e8f0);
+  border-left: 3px solid #22c55e;
+  border-radius: 4px;
+  line-height: 1.55;
+}
+.live-weather-panel .lw-title {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ta-text-secondary, #64748b);
+  margin-bottom: 4px;
+}
+.live-weather-panel .lw-icao { color: #16a34a; font-weight: 700; }
+.live-weather-panel .lw-time { color: #64748b; font-size: 10px; }
+.live-weather-panel .lw-raw {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 10px;
+  color: var(--ta-text-secondary, #64748b);
+  margin-top: 4px;
+  word-break: break-word;
+}
+.live-weather-panel .lw-aloft-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.live-weather-panel .lw-aloft-alt {
+  color: var(--ta-text-secondary, #64748b);
+  font-weight: 600;
+  min-width: 56px;
+}
+[data-theme="dark"] .live-weather-panel {
+  background: #1e293b;
+  border-color: #334155;
+  border-left-color: #34d399;
+}
+[data-theme="dark"] .live-weather-panel .lw-icao { color: #34d399; }
+[data-theme="dark"] .live-weather-panel .lw-time,
+[data-theme="dark"] .live-weather-panel .lw-raw,
+[data-theme="dark"] .live-weather-panel .lw-aloft-alt { color: #94a3b8; }
+[data-theme="dark"] .live-weather-panel .lw-title { color: #cbd5e1; }
+
 /* === ACS metric badges === */
 .acs-metric {
   display: inline-flex;
