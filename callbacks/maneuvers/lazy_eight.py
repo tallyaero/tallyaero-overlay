@@ -16,6 +16,7 @@ import dash_leaflet as dl
 from utility import simulate_lazy_eight
 
 from callbacks.map import create_airplane_marker
+from layouts.maneuvers._charts import altitude_profile_chart
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -232,7 +233,7 @@ def register(app):
         min_ias = min([pt.get('ias', pt.get('tas', entry_ias)) for pt in hover]) if hover else entry_ias
 
         # Build info panel with standardized format
-        info_content = dbc.Accordion([
+        info_accordion = dbc.Accordion([
             dbc.AccordionItem([
                 html.Div(f"Weight: {weight:.0f} lb | IAS: {entry_ias:.0f} kt | TAS: {avg_tas:.0f} kt | Wind: {wind_dir_val:.0f}°/{wind_speed_val:.0f} kt", style={"fontSize": "11px"}),
                 html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
@@ -248,6 +249,30 @@ def register(app):
                 ], style={"marginTop": "4px"}),
             ], title="Simulation Results", style={"fontSize": "12px"}),
         ], start_collapsed=False, style={"marginTop": "8px"})
+
+        # Phase C6 — altitude profile chart with heading-reversal markers.
+        # Lazy 8 sim emits segments like "half_1_45-90", "half_2_135-180".
+        # Plant a marker at every segment transition so the chart highlights
+        # the eight 45° increments and the half-eight boundary.
+        times = [pt.get("time", 0) for pt in hover]
+        alts = [pt.get("alt", 0) for pt in hover]
+        markers = []
+        prev_seg = None
+        for pt in hover:
+            seg = pt.get("segment", "")
+            if seg != prev_seg and seg:
+                # Label = the angle range from the segment name (e.g., "45-90")
+                # or the half-eight ordinal otherwise.
+                if "_" in seg:
+                    label = seg.rsplit("_", 1)[-1]
+                else:
+                    label = seg
+                markers.append((pt.get("time", 0), label))
+                prev_seg = seg
+        profile_chart = altitude_profile_chart(
+            times, alts, chart_id="lazy8-profile-chart", markers=markers,
+        )
+        info_content = html.Div([info_accordion, profile_chart])
 
         # Calculate bounds for auto-zoom
         if path:
