@@ -2118,37 +2118,16 @@ input[type="radio"] {
   margin-left: 0 !important;
 }
 
-/* 3. Time scrubber containers — when the per-maneuver callback
-   un-hides one, it becomes an absolute-positioned overlay just
-   below the top bar, centered horizontally on the map. */
-[id$="-slider-container"] {
-  position: fixed !important;
-  top: 110px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1100;
-  width: 480px;
-  max-width: 80vw;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid var(--ta-border-primary, #e2e8f0);
-  border-radius: 6px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-  backdrop-filter: blur(4px);
-}
-[id$="-slider-container"] .rc-slider {
-  width: 100% !important;
-}
+/* 3. Time scrubber containers — bottom-of-map anchor lives at the
+   first [id$="-slider-container"] block higher up in this file. The
+   mark-label typography rules below are kept since they're useful
+   regardless of where the chip is positioned. */
 [id$="-slider-container"] label {
   font-size: 10px !important;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ta-text-secondary, #64748b);
-}
-[data-theme="dark"] [id$="-slider-container"] {
-  background: rgba(15, 23, 42, 0.92);
-  border-color: #334155;
 }
 
 /* 4. Reset/Undo overlay — top-right of the map, just left of the
