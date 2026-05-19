@@ -33,6 +33,7 @@ from physics import (
 )
 
 from .base import _ref_weight_lb
+from .eights_on_pylons import compute_pivotal_altitude
 
 
 def _wrap_360(angle: float) -> float:
@@ -282,6 +283,14 @@ def simulate_turns_around_point(
     max_gs = 0.0
     min_gs = 999.0
     total_time = 0.0
+    # Phase C1 — pivotal altitude varies with ground speed around the orbit.
+    # TAP is flown at constant altitude, so the PA value is informational only
+    # (it tells the pilot at what altitude this configuration would naturally
+    # pivot — same physics as Eights on Pylons).
+    max_pa = 0.0
+    min_pa = 1e9
+    pa_sum = 0.0
+    pa_count = 0
 
     # Generate points along the PERFECT circular path
     # We go around the circle, starting from the entry point
@@ -363,6 +372,15 @@ def simulate_turns_around_point(
         if gs_kt < min_gs:
             min_gs = gs_kt
 
+        # Pivotal altitude at this ground speed (PA = GS² / 11.3 in ft AGL)
+        pa_ft = compute_pivotal_altitude(gs_kt)
+        if pa_ft > max_pa:
+            max_pa = pa_ft
+        if pa_ft < min_pa:
+            min_pa = pa_ft
+        pa_sum += pa_ft
+        pa_count += 1
+
         # Required bank angle to maintain the constant radius at this groundspeed
         # Centripetal acceleration = GS² / R = g * tan(bank)
         # bank = arctan(GS² / (R * g))
@@ -423,6 +441,7 @@ def simulate_turns_around_point(
             "turn_progress": round(turn_progress_deg, 1),
             "segment": f"turn_{turn_number}",
             "wind_correction": round(crab_deg, 1),
+            "pivotal_alt": round(pa_ft, 0),
         })
 
     # Compile statistics and warnings
@@ -441,6 +460,13 @@ def simulate_turns_around_point(
     warnings["final_altitude_ft"] = round(altitude_ft, 0)  # Perfect = no loss
     warnings["min_altitude_ft"] = round(altitude_ft, 0)
     warnings["altitude_loss_ft"] = 0  # Perfect execution
+
+    # Pivotal-altitude summary (Phase C1 — ACS Gap 1).
+    if pa_count > 0:
+        warnings["pivotal_alt_min"] = round(min_pa, 0)
+        warnings["pivotal_alt_max"] = round(max_pa, 0)
+        warnings["pivotal_alt_avg"] = round(pa_sum / pa_count, 0)
+        warnings["pivotal_alt_range"] = round(max_pa - min_pa, 0)
 
     # Entry point info
     warnings["entry_heading"] = round(entry_heading_deg, 0)

@@ -250,6 +250,15 @@ def register(app):
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                     html.Div(f"AOB: {sim_warnings.get('min_bank_achieved', 0):.0f}-{max_bank:.0f}° | Load: {load_factor:.2f}G | GS: {sim_warnings.get('min_groundspeed', 0):.0f}-{sim_warnings.get('max_groundspeed', 0):.0f} kt", style={"fontSize": "11px"}),
                     html.Div(f"Orbit: {sim_warnings.get('orbit_radius_ft', 0):.0f} ft | Alt loss: {sim_warnings.get('altitude_loss_ft', 0):.0f} ft", style={"fontSize": "11px"}),
+                    html.Div(
+                        f"PA: {sim_warnings.get('pivotal_alt_min', 0):.0f}-"
+                        f"{sim_warnings.get('pivotal_alt_max', 0):.0f} ft AGL "
+                        f"(avg {sim_warnings.get('pivotal_alt_avg', 0):.0f}) "
+                        f"— your alt: {altitude:.0f} ft",
+                        style={"fontSize": "11px"},
+                        title="Pivotal altitude varies around the orbit with ground speed (PA = GS²/11.3). "
+                              "Informational only — TAP is flown at constant altitude.",
+                    ),
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                     html.Div(f"Vs turn: {vs_in_turn:.0f} kt | Margin: {min_ias_achieved - vs_in_turn:.0f} kt | Time: {sim_warnings.get('total_time_sec', 0):.0f}s", style={"fontSize": "11px"}),
                     html.Div(f"Turns: {turns} | {direction.title()} | Entry: {sim_warnings.get('entry_heading', 0):.0f}°", style={"fontSize": "11px"}),
@@ -322,6 +331,7 @@ def register(app):
             html.Div(f"Heading: {pt.get('heading', 0):.0f}°"),
             html.Div(f"Track: {pt.get('track', 0):.0f}°"),
             html.Div(f"Crab: {'R ' if pt.get('drift', 0) < 0 else ('L ' if pt.get('drift', 0) > 0 else '')}{abs(pt.get('drift', 0)):.1f}°"),
+            html.Div(f"PA at this GS: {pt.get('pivotal_alt', 0):.0f} ft AGL"),
         ]
 
         # Create airplane marker pointing in direction of heading
