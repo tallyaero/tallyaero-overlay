@@ -220,6 +220,7 @@ def simulate_chandelle(
     ac: dict = None,
     weight_lb: float = None,
     timestep_sec: float = 0.5,
+    power_setting: float = 1.0,
 ) -> tuple:
     """
     Simulate a chandelle maneuver with proper wind effects and aircraft data.
@@ -271,7 +272,8 @@ def simulate_chandelle(
     # Turn direction: left = -1, right = +1
     turn_sign = -1.0 if str(turn_direction).lower().startswith('l') else 1.0
 
-    # Target heading is 180° from entry
+    # Target heading is 180° from entry (will be re-pinned after power-truncation
+    # below if power_setting < 0.5).
     target_heading = _wrap_360(entry_heading_deg + 180.0)
 
     # Compute initial TAS
@@ -302,6 +304,29 @@ def simulate_chandelle(
 
     # Get full throttle horsepower at entry altitude
     hp_available = _get_engine_horsepower(ac, entry_altitude_ft)
+
+    # Design Directive — Chandelle is a FULL-POWER maneuver (design = 1.0).
+    # Scale HP by power_setting. Below 50% the airplane cannot complete the
+    # 180° heading change at target IAS — we truncate the path proportionally
+    # and surface failure_reason on the last hover point.
+    try:
+        power_pct = float(power_setting) if power_setting is not None else 1.0
+    except (TypeError, ValueError):
+        power_pct = 1.0
+    power_pct = max(0.0, min(1.0, power_pct))
+    design_power = 1.0
+    hp_available *= power_pct
+    # Max heading change the airplane will be allowed to reach.
+    if power_pct < 0.5:
+        # Linear truncation: 0% → 0°, 50% → 180°. Clamp to a minimum of 30°
+        # so the rendered path is at least visible on the map.
+        max_progress_deg = max(30.0, 180.0 * (power_pct / 0.5))
+    else:
+        max_progress_deg = 180.0
+
+    # Re-pin target_heading to the truncated end-heading so the rollout snap
+    # lands where the airplane actually quit (not 180° away).
+    target_heading = _wrap_360(entry_heading_deg + turn_sign * max_progress_deg)
 
     # Wind components
     wn_fps, we_fps = _wind_components_from_dir(wind_dir_deg, wind_speed_kt)
@@ -388,6 +413,11 @@ def simulate_chandelle(
         # Compute current TAS
         tas = compute_tas_from_ias(ias, alt_agl)
         tas_fps = tas * 1.68781
+
+        # Power-truncation kill switch: if off-design power has held us back
+        # past the allowed heading change, force rollout regardless of phase.
+        if phase not in ("rollout", "done") and accumulated_turn >= max_progress_deg - 0.5:
+            phase = "rollout"
 
         # Phase logic
         if phase == "roll_in":
@@ -483,6 +513,14 @@ def simulate_chandelle(
         speed_margin = max(0.0, min(1.0, speed_margin))
         vs_fpm = vs_fpm * (0.3 + 0.7 * speed_margin)  # Never fully zero climb
 
+        # Design Directive — scale climb rate proportional to power_setting.
+        # The existing chandelle physics treats the maneuver as an idealized
+        # energy trade (IAS → altitude) which would gain the same altitude
+        # regardless of HP. In reality less power means less excess energy
+        # in → less altitude gained. Multiply the climb rate by power_pct
+        # so off-design power produces a visibly smaller climb.
+        vs_fpm = vs_fpm * power_pct
+
         vs_fpm = max(0.0, vs_fpm)  # No descent during chandelle
 
         # Update altitude
@@ -535,5 +573,19 @@ def simulate_chandelle(
         # Safety limit
         if t > 120:  # 2 minutes max for a chandelle
             break
+
+    # Surface power / off-design metadata on the last hover point so the
+    # callback can render a verdict without recomputing.
+    if hover:
+        last = hover[-1]
+        last["power_setting"] = round(power_pct, 3)
+        last["design_power"] = design_power
+        last["max_progress_deg"] = round(max_progress_deg, 1)
+        last["altitude_gain_ft"] = round(alt_agl - entry_altitude_ft, 1)
+        if power_pct < 0.5:
+            last["failure_reason"] = (
+                f"Insufficient power to complete 180° — reached "
+                f"{accumulated_turn:.0f}° at {power_pct*100:.0f}% power"
+            )
 
     return path, hover

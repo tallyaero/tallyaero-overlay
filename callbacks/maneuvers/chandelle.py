@@ -49,6 +49,7 @@ def register(app):
         State("aircraft-select", "value"),
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
+        State("power-setting", "value"),
         prevent_initial_call=True
     )
     def draw_chandelle(
@@ -65,7 +66,8 @@ def register(app):
         wind_speed,
         aircraft_name,
         selected_airport_id,
-        weight_lb
+        weight_lb,
+        power_setting,
     ):
         if not n_clicks or not start or not aircraft_name:
             raise PreventUpdate
@@ -104,6 +106,13 @@ def register(app):
         # Get weight (use runtime total weight or fall back to max takeoff)
         weight = float(weight_lb) if weight_lb not in [None, "", "null"] else ac.get("max_takeoff_weight", 2300.0)
 
+        # Design Directive — Chandelle design power = 1.0 (FULL throttle).
+        # Below 50% the sim truncates the path and surfaces failure_reason.
+        try:
+            power_pct = float(power_setting) if power_setting not in [None, "", "null"] else 1.0
+        except (TypeError, ValueError):
+            power_pct = 1.0
+
         path, hover = simulate_chandelle(
             entry_point={"lat": start["lat"], "lon": start["lon"]},
             entry_heading_deg=heading,
@@ -118,6 +127,7 @@ def register(app):
             field_elev_ft=field_elev_ft,
             ac=ac,
             weight_lb=weight,
+            power_setting=power_pct,
         )
 
         if not path or not hover:
