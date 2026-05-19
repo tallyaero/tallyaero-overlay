@@ -2346,11 +2346,34 @@ def run_simulation(
                     final_leg_if_turn_now, touchdown_heading, fps_to_knots(tas_fps), wind_dir, wind_speed
                 )
 
-                # Total altitude needed for remaining path (wind-corrected)
-                required_altitude = (turn_arc_wc + final_leg_wc) / straight_gr
+                # The 180° turn is banked. Lift scales as 1/cos(bank) so
+                # induced drag scales as 1/cos²(bank) — at the required
+                # 1500 ft radius the bank is ~20°, costing ~12% of the
+                # glide ratio. Treating the turn as straight-glide
+                # underestimates altitude loss by ~80 ft for a typical
+                # Decathlon-class arc, which translated to the aircraft
+                # arriving 300-400 ft short of the threshold on final.
+                required_bank_rad = math.atan(
+                    (tas_fps * tas_fps) / (G_FPS2 * turn_radius_ft))
+                required_bank_rad = max(
+                    math.radians(15.0),
+                    min(math.radians(45.0), required_bank_rad))
+                gr_in_turn = max(
+                    3.0, straight_gr * (math.cos(required_bank_rad) ** 2))
 
-                # Turn when we have just enough altitude for the remaining path
-                turn_start_buffer_ft = 50  # Small buffer for safety
+                # Final pads ~10% to absorb the cross-track intercept
+                # corrections (the aircraft S-turns slightly on
+                # centerline, not a perfect straight glide).
+                final_leg_padded = final_leg_wc * 1.10
+
+                required_altitude = (
+                    (turn_arc_wc / gr_in_turn)
+                    + (final_leg_padded / straight_gr))
+
+                # Buffer absorbs the bank-roll-in / roll-out transient.
+                # The GR correction above is the main fix; the buffer is
+                # kept modest (75 ft) so we don't bias toward overshoot.
+                turn_start_buffer_ft = 75
                 if alt_agl <= required_altitude + turn_start_buffer_ft:
                     po180_phase = "turn"
                     po180_turn_accumulated = 0.0
