@@ -1827,14 +1827,25 @@ def run_simulation(
                         alt_to_lose_fs = alt_agl - final_spiral_target_alt
                         glide_distance_needed = alt_to_lose_fs * straight_gr
 
-                        # Calculate number of turns and radius
-                        # glide_distance = n_turns × 2π × radius
-                        # Try to fit in ~2-4 turns with reasonable radius
-                        max_spiral_radius = 5000.0
-                        min_spiral_radius = 800.0
+                        # Cap the spiral radius. Old code allowed up
+                        # to 5000 ft — for the user-reported KDYB /
+                        # 3800 ft case that picked a 1583 ft radius
+                        # "spiral" that was really a wide arc. The
+                        # aircraft completed only ⅓ of the loop before
+                        # the exit conditions fired, drifting ~1800 ft
+                        # farther from TD in the process and blowing
+                        # the rest of the glide budget on getting back.
+                        # Smaller radius → tighter turn rate → exit
+                        # conditions fire near the same physical
+                        # position even if mid-turn. 600 ft min keeps
+                        # the calculated bank under the 45° cap at
+                        # typical GA TAS (132 fps → atan(132²/(g·600))
+                        # ≈ 42°).
+                        max_spiral_radius = 1200.0
+                        min_spiral_radius = 600.0
 
                         n_turns_estimate = 2
-                        while n_turns_estimate <= 6:
+                        while n_turns_estimate <= 8:
                             radius_needed = glide_distance_needed / (n_turns_estimate * 2 * math.pi)
                             if radius_needed <= max_spiral_radius:
                                 break
@@ -2066,11 +2077,20 @@ def run_simulation(
                 arrival_alt_if_glide = alt_agl - (dist_to_final_wc / straight_gr)
 
                 # Transition condition: can glide to FINAL at approximately correct altitude
-                # Allow some buffer since we can use slip to fine-tune
+                # Allow some buffer since we can use slip to fine-tune.
+                # Tightened from final_top+500 to final_top+200 — the
+                # +500 slop let the spiral exit while the aircraft was
+                # still well above FINAL's altitude band, leaving slip
+                # to absorb 500+ ft of excess on a 0.5 NM final leg
+                # which it physically can't.
                 can_transition = (arrival_alt_if_glide >= final_bucket_fs.altitude_ft - final_bucket_fs.height_ft / 2 and
-                                  arrival_alt_if_glide <= final_top + 500)
+                                  arrival_alt_if_glide <= final_top + 200)
                 heading_error_to_final = abs(_angle_diff_deg(track, bearing_to_final))
-                roughly_facing_final = heading_error_to_final < 90.0
+                # Tightened from 90° to 60° — exiting at 89° off meant
+                # the aircraft then had to bleed more altitude turning
+                # the rest of the way to alignment, blowing the energy
+                # budget on the long glide-in.
+                roughly_facing_final = heading_error_to_final < 60.0
 
                 if can_transition and roughly_facing_final:
                     # Transition: exit spiral and head to FINAL bucket
