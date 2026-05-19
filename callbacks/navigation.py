@@ -316,6 +316,7 @@ def register(app):
         Output("layer", "children", allow_duplicate=True),
         Output("map", "bounds", allow_duplicate=True),
         Output("scrubber-layer", "children", allow_duplicate=True),
+        Output("envelope-layer", "children", allow_duplicate=True),
         Output("last-click-info", "data", allow_duplicate=True),
         # Reset-All-only targets: per-maneuver UI state, results
         # buttons, status messages, plus engineout/impossible-turn
@@ -346,10 +347,12 @@ def register(app):
         cleared_layer: list = []
         cleared_bounds = None
         cleared_scrubber: list = []
+        cleared_envelope: list = []
         cleared_last_click = None
 
         shared = (cleared_points, cleared_target, cleared_layer,
-                  cleared_bounds, cleared_scrubber, cleared_last_click)
+                  cleared_bounds, cleared_scrubber, cleared_envelope,
+                  cleared_last_click)
 
         if trigger == "reset-clicks":
             # Reset Clicks: keep simulation results — feed no_update

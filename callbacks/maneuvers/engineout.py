@@ -299,34 +299,15 @@ def register(app):
 
             elements = [start_marker, touchdown_marker, arc_line]
 
-            # Compute and show glide envelope if enabled
-            envelope_data = []
-            if show_envelope and "show" in show_envelope:
-                # Get glide ratio from hover data or calculate
-                avg_gr = 9.0  # Default
-                if hover_data:
-                    gr_values = [h.get("glide_ratio", 9.0) for h in hover_data if h.get("glide_ratio")]
-                    avg_gr = sum(gr_values) / len(gr_values) if gr_values else 9.0
-
-                # Get TAS
-                avg_tas = 80.0
-                if hover_data:
-                    tas_values = [h.get("tas", 80) for h in hover_data if h.get("tas")]
-                    avg_tas = sum(tas_values) / len(tas_values) if tas_values else 80.0
-
-                envelope = compute_glide_envelope(
-                    start_point=start,
-                    altitude_ft=float(start_alt_agl),
-                    glide_ratio=avg_gr,
-                    wind_dir=float(wind_dir),
-                    wind_speed=float(wind_speed),
-                    tas_knots=avg_tas,
-                    num_points=36,
-                )
-                envelope_data = [[lat, lon] for lat, lon in envelope]
-
+            # Glide envelope is now rendered into its own envelope-layer
+            # by `render_glide_ring` (below), driven by the Glide Ring
+            # toggle and updated reactively as the user changes the
+            # start point / altitude / wind / aircraft. Keep an empty
+            # `envelope_data` here so the rest of this callback (bounds,
+            # envelope-store output) continues to work.
+            envelope_data: list = []
+            if False:  # legacy fallback removed — see render_glide_ring
                 if envelope_data:
-                    # Theme B envelope — lime-500 dashed
                     envelope_polygon = dl.Polygon(
                         positions=envelope_data,
                         color="#84cc16",
@@ -337,7 +318,6 @@ def register(app):
                         fillOpacity=0.15,
                         children=dl.Tooltip("Max glide distance ring"),
                     )
-                    elements.insert(0, envelope_polygon)  # Add behind other elements
 
             # Impact vs success messaging / marker
             if impact_point and isinstance(impact_point, (list, tuple)):
@@ -590,3 +570,144 @@ def register(app):
         crab = -pt.get('drift', 0)  # Negate: crab is opposite of drift (point into wind)
         marker = create_airplane_marker(pos, heading, tooltip_content, bank, crab)
         return [marker]
+
+    # ------------------------------------------------------------------
+    # Phase I2 — Glide Ring toggle auto-draw + wind-aloft awareness.
+    # ------------------------------------------------------------------
+    @app.callback(
+        Output("envelope-layer", "children"),
+        Input("engineout-show-envelope", "value"),
+        Input({"type": "point-store", "m_id": "engineout", "role": "start"}, "data"),
+        Input("engineout-altitude", "value"),
+        Input("aircraft-select", "value"),
+        Input("engine-select", "value"),
+        Input("env-wind-dir", "value"),
+        Input("env-wind-speed", "value"),
+        Input("wind-profile-store", "data"),
+        Input("env-oat", "value"),
+        Input("env-altimeter", "value"),
+        Input("engineout-flap-setting", "value"),
+        Input("engineout-prop-condition", "value"),
+        State("maneuver-select", "value"),
+        State("selected-airport-id", "data"),
+        prevent_initial_call=True,
+    )
+    def render_glide_ring(show_envelope, start_data, start_alt_agl,
+                           ac_name, engine_key, wind_dir, wind_speed,
+                           wind_profile_data, oat_f, altimeter,
+                           flap_setting, prop_condition, maneuver,
+                           airport_id):
+        """Draw the engine-out glide envelope onto the dedicated
+        envelope-layer whenever the toggle is on AND we have the
+        minimum inputs needed (start point, altitude, aircraft +
+        engine). Reactive to wind changes — including the live
+        winds-aloft column — so the user sees the ring deform as
+        they pick a different airport or change wind manually."""
+        # Hide the ring outside engine-out so it doesn't bleed into
+        # the other maneuver tabs.
+        if maneuver != "engineout":
+            return []
+        if not show_envelope or "show" not in show_envelope:
+            return []
+        if not start_data or not isinstance(start_data, dict):
+            return []
+        if not ac_name or ac_name not in aircraft_data:
+            return []
+        if not engine_key:
+            return []
+
+        try:
+            start_alt = float(start_alt_agl) if start_alt_agl else 0.0
+        except (TypeError, ValueError):
+            return []
+        if start_alt <= 0:
+            return []
+
+        try:
+            wd = float(wind_dir) if wind_dir not in (None, "") else 0.0
+            ws = float(wind_speed) if wind_speed not in (None, "") else 0.0
+        except (TypeError, ValueError):
+            wd, ws = 0.0, 0.0
+
+        # Aircraft glide ratio + best-glide TAS pulled from the same
+        # _get_best_glide_and_ratio helper the sim uses, so the ring
+        # reflects the actual aircraft's POH-derived performance.
+        try:
+            from simulation.engine_out import _get_best_glide_and_ratio
+            from physics.atmosphere import compute_pressure_altitude, compute_air_density
+            from physics.aero import compute_true_airspeed
+            from simulation.engine_out import adjust_glide_ratio_for_density
+            ac = aircraft_data[ac_name]
+            best_glide_kias, straight_gr = _get_best_glide_and_ratio(
+                ac, engine_key, flap_setting or "clean",
+                prop_condition or "idle",
+            )
+        except Exception:
+            return []
+
+        # Honor live env so the ring matches the sim's altitude perf.
+        try:
+            oat_c = (float(oat_f) - 32.0) * 5.0 / 9.0 if oat_f not in (None, "") else 15.0
+            altim = float(altimeter) if altimeter not in (None, "") else 29.92
+        except (TypeError, ValueError):
+            oat_c, altim = 15.0, 29.92
+
+        # Field elev — needed for MSL conversion in wind-profile lookups.
+        airport = next((a for a in airport_data
+                         if a.get("id") == airport_id), None)
+        elev_ft = float(airport.get("elevation_ft", 0.0)) if airport else 0.0
+
+        try:
+            # Density-adjusted glide ratio mirrors what the engine_out
+            # sim does — important so the ring matches the sim's
+            # reachable area at altitude.
+            pa = compute_pressure_altitude(elev_ft + start_alt, altim)
+            rho = compute_air_density(pa, oat_c)
+            gr_adj = adjust_glide_ratio_for_density(straight_gr, rho)
+            gr_adj = max(3.0, min(gr_adj, 25.0))
+            tas_kt = compute_true_airspeed(best_glide_kias, pa, oat_c)
+        except Exception:
+            gr_adj = straight_gr
+            tas_kt = best_glide_kias
+
+        # Hydrate the WindProfile if the airport pick fetched it.
+        wind_profile = None
+        if wind_profile_data:
+            try:
+                from core.winds_aloft import WindProfile
+                wind_profile = WindProfile.from_store(wind_profile_data)
+            except Exception:
+                wind_profile = None
+
+        try:
+            envelope = compute_glide_envelope(
+                start_point=GeoPoint(start_data["lat"], start_data["lon"]),
+                altitude_ft=start_alt,
+                glide_ratio=gr_adj,
+                wind_dir=wd,
+                wind_speed=ws,
+                tas_knots=tas_kt,
+                num_points=48,  # smoother polygon than the sim default 36
+                wind_profile=wind_profile,
+                start_elev_ft=elev_ft,
+            )
+        except Exception as e:
+            log.warning(f"Glide ring compute failed: {e}")
+            return []
+
+        if not envelope:
+            return []
+
+        tooltip = ("Max-glide reach (live winds aloft)" if wind_profile
+                   else "Max-glide reach (surface wind only)")
+        polygon = dl.Polygon(
+            positions=envelope,
+            color="#84cc16",
+            weight=1,
+            opacity=0.85,
+            dashArray="4,4",
+            fillColor="#84cc16",
+            fillOpacity=0.15,
+            children=dl.Tooltip(tooltip),
+        )
+        return [polygon]

@@ -2870,6 +2870,8 @@ def compute_glide_envelope(
     wind_speed: float,
     tas_knots: float,
     num_points: int = 36,
+    wind_profile=None,
+    start_elev_ft: float = 0.0,
 ) -> List[List[float]]:
     """
     Compute the glide envelope (reachable area) from a given position.
@@ -2878,14 +2880,25 @@ def compute_glide_envelope(
     (can glide farther with tailwind) and compressed upwind (headwind
     reduces ground distance covered).
 
+    If `wind_profile` is provided, the envelope integrates per-altitude-
+    band using winds at each MSL altitude — significantly more accurate
+    than a single mean wind when there's vertical shear (e.g. 5 kt at
+    surface vs 25 kt at 9000 ft). Without wind_profile the function
+    falls back to the old single-wind model (uses wind_dir/wind_speed).
+
     Args:
         start_point: Starting position (GeoPoint)
-        altitude_ft: Altitude AGL in feet
+        altitude_ft: Altitude AGL in feet at the start
         glide_ratio: Aircraft glide ratio (e.g., 9.0)
-        wind_dir: Wind FROM direction in degrees
-        wind_speed: Wind speed in knots
+        wind_dir: Wind FROM direction in degrees (TRUE). Used as the
+                  single-wind fallback when wind_profile is None.
+        wind_speed: Wind speed in knots (TRUE). Fallback.
         tas_knots: True airspeed in knots
         num_points: Number of points around the envelope
+        wind_profile: Optional core.winds_aloft.WindProfile. When
+                      provided, integrate the descent in 500-ft bands.
+        start_elev_ft: Field elevation in MSL feet so wind_profile
+                       lookups use the right MSL altitude.
 
     Returns:
         List of [lat, lon] points forming the envelope polygon
@@ -2893,54 +2906,78 @@ def compute_glide_envelope(
     if altitude_ft <= 0 or glide_ratio <= 0 or tas_knots <= 0:
         return []
 
-    # Convert wind FROM direction to wind TO direction (vector direction)
-    wind_to_deg = (wind_dir + 180.0) % 360.0
-    wind_to_rad = math.radians(wind_to_deg)
-
-    # Wind components (knots)
-    wind_north = wind_speed * math.cos(wind_to_rad)
-    wind_east = wind_speed * math.sin(wind_to_rad)
-
-    # Glide time = altitude / sink_rate = altitude / (TAS / GR)
-    # In consistent units: TAS in ft/s, altitude in ft
     tas_fps = tas_knots * 1.68781
     sink_rate_fps = tas_fps / glide_ratio
-    glide_time_sec = altitude_ft / sink_rate_fps
 
-    # Generate envelope points
-    envelope = []
-    bearing_step = 360.0 / num_points
-
-    for i in range(num_points):
-        bearing_deg = i * bearing_step
+    # Single-wind fallback path. Compact + matches pre-Phase-I2 behavior
+    # when no WindProfile is staged (e.g. user hasn't picked an airport
+    # with live winds aloft).
+    def _single_wind_endpoint(bearing_deg: float, wd: float, ws: float):
+        wind_to_rad = math.radians((wd + 180.0) % 360.0)
+        wind_north_kt = ws * math.cos(wind_to_rad)
+        wind_east_kt = ws * math.sin(wind_to_rad)
         bearing_rad = math.radians(bearing_deg)
-
-        # Aircraft flies with nose pointed to maintain track in this bearing
-        # TAS vector in this direction
-        tas_north = tas_knots * math.cos(bearing_rad)
-        tas_east = tas_knots * math.sin(bearing_rad)
-
-        # Groundspeed vector = TAS vector + wind vector
-        gs_north = tas_north + wind_north
-        gs_east = tas_east + wind_east
-        gs_knots = math.sqrt(gs_north**2 + gs_east**2)
-
-        # Ground distance covered in glide time
+        tas_north_kt = tas_knots * math.cos(bearing_rad)
+        tas_east_kt = tas_knots * math.sin(bearing_rad)
+        gs_north_kt = tas_north_kt + wind_north_kt
+        gs_east_kt = tas_east_kt + wind_east_kt
+        gs_knots = math.sqrt(gs_north_kt**2 + gs_east_kt**2)
+        glide_time_sec = altitude_ft / sink_rate_fps
         ground_distance_nm = (gs_knots * glide_time_sec) / 3600.0
-
-        # Actual ground track direction (may differ from bearing due to wind)
         if gs_knots > 0.1:
-            track_rad = math.atan2(gs_east, gs_north)
-            track_deg = math.degrees(track_rad) % 360.0
+            track_deg = math.degrees(
+                math.atan2(gs_east_kt, gs_north_kt)) % 360.0
         else:
             track_deg = bearing_deg
+        return point_from(start_point, track_deg, ground_distance_nm)
 
-        # Project point along actual ground track
-        point = point_from(start_point, track_deg, ground_distance_nm)
-        envelope.append([point.latitude, point.longitude])
+    # Wind-profile path: integrate descent in altitude bands and
+    # accumulate displacement at each one's wind. Within a single
+    # bearing (chosen heading the pilot picks), the aircraft holds
+    # that heading while wind drifts the path. Each band contributes
+    # GS_band × t_band of along-bearing + crosswind displacement.
+    def _profile_endpoint(bearing_deg: float):
+        bearing_rad = math.radians(bearing_deg)
+        tas_north_kt = tas_knots * math.cos(bearing_rad)
+        tas_east_kt = tas_knots * math.sin(bearing_rad)
+        north_disp_ft = 0.0
+        east_disp_ft = 0.0
+        alt_remaining = altitude_ft
+        BAND = 500.0  # ft — coarse enough to be cheap, fine enough
+                     # to track the 1500/3000/6000/9000/12000-ft layer
+                     # transitions in the Open-Meteo column.
+        while alt_remaining > 1e-3:
+            band_size = min(BAND, alt_remaining)
+            band_mid_agl = alt_remaining - band_size / 2.0
+            band_mid_msl = start_elev_ft + band_mid_agl
+            try:
+                wd, ws = wind_profile.at(band_mid_msl)
+            except Exception:
+                wd, ws = float(wind_dir), float(wind_speed)
+            wind_to_rad = math.radians((float(wd) + 180.0) % 360.0)
+            wind_north_kt = float(ws) * math.cos(wind_to_rad)
+            wind_east_kt = float(ws) * math.sin(wind_to_rad)
+            gs_north_kt = tas_north_kt + wind_north_kt
+            gs_east_kt = tas_east_kt + wind_east_kt
+            descent_time_sec = band_size / sink_rate_fps
+            north_disp_ft += gs_north_kt * 1.68781 * descent_time_sec
+            east_disp_ft += gs_east_kt * 1.68781 * descent_time_sec
+            alt_remaining -= band_size
+        total_disp_ft = math.sqrt(north_disp_ft**2 + east_disp_ft**2)
+        if total_disp_ft < 1e-3:
+            return start_point
+        track_deg = math.degrees(
+            math.atan2(east_disp_ft, north_disp_ft)) % 360.0
+        return point_from(start_point, track_deg, total_disp_ft / FT_PER_NM)
 
-    # Close the polygon
+    use_profile = wind_profile is not None
+    envelope = []
+    bearing_step = 360.0 / num_points
+    for i in range(num_points):
+        b = i * bearing_step
+        pt = (_profile_endpoint(b) if use_profile
+              else _single_wind_endpoint(b, wind_dir, wind_speed))
+        envelope.append([pt.latitude, pt.longitude])
     if envelope:
         envelope.append(envelope[0])
-
     return envelope

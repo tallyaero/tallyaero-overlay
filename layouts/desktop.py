@@ -604,6 +604,11 @@ def desktop_layout():
                                 url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
                                 attribution="Tiles &copy; Esri",
                             ),
+                            # Engine-out glide ring lives in its own
+                            # layer so the toggle can auto-draw it
+                            # without touching the main `layer` that
+                            # carries the simulated path + markers.
+                            dl.LayerGroup(id="envelope-layer"),
                             dl.LayerGroup(id="layer"),
                             dl.LayerGroup(id="scrubber-layer"),  # Dedicated layer for time scrubber marker
                             dl.LayerGroup(id="route-layer"),     # Phase 5 — great-circle route
