@@ -109,6 +109,7 @@ def simulate_lazy_eight(
     ac: dict = None,
     weight_lb: float = None,
     timestep_sec: float = 0.5,
+    power_setting: float = 0.625,
 ) -> tuple:
     """
     Simulate a lazy eight maneuver with proper wind effects and aircraft data.
@@ -204,6 +205,21 @@ def simulate_lazy_eight(
     # Rough estimate: ~10 ft altitude gain per knot of speed lost
     estimated_alt_gain = ias_delta * 10.0
     estimated_alt_gain = max(200.0, min(800.0, estimated_alt_gain))  # Reasonable bounds
+
+    # Design Directive — Lazy 8 design power = 0.625 (cruise). Off-design
+    # power drifts oscillation amplitude per:
+    #   amplitude_factor = 1.0 + abs(power_setting - 0.625) * 0.5
+    # So at 100% power amplitude grows 1.19x, at 30% power 1.16x. The
+    # altitude-target and IAS-target swings are scaled by this factor —
+    # the figure-8 develops bigger climbs and steeper dives.
+    try:
+        power_pct = float(power_setting) if power_setting is not None else 0.625
+    except (TypeError, ValueError):
+        power_pct = 0.625
+    power_pct = max(0.0, min(1.0, power_pct))
+    design_power = 0.625
+    amplitude_factor = 1.0 + abs(power_pct - design_power) * 0.5
+    estimated_alt_gain = estimated_alt_gain * amplitude_factor
 
     def compute_tas_from_ias(ias_kt, alt_ft):
         """Compute TAS from IAS at current altitude."""
@@ -422,5 +438,15 @@ def simulate_lazy_eight(
         # Check safety limit
         if t > 180:
             break
+
+    # Surface power / amplitude-drift metadata on the last hover point so
+    # the callback can render an off-design verdict in D2.
+    if hover:
+        alts = [pt.get("alt", entry_altitude_ft) for pt in hover]
+        last = hover[-1]
+        last["power_setting"] = round(power_pct, 3)
+        last["design_power"] = design_power
+        last["amplitude_factor"] = round(amplitude_factor, 3)
+        last["altitude_swing_ft"] = round(max(alts) - min(alts), 1)
 
     return path, hover

@@ -49,6 +49,7 @@ def register(app):
         State("aircraft-select", "value"),
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
+        State("power-setting", "value"),
         prevent_initial_call=True
     )
     def draw_lazy_eight(
@@ -65,7 +66,8 @@ def register(app):
         wind_speed,
         aircraft_name,
         selected_airport_id,
-        weight_lb
+        weight_lb,
+        power_setting,
     ):
         if not n_clicks or not start or not aircraft_name:
             raise PreventUpdate
@@ -104,6 +106,13 @@ def register(app):
         # Get weight
         weight = float(weight_lb) if weight_lb not in [None, "", "null"] else ac.get("max_takeoff_weight", 2300.0)
 
+        # Design Directive — Lazy 8 design power = 0.625 (cruise). Off-design
+        # power drifts oscillation amplitude (1 + |power - 0.625| * 0.5).
+        try:
+            power_pct = float(power_setting) if power_setting not in [None, "", "null"] else 0.625
+        except (TypeError, ValueError):
+            power_pct = 0.625
+
         path, hover = simulate_lazy_eight(
             entry_point={"lat": start["lat"], "lon": start["lon"]},
             entry_heading_deg=heading,
@@ -118,6 +127,7 @@ def register(app):
             field_elev_ft=field_elev_ft,
             ac=ac,
             weight_lb=weight,
+            power_setting=power_pct,
         )
 
         if not path or not hover:
