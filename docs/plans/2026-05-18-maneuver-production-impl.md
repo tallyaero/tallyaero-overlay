@@ -761,6 +761,11 @@ git commit -m "feat(maneuvers): ACS tolerance badges across 8 maneuver info pane
 
 ## Phase D — Design Directive enforcement (Power slider must produce visible consequences)
 
+**Status (2026-05-18):**
+- D1 done — Steep Turn / Chandelle / Lazy 8 sims accept `power_setting`, callbacks pass through. 21 new physics tests pass. Snapshot regen for steep_turn (new metadata keys; at design power vs/alt unchanged so the snapshot's hover values are identical).
+- D2 done — `_power_verdict()` helper in `layouts/maneuvers/_shared.py`, wired into 8 maneuver callbacks. CSS chip/banner classes added. 11 verdict-helper tests pass.
+- D3 pending — user-driven UI smoke pass; checklist at bottom of this phase.
+
 ### Task D1: Audit power-slider consumption across all 12 callbacks; close gaps
 
 **Files:**
