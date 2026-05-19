@@ -64,6 +64,7 @@ def register(app):
         State("impossibleturn-prop-config", "value"),
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
+        State("wind-profile-store", "data"),
         prevent_initial_call=True,
     )
     def draw_impossible_turn(
@@ -89,6 +90,7 @@ def register(app):
         prop_config,
         selected_airport_id,
         runtime_weight,
+        wind_profile_data,
     ):
         if not n_clicks:
             raise PreventUpdate
@@ -169,6 +171,16 @@ def register(app):
             # Enable when airport is selected and we have runway data
             include_takeoff_climb = bool(selected_airport_id and runway_id_selected)
 
+            # Phase H — hydrate live winds-aloft column if airport-pick
+            # staged one. Sim picks wind at the maneuver's mid-altitude.
+            wind_profile = None
+            if wind_profile_data:
+                try:
+                    from core.winds_aloft import WindProfile
+                    wind_profile = WindProfile.from_store(wind_profile_data)
+                except Exception:
+                    wind_profile = None
+
             path, hover, meta = simulate_impossible_turn(
                 start_point=threshold_geopoint,  # Legacy fallback
                 runway_heading_deg=float(runway_heading),
@@ -184,6 +196,7 @@ def register(app):
                 altimeter_inhg=float(altimeter),
                 wind_dir=float(wind_dir),
                 wind_speed=float(wind_speed),
+                wind_profile=wind_profile,
                 timestep_sec=0.5,
                 flap_config=flap_config,
                 prop_config=prop_config,

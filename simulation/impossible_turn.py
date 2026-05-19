@@ -1044,6 +1044,7 @@ def simulate_impossible_turn(
     altimeter_inhg: float = None,
     wind_dir: float = None,
     wind_speed: float = None,
+    wind_profile=None,  # type: Optional[WindProfile] from core.winds_aloft
     timestep_sec: float = 0.5,
     flap_config: str = "clean",
     prop_config: str = "windmilling",
@@ -1109,6 +1110,21 @@ def simulate_impossible_turn(
     altimeter_inhg_f = float(altimeter_inhg if altimeter_inhg is not None else 29.92)
     wind_dir_f = float(wind_dir or 0.0)
     wind_speed_f = float(wind_speed or 0.0)
+
+    # Phase H — when a column profile is provided, take the wind at
+    # the maneuver's mid-altitude (failure_alt / 2 above field elev)
+    # since climbing turn + glide-back happens centered there. Most
+    # of the impossible-turn drama is below 1000 ft AGL, where
+    # boundary-layer wind differs little from the surface; we still
+    # use the column so a stiff low-level inversion is captured.
+    if wind_profile is not None:
+        try:
+            mean_alt_msl = float(touchdown_elev_ft) + (float(altitude_agl) / 2.0)
+            wd_eff, ws_eff = wind_profile.at(mean_alt_msl)
+            wind_dir_f = float(wd_eff)
+            wind_speed_f = float(ws_eff)
+        except Exception:
+            pass
     timestep_f = float(timestep_sec) if timestep_sec and float(timestep_sec) > 0 else 0.5
     reaction_f = float(reaction_sec or 0.0)
     start_ias_f = float(start_ias_kias or 0.0)
