@@ -63,6 +63,7 @@ def simulate_steep_turn(
     timestep_sec: float = 0.5,
     roll_rate_dps: float = 5.0,
     pause_sec: float = 1.0,
+    power_setting: float = 0.7,
     # Legacy parameter name support
     tas_knots: float = None,
 ) -> tuple:
@@ -113,6 +114,17 @@ def simulate_steep_turn(
     roll_rate_dps = float(roll_rate_dps or 5.0)
     pause_sec = float(pause_sec or 1.0)
 
+    # Design Directive — off-design power produces altitude drift in a
+    # nominally level steep turn. Design power = 0.70 (cruise+).
+    # Drift formula: +200 fpm per 100% above design, -200 fpm per 100% below.
+    try:
+        power_pct = float(power_setting) if power_setting is not None else 0.7
+    except (TypeError, ValueError):
+        power_pct = 0.7
+    power_pct = max(0.0, min(1.0, power_pct))
+    design_power = 0.70
+    altitude_drift_fpm = (power_pct - design_power) * 200.0
+
     # Compute TAS from IAS
     alt_msl_ft = field_elev_ft + altitude_ft
     pressure_alt_ft = compute_pressure_altitude(alt_msl_ft, altimeter_inhg)
@@ -153,6 +165,7 @@ def simulate_steep_turn(
     hdg = entry_heading_deg
     t = 0.0
     bank_state_deg = 0.0
+    alt_state = altitude_ft
 
     path = []
     hover = []
@@ -163,17 +176,18 @@ def simulate_steep_turn(
         Per MANEUVER_STANDARD.md every maneuver must publish `ias`
         (constant for a level steep turn — equal to the input
         ias_knots) and `load_factor` (1/cos(bank), the load the
-        wings see at the current bank)."""
+        wings see at the current bank). Altitude tracks `alt_state`
+        which drifts with off-design power."""
         load_factor = 1.0 / math.cos(math.radians(aob_deg)) if abs(aob_deg) < 89.9 else float("inf")
         hover.append({
             "time": round(t, 2),
-            "alt": round(altitude_ft, 1),
+            "alt": round(alt_state, 1),
             "ias": round(float(ias_knots), 1),
             "tas": round(tas_knots_val, 1),
             "gs": round(gs_kt, 1),
             "aob": round(aob_deg, 1),
             "load_factor": round(load_factor, 2) if math.isfinite(load_factor) else None,
-            "vs": 0.0,  # Level steep turn
+            "vs": round(altitude_drift_fpm, 0),
             "track": round(track_deg, 1),
             "heading": round(hdg, 1),
             "drift": round(drift_deg, 1) if drift_deg is not None else 0.0,
@@ -282,7 +296,7 @@ def simulate_steep_turn(
                     # Compute motion for this final point
                     gs_fps, gs_kt, track_deg, drift_deg = compute_motion()
 
-                    # Record final corrected point
+                    alt_state += (altitude_drift_fpm / 60.0) * dt
                     record(gs_kt, 0.0, track_deg, drift_deg, segment)
 
                     # Move position for the final step
@@ -312,7 +326,7 @@ def simulate_steep_turn(
                 # Compute motion
                 gs_fps, gs_kt, track_deg, drift_deg = compute_motion()
 
-                # Record point (apply turn_sign to bank for L/R display)
+                alt_state += (altitude_drift_fpm / 60.0) * dt
                 record(gs_kt, turn_sign * bank_state_deg, track_deg, drift_deg, segment)
 
                 # Move position
@@ -340,7 +354,7 @@ def simulate_steep_turn(
                 # Compute motion
                 gs_fps, gs_kt, track_deg, drift_deg = compute_motion()
 
-                # Record point
+                alt_state += (altitude_drift_fpm / 60.0) * dt
                 record(gs_kt, 0.0, track_deg, drift_deg, "pause")
 
                 # Move position (aircraft drifts with wind)
@@ -352,5 +366,13 @@ def simulate_steep_turn(
                 # Safety limit
                 if t > 600:
                     break
+
+    # Surface power/altitude-drift metadata on the final hover point so
+    # the callback can render an off-design verdict without recomputing.
+    if hover:
+        hover[-1]["power_setting"] = round(power_pct, 3)
+        hover[-1]["design_power"] = design_power
+        hover[-1]["altitude_change_ft"] = round(alt_state - altitude_ft, 1)
+        hover[-1]["altitude_drift_fpm"] = round(altitude_drift_fpm, 0)
 
     return path, hover

@@ -50,6 +50,7 @@ def register(app):
         State("engine-select", "value"),
         State("runtime-total-weight-lb", "data"),
         State("selected-airport-id", "data"),
+        State("power-setting", "value"),
         prevent_initial_call=True
     )
     def draw_steep_turn(
@@ -68,7 +69,8 @@ def register(app):
         aircraft_name,
         engine_name,
         runtime_weight,
-        selected_airport_id
+        selected_airport_id,
+        power_setting,
     ):
         if not n_clicks or not start or not aircraft_name or not engine_name:
             raise PreventUpdate
@@ -116,6 +118,13 @@ def register(app):
         # Parse altimeter setting
         altimeter_val = float(altimeter_inhg) if altimeter_inhg not in [None, "", "null"] else 29.92
 
+        # Design Directive — pipe global Power % through to the sim.
+        # Default = design power 0.70 if slider returns no value.
+        try:
+            power_pct = float(power_setting) if power_setting not in [None, "", "null"] else 0.70
+        except (TypeError, ValueError):
+            power_pct = 0.70
+
         path, hover = simulate_steep_turn(
             entry_point={"lat": start["lat"], "lon": start["lon"]},
             entry_heading_deg=float(entry_heading),
@@ -128,6 +137,7 @@ def register(app):
             oat_c=float(oat_c),
             altimeter_inhg=float(altimeter_val),
             field_elev_ft=float(field_elev_ft),
+            power_setting=power_pct,
         )
 
         if not path or not hover:
