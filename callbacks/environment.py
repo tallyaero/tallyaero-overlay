@@ -4,10 +4,13 @@ context for a maneuver."""
 
 from __future__ import annotations
 
-from dash import html, Input, Output, State, ALL, ctx
+from dash import html, Input, Output, State, ALL, ctx, no_update
 from dash.exceptions import PreventUpdate
 
 from core.data_loader import aircraft_data, airport_data
+from core.log import get_logger
+
+log = get_logger(__name__)
 
 
 _AP_SEARCH_FIELDS = ("id", "name", "icao", "iata", "local", "municipality", "state")
@@ -82,6 +85,13 @@ def register(app):
         Output("selected-airport-display", "children"),
         Output("selected-airport-display", "style"),
         Output("airport-search-results", "children", allow_duplicate=True),
+        # Phase H — live weather auto-fill outputs.
+        Output("env-wind-dir", "value", allow_duplicate=True),
+        Output("env-wind-speed", "value", allow_duplicate=True),
+        Output("env-oat", "value", allow_duplicate=True),
+        Output("env-altimeter", "value", allow_duplicate=True),
+        Output("wind-profile-store", "data", allow_duplicate=True),
+        Output("active-metar-store", "data", allow_duplicate=True),
         Input({"type": "airport-result", "index": ALL}, "n_clicks"),
         Input("airport-search-input", "n_submit"),
         State("airport-search-matches", "data"),
@@ -95,6 +105,14 @@ def register(app):
         After selection, map auto-zooms to an airport-area view
         (zoom 14, ~2 NM radius around the airport) so runway+pattern
         geometry is visible without manual pan/zoom.
+
+        Phase H additions: best-effort fetch of (a) the surface METAR
+        for the airport's ICAO (sets env-wind/OAT/altimeter, magvar-
+        converted to TRUE for the sims) and (b) a 6-layer winds-aloft
+        column at the airport's coords. Both are stored in dcc.Store
+        so the altitude-changing sims can do per-tick wind lookup
+        during a draw. Network failures fall back to no_update — the
+        sidebar's current values stick.
         """
         trigger = ctx.triggered_id
         airport_id = None
@@ -131,15 +149,68 @@ def register(app):
         }
         # Airport-area zoom — zoom 14 gives ~2 NM radius around the
         # airport so runway + traffic pattern geometry is visible.
-        # dash-leaflet 1.0.15: `center`/`zoom` are initial-only props;
-        # programmatic re-centering requires the `viewport` dict.
         viewport = {"center": [lat, lon], "zoom": 14, "transition": "flyTo"}
-        # Persist the picked airport's ICAO in the input so the pilot
-        # can see where they are / where they just recentered to.
-        # Prefer ICAO, fall back to id (covers FAA LIDs like 66B).
         persisted_code = ap.get("icao") or ap.get("id") or airport_id
-        return (viewport, f"{elev} ft", airport_id, persisted_code,
-                f"Selected: {name} ({airport_id})", display_style, [])
+
+        # ---- Phase H · best-effort live weather fetch ----
+        metar = None
+        try:
+            from core.metar import fetch_metar
+            icao_for_metar = (ap.get("icao") or "").upper().strip()
+            if icao_for_metar:
+                metar = fetch_metar(icao_for_metar)
+        except Exception as e:
+            log.warning(f"METAR fetch failed for {airport_id}: {e}")
+
+        wind_profile_data = no_update
+        try:
+            from core.winds_aloft import wind_column_at_point
+            profile = wind_column_at_point(float(lat), float(lon),
+                                            surface_metar=metar)
+            if profile is not None:
+                wind_profile_data = profile.to_store()
+        except Exception as e:
+            log.warning(f"Winds-aloft column fetch failed for {airport_id}: {e}")
+
+        # Compute env-input fills (no_update preserves the user's
+        # current sidebar value if METAR is missing or partial).
+        wind_dir_fill = no_update
+        wind_speed_fill = no_update
+        oat_fill = no_update
+        altim_fill = no_update
+        metar_store = no_update
+        if metar:
+            # METAR wind direction is MAGNETIC — convert to TRUE for the
+            # sim, since the env-wind-dir field is interpreted as the
+            # geometric wind direction by every maneuver callback.
+            md = metar.get("wind_dir_deg")
+            ms = metar.get("wind_speed_kt")
+            if md is not None:
+                try:
+                    from core.route import magvar_west_positive
+                    magvar_w = float(magvar_west_positive(
+                        float(lat), float(lon),
+                        float(ap.get("elevation_ft", 0.0) or 0.0),
+                    ))
+                except Exception:
+                    magvar_w = 0.0
+                wind_dir_fill = int(round((float(md) - magvar_w) % 360.0))
+            if ms is not None:
+                wind_speed_fill = int(round(float(ms)))
+            temp_c = metar.get("temp_c")
+            if temp_c is not None:
+                oat_fill = int(round(float(temp_c) * 9.0 / 5.0 + 32.0))
+            altim = metar.get("altimeter_inhg")
+            if altim is not None:
+                altim_fill = round(float(altim), 2)
+            metar_store = metar
+
+        return (
+            viewport, f"{elev} ft", airport_id, persisted_code,
+            f"Selected: {name} ({airport_id})", display_style, [],
+            wind_dir_fill, wind_speed_fill, oat_fill, altim_fill,
+            wind_profile_data, metar_store,
+        )
 
     @app.callback(
         Output("airport-search-results", "children"),

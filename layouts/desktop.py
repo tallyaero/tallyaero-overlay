@@ -669,6 +669,13 @@ def desktop_layout():
 
             dcc.Store(id="runtime-total-weight-lb"),
 
+            # Phase H · live weather staged on airport-pick. Sims read
+            # the wind-profile-store to do per-tick wind lookup; the
+            # active-metar-store carries the parsed observation so any
+            # surface that wants to display it (chip / tooltip) can.
+            dcc.Store(id="wind-profile-store", data=None),
+            dcc.Store(id="active-metar-store", data=None),
+
             # Power-Off 180 (touchdown only; start is auto-generated but keep for future flexibility)
             dcc.Store(id={"type": "point-store", "m_id": "poweroff180", "role": "touchdown"}),
             dcc.Store(id={"type": "point-store", "m_id": "poweroff180", "role": "start"}),
