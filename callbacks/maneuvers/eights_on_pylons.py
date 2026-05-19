@@ -15,7 +15,7 @@ import dash_bootstrap_components as dbc
 import dash_leaflet as dl
 
 from callbacks.map import create_airplane_marker
-from layouts.maneuvers._shared import _acs_metric
+from layouts.maneuvers._shared import _acs_metric, _power_verdict
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -125,6 +125,12 @@ def register(app):
         bank_deg = float(bank_angle) if bank_angle not in [None, "", "null"] else 30.0
         n_eights = int(num_eights) if num_eights not in [None, "", "null"] else 1
         entry_dir = str(entry_direction) if entry_direction not in [None, "", "null"] else "downwind"
+        # Design Directive — design power is cruise (0.625). Parsed once so
+        # both the sim call and the D2 verdict chip share the value.
+        try:
+            power_pct = float(power_setting) if power_setting not in [None, "", "null"] else 0.625
+        except (TypeError, ValueError):
+            power_pct = 0.625
 
         # OAT F -> C
         try:
@@ -153,7 +159,7 @@ def register(app):
             field_elev_ft=selected_airport_elev_ft,
             ac=ac,
             weight_lb=weight_lb,
-            power_setting=float(power_setting) if power_setting not in [None, "", "null"] else 0.65,
+            power_setting=power_pct,
             cg_position=float(cg_position) if cg_position not in [None, "", "null"] else 0.5,
             bank_angle_deg=bank_deg,
             entry_direction=entry_dir,
@@ -313,6 +319,12 @@ def register(app):
                     html.Div([
                         _acs_metric("Heading", 0, "°", target=0, tol=10, cert_level="commercial"),
                     ], style={"display": "flex", "flexWrap": "wrap", "marginTop": "6px"}),
+                    # Phase D2 — Design Directive power verdict.
+                    _power_verdict(
+                        power_pct, 0.625,
+                        "wider arcs (PA shifts as GS changes)",
+                        "could not hold pivotal altitude — pylon slipped off wing tip",
+                    ),
                 ], title="Simulation Results", style={"fontSize": "12px"}),
             ], start_collapsed=False, style={"marginTop": "8px"})
         )

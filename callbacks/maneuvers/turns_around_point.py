@@ -14,7 +14,7 @@ import dash_bootstrap_components as dbc
 import dash_leaflet as dl
 
 from callbacks.map import create_airplane_marker
-from layouts.maneuvers._shared import _acs_metric
+from layouts.maneuvers._shared import _acs_metric, _power_verdict
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -276,6 +276,12 @@ def register(app):
                         _acs_metric("Altitude", 0, "ft", target=0, tol=100, cert_level="private"),
                         _acs_metric("Track radius", 0, "%", target=0, tol=10, cert_level="private"),
                     ], style={"display": "flex", "flexWrap": "wrap", "marginTop": "6px"}),
+                    # Phase D2 — Design Directive power verdict.
+                    _power_verdict(
+                        power_pct, 0.60,
+                        "wider arcs, more crab",
+                        "ground track exceeded 10% radius tolerance",
+                    ),
                 ], title="Simulation Results", style={"fontSize": "12px"}),
             ], start_collapsed=False, style={"marginTop": "8px"})
         )

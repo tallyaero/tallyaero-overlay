@@ -65,3 +65,44 @@ def _acs_metric(label, value, units, target, tol, cert_level="private"):
         className="acs-metric",
         **{"data-cert-level": cert_level},
     )
+
+
+def _power_verdict(power_pct, design_power, consequence_text, failure_reason):
+    """Render the Design Directive power verdict for a maneuver (Phase D2).
+
+    Compares actual power (0-1) to the maneuver's design power and emits
+    one of three components based on |delta|:
+      - abs_delta < 0.10 → green badge: "Power: X%" (within tolerance)
+      - abs_delta < 0.20 → amber chip: "Off-design power: X% (design Y%) — <consequence>"
+      - abs_delta >= 0.20 → red banner: "Maneuver failed — <failure_reason>"
+
+    Returns an html.Div. consequence_text and failure_reason are short
+    strings supplied by each callback per the Design Directive table.
+    """
+    try:
+        p = float(power_pct)
+    except (TypeError, ValueError):
+        p = float(design_power)
+    p = max(0.0, min(1.0, p))
+    d = float(design_power)
+    abs_delta = abs(p - d)
+
+    if abs_delta < 0.10:
+        return html.Div(
+            [
+                html.Span("Power", className="acs-metric-label"),
+                html.Span(f"{p * 100:.0f}", className="acs-metric-value acs-pass"),
+                html.Span("%", className="acs-metric-units"),
+            ],
+            className="acs-metric",
+            **{"data-cert-level": "design-directive"},
+        )
+    if abs_delta < 0.20:
+        return html.Div(
+            f"Off-design power: {p * 100:.0f}% (design {d * 100:.0f}%) — {consequence_text}",
+            className="power-chip power-chip-amber",
+        )
+    return html.Div(
+        f"Maneuver failed — {failure_reason}",
+        className="power-banner power-banner-red",
+    )

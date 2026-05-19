@@ -3215,6 +3215,36 @@ input[type="radio"] {
   border-left-color: var(--acs-fail);
 }
 
+/* === Design Directive power verdicts (Phase D2) === */
+.power-chip {
+  display: inline-block;
+  padding: 4px 10px;
+  margin: 6px 0 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  line-height: 1.4;
+}
+.power-chip-amber {
+  background: #fef3c7;
+  color: #92400e;
+  border-left: 3px solid var(--acs-marginal);
+}
+.power-banner {
+  display: block;
+  padding: 8px 12px;
+  margin: 6px 0 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+.power-banner-red {
+  background: #fee2e2;
+  color: #991b1b;
+  border-left: 4px solid var(--acs-fail);
+}
+
 .maneuver-profile-chart {
   width: 100%;
   margin-top: 8px;

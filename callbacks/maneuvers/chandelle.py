@@ -17,7 +17,7 @@ from utility import simulate_chandelle
 
 from callbacks.map import create_airplane_marker
 from layouts.maneuvers._charts import altitude_profile_chart
-from layouts.maneuvers._shared import _acs_metric
+from layouts.maneuvers._shared import _acs_metric, _power_verdict
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -259,6 +259,12 @@ def register(app):
                     _acs_metric("Roll-out", 0, "°", target=0, tol=10, cert_level="commercial"),
                     _acs_metric("Stall margin", min_ias - vs_in_turn, "kt", target=10, tol=10, cert_level="commercial"),
                 ], style={"display": "flex", "flexWrap": "wrap", "marginTop": "6px"}),
+                # Phase D2 — Design Directive power verdict.
+                _power_verdict(
+                    power_pct, 1.0,
+                    "altitude gained reduced",
+                    "could not reach 180° within target IAS",
+                ),
             ], title="Simulation Results", style={"fontSize": "12px"}),
         ], start_collapsed=False, style={"marginTop": "8px"})
 

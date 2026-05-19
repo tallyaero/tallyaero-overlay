@@ -17,7 +17,7 @@ from utility import simulate_lazy_eight
 
 from callbacks.map import create_airplane_marker
 from layouts.maneuvers._charts import altitude_profile_chart
-from layouts.maneuvers._shared import _acs_metric
+from layouts.maneuvers._shared import _acs_metric, _power_verdict
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -296,6 +296,12 @@ def register(app):
                     _acs_metric("Altitude drift", 0, "ft", target=0, tol=100, cert_level="commercial"),
                     _acs_metric("Roll-out", 0, "°", target=0, tol=10, cert_level="commercial"),
                 ], style={"display": "flex", "flexWrap": "wrap", "marginTop": "6px"}),
+                # Phase D2 — Design Directive power verdict.
+                _power_verdict(
+                    power_pct, 0.625,
+                    "oscillation amplitude drifts",
+                    "altitude oscillation out of phase, exit bank > 60°",
+                ),
             ], title="Simulation Results", style={"fontSize": "12px"}),
         ], start_collapsed=False, style={"marginTop": "8px"})
 

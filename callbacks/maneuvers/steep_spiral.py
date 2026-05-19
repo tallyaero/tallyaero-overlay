@@ -17,7 +17,7 @@ from utility import simulate_steep_spiral
 
 from callbacks.map import create_airplane_marker
 from layouts.maneuvers._charts import altitude_profile_chart
-from layouts.maneuvers._shared import _acs_metric
+from layouts.maneuvers._shared import _acs_metric, _power_verdict
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -189,21 +189,10 @@ def register(app):
                 "fontSize": "12px",
             }))
 
-        # Phase C7 — tier-2 amber chip for off-design residual power.
-        if warnings.get('off_design_residual_power'):
-            rp = warnings['off_design_residual_power']
-            warning_elements.append(html.Div(
-                f"Off-design power: {rp:.0f}% — Steep Spiral is an idle-power maneuver. "
-                f"Descent rate reduced; may not reach 1500 ft AGL completion.",
-                style={
-                    "borderLeft": "3px solid var(--acs-marginal, #f59e0b)",
-                    "color": "var(--acs-marginal, #f59e0b)",
-                    "padding": "4px 8px",
-                    "marginBottom": "6px",
-                    "fontSize": "11px",
-                    "backgroundColor": "rgba(245, 158, 11, 0.05)",
-                },
-            ))
+        # Phase D2 — the graded Design Directive power verdict (added below
+        # inside the accordion) supersedes the C7 binary amber chip. The
+        # off_design_residual_power warning is still emitted by the sim but
+        # the chip is now consolidated into the accordion verdict.
 
         # Ground impact warning (critical)
         if warnings.get('ground_impact'):
@@ -273,6 +262,12 @@ def register(app):
                         _acs_metric("Exit heading", 0, "°", target=0, tol=10, cert_level="commercial"),
                         _acs_metric("Altitude at exit", 0, "ft", target=0, tol=100, cert_level="commercial"),
                     ], style={"display": "flex", "flexWrap": "wrap", "marginTop": "6px"}),
+                    # Phase D2 — Design Directive power verdict.
+                    _power_verdict(
+                        power_pct, 0.0,
+                        "reduced descent rate, longer time to lose altitude",
+                        "descent rate too low to complete training profile",
+                    ),
                 ], title="Simulation Results", style={"fontSize": "12px"}),
             ], start_collapsed=False, style={"marginTop": "8px"})
         )

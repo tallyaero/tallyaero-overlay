@@ -16,7 +16,7 @@ import dash_leaflet as dl
 from utility import simulate_steep_turn
 
 from callbacks.map import create_airplane_marker
-from layouts.maneuvers._shared import _acs_metric
+from layouts.maneuvers._shared import _acs_metric, _power_verdict
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -248,6 +248,12 @@ def register(app):
                     _acs_metric("Heading", 0, "°", target=0, tol=10, cert_level="private"),
                     _acs_metric("IAS", 0, "kt", target=0, tol=10, cert_level="private"),
                 ], style={"display": "flex", "flexWrap": "wrap", "marginTop": "6px"}),
+                # Phase D2 — Design Directive power verdict.
+                _power_verdict(
+                    power_pct, 0.70,
+                    "+/- altitude drift in turn",
+                    "altitude lost/gained beyond ACS ±100 ft tolerance",
+                ),
             ], title="Simulation Results", style={"fontSize": "12px"}),
         ], start_collapsed=False, style={"marginTop": "8px"})
 
