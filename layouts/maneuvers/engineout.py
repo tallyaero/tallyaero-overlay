@@ -53,11 +53,16 @@ def engineout_layout(default_elev=None):
             id="engineout-max-bank", type="number",
             value=45, min=15, max=60,
         ), tooltip="Maximum bank used in the glide turns. Steeper = tighter radius but more drag/altitude loss."),
-        _field("Envelope", dcc.Checklist(
-            id="engineout-show-envelope",
-            options=[{"label": " Ring", "value": "show"}],
-            value=[],
-        ), tooltip="Show the reachable-glide envelope ring overlay."),
+        html.Div(
+            dcc.Checklist(
+                id="engineout-show-envelope",
+                options=[{"label": "Glide Ring", "value": "show"}],
+                value=[],
+                className="shelf-toggle-chip-checklist",
+            ),
+            className="shelf-toggle-chip",
+            title="Toggle the reachable-glide envelope ring overlay.",
+        ),
 
         html.Div(className="shelf-spacer"),
 
@@ -81,7 +86,9 @@ def engineout_layout(default_elev=None):
         html.Div(id="engineout-runway-info", style={"display": "none"}),
         html.Div(id="engineout-manual-heading-div", style={"display": "none"}),
         html.Div(id={"type": "click-status", "m_id": "engineout"}, style={"display": "none"}),
-        html.Div(id="engineout-min-alt-result", className="shelf-info-panel"),
+        # Stash for the callback's min-altitude output — surfaced inside
+        # the Results modal now, not visible on the control strip.
+        html.Div(id="engineout-min-alt-result", style={"display": "none"}),
         html.Div(id="engineout-slider-container",
                  style={"display": "none"},
                  children=[

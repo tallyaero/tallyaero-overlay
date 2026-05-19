@@ -31,6 +31,14 @@ from core.data_loader import aircraft_data, airport_data
 log = get_logger(__name__)
 
 
+def _safe_min_alt(s):
+    """Parse the numeric min-alt out of 'Minimum Altitude Required: 1234 ft AGL'."""
+    try:
+        return float(s.split(":")[1].split("ft")[0].strip())
+    except Exception:
+        return float("inf")
+
+
 def register(app):
     """Install Engine-Out callbacks against the given Dash app."""
 
@@ -440,9 +448,27 @@ def register(app):
             status_color = "#28a745" if success else "#dc3545"
             status_text = "TOUCHDOWN" if success else "IMPACT"
 
+            min_alt_color = (
+                "#28a745" if (isinstance(min_alt_display, str)
+                              and start_alt_agl is not None
+                              and "ft AGL" in min_alt_display
+                              and start_alt_agl >= _safe_min_alt(min_alt_display))
+                else "#dc3545")
+            min_alt_row = html.Div(
+                min_alt_display,
+                style={
+                    "fontSize": "11px",
+                    "fontWeight": "600",
+                    "color": min_alt_color,
+                    "marginBottom": "8px",
+                },
+            ) if min_alt_display else None
+
             info_content = dbc.Accordion([
                 dbc.AccordionItem([
                     html.Div(status_text, style={"fontWeight": "bold", "color": status_color, "marginBottom": "8px", "fontSize": "13px"}),
+
+                    *([min_alt_row] if min_alt_row else []),
 
                     html.Div([html.Strong("Flight Phases")], style={"marginBottom": "4px"}),
                     html.Div(phase_display, style={"fontSize": "10px", "color": "#555", "marginBottom": "8px", "wordWrap": "break-word"}),

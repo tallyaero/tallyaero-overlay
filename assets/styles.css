@@ -1861,6 +1861,66 @@ input[type="radio"] {
   border-color: #7f1d1d;
 }
 
+/* Toggle chip — replaces the old labeled checkbox "Envelope: Ring".
+   Wraps a single-option dcc.Checklist into a pill-shaped chip that
+   highlights when checked. The native checkbox input is hidden; the
+   label IS the chip. Uses :has(:checked) for active state. */
+.shelf-toggle-chip {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 4px;
+}
+.shelf-toggle-chip .shelf-toggle-chip-checklist {
+  margin: 0;
+}
+.shelf-toggle-chip label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  padding: 5px 12px;
+  border: 1px solid var(--ta-border-primary, #cbd5e1);
+  border-radius: 999px;
+  background: var(--ta-surface-secondary, #f1f5f9);
+  color: var(--ta-text-secondary, #475569);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  user-select: none;
+  white-space: nowrap;
+}
+.shelf-toggle-chip label:hover {
+  border-color: var(--ta-brand-blue, #0d59f2);
+  color: var(--ta-text-primary, #0f172a);
+}
+.shelf-toggle-chip input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+.shelf-toggle-chip label:has(input:checked) {
+  background: var(--ta-brand-blue, #0d59f2);
+  border-color: var(--ta-brand-blue, #0d59f2);
+  color: #ffffff;
+}
+[data-theme="dark"] .shelf-toggle-chip label {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+[data-theme="dark"] .shelf-toggle-chip label:hover {
+  border-color: #60a5fa;
+  color: #e2e8f0;
+}
+[data-theme="dark"] .shelf-toggle-chip label:has(input:checked) {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
 /* Per-maneuver simulation-results modal — give the body room. */
 .sim-results-modal-scroll {
   max-height: 70vh;
