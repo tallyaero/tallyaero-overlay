@@ -2372,12 +2372,32 @@ def run_simulation(
                     po180_phase = "final"
 
             else:
+                # PO180 "final" phase — hold the runway centerline all
+                # the way to touchdown using cross-track error to bias
+                # the intercept angle. Earlier versions of this code
+                # bailed to `in_po180 = False` at dist_to_td < 500 ft;
+                # that handed control back to the generic "fly to bucket
+                # center" path, which uses bearing-to-bucket instead of
+                # runway-heading hold. The result was 30° bank locked
+                # in for the last 10 seconds and a 65°-off arrival,
+                # ~1700 ft short of the threshold. Keep centerline-hold
+                # active until touchdown elevation is reached.
                 xtrack_ft, along_ft = _cross_track_to_centerline_ft(
                     touchdown_point, cur_pos, touchdown_heading
                 )
 
+                # Tighten intercept as we get close so the aircraft
+                # doesn't fly wide past the threshold. Scale the
+                # intercept angle inversely with distance from TD.
                 max_intercept_deg = 45.0
                 intercept_angle = min(max_intercept_deg, abs(xtrack_ft) / 25.0)
+                # Close-in tightening — within 1000 ft, scale intercept
+                # down to a max of 15° so we land on heading, not
+                # crab-bombing the centerline at 45°.
+                if dist_to_td < 1000.0:
+                    intercept_angle = min(intercept_angle, 15.0)
+                if dist_to_td < 500.0:
+                    intercept_angle = min(intercept_angle, 5.0)
 
                 if abs(xtrack_ft) > 25:
                     if xtrack_ft > 0:
@@ -2388,10 +2408,13 @@ def run_simulation(
                     desired_track = touchdown_heading
 
                 track_error = _angle_diff_deg(desired_track, track)
-                bank_target = max(-20.0, min(20.0, track_error * 0.4))
-
-                if dist_to_td < 500:
-                    in_po180 = False
+                # Bank-limit tightens with proximity so we don't snap-
+                # roll past the centerline in the last 500 ft.
+                bank_limit = 20.0
+                if dist_to_td < 500.0:
+                    bank_limit = 10.0
+                bank_target = max(-bank_limit,
+                                   min(bank_limit, track_error * 0.4))
 
         else:
             if time_sec < reaction_end:
