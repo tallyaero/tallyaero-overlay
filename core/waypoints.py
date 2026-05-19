@@ -354,3 +354,53 @@ def nearest_airport_within(
             best_d = d
             best = ap
     return best
+
+
+def nearest_waypoint_within(
+    *,
+    lat: float, lon: float,
+    max_nm: float = 3.0,
+    airport_data: Optional[list[dict]] = None,
+    navaid_data: Optional[list[dict]] = None,
+    fix_data: Optional[list[dict]] = None,
+) -> Optional[tuple[str, dict]]:
+    """Click-to-build snap across all waypoint types. Returns
+    (kind, record) tuple where kind is 'airport', 'navaid', or 'fix'.
+    Airports win ties — they're the most-flown waypoint type and have
+    the richest downstream metadata."""
+    if max_nm <= 0:
+        return None
+    pad_lat = max_nm / 60.0
+    pad_lon = pad_lat / max(0.1, math.cos(math.radians(lat)))
+    lat_lo, lat_hi = lat - pad_lat, lat + pad_lat
+    lon_lo, lon_hi = lon - pad_lon, lon + pad_lon
+    from core.route import haversine_nm
+
+    best_kind, best_rec, best_d = None, None, max_nm
+
+    def _scan(records, kind, prefer_tier):
+        nonlocal best_kind, best_rec, best_d
+        if not records:
+            return
+        for r in records:
+            r_lat = r.get("lat")
+            r_lon = r.get("lon")
+            if r_lat is None or r_lon is None:
+                continue
+            if (r_lat < lat_lo or r_lat > lat_hi
+                    or r_lon < lon_lo or r_lon > lon_hi):
+                continue
+            d = haversine_nm(lat, lon, r_lat, r_lon)
+            # Apply the tier preference as a small additive penalty so
+            # an airport at 0.5 NM still beats a fix at 0.4 NM.
+            adjusted = d + prefer_tier
+            if adjusted < best_d:
+                best_d, best_kind, best_rec = adjusted, kind, r
+
+    _scan(airport_data, "airport", 0.0)
+    _scan(navaid_data, "navaid", 0.15)  # airports preferred at near-tie
+    _scan(fix_data, "fix", 0.30)        # fixes are last-resort snap
+
+    if best_rec is None:
+        return None
+    return best_kind, best_rec

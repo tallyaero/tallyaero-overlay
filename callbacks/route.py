@@ -36,8 +36,8 @@ from core.airport_search import (
     search_navaids, search_fixes, navaid_label, fix_label,
 )
 from core.waypoints import (
-    resolve_any, nearest_airport_within, format_gps_ident,
-    format_gps_display, parse_gps_coordinate,
+    resolve_any, nearest_airport_within, nearest_waypoint_within,
+    format_gps_ident, format_gps_display, parse_gps_coordinate,
 )
 from core.diverts import (
     divert_coverage_along_route_glide, gap_segments, longest_gap_nm,
@@ -946,15 +946,38 @@ def register(app):
         if lat is None or lon is None:
             raise PreventUpdate
 
-        # Snap to nearest airport within 3 NM, else drop a GPS waypoint.
-        snapped = nearest_airport_within(airport_data, lat, lon, max_nm=3.0)
-        if snapped:
-            new_value = snapped.get("id")
-            new_option = {
-                "label": new_value,
-                "value": new_value,
-                "title": airport_label(snapped),
-            }
+        # Snap to nearest waypoint within 3 NM. Airports preferred,
+        # then NAVAIDs (small tie-break penalty), then fixes; falls
+        # through to a GPS waypoint when nothing is close enough.
+        hit = nearest_waypoint_within(
+            lat=lat, lon=lon, max_nm=3.0,
+            airport_data=airport_data,
+            navaid_data=navaid_data,
+            fix_data=fix_data,
+        )
+        if hit is not None:
+            kind, rec = hit
+            if kind == "airport":
+                new_value = rec.get("id")
+                new_option = {
+                    "label": new_value,
+                    "value": new_value,
+                    "title": airport_label(rec),
+                }
+            elif kind == "navaid":
+                new_value = f"NAV:{rec['ident']}"
+                new_option = {
+                    "label": f"NAV {rec['ident']}",
+                    "value": new_value,
+                    "title": navaid_label(rec),
+                }
+            else:  # fix
+                new_value = f"FIX:{rec['ident']}"
+                new_option = {
+                    "label": f"FIX {rec['ident']}",
+                    "value": new_value,
+                    "title": fix_label(rec),
+                }
         else:
             new_value = format_gps_ident(lat, lon)
             new_option = {
