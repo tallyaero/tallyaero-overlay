@@ -45,9 +45,11 @@ def engineout_layout(default_elev=None):
         _field("Start Hdg", dcc.Input(
             id="engineout-start-heading", type="number", value=240,
         ), tooltip="Initial heading at the engine-failure point."),
-        _field("Start Alt (ft)", dcc.Input(
+        _field("Start Alt MSL", dcc.Input(
             id="engineout-altitude", type="number", value=5000,
-        ), tooltip="Altitude AGL at engine failure."),
+        ), tooltip=("Altitude MSL at engine failure — what the altimeter "
+                    "reads. The simulator subtracts the touchdown field "
+                    "elevation to get the AGL energy budget.")),
         _field("Reaction (s)", dcc.Input(
             id="engineout-reaction-time", type="number",
             value=2.0, min=0, max=10, step=0.5,

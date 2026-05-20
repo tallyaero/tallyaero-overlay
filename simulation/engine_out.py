@@ -2872,6 +2872,9 @@ def compute_glide_envelope(
     num_points: int = 36,
     wind_profile=None,
     start_elev_ft: float = 0.0,
+    elevation_fn=None,
+    terrain_buffer_ft: float = 200.0,
+    terrain_step_nm: float = 0.5,
 ) -> List[List[float]]:
     """
     Compute the glide envelope (reachable area) from a given position.
@@ -2970,13 +2973,54 @@ def compute_glide_envelope(
             math.atan2(east_disp_ft, north_disp_ft)) % 360.0
         return point_from(start_point, track_deg, total_disp_ft / FT_PER_NM)
 
+    # Terrain-aware clipping. For each bearing, walk outward in
+    # terrain_step_nm chunks tracking remaining altitude after descent
+    # at that range. Stop when MSL altitude drops below local terrain
+    # plus the buffer; return the last safe point instead of the
+    # raw wind-distance endpoint. Pure no-terrain path falls through
+    # to the original wind-only behavior.
+    def _terrain_clip(end_pt: GeoPoint, bearing_deg: float) -> GeoPoint:
+        if elevation_fn is None:
+            return end_pt
+        # Un-clipped reach as ground distance from start → end_pt.
+        d_nm = geo_dist((start_point.latitude, start_point.longitude),
+                         (end_pt.latitude, end_pt.longitude)).nm
+        if d_nm <= terrain_step_nm:
+            return end_pt
+        # MSL altitude at start
+        start_msl = start_elev_ft + altitude_ft
+        last_safe = start_point
+        # Linear descent: assume constant glide angle along this radial
+        # — for envelope visualization this is fine; per-band wind
+        # already shaped the endpoint distance.
+        n_steps = max(1, int(math.ceil(d_nm / terrain_step_nm)))
+        for k in range(1, n_steps + 1):
+            frac = k / n_steps
+            d_here = d_nm * frac
+            test_pt = point_from(start_point, bearing_deg, d_here)
+            alt_msl_here = start_msl - frac * altitude_ft
+            try:
+                terrain_m = elevation_fn(test_pt.latitude, test_pt.longitude)
+            except Exception:
+                terrain_m = None
+            if terrain_m is None or terrain_m != terrain_m:  # NaN check
+                last_safe = test_pt
+                continue
+            terrain_ft = terrain_m * 3.28084
+            if alt_msl_here < terrain_ft + terrain_buffer_ft:
+                return last_safe
+            last_safe = test_pt
+        return last_safe
+
     use_profile = wind_profile is not None
     envelope = []
     bearing_step = 360.0 / num_points
     for i in range(num_points):
         b = i * bearing_step
-        pt = (_profile_endpoint(b) if use_profile
-              else _single_wind_endpoint(b, wind_dir, wind_speed))
+        raw_pt = (_profile_endpoint(b) if use_profile
+                  else _single_wind_endpoint(b, wind_dir, wind_speed))
+        # Per-bearing terrain clip (no-op when elevation_fn is None).
+        pt = _terrain_clip(raw_pt, b)
         envelope.append([pt.latitude, pt.longitude])
     if envelope:
         envelope.append(envelope[0])

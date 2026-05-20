@@ -147,7 +147,7 @@ def register(app):
                     return default
 
             start_heading      = safe_float("engineout-start-heading.value")
-            start_alt_agl      = safe_float("engineout-altitude.value")
+            start_alt_msl      = safe_float("engineout-altitude.value")
             manual_td_elev     = safe_float("engineout-manual-elev.value")
             wind_dir           = safe_float("env-wind-dir.value")
             wind_speed         = safe_float("env-wind-speed.value")
@@ -179,7 +179,7 @@ def register(app):
                 touchdown_heading = float(heading_input)
 
             required = [
-                start_heading, start_alt_agl, touchdown_heading,
+                start_heading, start_alt_msl, touchdown_heading,
                 wind_dir, wind_speed, oat_f, altimeter,
                 total_wt
             ]
@@ -200,6 +200,19 @@ def register(app):
                 touchdown_elev_ft = float(td_store_elev)
             else:
                 touchdown_elev_ft = float(airport_elev_ft)
+
+            # Start Alt input is MSL (altimeter reading); the sim
+            # wants AGL energy above the touchdown field. Reject runs
+            # where the pilot's typed MSL is below the field elevation
+            # — that's not a glide, that's an impact.
+            start_alt_agl = float(start_alt_msl) - float(touchdown_elev_ft)
+            if start_alt_agl < 100:
+                return ([], None,
+                        f"Start altitude {start_alt_msl:.0f} ft MSL is "
+                        f"below or too close to touchdown elevation "
+                        f"{touchdown_elev_ft:.0f} ft MSL.",
+                        [], [], {"display": "none"}, 100,
+                        {0: "Start", 100: "End"}, 0, "", [], "", BTN_BASE)
 
             oat_c = (float(oat_f) - 32.0) * 5.0 / 9.0
 
@@ -520,7 +533,7 @@ def register(app):
 
                     html.Div([html.Strong("Glide Performance")], style={"marginBottom": "4px"}),
                     html.Div(f"Avg G/R: {avg_gr:.1f}:1 | GS: {avg_gs:.0f} kt | VS: {avg_vs:.0f} fpm", style={"fontSize": "11px"}),
-                    html.Div(f"Distance: {total_distance_nm:.2f} nm | Start alt: {start_alt_agl:.0f} ft", style={"fontSize": "11px"}),
+                    html.Div(f"Distance: {total_distance_nm:.2f} nm | Start alt: {start_alt_msl:.0f} ft MSL ({start_alt_agl:.0f} ft AGL)", style={"fontSize": "11px"}),
                     html.Div(f"Slip used: {'Yes' if slip_used else 'No'}", style={"fontSize": "11px", "color": "#fd7e14" if slip_used else "#666"}),
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
 
@@ -670,9 +683,10 @@ def register(app):
         # Engine-out-only fields fetched from the request body so
         # they don't appear in the Input/State declaration above.
         # Falls back to layout defaults when not mounted.
-        start_alt_agl = 5000.0
+        start_alt_msl = 5000.0
         flap_setting = "clean"
         prop_condition = "idle"
+        manual_td_elev_ring = None
         try:
             from flask import request
             body = request.get_json(silent=True) or {}
@@ -680,13 +694,18 @@ def register(app):
                 sid = entry.get("id")
                 if sid == "engineout-altitude":
                     try:
-                        start_alt_agl = float(entry.get("value")) if entry.get("value") not in (None, "") else 5000.0
+                        start_alt_msl = float(entry.get("value")) if entry.get("value") not in (None, "") else 5000.0
                     except (TypeError, ValueError):
                         pass
                 elif sid == "engineout-flap-setting":
                     flap_setting = entry.get("value") or "clean"
                 elif sid == "engineout-prop-condition":
                     prop_condition = entry.get("value") or "idle"
+                elif sid == "engineout-manual-elev":
+                    try:
+                        manual_td_elev_ring = float(entry.get("value")) if entry.get("value") not in (None, "") else None
+                    except (TypeError, ValueError):
+                        pass
         except Exception:
             pass
         # Hide the ring outside engine-out so it doesn't bleed into
@@ -706,13 +725,25 @@ def register(app):
             log.info("Glide Ring: engine not selected")
             return []
 
+        # Convert MSL → AGL using the touchdown field elevation. Pick
+        # order matches the Draw flow: manual override > selected
+        # airport > 0 (ring at MSL).
         try:
-            start_alt = float(start_alt_agl) if start_alt_agl else 0.0
+            start_alt_msl_val = float(start_alt_msl) if start_alt_msl else 0.0
         except (TypeError, ValueError):
-            log.info(f"Glide Ring: bad altitude {start_alt_agl!r}")
+            log.info(f"Glide Ring: bad altitude {start_alt_msl!r}")
             return []
+        ring_field_elev = 0.0
+        if manual_td_elev_ring is not None:
+            ring_field_elev = float(manual_td_elev_ring)
+        elif airport_id:
+            _ap = next((a for a in airport_data if a.get("id") == airport_id), None)
+            if _ap:
+                ring_field_elev = float(_ap.get("elevation_ft", 0.0))
+        start_alt = start_alt_msl_val - ring_field_elev
         if start_alt <= 0:
-            log.info(f"Glide Ring: zero altitude {start_alt}")
+            log.info(f"Glide Ring: MSL {start_alt_msl_val} below field "
+                     f"elev {ring_field_elev} → no glide possible")
             return []
 
         try:
@@ -745,10 +776,10 @@ def register(app):
         except (TypeError, ValueError):
             oat_c, altim = 15.0, 29.92
 
-        # Field elev — needed for MSL conversion in wind-profile lookups.
-        airport = next((a for a in airport_data
-                         if a.get("id") == airport_id), None)
-        elev_ft = float(airport.get("elevation_ft", 0.0)) if airport else 0.0
+        # Field elev for atmospheric calcs + wind-profile MSL lookup.
+        # Uses the same elevation we just used to convert MSL → AGL above
+        # so the energy budget and the air-density calc agree.
+        elev_ft = ring_field_elev
 
         try:
             # Density-adjusted glide ratio mirrors what the engine_out
@@ -772,6 +803,15 @@ def register(app):
             except Exception:
                 wind_profile = None
 
+        # Terrain-clip the ring like the Route Planner's corridor —
+        # the reachable area shrinks toward terrain that rises faster
+        # than the aircraft descends. Lazy-imported so engineout still
+        # boots when the terrain layer can't be hydrated.
+        try:
+            from core.terrain import elevation_m as _terrain_elev_m
+        except Exception:
+            _terrain_elev_m = None
+
         try:
             envelope = compute_glide_envelope(
                 start_point=GeoPoint(start_data["lat"], start_data["lon"]),
@@ -783,6 +823,7 @@ def register(app):
                 num_points=48,  # smoother polygon than the sim default 36
                 wind_profile=wind_profile,
                 start_elev_ft=elev_ft,
+                elevation_fn=_terrain_elev_m,
             )
         except Exception as e:
             log.warning(f"Glide ring compute failed: {e}")
