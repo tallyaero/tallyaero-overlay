@@ -140,12 +140,16 @@ DECISION_TREE_SAFETY_MARGIN = 1.10  # 10% — accounts for turn entry/exit losse
                                      # option (Option B over C, etc.).
 
 # === HIGH KEY (Phase EM-DYN) ===
-# Threshold for entering the overhead-spiral approach mode. When the aircraft
-# has more altitude than needed to fly direct to touchdown AND complete a
-# normal pattern, the right play is "fly direct, spiral over the field, then
-# enter low key" — not a lateral pattern. 1500 ft is the alt a 4-turn 45°
-# spiral burns at typical trainer sink rates.
-HIGH_KEY_EXCESS_FT = 1500.0
+# Entry threshold for overhead-spiral approach mode. When the aircraft has
+# more than HIGH_KEY_EXCESS_FT of altitude above pattern after a wind-corrected
+# direct glide to touchdown, the lateral-pattern options waste more altitude
+# than an overhead spiral. Even modest excess (~300 ft) benefits from staying
+# over the field — the lateral routes (Option B/C) add ~1000-1500 ft of
+# extra ground track just on the half-oval + opposite spiral position.
+# Number is conservative — when very tight, HIGH_KEY collapses to a near-
+# straight overhead pass (no real spiral needed) and the existing simulator
+# transitions cleanly into ABEAM and PO180.
+HIGH_KEY_EXCESS_FT = 300.0
 HIGH_KEY_BUFFER_FT = 500.0    # alt above pattern at which spiral ends
 
 
@@ -880,26 +884,34 @@ def _build_bucket_chain(
     # lat/lon and descends through the bucket's altitude band.
     # =========================================================================
     if energy.alt_excess_ft > HIGH_KEY_EXCESS_FT:
-        # High-key spiral altitude band: from arrival altitude over the field
-        # down to pattern_alt + HIGH_KEY_BUFFER_FT (the "low key" handoff).
-        high_key_top = energy.alt_at_field_agl - 200.0   # leave 200 ft for arrival jitter
+        # High-key altitude band: bottom is the low-key handoff (pattern_alt +
+        # 500 ft); top is intentionally far above any plausible approach
+        # altitude so the aircraft is *always* inside the band the moment it
+        # crosses overhead. The simulator's spiral-entry check requires
+        # contains() to be True; a tight altitude band caused the previous
+        # iteration to miss aircraft that arrived slightly above the
+        # computed top, and they then just flew past the field. Mirrors the
+        # 15000 ft cap used by the existing UPWIND SPIRAL bucket so behavior
+        # is consistent.
         high_key_bottom = pattern_alt_ft + HIGH_KEY_BUFFER_FT
-        if high_key_top > high_key_bottom + 200:  # sanity: band wide enough
-            high_key_center = (high_key_top + high_key_bottom) / 2.0
-            high_key_height = high_key_top - high_key_bottom
-            high_key_bucket = Bucket(
-                name="SPIRAL",  # reuse existing simulator phase logic
-                lat=touchdown_point.latitude,
-                lon=touchdown_point.longitude,
-                altitude_ft=high_key_center,
-                height_ft=high_key_height,
-                width_ft=2500.0,
-                depth_ft=2500.0,
-                heading_deg=runway_heading,
-                heading_tol_deg=180.0,  # any heading is OK over the field
-                next_bucket_name="ABEAM",
-            )
-            return [high_key_bucket, abeam_bucket, touchdown_bucket], pattern_side, False
+        high_key_top = 15000.0
+        high_key_center = (high_key_top + high_key_bottom) / 2.0
+        high_key_height = high_key_top - high_key_bottom
+        high_key_bucket = Bucket(
+            name="SPIRAL",  # reuse existing simulator phase logic
+            lat=touchdown_point.latitude,
+            lon=touchdown_point.longitude,
+            altitude_ft=high_key_center,
+            height_ft=high_key_height,
+            # Wide capture so the aircraft enters spiral as soon as it
+            # crosses overhead the field, not only when perfectly centered.
+            width_ft=3000.0,
+            depth_ft=3000.0,
+            heading_deg=runway_heading,
+            heading_tol_deg=180.0,  # any heading is OK over the field
+            next_bucket_name="ABEAM",
+        )
+        return [high_key_bucket, abeam_bucket, touchdown_bucket], pattern_side, False
 
     # =========================================================================
     # FINAL SIDE DECISION TREE (Options A, B, C)
