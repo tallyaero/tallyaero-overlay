@@ -871,19 +871,24 @@ def _build_bucket_chain(
     # =========================================================================
     # HIGH KEY (Phase EM-DYN) — overhead-spiral approach mode.
     #
-    # When the aircraft has enough excess altitude to fly direct to touchdown
-    # AND still have ≥ HIGH_KEY_EXCESS_FT above pattern altitude, the right
-    # play is "fly direct, spiral overhead, enter low key" — not a lateral
-    # pattern. This matches what an instructor would teach: with enough
-    # altitude to spare, the aircraft never leaves the immediate vicinity
-    # of the field.
+    # Applies ONLY to FINAL-SIDE starts (aircraft in front of touchdown along
+    # the runway extended centerline). For those quadrants, when the
+    # aircraft has more altitude than needed to fly direct AND complete the
+    # pattern, the right play is "fly direct, spiral overhead, then PO180" —
+    # not a lateral pattern.
+    #
+    # UPWIND-SIDE starts (behind touchdown) take a different route: fly to
+    # the same-side abeam point, spiral there, then PO180 base→final. That
+    # logic lives in the upwind-side branch further down and was already
+    # correct — gating HIGH_KEY here keeps us from short-circuiting it.
     #
     # The HIGH_KEY bucket is a SPIRAL bucket positioned over the touchdown
     # point (same lat/lon, not the perpendicular abeam offset). The
-    # simulator's existing SPIRAL phase logic orbits at the bucket's
-    # lat/lon and descends through the bucket's altitude band.
+    # simulator's existing SPIRAL phase logic with active orbit guidance
+    # (Phase EM-DYN orbit-center pursuit) orbits at the bucket's lat/lon
+    # and descends through the bucket's altitude band.
     # =========================================================================
-    if energy.alt_excess_ft > HIGH_KEY_EXCESS_FT:
+    if on_final_side and energy.alt_excess_ft > HIGH_KEY_EXCESS_FT:
         # High-key altitude band: bottom is the low-key handoff (pattern_alt +
         # 500 ft); top is intentionally far above any plausible approach
         # altitude so the aircraft is *always* inside the band the moment it
