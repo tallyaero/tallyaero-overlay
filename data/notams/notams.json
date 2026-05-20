@@ -1,0 +1,74 @@
+[
+  {
+    "id": "!FDC 6/1234",
+    "lat": 32.898,
+    "lon": -80.041,
+    "radius_nm": 0.3,
+    "floor_ft": 0,
+    "ceiling_ft": 200,
+    "start_utc": "2026-05-15T00:00:00Z",
+    "end_utc": "2026-08-15T23:59:00Z",
+    "category": "OBST",
+    "text": "CRANE 198 FT AGL 1.5 NM WSW KCHS. LIGHTED."
+  },
+  {
+    "id": "!CHS 05/0234",
+    "lat": 32.898,
+    "lon": -80.041,
+    "radius_nm": 3.0,
+    "floor_ft": 0,
+    "ceiling_ft": 4000,
+    "start_utc": "2026-05-19T12:00:00Z",
+    "end_utc": "2026-05-19T22:00:00Z",
+    "category": "RWY",
+    "text": "RWY 03/21 CLSD FOR PAVEMENT WORK 12:00-22:00 LCL."
+  },
+  {
+    "id": "!CLT 05/0876",
+    "lat": 35.214,
+    "lon": -80.943,
+    "radius_nm": 2.0,
+    "floor_ft": 0,
+    "ceiling_ft": 6000,
+    "start_utc": "2026-05-19T00:00:00Z",
+    "end_utc": null,
+    "category": "NAV",
+    "text": "ILS RWY 36C U/S. LOC OK, GS U/S."
+  },
+  {
+    "id": "!FDC 6/0042",
+    "lat": 34.0,
+    "lon": -80.5,
+    "radius_nm": 30.0,
+    "floor_ft": 0,
+    "ceiling_ft": 17999,
+    "start_utc": "2026-05-19T14:00:00Z",
+    "end_utc": "2026-05-19T20:00:00Z",
+    "category": "TFR",
+    "text": "VIP MOVEMENT. SEE 14 CFR 99.7. FLIGHT PROHIBITED WITHIN 30 NM OF 3400N08030W SFC TO 17999 FT MSL."
+  },
+  {
+    "id": "!SAV 04/1023",
+    "lat": 32.13,
+    "lon": -81.20,
+    "radius_nm": 1.5,
+    "floor_ft": null,
+    "ceiling_ft": null,
+    "start_utc": "2026-04-12T00:00:00Z",
+    "end_utc": null,
+    "category": "COM",
+    "text": "TOWER FREQ 119.1 MHZ U/S. USE GROUND 121.9."
+  },
+  {
+    "id": "!ATL 05/0042",
+    "lat": 33.640,
+    "lon": -84.428,
+    "radius_nm": 5.0,
+    "floor_ft": 0,
+    "ceiling_ft": 10000,
+    "start_utc": "2026-05-01T00:00:00Z",
+    "end_utc": "2026-12-31T23:59:00Z",
+    "category": "AIRSPACE",
+    "text": "KATL CLASS B ALTERATION. NEW UPPER LIMIT 12500 FT MSL VICE 10000."
+  }
+]

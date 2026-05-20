@@ -2908,6 +2908,13 @@ input[type="radio"] {
   text-overflow: ellipsis; white-space: nowrap;
   color: #64748b; font-size: 11px;
 }
+.nav-log-notam-text {
+  font-size: 11px; color: #1e293b;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  max-width: 360px;
+  white-space: normal;
+  word-break: break-word;
+}
 
 .nav-log-table-wrap { overflow-x: auto; }
 .nav-log-table {
