@@ -8,7 +8,7 @@ info panel, min-altitude readout, scrubber state.
 from __future__ import annotations
 
 import dash
-from dash import html, Input, Output, State, no_update
+from dash import html, dcc, Input, Output, State, no_update
 from dash.exceptions import PreventUpdate
 from geopy.point import Point as GeoPoint
 from geopy.distance import distance as geo_distance
@@ -16,6 +16,7 @@ import dash_bootstrap_components as dbc
 import dash_leaflet as dl
 
 from core.log import get_logger
+from core.profile3d import make_3d_track_figure
 
 from layouts.maneuvers._shared import _winds_aloft_chip
 from utility import (
@@ -448,6 +449,60 @@ def register(app):
                 },
             ) if min_alt_display else None
 
+            # Build the 3D side-view figure (Phase 5AH). Pull lat/lon
+            # from path + altitude/phase from the aligned hover_data
+            # so the rendered track is exactly what got drawn on the
+            # map, just with the vertical dimension restored.
+            try:
+                lat3d = [p[0] for p in path]
+                lon3d = [p[1] for p in path]
+                # hover_data carries AGL ft; convert to MSL by adding
+                # the touchdown elevation so the runway sits at its
+                # real height.
+                td_elev = float(touchdown[2]) if touchdown and len(touchdown) >= 3 else 0.0
+                alts3d = [(h.get("alt") or 0.0) + td_elev for h in hover_data]
+                phases3d = [h.get("phase") or "" for h in hover_data]
+                # Length-align the per-step arrays to path length.
+                n3d = min(len(lat3d), len(alts3d), len(phases3d))
+                lat3d, lon3d = lat3d[:n3d], lon3d[:n3d]
+                alts3d, phases3d = alts3d[:n3d], phases3d[:n3d]
+                runway_ref = None
+                if (touchdown and len(touchdown) >= 2
+                        and len(path) >= 1):
+                    # Render a 3,000-ft centerline through the touchdown
+                    # point on the touchdown heading so the pilot has a
+                    # ground reference.
+                    from geopy.point import Point as _GP
+                    from geopy.distance import distance as _gd
+                    td_lat, td_lon = touchdown[0], touchdown[1]
+                    ahead = _gd(feet=1500).destination(
+                        _GP(td_lat, td_lon), touchdown_heading)
+                    behind = _gd(feet=1500).destination(
+                        _GP(td_lat, td_lon), (touchdown_heading + 180) % 360)
+                    runway_ref = {
+                        "start_lat": behind.latitude,
+                        "start_lon": behind.longitude,
+                        "end_lat": ahead.latitude,
+                        "end_lon": ahead.longitude,
+                        "elev_ft": td_elev,
+                    }
+                fig3d = make_3d_track_figure(
+                    path_lat=lat3d, path_lon=lon3d, alts_ft=alts3d,
+                    phases=phases3d, runway=runway_ref,
+                    height=380,
+                )
+                profile3d_graph = dcc.Graph(
+                    figure=fig3d,
+                    config={"displayModeBar": False},
+                    style={"width": "100%"},
+                )
+            except Exception as _e3:
+                log.warning("3D side-view failed to build: %s", _e3)
+                profile3d_graph = html.Div(
+                    "3D side view unavailable for this run.",
+                    style={"fontSize": "11px", "color": "#94a3b8",
+                            "padding": "12px"})
+
             info_content = dbc.Accordion([
                 dbc.AccordionItem([
                     html.Div(status_text, style={"fontWeight": "bold", "color": status_color, "marginBottom": "8px", "fontSize": "13px"}),
@@ -474,6 +529,13 @@ def register(app):
                     html.Div(f"Total time: {max_time:.1f}s | Reaction: {reaction_time:.1f}s", style={"fontSize": "11px"}),
                     html.Div(f"Max bank: {max_bank:.0f}° | Bank τ: {bank_tau:.1f}s", style={"fontSize": "11px"}),
                 ], title="Simulation Results", style={"fontSize": "12px"}),
+                dbc.AccordionItem([
+                    html.Div("Drag to rotate. Scroll to zoom. "
+                              "Vertical axis is exaggerated for readability.",
+                              style={"fontSize": "10px", "color": "#94a3b8",
+                                       "marginBottom": "4px"}),
+                    profile3d_graph,
+                ], title="3D Side View", style={"fontSize": "12px"}),
             ], start_collapsed=False, style={"marginTop": "8px"})
 
             winds_chip = _winds_aloft_chip(wind_profile_data)
