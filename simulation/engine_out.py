@@ -688,6 +688,103 @@ def _wind_corrected_glide_distance(
         return geometric_dist_ft * 2.0
 
 
+# =============================================================================
+# Energy-budget helpers (Phase EM-DYN)
+# =============================================================================
+# Replace hard-coded thresholds with formulas keyed off the aircraft's actual
+# energy state. The fundamental variable is "altitude excess" — how much
+# altitude is left over after gliding direct-line to the touchdown point and
+# arriving at pattern altitude. Every gate in _build_bucket_chain is derived
+# from this number so the decision tree responds the way a real pilot would
+# (cautious when tight, generous when fat).
+
+@dataclass
+class _EnergyBudget:
+    direct_dist_ft: float            # straight-line ground distance start → touchdown
+    wind_corrected_dist_ft: float    # wind-adjusted equivalent distance
+    direct_glide_alt_ft: float       # altitude burned flying direct
+    alt_at_field_agl: float          # altitude AGL upon arrival overhead touchdown
+    alt_excess_ft: float             # alt_at_field_agl − pattern_alt_ft (master variable)
+
+
+def _compute_energy_budget(start_pos: GeoPoint,
+                             start_alt_agl: float,
+                             touchdown_point: GeoPoint,
+                             pattern_alt_ft: float,
+                             glide_ratio: float,
+                             tas_kt: float,
+                             wind_dir: float,
+                             wind_speed_kt: float) -> _EnergyBudget:
+    """Master energy-state calculation. All bucket-chain gates derive from this."""
+    direct_dist_ft = geo_dist(
+        (start_pos.latitude, start_pos.longitude),
+        (touchdown_point.latitude, touchdown_point.longitude)
+    ).feet
+    track = calculate_initial_compass_bearing(start_pos, touchdown_point)
+    wc_dist = _wind_corrected_glide_distance(
+        direct_dist_ft, track, tas_kt, wind_dir, wind_speed_kt)
+    glide_alt = wc_dist / glide_ratio
+    arrival = max(0.0, start_alt_agl - glide_alt)
+    excess = arrival - pattern_alt_ft
+    return _EnergyBudget(
+        direct_dist_ft=direct_dist_ft,
+        wind_corrected_dist_ft=wc_dist,
+        direct_glide_alt_ft=glide_alt,
+        alt_at_field_agl=arrival,
+        alt_excess_ft=excess,
+    )
+
+
+def _curving_join_alt_cost_ft(xtrack_ft: float,
+                                heading_diff_deg: float,
+                                tas_kt: float,
+                                glide_ratio: float,
+                                max_bank_deg: float = 30.0) -> float:
+    """Approximate altitude consumed when joining the runway centerline from
+    a position with given cross-track + heading difference.
+
+    Decomposed into two terms:
+      arc_alt:    cost of swinging through heading_diff_deg at turn radius R
+                  → (R × Δψ_rad) / GR
+      xtrack_alt: extra ground distance pulled in laterally by ~xtrack/2
+                  → (|xtrack| × 0.5) / GR
+    Both are pessimistic — the actual curving arc length is somewhere
+    between the two extremes — so the sum is a conservative upper bound.
+
+    Returns ft of altitude consumed by the curving join (always >= 0)."""
+    tas_fps = max(1.0, tas_kt * 1.68781)
+    R = _calculate_turn_radius_for_bank(tas_fps, max_bank_deg)
+    if R == float('inf'):
+        return float('inf')
+    arc_alt = (R * math.radians(max(0.0, heading_diff_deg))) / max(1.0, glide_ratio)
+    xtrack_alt = (abs(xtrack_ft) * 0.5) / max(1.0, glide_ratio)
+    return arc_alt + xtrack_alt
+
+
+def _curving_join_viable(xtrack_ft: float,
+                          heading_diff_deg: float,
+                          tas_kt: float,
+                          glide_ratio: float,
+                          alt_excess_at_target_ft: float,
+                          max_bank_deg: float = 30.0,
+                          alt_buffer_ft: float = 50.0) -> bool:
+    """Combined geometric + energy gate for the curving join (Option A).
+
+    Geometric: a single-turn capture of centerline is only possible when
+    |xtrack| ≤ 2R. Beyond that, an s-turn or pattern is required.
+
+    Energy: the curving cost must fit within alt_excess_at_target_ft + buffer."""
+    tas_fps = max(1.0, tas_kt * 1.68781)
+    R = _calculate_turn_radius_for_bank(tas_fps, max_bank_deg)
+    if R == float('inf'):
+        return False
+    if abs(xtrack_ft) > 2.0 * R:
+        return False
+    cost = _curving_join_alt_cost_ft(xtrack_ft, heading_diff_deg, tas_kt,
+                                       glide_ratio, max_bank_deg)
+    return alt_excess_at_target_ft >= cost + alt_buffer_ft
+
+
 def _build_bucket_chain(
     start_pos: GeoPoint,
     start_alt: float,
@@ -701,6 +798,7 @@ def _build_bucket_chain(
     wind_dir: float = 0.0,
     wind_speed_kt: float = 0.0,
     tas_kt: float = 75.0,
+    max_bank_deg: float = 30.0,
 ) -> Tuple[List[Bucket], str, bool]:
     """
     Build the optimal bucket chain based on starting position.
@@ -747,17 +845,39 @@ def _build_bucket_chain(
     downwind_bucket = _create_downwind_bucket(touchdown_point, runway_heading, pattern_offset_ft, pattern_alt_ft, pattern_side)
 
     heading_diff = abs(_angle_diff_deg(start_heading, runway_heading))
-    roughly_aligned = heading_diff < 60.0
+
+    # Energy budget — the master variable. Every gate below derives from this.
+    energy = _compute_energy_budget(
+        start_pos, start_alt, touchdown_point,
+        pattern_alt_ft, glide_ratio, tas_kt, wind_dir, wind_speed_kt,
+    )
 
     # =========================================================================
     # FINAL SIDE DECISION TREE (Options A, B, C)
     # =========================================================================
     if on_final_side:
-        # Option A: Straight to Final
-        # Conditions: Can arrive at final bucket altitude AND roughly aligned AND near centerline
+        # Option A: Straight-in with curving join.
+        # Replaces the legacy rigid "aligned AND xtrack < 1500" gate with an
+        # energy-derived viability check. The curving join is taken when:
+        #   - the aircraft can physically reach the FINAL bucket with margin
+        #   - the curving join cost (arc through heading_diff + lateral pull-in
+        #     by xtrack) fits inside the altitude excess we have at the FINAL
+        #     bucket
+        #   - the cross-track can be captured in a single turn (|xtrack| ≤ 2R)
+        # This both ACCEPTS far-but-fat approaches (e.g. 2500 ft xtrack with
+        # 1500 ft of excess) and REJECTS close-but-thin ones (e.g. 800 ft
+        # xtrack with only 50 ft excess) that the old gate got wrong.
         if _can_arrive_at_bucket_altitude(start_pos, start_alt, final_bucket, glide_ratio, 300,
                                           tas_kt, wind_dir, wind_speed_kt):
-            if roughly_aligned and abs(xtrack_ft) < 1500:
+            # Excess altitude at the final-bucket arrival point.
+            alt_excess_at_final = (
+                start_alt
+                - energy.direct_glide_alt_ft
+                - final_bucket.altitude_ft
+            )
+            if _curving_join_viable(xtrack_ft, heading_diff, tas_kt,
+                                     glide_ratio, alt_excess_at_final,
+                                     max_bank_deg=max_bank_deg):
                 return [final_bucket, touchdown_bucket], pattern_side, False
 
         # =======================================================================
@@ -881,10 +1001,18 @@ def _build_bucket_chain(
     # Decision based on minimum altitude required for full SPIRAL flow
     # =========================================================================
     else:
-        # Option A check for upwind side too (if aligned and can reach final)
+        # Option A check on the upwind side — energy-derived gate (same as
+        # final-side branch above).
         if _can_arrive_at_bucket_altitude(start_pos, start_alt, final_bucket, glide_ratio, 300,
                                           tas_kt, wind_dir, wind_speed_kt):
-            if roughly_aligned and abs(xtrack_ft) < 1500:
+            alt_excess_at_final = (
+                start_alt
+                - energy.direct_glide_alt_ft
+                - final_bucket.altitude_ft
+            )
+            if _curving_join_viable(xtrack_ft, heading_diff, tas_kt,
+                                     glide_ratio, alt_excess_at_final,
+                                     max_bank_deg=max_bank_deg):
                 return [final_bucket, touchdown_bucket], pattern_side, False
 
         # =======================================================================
@@ -1468,6 +1596,7 @@ def run_simulation(
         wind_dir=float(wind_dir),
         wind_speed_kt=float(wind_speed),
         tas_kt=tas_knots,
+        max_bank_deg=float(max_bank_deg),
     )
 
     lat = start_point.latitude
