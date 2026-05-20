@@ -705,6 +705,31 @@ def _wind_corrected_glide_distance(
 
 
 # =============================================================================
+# Dynamic geometry helpers (Phase EM-DYN)
+# =============================================================================
+
+def _dynamic_pattern_offset_ft(tas_kt: float, max_bank_deg: float) -> float:
+    """Lateral pattern spacing sized so the PO180 turn from abeam ends
+    directly on the runway centerline at the touchdown point — i.e.,
+    no straight final leg, continuous turn base→final.
+
+    Geometry: a 180° turn at constant bank moves the aircraft laterally
+    by 2R (turn diameter). If pattern_offset = 2R, the aircraft starting
+    perpendicular to the runway at pattern_offset distance and turning
+    180° will end up on centerline at the touchdown's along-track
+    position. +20% margin to absorb roll-in / roll-out time + wind drift.
+
+    For engine-out at 76 kt TAS with 45° max bank, this yields ~1130 ft
+    — a tight pattern, which is what an instructor would teach for
+    a power-off approach (you stay close so you don't lose the field)."""
+    tas_fps = max(1.0, tas_kt * 1.68781)
+    R = _calculate_turn_radius_for_bank(tas_fps, max_bank_deg)
+    if R == float('inf'):
+        return DEFAULT_PATTERN_OFFSET_FT
+    return max(800.0, min(3500.0, R * 2.2))
+
+
+# =============================================================================
 # Energy-budget helpers (Phase EM-DYN)
 # =============================================================================
 # Replace hard-coded thresholds with formulas keyed off the aircraft's actual
@@ -837,6 +862,13 @@ def _build_bucket_chain(
     Returns:
         (bucket_chain, pattern_side, use_opposite_spiral)
     """
+    # Dynamic pattern offset — sized to enable continuous turn base→final
+    # from the abeam position. Replaces the legacy DEFAULT_PATTERN_OFFSET_FT
+    # (3000 ft) with a turn-diameter-derived value so the 180° PO180 turn
+    # ends directly on the runway with no straight final segment. Pilots
+    # flying engine-out keep tight patterns; the simulator should too.
+    pattern_offset_ft = _dynamic_pattern_offset_ft(tas_kt, max_bank_deg)
+
     xtrack_ft, along_ft = _cross_track_to_centerline_ft(
         touchdown_point, start_pos, runway_heading
     )
@@ -908,10 +940,14 @@ def _build_bucket_chain(
             lon=touchdown_point.longitude,
             altitude_ft=high_key_center,
             height_ft=high_key_height,
-            # Wide capture so the aircraft enters spiral as soon as it
-            # crosses overhead the field, not only when perfectly centered.
-            width_ft=3000.0,
-            depth_ft=3000.0,
+            # Tight capture so the aircraft has to be near touchdown
+            # before the spiral phase activates. With a wide capture
+            # (3000 ft) the aircraft would start banking at the bucket
+            # edge, putting the orbit center ~1500 ft + R off the
+            # touchdown point. 1500 ft bucket keeps the entry inside
+            # 750 ft of center; active orbit guidance pulls the rest.
+            width_ft=1500.0,
+            depth_ft=1500.0,
             heading_deg=runway_heading,
             heading_tol_deg=180.0,  # any heading is OK over the field
             next_bucket_name="ABEAM",
@@ -2176,9 +2212,11 @@ def run_simulation(
                 tangent_heading = (bearing_from_center_to_ac + 90.0) % 360.0
             # Radial bias: if aircraft is outside the desired orbit ring,
             # bias the target heading inward (toward the center); if inside,
-            # bias outward. 0.05° per ft, capped at ±30°.
+            # bias outward. 0.15° per ft, capped at ±45° — strong enough to
+            # pull a 1000-ft offset down to the orbit ring in ~3 turns
+            # rather than ~10.
             radial_error_ft = dist_from_center_ft - target_radius
-            radial_bias_deg = max(-30.0, min(30.0, radial_error_ft * 0.05))
+            radial_bias_deg = max(-45.0, min(45.0, radial_error_ft * 0.15))
             if pattern_side == "left":
                 target_heading = (tangent_heading - radial_bias_deg) % 360.0
             else:
