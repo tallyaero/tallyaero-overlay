@@ -134,7 +134,19 @@ ABEAM_TRIGGER_MAX_ALONG_FT = 500.0
 # === Decision Tree Safety Margin ===
 # Favor Option C (full bucket progression) - the ideal flight path
 # Set to 1.0 for no margin since wind model is now consistent throughout
-DECISION_TREE_SAFETY_MARGIN = 1.0  # No margin - trust the wind model
+DECISION_TREE_SAFETY_MARGIN = 1.10  # 10% — accounts for turn entry/exit losses
+                                     # and wind drift during the maneuver.
+                                     # Biases borderline cases to the simpler
+                                     # option (Option B over C, etc.).
+
+# === HIGH KEY (Phase EM-DYN) ===
+# Threshold for entering the overhead-spiral approach mode. When the aircraft
+# has more altitude than needed to fly direct to touchdown AND complete a
+# normal pattern, the right play is "fly direct, spiral over the field, then
+# enter low key" — not a lateral pattern. 1500 ft is the alt a 4-turn 45°
+# spiral burns at typical trainer sink rates.
+HIGH_KEY_EXCESS_FT = 1500.0
+HIGH_KEY_BUFFER_FT = 500.0    # alt above pattern at which spiral ends
 
 
 # =============================================================================
@@ -851,6 +863,43 @@ def _build_bucket_chain(
         start_pos, start_alt, touchdown_point,
         pattern_alt_ft, glide_ratio, tas_kt, wind_dir, wind_speed_kt,
     )
+
+    # =========================================================================
+    # HIGH KEY (Phase EM-DYN) — overhead-spiral approach mode.
+    #
+    # When the aircraft has enough excess altitude to fly direct to touchdown
+    # AND still have ≥ HIGH_KEY_EXCESS_FT above pattern altitude, the right
+    # play is "fly direct, spiral overhead, enter low key" — not a lateral
+    # pattern. This matches what an instructor would teach: with enough
+    # altitude to spare, the aircraft never leaves the immediate vicinity
+    # of the field.
+    #
+    # The HIGH_KEY bucket is a SPIRAL bucket positioned over the touchdown
+    # point (same lat/lon, not the perpendicular abeam offset). The
+    # simulator's existing SPIRAL phase logic orbits at the bucket's
+    # lat/lon and descends through the bucket's altitude band.
+    # =========================================================================
+    if energy.alt_excess_ft > HIGH_KEY_EXCESS_FT:
+        # High-key spiral altitude band: from arrival altitude over the field
+        # down to pattern_alt + HIGH_KEY_BUFFER_FT (the "low key" handoff).
+        high_key_top = energy.alt_at_field_agl - 200.0   # leave 200 ft for arrival jitter
+        high_key_bottom = pattern_alt_ft + HIGH_KEY_BUFFER_FT
+        if high_key_top > high_key_bottom + 200:  # sanity: band wide enough
+            high_key_center = (high_key_top + high_key_bottom) / 2.0
+            high_key_height = high_key_top - high_key_bottom
+            high_key_bucket = Bucket(
+                name="SPIRAL",  # reuse existing simulator phase logic
+                lat=touchdown_point.latitude,
+                lon=touchdown_point.longitude,
+                altitude_ft=high_key_center,
+                height_ft=high_key_height,
+                width_ft=2500.0,
+                depth_ft=2500.0,
+                heading_deg=runway_heading,
+                heading_tol_deg=180.0,  # any heading is OK over the field
+                next_bucket_name="ABEAM",
+            )
+            return [high_key_bucket, abeam_bucket, touchdown_bucket], pattern_side, False
 
     # =========================================================================
     # FINAL SIDE DECISION TREE (Options A, B, C)
