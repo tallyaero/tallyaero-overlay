@@ -539,7 +539,12 @@ def register(app):
                 # hover_data carries AGL ft; convert to MSL by adding
                 # the touchdown elevation so the runway sits at its
                 # real height.
-                td_elev = float(touchdown[2]) if touchdown and len(touchdown) >= 3 else 0.0
+                # touchdown is a geopy.Point — has no __len__ but
+                # supports tuple-style indexing (0=lat, 1=lon, 2=alt).
+                try:
+                    td_elev = float(touchdown[2]) if touchdown else 0.0
+                except (IndexError, TypeError):
+                    td_elev = 0.0
                 alts3d = [(h.get("alt") or 0.0) + td_elev for h in hover_data]
                 phases3d = [h.get("phase") or "" for h in hover_data]
                 # Length-align the per-step arrays to path length.
@@ -547,8 +552,7 @@ def register(app):
                 lat3d, lon3d = lat3d[:n3d], lon3d[:n3d]
                 alts3d, phases3d = alts3d[:n3d], phases3d[:n3d]
                 runway_ref = None
-                if (touchdown and len(touchdown) >= 2
-                        and len(path) >= 1):
+                if touchdown is not None and len(path) >= 1:
                     # Render a 3,000-ft centerline through the touchdown
                     # point on the touchdown heading so the pilot has a
                     # ground reference.
