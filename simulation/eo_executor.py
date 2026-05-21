@@ -263,6 +263,7 @@ def execute_plan(plan: GlidePlan,
                    dt_sec: float = 0.5,
                    touchdown_elev_ft: float = 0.0,
                    start_heading_deg: float = 0.0,
+                   glide_ratio_for_display: float = 0.0,
                    ) -> tuple[list, list, dict]:
     """Walk the plan and emit (path, hover_data, metadata) in the legacy shape.
 
@@ -293,6 +294,8 @@ def execute_plan(plan: GlidePlan,
             "aob": 0.0,
             "vs": 0,
             "crab": 0.0,
+            "drift": 0.0,
+            "glide_ratio": round(glide_ratio_for_display, 2),
             "slip": 0,
         })
 
@@ -408,6 +411,9 @@ def execute_plan(plan: GlidePlan,
                 "track": round(s["track"], 1),
                 "aob": round(s["bank"], 1),
                 "vs": round(s.get("vs", 0.0), 0),
+                # Density-corrected best-glide ratio, surfaced per sample
+                # so the Results modal can average across the run.
+                "glide_ratio": round(glide_ratio_for_display, 2),
                 # Legacy convention used by the tooltip + airplane marker:
                 # "drift" = how the wind PUSHES the aircraft (= -crab).
                 # Tooltip prints "R x°" when drift < 0 (= nose right of

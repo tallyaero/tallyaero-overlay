@@ -2424,7 +2424,7 @@ def plan_glide_intercept(*,
                 straight_segment = _straight_segment(
                     g["t1"], alt_after_arc1,
                     g["t2"], alt_after_straight,
-                    label="Tangent to spiral")
+                    label="Entry tangent")
 
                 # Spiral: from tangent entry (t2 heading theta) around C
                 # for (partial + N*360°) ending at LK heading downwind.
@@ -2491,12 +2491,23 @@ def plan_glide_intercept(*,
                               intercept_pos.longitude,
                               conn_alt, intercept_heading),
             ]
+            # If a high-key spiral got inserted, surface its size in the
+            # diagnostics so the Results modal can display it.
+            spiral_turns_diag = 0.0
+            spiral_bank_diag = 0.0
+            for _seg in spiral_segments:
+                if _seg.kind == "spiral" and _seg.spiral_turns:
+                    spiral_turns_diag = float(_seg.spiral_turns)
+                    spiral_bank_diag = float(_seg.spiral_bank_deg or 0.0)
+                    break
             best_plan = GlidePlan(
                 segments=all_segments,
                 key_positions=key_positions,
                 diagnostics=_diag_for(
                     side, "intercept_path", alt_at_td,
                     feasible=(alt_at_td <= 50.0),
+                    spiral_turns=spiral_turns_diag,
+                    spiral_bank_deg=spiral_bank_diag,
                     failure_reason=(
                         None if alt_at_td <= 50.0
                         else f"Arrives {alt_at_td:.0f} ft high.")),
@@ -2597,6 +2608,7 @@ def simulate_engineout_planned(*,
         dt_sec=float(timestep_sec),
         touchdown_elev_ft=float(touchdown_elev_ft),
         start_heading_deg=float(start_heading),
+        glide_ratio_for_display=float(glide_ratio_eff),
     )
 
     # Legacy callers expect `success`, `impact_point`, `reason`,
