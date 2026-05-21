@@ -2213,83 +2213,110 @@ def plan_glide_intercept(*,
 
         # Spiral absorption: if alt_at_td is still positive, the ideal
         # path was capped (we hit the downwind-extension limit) and slip
-        # alone couldn't burn the rest. Insert a constant-radius spiral
-        # at the engine-out position so the aircraft arrives at F with
-        # alt that slip can fully absorb (= cost_max_slip).
+        # alone can't burn the rest. Insert a constant-radius spiral
+        # OVERHEAD THE TOUCHDOWN — FAA-standard high-key/low-key behavior
+        # so the aircraft circles over the field, not at the engine-out
+        # location. The spiral is placed BETWEEN the Dubins entry and
+        # the ideal path: aircraft Dubins to LK (= low-key, abeam TD on
+        # pattern side), spirals there to burn excess, then continues
+        # PO180 + final to TD.
         spiral_segments: list[GlideSegment] = []
         if alt_at_td > 50.0:
-            absorb_target = alt_at_td
-            tas_fps = best_glide_tas_kt * 1.68781
-            R_spiral_min = (tas_fps * tas_fps) / (
-                32.174 * math.tan(math.radians(SPIRAL_BANK_MAX_DEG)))
-            R_spiral_max = tas_fps / math.radians(
-                SPIRAL_RATE_MIN_DEG_PER_S)
-            # Pick smallest n (full turns) with R in valid range.
-            absorb_per_turn_at_min_R = (
-                2.0 * math.pi * R_spiral_min / max(1.0, glide_ratio))
-            R_spiral = None
-            n_turns_spiral = 0
-            if absorb_target >= absorb_per_turn_at_min_R:
-                for n in range(1, 8):
-                    R_candidate = (absorb_target * glide_ratio
-                                       / (2.0 * math.pi * n))
-                    if R_spiral_min <= R_candidate <= R_spiral_max:
-                        R_spiral = R_candidate
-                        n_turns_spiral = n
-                        break
-                if R_spiral is None:
-                    # Too much energy for our R range — saturate at R_max
-                    # with as many turns as fit.
-                    n_turns_spiral = max(1, int(math.ceil(
-                        absorb_target * glide_ratio
-                        / (2.0 * math.pi * R_spiral_max))))
-                    R_spiral = (absorb_target * glide_ratio
-                                   / (2.0 * math.pi * n_turns_spiral))
-                    R_spiral = max(R_spiral_min,
-                                       min(R_spiral_max, R_spiral))
-            if R_spiral is not None and n_turns_spiral > 0:
-                # Center perpendicular to start_heading on the pattern
-                # side (so the spiral turns the same direction as the
-                # pattern and the Dubins entry).
-                sign = -1.0 if side == "left" else 1.0
-                center_bearing = _wrap_360(start_heading_deg - sign * 90.0)
-                spiral_center = _point_at_bearing(
-                    start, center_bearing, R_spiral)
-                spiral_absorb_ft = (n_turns_spiral * 2.0 * math.pi
-                                          * R_spiral / glide_ratio)
-                spiral_seg = _spiral_segment(
-                    center=spiral_center,
-                    start_alt=start_alt_agl_ft,
-                    end_alt=start_alt_agl_ft - spiral_absorb_ft,
-                    turn_radius_ft=R_spiral,
-                    n_turns=float(n_turns_spiral),
-                    bank_deg=math.degrees(math.atan(
-                        tas_fps * tas_fps
-                        / (32.174 * R_spiral))),
-                    direction=side,
-                    start_heading=start_heading_deg,
-                    label=(f"Spiral absorb ({n_turns_spiral}×, "
-                             f"R={R_spiral:.0f}ft)"))
-                spiral_segments.append(spiral_seg)
-                # Re-run the entry + ideal-path build with the reduced
-                # start altitude.
-                conn_segments, conn_pos, conn_alt, conn_hdg = \
-                    _connect_via_dubins(
-                        start,
-                        start_alt_agl_ft - spiral_absorb_ft,
-                        start_heading_deg,
-                        intercept_pos, intercept_heading,
-                        R_normal, best_glide_tas_kt, glide_ratio,
-                        wind_dir_deg, wind_speed_kt, label_prefix="Entry",
-                        force_direction=side)
-                path_segments, alt_at_td = \
-                    _build_segments_along_ideal_path(
-                        intercept_s, conn_alt, touchdown,
-                        runway_heading_deg, side, R_po180,
-                        best_glide_tas_kt, glide_ratio,
-                        wind_dir_deg, wind_speed_kt)
+            # Re-target intercept to LK so the spiral sits near the field.
+            lk_intercept_s = 2.0 * FINAL_LEG_FT + math.pi * R_po180
+            lk_intercept_pos, lk_intercept_heading = \
+                _ideal_path_point_at_s(
+                    lk_intercept_s, touchdown, runway_heading_deg,
+                    side, R_po180)
+            # Dubins entry to LK with reduced altitude available.
+            lk_conn_segments, lk_conn_pos, lk_conn_alt, lk_conn_hdg = \
+                _connect_via_dubins(
+                    start, start_alt_agl_ft, start_heading_deg,
+                    lk_intercept_pos, lk_intercept_heading,
+                    R_normal, best_glide_tas_kt, glide_ratio,
+                    wind_dir_deg, wind_speed_kt, label_prefix="Entry",
+                    force_direction=side)
+            # Path cost LK → TD = lk_intercept_s / GR.
+            lk_to_td_cost = lk_intercept_s / max(1.0, glide_ratio)
+            alt_at_td_via_lk = lk_conn_alt - lk_to_td_cost
+            if alt_at_td_via_lk > 50.0:
+                # Spiral at LK to absorb (alt_at_td_via_lk). Center is
+                # placed so the aircraft enters and exits the spiral at
+                # LK heading downwind (= continuous with the ideal path).
+                absorb_target = alt_at_td_via_lk
+                tas_fps = best_glide_tas_kt * 1.68781
+                R_spiral_min = (tas_fps * tas_fps) / (
+                    32.174 * math.tan(math.radians(SPIRAL_BANK_MAX_DEG)))
+                R_spiral_max = tas_fps / math.radians(
+                    SPIRAL_RATE_MIN_DEG_PER_S)
+                absorb_per_turn_at_min_R = (
+                    2.0 * math.pi * R_spiral_min
+                    / max(1.0, glide_ratio))
+                R_spiral = None
+                n_turns_spiral = 0
+                if absorb_target >= absorb_per_turn_at_min_R:
+                    for n in range(1, 8):
+                        R_candidate = (absorb_target * glide_ratio
+                                           / (2.0 * math.pi * n))
+                        if R_spiral_min <= R_candidate <= R_spiral_max:
+                            R_spiral = R_candidate
+                            n_turns_spiral = n
+                            break
+                    if R_spiral is None:
+                        n_turns_spiral = max(1, int(math.ceil(
+                            absorb_target * glide_ratio
+                            / (2.0 * math.pi * R_spiral_max))))
+                        R_spiral = (absorb_target * glide_ratio
+                                       / (2.0 * math.pi * n_turns_spiral))
+                        R_spiral = max(R_spiral_min,
+                                           min(R_spiral_max, R_spiral))
+                if R_spiral is not None and n_turns_spiral > 0:
+                    # FAA high-key orbit: spiral in the SAME direction
+                    # as the pattern so the center sits OVER the field.
+                    # At LK on LEFT downwind, a LEFT turn curls inboard
+                    # toward the runway (center at LK + R toward the
+                    # centerline). For LEFT pattern: spiral LEFT; for
+                    # RIGHT pattern: spiral RIGHT.
+                    spiral_dir = side
+                    # Center bearing from aircraft = heading - 90° for
+                    # LEFT (= INBOARD), heading + 90° for RIGHT.
+                    sign_pattern = -1.0 if side == "left" else 1.0
+                    center_bearing_from_lk = _wrap_360(
+                        lk_intercept_heading + sign_pattern * 90.0)
+                    spiral_center = _point_at_bearing(
+                        lk_intercept_pos, center_bearing_from_lk,
+                        R_spiral)
+                    spiral_absorb_ft = (n_turns_spiral * 2.0 * math.pi
+                                              * R_spiral / glide_ratio)
+                    spiral_seg = _spiral_segment(
+                        center=spiral_center,
+                        start_alt=lk_conn_alt,
+                        end_alt=lk_conn_alt - spiral_absorb_ft,
+                        turn_radius_ft=R_spiral,
+                        n_turns=float(n_turns_spiral),
+                        bank_deg=math.degrees(math.atan(
+                            tas_fps * tas_fps
+                            / (32.174 * R_spiral))),
+                        direction=spiral_dir,
+                        start_heading=lk_intercept_heading,
+                        label=(f"High-key orbit ({n_turns_spiral}×, "
+                                 f"R={R_spiral:.0f}ft)"))
+                    # Build segments along the ideal path from LK to TD
+                    # with the post-spiral altitude.
+                    spiral_exit_alt = lk_conn_alt - spiral_absorb_ft
+                    spiral_path_segments, alt_at_td = \
+                        _build_segments_along_ideal_path(
+                            lk_intercept_s, spiral_exit_alt, touchdown,
+                            runway_heading_deg, side, R_po180,
+                            best_glide_tas_kt, glide_ratio,
+                            wind_dir_deg, wind_speed_kt)
+                    # Replace prior segments — high-energy mode uses
+                    # Dubins-to-LK + Spiral-at-LK + ideal path LK→TD.
+                    conn_segments = lk_conn_segments
+                    spiral_segments = [spiral_seg]
+                    path_segments = spiral_path_segments
 
-        all_segments = spiral_segments + conn_segments + path_segments
+        all_segments = conn_segments + spiral_segments + path_segments
 
         # Score: closer to landing at 0 is better; penalize overshoots.
         score = abs(alt_at_td)
