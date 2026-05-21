@@ -408,6 +408,13 @@ def execute_plan(plan: GlidePlan,
                 "track": round(s["track"], 1),
                 "aob": round(s["bank"], 1),
                 "vs": round(s.get("vs", 0.0), 0),
+                # Legacy convention used by the tooltip + airplane marker:
+                # "drift" = how the wind PUSHES the aircraft (= -crab).
+                # Tooltip prints "R x°" when drift < 0 (= nose right of
+                # track) and "L x°" when drift > 0.
+                "drift": round(
+                    -(((s["heading"] - s["track"] + 540.0) % 360.0) - 180.0),
+                    1),
                 "crab": round(
                     ((s["heading"] - s["track"] + 540.0) % 360.0) - 180.0,
                     1),
