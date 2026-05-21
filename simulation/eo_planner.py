@@ -2162,7 +2162,23 @@ def plan_glide_intercept(*,
     best_plan = None
     best_score = math.inf
 
-    for side in ["left", "right"]:
+    # Shortest-first-turn pilot rule: pick the pattern side so the first
+    # arc of the Dubins entry is the shortest turn from start_heading to
+    # bearing(start → TD). Pattern direction matches the first turn, so
+    # the entire trajectory (Dubins entry + spiral + downwind + PO180 +
+    # final) stays in one direction with no flip-flop. No energy
+    # override — if the chosen side comes up short, the aircraft lands
+    # short. That's the honest outcome of "I committed to turning this
+    # way."
+    if direct_dist_ft > 1e-3:
+        _bearing_to_td = _bearing(start, touchdown)
+    else:
+        _bearing_to_td = start_heading_deg
+    _heading_diff_signed = (
+        (_bearing_to_td - start_heading_deg + 540.0) % 360.0) - 180.0
+    _forced_side = "right" if _heading_diff_signed > 0 else "left"
+
+    for side in [_forced_side]:
         intercept_s, intercept_pos, intercept_heading = \
             _find_intercept_on_ideal_path(
                 start, start_alt_agl_ft, start_heading_deg,

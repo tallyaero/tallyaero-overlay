@@ -88,6 +88,23 @@ def _sample_straight(seg: GlideSegment, dt: float, tas_kt: float,
     vs_fpm = ((seg.end_alt_agl_ft - seg.start_alt_agl_ft)
                 / max(1e-3, duration_sec) * 60.0)
 
+    # Crab angle: to maintain the desired track in crosswind, the
+    # aircraft must point its nose into the wind. Positive crab = nose
+    # to the right of track (= heading > track).
+    #   crosswind_kt = -wind_speed × sin(wind_dir − track)
+    #     (positive crosswind component pushes aircraft right of track)
+    #   crab = asin(crosswind / TAS) flips the sign — aircraft yaws
+    #   opposite the push direction so its track stays on the desired
+    #   line.
+    if wind_speed_kt > 0.1 and tas_kt > 1.0:
+        wind_perp_kt = wind_speed_kt * math.sin(
+            math.radians(wind_dir_deg - track))
+        crab_arg = max(-1.0, min(1.0, wind_perp_kt / tas_kt))
+        crab_deg = math.degrees(math.asin(crab_arg))
+    else:
+        crab_deg = 0.0
+    heading_with_crab = (track + crab_deg) % 360.0
+
     samples: list[dict] = []
     for k in range(1, n_steps + 1):
         f = k / n_steps
@@ -101,8 +118,9 @@ def _sample_straight(seg: GlideSegment, dt: float, tas_kt: float,
             "lat": pos.latitude,
             "lon": pos.longitude,
             "alt_agl": alt,
-            "heading": track,
+            "heading": heading_with_crab,
             "track": track,
+            "crab": crab_deg,
             "bank": 0.0,
             "tas": tas_kt,
             "gs": gs_kt,
@@ -390,7 +408,9 @@ def execute_plan(plan: GlidePlan,
                 "track": round(s["track"], 1),
                 "aob": round(s["bank"], 1),
                 "vs": round(s.get("vs", 0.0), 0),
-                "crab": round(s["heading"] - s["track"], 1),
+                "crab": round(
+                    ((s["heading"] - s["track"] + 540.0) % 360.0) - 180.0,
+                    1),
                 "slip": 0,
             })
 
