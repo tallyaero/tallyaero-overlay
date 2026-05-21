@@ -2232,10 +2232,9 @@ def plan_glide_intercept(*,
         # alone can't burn the rest. Insert a constant-radius spiral
         # OVERHEAD THE TOUCHDOWN — FAA-standard high-key/low-key behavior
         # so the aircraft circles over the field, not at the engine-out
-        # location. The spiral is placed BETWEEN the Dubins entry and
-        # the ideal path: aircraft Dubins to LK (= low-key, abeam TD on
-        # pattern side), spirals there to burn excess, then continues
-        # PO180 + final to TD.
+        # location. The spiral is entered TANGENTIALLY from the aircraft
+        # (no detour to LK first) and exits at LK heading downwind so it
+        # flows continuously into the ideal-path pattern.
         spiral_segments: list[GlideSegment] = []
         if alt_at_td > 50.0:
             # Re-target intercept to LK so the spiral sits near the field.
@@ -2244,93 +2243,224 @@ def plan_glide_intercept(*,
                 _ideal_path_point_at_s(
                     lk_intercept_s, touchdown, runway_heading_deg,
                     side, R_po180)
-            # Dubins entry to LK with reduced altitude available.
-            lk_conn_segments, lk_conn_pos, lk_conn_alt, lk_conn_hdg = \
-                _connect_via_dubins(
-                    start, start_alt_agl_ft, start_heading_deg,
-                    lk_intercept_pos, lk_intercept_heading,
-                    R_normal, best_glide_tas_kt, glide_ratio,
-                    wind_dir_deg, wind_speed_kt, label_prefix="Entry",
-                    force_direction=side)
-            # Path cost LK → TD = lk_intercept_s / GR.
             lk_to_td_cost = lk_intercept_s / max(1.0, glide_ratio)
-            alt_at_td_via_lk = lk_conn_alt - lk_to_td_cost
-            if alt_at_td_via_lk > 50.0:
-                # Spiral at LK to absorb (alt_at_td_via_lk). Center is
-                # placed so the aircraft enters and exits the spiral at
-                # LK heading downwind (= continuous with the ideal path).
-                absorb_target = alt_at_td_via_lk
-                tas_fps = best_glide_tas_kt * 1.68781
-                R_spiral_min = (tas_fps * tas_fps) / (
-                    32.174 * math.tan(math.radians(SPIRAL_BANK_MAX_DEG)))
-                R_spiral_max = tas_fps / math.radians(
-                    SPIRAL_RATE_MIN_DEG_PER_S)
-                absorb_per_turn_at_min_R = (
-                    2.0 * math.pi * R_spiral_min
-                    / max(1.0, glide_ratio))
-                R_spiral = None
-                n_turns_spiral = 0
-                if absorb_target >= absorb_per_turn_at_min_R:
+            tas_fps_local = best_glide_tas_kt * 1.68781
+            R_spiral_min = (tas_fps_local * tas_fps_local) / (
+                32.174 * math.tan(math.radians(SPIRAL_BANK_MAX_DEG)))
+            R_spiral_max = tas_fps_local / math.radians(
+                SPIRAL_RATE_MIN_DEG_PER_S)
+            GR_local = max(1.0, glide_ratio)
+            sign_p = -1.0 if side == "left" else 1.0
+
+            def _tangent_geom(R_sp):
+                """Geometry for tangent entry onto spiral circle of radius
+                R_sp. Center is placed inboard of LK so that LK is on the
+                circle and the aircraft exits at LK heading downwind. The
+                aircraft's turn circle (R_normal) and the spiral circle
+                (R_sp) share an outer tangent (= LSL/RSR Dubins to
+                circle). Returns None if circles overlap or geometry is
+                degenerate."""
+                inboard = _wrap_360(
+                    lk_intercept_heading + sign_p * 90.0)
+                C = _point_at_bearing(
+                    lk_intercept_pos, inboard, R_sp)
+                c1_brg = _wrap_360(start_heading_deg + sign_p * 90.0)
+                c1 = _point_at_bearing(start, c1_brg, R_normal)
+                d_cc = _ft(c1, C)
+                if d_cc < abs(R_sp - R_normal) + 1e-3:
+                    return None
+                bc1c2 = _bearing(c1, C)
+                delta = (R_sp - R_normal) / d_cc
+                delta = max(-1.0, min(1.0, delta))
+                theta = _wrap_360(
+                    bc1c2 - sign_p * math.degrees(math.asin(delta)))
+                perp_brg = _wrap_360(theta - sign_p * 90.0)
+                t1 = _point_at_bearing(c1, perp_brg, R_normal)
+                t2 = _point_at_bearing(C, perp_brg, R_sp)
+                arc1 = (sign_p * (theta - start_heading_deg)) % 360.0
+                straight_len = _ft(t1, t2)
+                radial_t2 = perp_brg
+                radial_lk = _wrap_360(
+                    lk_intercept_heading - sign_p * 90.0)
+                partial = (
+                    sign_p * (radial_lk - radial_t2)) % 360.0
+                return dict(
+                    C=C, c1=c1, theta=theta, t1=t1, t2=t2,
+                    arc1_deg=arc1, partial_deg=partial,
+                    straight_len_ft=straight_len)
+
+            # Binary search on R for each integer N (extra full turns) —
+            # find the (R, N) that closes the energy budget exactly.
+            best_R = None
+            best_N = None
+            best_geom = None
+            best_residual = math.inf
+            for N_try in range(0, 6):
+                lo, hi = R_spiral_min, R_spiral_max
+                for _ in range(24):
+                    mid = 0.5 * (lo + hi)
+                    g = _tangent_geom(mid)
+                    if g is None:
+                        lo = mid
+                        continue
+                    entry_cost = (
+                        math.radians(g["arc1_deg"]) * R_normal
+                        + g["straight_len_ft"]) / GR_local
+                    spiral_cost = mid * (
+                        math.radians(g["partial_deg"])
+                        + N_try * 2.0 * math.pi) / GR_local
+                    total = entry_cost + spiral_cost + lk_to_td_cost
+                    if total > start_alt_agl_ft:
+                        # absorbs too much → reduce R
+                        hi = mid
+                    else:
+                        lo = mid
+                R_final = 0.5 * (lo + hi)
+                g = _tangent_geom(R_final)
+                if g is None:
+                    continue
+                entry_cost = (
+                    math.radians(g["arc1_deg"]) * R_normal
+                    + g["straight_len_ft"]) / GR_local
+                spiral_cost = R_final * (
+                    math.radians(g["partial_deg"])
+                    + N_try * 2.0 * math.pi) / GR_local
+                total = entry_cost + spiral_cost + lk_to_td_cost
+                residual = abs(total - start_alt_agl_ft)
+                in_range = (R_spiral_min - 1.0
+                            <= R_final <= R_spiral_max + 1.0)
+                if in_range and residual < best_residual:
+                    best_residual = residual
+                    best_R = R_final
+                    best_N = N_try
+                    best_geom = g
+
+            if best_R is None or best_geom is None:
+                # Tangent geometry impossible — aircraft is too close to
+                # / overhead the field, so the start circle and the
+                # spiral circle overlap. Fall back to Dubins-to-LK +
+                # spiral-at-LK (full turns), the FAA classic approach.
+                lk_conn_segments, _, lk_conn_alt, _ = \
+                    _connect_via_dubins(
+                        start, start_alt_agl_ft, start_heading_deg,
+                        lk_intercept_pos, lk_intercept_heading,
+                        R_normal, best_glide_tas_kt, glide_ratio,
+                        wind_dir_deg, wind_speed_kt,
+                        label_prefix="Entry",
+                        force_direction=side)
+                alt_at_td_via_lk = lk_conn_alt - lk_to_td_cost
+                if alt_at_td_via_lk > 50.0:
+                    absorb_target = alt_at_td_via_lk
+                    R_fb = None
+                    n_fb = 0
                     for n in range(1, 8):
-                        R_candidate = (absorb_target * glide_ratio
-                                           / (2.0 * math.pi * n))
-                        if R_spiral_min <= R_candidate <= R_spiral_max:
-                            R_spiral = R_candidate
-                            n_turns_spiral = n
+                        R_cand = (absorb_target * glide_ratio
+                                      / (2.0 * math.pi * n))
+                        if R_spiral_min <= R_cand <= R_spiral_max:
+                            R_fb = R_cand
+                            n_fb = n
                             break
-                    if R_spiral is None:
-                        n_turns_spiral = max(1, int(math.ceil(
+                    if R_fb is None:
+                        n_fb = max(1, int(math.ceil(
                             absorb_target * glide_ratio
                             / (2.0 * math.pi * R_spiral_max))))
-                        R_spiral = (absorb_target * glide_ratio
-                                       / (2.0 * math.pi * n_turns_spiral))
-                        R_spiral = max(R_spiral_min,
-                                           min(R_spiral_max, R_spiral))
-                if R_spiral is not None and n_turns_spiral > 0:
-                    # FAA high-key orbit: spiral in the SAME direction
-                    # as the pattern so the center sits OVER the field.
-                    # At LK on LEFT downwind, a LEFT turn curls inboard
-                    # toward the runway (center at LK + R toward the
-                    # centerline). For LEFT pattern: spiral LEFT; for
-                    # RIGHT pattern: spiral RIGHT.
-                    spiral_dir = side
-                    # Center bearing from aircraft = heading - 90° for
-                    # LEFT (= INBOARD), heading + 90° for RIGHT.
-                    sign_pattern = -1.0 if side == "left" else 1.0
-                    center_bearing_from_lk = _wrap_360(
-                        lk_intercept_heading + sign_pattern * 90.0)
-                    spiral_center = _point_at_bearing(
-                        lk_intercept_pos, center_bearing_from_lk,
-                        R_spiral)
-                    spiral_absorb_ft = (n_turns_spiral * 2.0 * math.pi
-                                              * R_spiral / glide_ratio)
-                    spiral_seg = _spiral_segment(
-                        center=spiral_center,
-                        start_alt=lk_conn_alt,
-                        end_alt=lk_conn_alt - spiral_absorb_ft,
-                        turn_radius_ft=R_spiral,
-                        n_turns=float(n_turns_spiral),
-                        bank_deg=math.degrees(math.atan(
-                            tas_fps * tas_fps
-                            / (32.174 * R_spiral))),
-                        direction=spiral_dir,
-                        start_heading=lk_intercept_heading,
-                        label=(f"High-key orbit ({n_turns_spiral}×, "
-                                 f"R={R_spiral:.0f}ft)"))
-                    # Build segments along the ideal path from LK to TD
-                    # with the post-spiral altitude.
-                    spiral_exit_alt = lk_conn_alt - spiral_absorb_ft
-                    spiral_path_segments, alt_at_td = \
-                        _build_segments_along_ideal_path(
-                            lk_intercept_s, spiral_exit_alt, touchdown,
-                            runway_heading_deg, side, R_po180,
-                            best_glide_tas_kt, glide_ratio,
-                            wind_dir_deg, wind_speed_kt)
-                    # Replace prior segments — high-energy mode uses
-                    # Dubins-to-LK + Spiral-at-LK + ideal path LK→TD.
-                    conn_segments = lk_conn_segments
-                    spiral_segments = [spiral_seg]
-                    path_segments = spiral_path_segments
+                        R_fb = max(R_spiral_min, min(R_spiral_max,
+                            absorb_target * glide_ratio
+                            / (2.0 * math.pi * n_fb)))
+                    if R_fb is not None and n_fb > 0:
+                        center_brg = _wrap_360(
+                            lk_intercept_heading + sign_p * 90.0)
+                        C_fb = _point_at_bearing(
+                            lk_intercept_pos, center_brg, R_fb)
+                        absorb_fb = (n_fb * 2.0 * math.pi
+                                          * R_fb / GR_local)
+                        spiral_seg = _spiral_segment(
+                            center=C_fb,
+                            start_alt=lk_conn_alt,
+                            end_alt=lk_conn_alt - absorb_fb,
+                            turn_radius_ft=R_fb,
+                            n_turns=float(n_fb),
+                            bank_deg=math.degrees(math.atan(
+                                tas_fps_local * tas_fps_local
+                                / (32.174 * R_fb))),
+                            direction=side,
+                            start_heading=lk_intercept_heading,
+                            label=(f"High-key orbit ({n_fb}×, "
+                                     f"R={R_fb:.0f}ft)"))
+                        spiral_path_segments, alt_at_td = \
+                            _build_segments_along_ideal_path(
+                                lk_intercept_s,
+                                lk_conn_alt - absorb_fb,
+                                touchdown, runway_heading_deg, side,
+                                R_po180, best_glide_tas_kt, glide_ratio,
+                                wind_dir_deg, wind_speed_kt)
+                        conn_segments = lk_conn_segments
+                        spiral_segments = [spiral_seg]
+                        path_segments = spiral_path_segments
+            elif best_R is not None and best_geom is not None:
+                R_spiral = best_R
+                n_turns_spiral = best_N
+                g = best_geom
+                # Build entry segments: Dubins arc1 then straight tangent
+                # to t2 on the spiral circle.
+                arc1_rad = math.radians(g["arc1_deg"])
+                arc1_length_ft = R_normal * arc1_rad
+                entry_arc_cost = arc1_length_ft / GR_local
+                straight_cost = _wind_corrected_alt_cost_ft(
+                    g["straight_len_ft"], g["theta"],
+                    best_glide_tas_kt, glide_ratio,
+                    wind_dir_deg, wind_speed_kt)
+                alt_after_arc1 = start_alt_agl_ft - entry_arc_cost
+                alt_after_straight = alt_after_arc1 - straight_cost
+
+                arc1_segment = _turn_segment_n(
+                    start=start, start_alt=start_alt_agl_ft,
+                    start_heading=start_heading_deg,
+                    turn_angle_deg=g["arc1_deg"],
+                    turn_radius_ft=R_normal,
+                    direction=side,
+                    end_alt=alt_after_arc1,
+                    label="Entry turn")
+                straight_segment = _straight_segment(
+                    g["t1"], alt_after_arc1,
+                    g["t2"], alt_after_straight,
+                    label="Tangent to spiral")
+
+                # Spiral: from tangent entry (t2 heading theta) around C
+                # for (partial + N*360°) ending at LK heading downwind.
+                spiral_total_arc_deg = (g["partial_deg"]
+                                            + n_turns_spiral * 360.0)
+                spiral_total_arc_rad = math.radians(
+                    spiral_total_arc_deg)
+                spiral_absorb_ft = (R_spiral * spiral_total_arc_rad
+                                          / GR_local)
+                spiral_seg = _spiral_segment(
+                    center=g["C"],
+                    start_alt=alt_after_straight,
+                    end_alt=alt_after_straight - spiral_absorb_ft,
+                    turn_radius_ft=R_spiral,
+                    n_turns=spiral_total_arc_deg / 360.0,
+                    bank_deg=math.degrees(math.atan(
+                        tas_fps_local * tas_fps_local
+                        / (32.174 * R_spiral))),
+                    direction=side,
+                    start_heading=g["theta"],
+                    label=(f"High-key orbit (R={R_spiral:.0f}ft, "
+                             f"{spiral_total_arc_deg:.0f}°)"))
+                spiral_exit_alt = alt_after_straight - spiral_absorb_ft
+
+                # Build segments along the ideal path from LK to TD
+                # with the post-spiral altitude.
+                spiral_path_segments, alt_at_td = \
+                    _build_segments_along_ideal_path(
+                        lk_intercept_s, spiral_exit_alt, touchdown,
+                        runway_heading_deg, side, R_po180,
+                        best_glide_tas_kt, glide_ratio,
+                        wind_dir_deg, wind_speed_kt)
+
+                conn_segments = [arc1_segment, straight_segment]
+                spiral_segments = [spiral_seg]
+                path_segments = spiral_path_segments
 
         all_segments = conn_segments + spiral_segments + path_segments
 
