@@ -39,6 +39,17 @@ _PHASE_COLORS = {
     "descent": "#d97706",
     "approach": "#dc2626",
     "miss": "#dc2626",
+    # Engine-out backward-construction planner phases (eo_executor):
+    "engine_failure": "#dc2626",
+    "entry":          "#0050a0",
+    "to_abeam":       "#0050a0",
+    "to_high_key":    "#0050a0",
+    "to_low_key":     "#1d4ed8",
+    "base_turn":      "#0891b2",
+    "final_turn":     "#15803d",
+    "po180":          "#0891b2",
+    "straight_in":    "#0050a0",
+    "transit":        "#475569",
 }
 _DEFAULT_COLOR = "#475569"
 

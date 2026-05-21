@@ -20,10 +20,10 @@ from core.profile3d import make_3d_track_figure
 
 from layouts.maneuvers._shared import _winds_aloft_chip
 from utility import (
-    simulate_engineout_glide,
     find_minimum_altitude,
     compute_glide_envelope,
 )
+from simulation.eo_planner import simulate_engineout_planned
 
 from callbacks.map import create_airplane_marker
 
@@ -226,7 +226,7 @@ def register(app):
                 except Exception:
                     wind_profile = None
 
-            path, hover_data, meta = simulate_engineout_glide(
+            path, hover_data, meta = simulate_engineout_planned(
                 start_point=start,
                 start_heading=float(start_heading),
                 touchdown_point=touchdown,
@@ -287,8 +287,41 @@ def register(app):
                 log.warning(f"Min altitude calc error: {min_err}")
                 min_alt_display = "Could not calculate minimum altitude"
 
-            # ---------- Core visuals: full glide track (Theme B) ----------
-            arc_line = dl.Polyline(positions=path, color="#0d59f2", weight=3, opacity=0.85)
+            # ---------- Core visuals: full glide track, phase-colored ----------
+            # Split the path into per-phase polylines so the pattern legs
+            # (entry/downwind/base/final) are visually distinct on the map.
+            _PHASE_PALETTE = {
+                "engine_failure": "#dc2626",
+                "entry":          "#0d59f2",
+                "to_abeam":       "#0d59f2",
+                "downwind":       "#1d4ed8",
+                "base_turn":      "#0891b2",
+                "base":           "#0891b2",
+                "final_turn":     "#15803d",
+                "final":          "#15803d",
+                "po180":          "#0891b2",
+                "straight_in":    "#0d59f2",
+                "spiral":         "#a855f7",
+                "transit":        "#475569",
+            }
+            arc_lines = []
+            if path and hover_data:
+                n = min(len(path), len(hover_data))
+                i = 0
+                while i < n:
+                    phase = hover_data[i].get("phase", "transit")
+                    j = i + 1
+                    while j < n and hover_data[j].get("phase", "transit") == phase:
+                        j += 1
+                    # Include the next point so segments visually connect.
+                    end = min(j + 1, n)
+                    color = _PHASE_PALETTE.get(phase, "#0d59f2")
+                    arc_lines.append(dl.Polyline(
+                        positions=path[i:end], color=color,
+                        weight=4, opacity=0.85,
+                        children=dl.Tooltip(
+                            phase.replace("_", " ").title())))
+                    i = j
 
             # Start (engine failure) — green-500
             start_marker = dl.CircleMarker(
@@ -315,7 +348,7 @@ def register(app):
                 children=dl.Tooltip(td_tooltip),
             )
 
-            elements = [start_marker, touchdown_marker, arc_line]
+            elements = [start_marker, touchdown_marker, *arc_lines]
 
             # Glide envelope is now rendered into its own envelope-layer
             # by `render_glide_ring` (below), driven by the Glide Ring
@@ -368,7 +401,41 @@ def register(app):
 
             # Build slider marks based on time
             max_time = hover_data[-1].get("time", 100) if hover_data else 100
+            # Build phase-labeled marks: a tick at the start of each unique
+            # phase + endpoints.
+            _PHASE_LABELS = {
+                "engine_failure": "EF",
+                "entry": "Entry",
+                "transit": "Transit",
+                "to_abeam": "Abeam",
+                "downwind": "Downwd",
+                "base_turn": "Base T",
+                "base": "Base",
+                "final_turn": "Fin T",
+                "final": "Final",
+                "po180": "PO180",
+                "straight_in": "Strt-in",
+                "spiral": "Spiral",
+                "to_high_key": "High K",
+                "to_low_key": "Low K",
+            }
             slider_marks = {0: "Start", int(max_time): "End"}
+            if hover_data:
+                seen_phase = None
+                for h in hover_data:
+                    ph = h.get("phase", "")
+                    if ph and ph != seen_phase:
+                        t = int(round(h.get("time", 0)))
+                        if 1 <= t < int(max_time):
+                            slider_marks[t] = {
+                                "label": _PHASE_LABELS.get(ph, ph),
+                                "style": {"fontSize": "9px",
+                                            "color": "#475569",
+                                            "transform": "rotate(-30deg)",
+                                            "transformOrigin": "0 50%",
+                                            "whiteSpace": "nowrap"},
+                            }
+                        seen_phase = ph
 
             # Prepare hover data for store (ensure JSON-serializable)
             hover_store = [
@@ -516,6 +583,79 @@ def register(app):
                     style={"fontSize": "11px", "color": "#94a3b8",
                             "padding": "12px"})
 
+            # Structured plan diagnostics — populated by the new backward-
+            # construction planner via `simulate_engineout_planned`. Falls
+            # back to {} so the accordion still renders if a legacy path is
+            # ever wired in.
+            diag = meta.get("diagnostics", {}) or {}
+            plan_rows: list = []
+            if diag:
+                strategy = (diag.get("approach_strategy") or "").replace("_", " ").title()
+                pattern = (diag.get("pattern_side") or "").title()
+                plan_rows.append(html.Div([html.Strong("Plan")],
+                                            style={"marginBottom": "4px"}))
+                plan_rows.append(html.Div(
+                    f"Strategy: {strategy} | Pattern: {pattern} | "
+                    f"On final side: {'Yes' if diag.get('on_final_side') else 'No'}",
+                    style={"fontSize": "11px"}))
+                if diag.get("spiral_turns", 0) > 0:
+                    plan_rows.append(html.Div(
+                        f"Overhead spiral: {diag['spiral_turns']:.2f} turns @ "
+                        f"{diag['spiral_bank_deg']:.0f}° bank",
+                        style={"fontSize": "11px"}))
+                plan_rows.append(html.Hr(style={"margin": "5px 0",
+                                                  "borderTop": "1px solid #ddd"}))
+
+                plan_rows.append(html.Div([html.Strong("Energy budget")],
+                                            style={"marginBottom": "4px"}))
+                plan_rows.append(html.Div(
+                    f"Start: {diag.get('start_alt_agl_ft', 0):.0f} ft AGL — "
+                    f"Direct cost: {diag.get('direct_glide_alt_ft', 0):.0f} ft — "
+                    f"Arrival over field: {diag.get('arrival_alt_agl_ft', 0):.0f} ft AGL",
+                    style={"fontSize": "11px"}))
+                excess_hk = diag.get("excess_at_high_key_ft", 0)
+                excess_lk = diag.get("excess_at_low_key_ft", 0)
+                hk_color = "#22c55e" if excess_hk >= 0 else "#dc2626"
+                lk_color = "#22c55e" if excess_lk >= 0 else "#dc2626"
+                plan_rows.append(html.Div([
+                    html.Span(
+                        f"Excess at High Key (1500 AGL): {excess_hk:+.0f} ft",
+                        style={"color": hk_color, "marginRight": "12px"}),
+                    html.Span(
+                        f"Low Key (1000 AGL): {excess_lk:+.0f} ft",
+                        style={"color": lk_color}),
+                ], style={"fontSize": "11px"}))
+                plan_rows.append(html.Hr(style={"margin": "5px 0",
+                                                  "borderTop": "1px solid #ddd"}))
+
+                plan_rows.append(html.Div([html.Strong("What would need to be true")],
+                                            style={"marginBottom": "4px"}))
+                plan_rows.append(html.Div(
+                    f"Minimum start altitude: ~{diag.get('required_alt_agl_to_make_it_ft', 0):.0f} ft AGL",
+                    style={"fontSize": "11px"}))
+                plan_rows.append(html.Div(
+                    f"Maximum direct distance at current altitude: "
+                    f"~{diag.get('required_max_dist_nm', 0):.2f} nm",
+                    style={"fontSize": "11px"}))
+                plan_rows.append(html.Div(
+                    f"Planning bank: {diag.get('planning_bank_deg', 0):.0f}° "
+                    f"(max {diag.get('max_bank_deg', 0):.0f}°) | "
+                    f"Turn radius: {diag.get('turn_radius_ft', 0):.0f} ft",
+                    style={"fontSize": "11px"}))
+                if diag.get("final_wind_component_kt", 0) != 0:
+                    fwc = diag["final_wind_component_kt"]
+                    plan_rows.append(html.Div(
+                        f"Final wind component: "
+                        f"{abs(fwc):.0f} kt {'headwind' if fwc >= 0 else 'tailwind'}",
+                        style={"fontSize": "11px"}))
+                if not diag.get("feasible", True) and diag.get("failure_reason"):
+                    plan_rows.append(html.Hr(style={"margin": "5px 0",
+                                                      "borderTop": "1px solid #ddd"}))
+                    plan_rows.append(html.Div(
+                        f"Reason: {diag['failure_reason']}",
+                        style={"fontSize": "11px", "color": "#dc2626",
+                                "fontWeight": "600"}))
+
             info_content = dbc.Accordion([
                 dbc.AccordionItem([
                     html.Div(status_text, style={"fontWeight": "bold", "color": status_color, "marginBottom": "8px", "fontSize": "13px"}),
@@ -542,6 +682,9 @@ def register(app):
                     html.Div(f"Total time: {max_time:.1f}s | Reaction: {reaction_time:.1f}s", style={"fontSize": "11px"}),
                     html.Div(f"Max bank: {max_bank:.0f}° | Bank τ: {bank_tau:.1f}s", style={"fontSize": "11px"}),
                 ], title="Simulation Results", style={"fontSize": "12px"}),
+                *([dbc.AccordionItem(plan_rows, title="Glide Plan",
+                                       style={"fontSize": "12px"})]
+                  if plan_rows else []),
                 dbc.AccordionItem([
                     html.Div("Drag to rotate. Scroll to zoom. "
                               "Vertical axis is exaggerated for readability.",
