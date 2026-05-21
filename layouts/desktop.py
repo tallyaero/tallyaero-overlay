@@ -777,6 +777,17 @@ def desktop_layout():
             # Engine-Out Glide
             dcc.Store(id={"type": "point-store", "m_id": "engineout", "role": "touchdown"}),
             dcc.Store(id={"type": "point-store", "m_id": "engineout", "role": "start"}),
+            # Mirror stores for engine-out form fields. The glide-ring
+            # callback needs to react to altitude/flap/prop/td-elev
+            # changes, but those components only exist in the DOM while
+            # the engine-out maneuver is mounted — so we can't State
+            # them directly. A small bridging callback mirrors their
+            # values into these always-present stores; the glide-ring
+            # callback then States the mirrors.
+            dcc.Store(id="engineout-altitude-mirror", data=5000.0),
+            dcc.Store(id="engineout-flap-mirror", data="clean"),
+            dcc.Store(id="engineout-prop-mirror", data="idle"),
+            dcc.Store(id="engineout-td-elev-mirror", data=None),
 
             # Steep Turns
             dcc.Store(id={"type": "point-store", "m_id": "steep_turn", "role": "start"}),

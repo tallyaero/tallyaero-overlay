@@ -794,15 +794,57 @@ def register(app):
         return [marker]
 
     # ------------------------------------------------------------------
+    # Mirror callbacks — copy the engine-out form fields into globally-
+    # mounted Stores so the glide-ring callback can State them. The
+    # form components only exist in the DOM while engine-out is the
+    # active maneuver, so we can't State them directly without
+    # crashing callback dispatch when other maneuvers are mounted.
+    # ------------------------------------------------------------------
+    @app.callback(
+        Output("engineout-altitude-mirror", "data"),
+        Input("engineout-altitude", "value"),
+        prevent_initial_call=True,
+    )
+    def _mirror_engineout_altitude(value):
+        try:
+            return float(value) if value not in (None, "") else 5000.0
+        except (TypeError, ValueError):
+            return 5000.0
+
+    @app.callback(
+        Output("engineout-flap-mirror", "data"),
+        Input("engineout-flap-setting", "value"),
+        prevent_initial_call=True,
+    )
+    def _mirror_engineout_flap(value):
+        return value or "clean"
+
+    @app.callback(
+        Output("engineout-prop-mirror", "data"),
+        Input("engineout-prop-condition", "value"),
+        prevent_initial_call=True,
+    )
+    def _mirror_engineout_prop(value):
+        return value or "idle"
+
+    @app.callback(
+        Output("engineout-td-elev-mirror", "data"),
+        Input("engineout-manual-elev", "value"),
+        prevent_initial_call=True,
+    )
+    def _mirror_engineout_td_elev(value):
+        try:
+            return float(value) if value not in (None, "") else None
+        except (TypeError, ValueError):
+            return None
+
+    # ------------------------------------------------------------------
     # Phase I2 — Glide Ring toggle auto-draw + wind-aloft awareness.
     # ------------------------------------------------------------------
-    # The toggle + the point-store are always-present in the DOM:
-    # the toggle lives in the desktop overlay (layouts/desktop.py),
-    # the point-store is pattern-matched. The engine-out-only
-    # form fields (altitude / flap / prop) are pulled out of the
-    # live Dash request body so we don't have to declare them as
-    # State on the callback — a missing State id would otherwise
-    # error the callback during dispatch when a non-engineout
+    # Reads the engine-out form fields via the mirror stores above,
+    # which ARE always mounted in the DOM (layouts/desktop.py). That
+    # way the ring re-renders whenever altitude/flap/prop/td-elev
+    # change AND doesn't crash callback dispatch when a non-engineout
     # maneuver is the currently mounted one.
     @app.callback(
         Output("envelope-layer", "children", allow_duplicate=True),
@@ -816,41 +858,35 @@ def register(app):
         Input("env-oat", "value"),
         Input("env-altimeter", "value"),
         Input("maneuver-select", "value"),
+        Input("engineout-altitude-mirror", "data"),
+        Input("engineout-flap-mirror", "data"),
+        Input("engineout-prop-mirror", "data"),
+        Input("engineout-td-elev-mirror", "data"),
         State("selected-airport-id", "data"),
         prevent_initial_call=True,
     )
     def render_glide_ring(show_envelope, start_data,
                            ac_name, engine_key, wind_dir, wind_speed,
                            wind_profile_data, oat_f, altimeter,
-                           maneuver, airport_id):
-        # Engine-out-only fields fetched from the request body so
-        # they don't appear in the Input/State declaration above.
-        # Falls back to layout defaults when not mounted.
-        start_alt_msl = 5000.0
-        flap_setting = "clean"
-        prop_condition = "idle"
-        manual_td_elev_ring = None
+                           maneuver,
+                           start_alt_msl_in, flap_setting_in,
+                           prop_condition_in, manual_td_elev_in,
+                           airport_id):
+        # Coerce the mirror values (with fallbacks if they're still
+        # at default).
         try:
-            from flask import request
-            body = request.get_json(silent=True) or {}
-            for entry in body.get("state", []) or []:
-                sid = entry.get("id")
-                if sid == "engineout-altitude":
-                    try:
-                        start_alt_msl = float(entry.get("value")) if entry.get("value") not in (None, "") else 5000.0
-                    except (TypeError, ValueError):
-                        pass
-                elif sid == "engineout-flap-setting":
-                    flap_setting = entry.get("value") or "clean"
-                elif sid == "engineout-prop-condition":
-                    prop_condition = entry.get("value") or "idle"
-                elif sid == "engineout-manual-elev":
-                    try:
-                        manual_td_elev_ring = float(entry.get("value")) if entry.get("value") not in (None, "") else None
-                    except (TypeError, ValueError):
-                        pass
-        except Exception:
-            pass
+            start_alt_msl = (float(start_alt_msl_in)
+                             if start_alt_msl_in not in (None, "") else 5000.0)
+        except (TypeError, ValueError):
+            start_alt_msl = 5000.0
+        flap_setting = flap_setting_in or "clean"
+        prop_condition = prop_condition_in or "idle"
+        try:
+            manual_td_elev_ring = (float(manual_td_elev_in)
+                                   if manual_td_elev_in not in (None, "")
+                                   else None)
+        except (TypeError, ValueError):
+            manual_td_elev_ring = None
         # Hide the ring outside engine-out so it doesn't bleed into
         # the other maneuver tabs.
         if maneuver != "engineout":
