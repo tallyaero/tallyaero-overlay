@@ -20,6 +20,7 @@ from layouts.maneuvers._charts import altitude_profile_chart
 from layouts.maneuvers._shared import _acs_metric, _power_verdict, _winds_aloft_chip
 
 from core.data_loader import aircraft_data, airport_data
+from core.profile3d import build_3d_side_view_block, side_view_accordion_item
 
 
 def register(app):
@@ -47,6 +48,7 @@ def register(app):
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
         State("aircraft-select", "value"),
+        State("engine-select", "value"),
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
         State("power-setting", "value"),
@@ -66,6 +68,7 @@ def register(app):
         wind_dir,
         wind_speed,
         aircraft_name,
+        engine_name,
         selected_airport_id,
         weight_lb,
         power_setting,
@@ -135,6 +138,7 @@ def register(app):
             weight_lb=weight,
             residual_power=residual_pwr,
             wind_profile=wind_profile,
+            engine_option=engine_name,
         )
 
         if not path or not hover:
@@ -253,10 +257,19 @@ def register(app):
         # Calculate load factor at max bank
         load_factor = 1 / math.cos(math.radians(float(max_bank))) if max_bank > 0 else 1.0
 
-        # Stall speed calculations
-        vs_clean = float(ac.get("stall_speed_clean_kias", 48))
-        vs_in_turn = vs_clean * math.sqrt(load_factor)
-        min_ias = min([pt.get('ias', avg_ias) for pt in hover]) if hover else avg_ias
+        # Stall references — surfaced by the sim. Pre-fix the callback
+        # read `stall_speed_clean_kias` (non-existent key) and got Vs=48
+        # for every airframe. Now uses the correct weight-interpolated Vs
+        # and the load-factor-adjusted Vs at the max bank ACTUALLY flown
+        # (after τ-smoothing, distinct from the geometry's required bank).
+        last_hover = hover[-1] if hover else {}
+        vs_clean = float(last_hover.get("vs_clean_kt", 50))
+        vs_in_turn = float(last_hover.get("vs_at_bank_kt") or (vs_clean * math.sqrt(load_factor)))
+        min_ias = float(last_hover.get("min_ias_kt") or (
+            min([pt.get('ias', avg_ias) for pt in hover]) if hover else avg_ias
+        ))
+        stall_margin_min = min_ias - vs_in_turn
+        peak_unclamped = last_hover.get("peak_unclamped_bank_deg")
 
         # Standardized info display
         warning_elements.append(
@@ -268,7 +281,24 @@ def register(app):
                     html.Div(f"Orbit: {warnings.get('orbit_radius_ft', 0):.0f} ft | VS: {avg_vs:.0f} fpm", style={"fontSize": "11px"}),
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                     html.Div(f"Alt: {altitude_ft:.0f}→{warnings.get('final_altitude_agl', 0):.0f} ft | Loss: {altitude_ft - warnings.get('final_altitude_agl', 0):.0f} ft ({warnings.get('altitude_per_turn', 0):.0f}/turn)", style={"fontSize": "11px"}),
-                    html.Div(f"Vs turn: {vs_in_turn:.0f} kt | Margin: {min_ias - vs_in_turn:.0f} kt | Time: {total_time:.0f}s", style={"fontSize": "11px"}),
+                    html.Div(
+                        f"Vs(clean): {vs_clean:.0f} → Vs×√n at {max_bank:.0f}°: {vs_in_turn:.0f} kt | min IAS: {min_ias:.0f} kt | Time: {total_time:.0f}s",
+                        style={"fontSize": "11px"},
+                    ),
+                    html.Div(
+                        f"Stall margin (min IAS): {stall_margin_min:+.0f} kt"
+                        + (f"  ·  Geometry required {peak_unclamped:.0f}° bank (capped at 60°)"
+                           if peak_unclamped is not None and peak_unclamped > 60.5 else ""),
+                        style={
+                            "fontSize": "11px",
+                            "color": (
+                                "#dc2626" if stall_margin_min < 4
+                                else "#f59e0b" if stall_margin_min < 8
+                                else "#16a34a"
+                            ),
+                            "fontWeight": "500",
+                        },
+                    ),
                     # Phase C9 — Commercial ACS tolerances.
                     html.Div([
                         _acs_metric("Exit heading", 0, "°", target=0, tol=10, cert_level="commercial"),
@@ -281,6 +311,15 @@ def register(app):
                         "descent rate too low to complete training profile",
                     ),
                 ], title="Simulation Results", style={"fontSize": "12px"}),
+                # 3D Side View — steep spiral descends through 3+ turns;
+                # the side view shows the corkscrew descent in space.
+                side_view_accordion_item(
+                    build_3d_side_view_block(
+                        path=path,
+                        hover=hover,
+                        elev_ft=float(field_elev_ft or 0.0),
+                    )
+                ),
             ], start_collapsed=False, style={"marginTop": "8px"})
         )
 
@@ -304,19 +343,23 @@ def register(app):
         if chip is not None:
             warning_elements.append(chip)
 
-        # Prepare slider configuration
-        num_points = len(hover)
-        slider_max = max(0, num_points - 1)
-
-        # Create marks at key intervals (start, each turn boundary, end)
-        slider_marks = {0: "Start"}
-        if slider_max > 0:
-            slider_marks[slider_max] = "End"
-            # Add marks at approximate turn boundaries
-            for i, pt in enumerate(hover):
-                if pt.get('turn_progress', 0) < 5 and pt.get('turn_number', 1) > 1:
-                    turn_num = pt.get('turn_number', 1)
-                    slider_marks[i] = f"T{turn_num}"
+        # Time-based scrubber (was index). Marks: Start · T2 · T3 · End,
+        # where Tn is the first tick where turn_number flips to n. The
+        # pre-fix code used hover index as both the scrubber position
+        # AND the mark key; for high-resolution sims that produced
+        # marks at indices the slider couldn't navigate to cleanly.
+        max_time = hover[-1].get("time", 0) if hover else 0
+        slider_marks = {}
+        prev_turn = 0
+        for pt in hover:
+            tn = int(pt.get("turn_number", 1))
+            if tn != prev_turn and prev_turn > 0:
+                t_mark = int(round(float(pt.get("time", 0))))
+                slider_marks[t_mark] = f"T{tn}"
+            prev_turn = tn
+        slider_marks[0] = "Start"
+        slider_marks[int(round(max_time))] = "End"
+        slider_max = int(round(max_time)) if max_time > 0 else 100
 
         # Show slider container
         slider_style = {"display": "block", "marginTop": "10px"}
@@ -349,14 +392,26 @@ def register(app):
         prevent_initial_call=True
     )
     def update_steep_spiral_scrubber(slider_value, hover_data, path_data):
-        """Update the scrubber marker and tooltip based on slider position."""
+        """Update the scrubber marker and tooltip based on slider position.
+
+        Time-based lookup (post-2026-05-21) — finds the closest hover
+        entry by time so T2 / T3 marks land on the right turn boundary
+        regardless of timestep granularity."""
         if not hover_data or not path_data or slider_value is None:
             return []
 
-        # Ensure slider value is within bounds
-        idx = int(slider_value)
-        if idx < 0 or idx >= len(hover_data) or idx >= len(path_data):
-            return []
+        target_time = float(slider_value)
+        best_idx = 0
+        best_diff = abs(hover_data[0].get("time", 0) - target_time)
+        for i, hp in enumerate(hover_data):
+            diff = abs(hp.get("time", 0) - target_time)
+            if diff < best_diff:
+                best_diff = diff
+                best_idx = i
+
+        idx = best_idx
+        if idx >= len(path_data):
+            idx = len(path_data) - 1
 
         pt = hover_data[idx]
         pos = path_data[idx]
@@ -373,7 +428,10 @@ def register(app):
             html.Div(f"VS: {pt.get('vs', 0):.0f} fpm"),
             html.Div(f"Heading: {pt.get('heading', 0):.0f}°"),
             html.Div(f"Track: {pt.get('track', 0):.0f}°"),
-            html.Div(f"Crab: {'R ' if pt.get('drift', 0) < 0 else ('L ' if pt.get('drift', 0) > 0 else '')}{abs(pt.get('drift', 0)):.1f}°"),
+            # Crab intentionally not shown — steep spiral is a continuous
+            # descending orbit; crab varies through every turn and is
+            # noise to the pilot. Marker visual still uses crab to
+            # orient the airplane icon.
         ]
 
         # Create airplane marker pointing in direction of heading

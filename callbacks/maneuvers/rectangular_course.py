@@ -15,9 +15,133 @@ import dash_bootstrap_components as dbc
 import dash_leaflet as dl
 
 from callbacks.map import create_airplane_marker
-from layouts.maneuvers._shared import _acs_metric
+from layouts.maneuvers._shared import _acs_metric, _winds_aloft_chip
 
 from core.data_loader import aircraft_data, airport_data
+
+
+# ---------------------------------------------------------------------------
+# 4-corner snap math — post-2026-05-21 UX rewrite.
+#
+# Pilot clicks four corners of the rectangle they want to fly. The clicks
+# rarely form a perfect rectangle, so we snap to one before running the sim.
+#
+# Strategy (keeps the pilot's downwind orientation intact):
+#   * Clicks 1 and 2 are treated as the DOWNWIND edge — kept verbatim.
+#   * Compute the perpendicular axis from the 1→2 vector.
+#   * Project clicks 3 and 4 onto that perpendicular; AVERAGE their
+#     perpendicular offset to derive the rectangle's width.
+#   * Choose the perpendicular DIRECTION as the side clicks 3+4 fall on
+#     (sign of the averaged offset).
+#   * Rebuild corners C and D so the resulting polygon is a true
+#     right-angled rectangle with the first edge unchanged.
+# ---------------------------------------------------------------------------
+
+def _rotate_clicks(clicks: list, downwind_idx: int) -> list:
+    """Rotate the 4-click list so the chosen downwind edge is first.
+
+    `downwind_idx` is the index of the FIRST click of the desired
+    downwind edge (0..3). After rotation, clicks[0]→clicks[1] is the
+    downwind edge — which is what `_snap_corners_to_rectangle` expects.
+    """
+    n = len(clicks)
+    if n != 4:
+        return list(clicks)
+    i = max(0, min(3, int(downwind_idx)))
+    return [clicks[(i + k) % n] for k in range(n)]
+
+
+def _auto_downwind_edge(clicks: list, wind_dir_deg: float) -> int:
+    """Pick the edge whose bearing best matches the DOWNWIND direction
+    (= wind_to, i.e. wind_dir + 180°). Returns 0..3 — the index of the
+    first click of the chosen edge."""
+    import math as _m
+    if len(clicks) != 4:
+        return 0
+    wind_to = (float(wind_dir_deg) + 180.0) % 360.0
+    best_idx = 0
+    best_err = 1e9
+    for i in range(4):
+        a = clicks[i]
+        b = clicks[(i + 1) % 4]
+        dn = (b["lat"] - a["lat"]) * 364567.2
+        de = (b["lon"] - a["lon"]) * 364567.2 * _m.cos(_m.radians(a["lat"]))
+        bearing = (_m.degrees(_m.atan2(de, dn)) + 360.0) % 360.0
+        err = abs(((bearing - wind_to) + 180.0) % 360.0 - 180.0)
+        if err < best_err:
+            best_err = err
+            best_idx = i
+    return best_idx
+
+
+def _snap_corners_to_rectangle(c1: dict, c2: dict, c3: dict, c4: dict) -> dict:
+    """Return {'dw_start', 'dw_end', 'lateral_offset_nm',
+              'corners_snapped': [c1, c2, c3', c4'],
+              'corners_raw': [c1, c2, c3, c4]}."""
+    ft_per_deg_lat = 364567.2
+    ref_lat = (c1["lat"] + c2["lat"]) / 2
+    ft_per_deg_lon = ft_per_deg_lat * math.cos(math.radians(ref_lat))
+
+    def to_xy(p):
+        n = (p["lat"] - ref_lat) * ft_per_deg_lat
+        e = (p["lon"] - (c1["lon"] + c2["lon"]) / 2) * ft_per_deg_lon
+        return n, e
+
+    def to_latlon(n, e):
+        return {
+            "lat": ref_lat + n / ft_per_deg_lat,
+            "lon": (c1["lon"] + c2["lon"]) / 2 + e / ft_per_deg_lon,
+        }
+
+    n1, e1 = to_xy(c1)
+    n2, e2 = to_xy(c2)
+    n3, e3 = to_xy(c3)
+    n4, e4 = to_xy(c4)
+
+    # Edge 1→2 vector + length
+    edge_n = n2 - n1
+    edge_e = e2 - e1
+    edge_len = math.hypot(edge_n, edge_e)
+    if edge_len < 1.0:
+        return {}  # degenerate — clicks 1 and 2 coincide
+
+    # Unit along 1→2
+    u_n = edge_n / edge_len
+    u_e = edge_e / edge_len
+    # Unit perpendicular (rotate +90°: (n, e) → (-e, n))
+    perp_n = -u_e
+    perp_e = u_n
+
+    # Signed perpendicular offset of each of c3, c4 from line through c1
+    def perp_offset(n, e):
+        return (n - n1) * perp_n + (e - e1) * perp_e
+
+    off3 = perp_offset(n3, e3)
+    off4 = perp_offset(n4, e4)
+    # Average gives the rectangle width; sign chooses which side.
+    width_signed = (off3 + off4) / 2.0
+    width = abs(width_signed)
+    side_sign = 1.0 if width_signed >= 0 else -1.0
+
+    # Snapped corners C and D — rectangle sits on the side clicks 3+4
+    # were averaged onto.
+    n_c = n2 + side_sign * perp_n * width
+    e_c = e2 + side_sign * perp_e * width
+    n_d = n1 + side_sign * perp_n * width
+    e_d = e1 + side_sign * perp_e * width
+
+    return {
+        "dw_start": {"lat": c1["lat"], "lon": c1["lon"]},
+        "dw_end": {"lat": c2["lat"], "lon": c2["lon"]},
+        "lateral_offset_nm": round(width / 6076.12, 3),
+        "corners_snapped": [
+            {"lat": c1["lat"], "lon": c1["lon"]},
+            {"lat": c2["lat"], "lon": c2["lon"]},
+            to_latlon(n_c, e_c),
+            to_latlon(n_d, e_d),
+        ],
+        "corners_raw": [c1, c2, c3, c4],
+    }
 
 
 _STRAIGHT_LEGS = ("downwind", "base", "upwind", "crosswind")
@@ -57,146 +181,221 @@ def _per_leg_wca(hover):
 def register(app):
     """Install Rectangular Course callbacks against the given Dash app."""
 
+    # Mirror the shelf dropdown value into the always-present Store.
+    # The shelf dropdown is only mounted when rect_course is the active
+    # maneuver; the Store is always in the layout (defined in
+    # desktop.py) so the snap-preview callback's Input stays valid in
+    # every maneuver context.
     @app.callback(
+        Output("rectcourse-downwind-edge", "data"),
+        Input("rectcourse-downwind-edge-select", "value"),
+        prevent_initial_call=True,
+    )
+    def mirror_downwind_edge_choice(value):
+        return value if value is not None else "auto"
+
+    @app.callback(
+        Output("rectcourse-snapped-store", "data"),
         Output("rectcourse-calculated-edge", "data"),
         Output("rectcourse-edge-info-display", "children"),
         Output("layer", "children", allow_duplicate=True),
-        Input({"type": "point-store", "m_id": "rect_course", "role": "dw_start"}, "data"),
-        Input({"type": "point-store", "m_id": "rect_course", "role": "dw_end"}, "data"),
+        Input({"type": "point-store", "m_id": "rect_course", "role": "c1"}, "data"),
+        Input({"type": "point-store", "m_id": "rect_course", "role": "c2"}, "data"),
+        Input({"type": "point-store", "m_id": "rect_course", "role": "c3"}, "data"),
+        Input({"type": "point-store", "m_id": "rect_course", "role": "c4"}, "data"),
+        # Read from the always-present Store (mirrored from the shelf
+        # dropdown). Pre-fix this referenced the dropdown directly,
+        # which raised "nonexistent object" errors any time the user
+        # was on another maneuver and a point-store fired.
+        Input("rectcourse-downwind-edge", "data"),
+        State("env-wind-dir", "value"),
         State("layer", "children"),
         State("maneuver-select", "value"),
         prevent_initial_call=True
     )
-    def calculate_rectcourse_edge_and_preview(dw_start, dw_end, layer_children, current_maneuver):
-        """
-        Calculate the downwind leg length and bearing from two clicked points.
-        Draw a preview of the downwind leg on the map.
+    def calculate_rectcourse_corners_and_preview(c1, c2, c3, c4, downwind_choice,
+                                                  wind_dir, layer_children, current_maneuver):
+        """4-corner UX preview.
+
+        Draws a progressive preview after each of the four corner clicks:
+          1 click  → dot
+          2 clicks → first-edge dashed line (downwind orientation)
+          3 clicks → 3-side polyline (raw clicks)
+          4 clicks → snapped rectangle (solid outline) + raw-click dots
+                      for reference, plus a dashed line on the first edge.
+
+        Returns three stores:
+          - rectcourse-snapped-store: snapped rectangle + dw_start/dw_end/
+            lateral_offset_nm (drives the draw callback)
+          - rectcourse-calculated-edge: legacy edge data (kept for
+            backward-compat with any consumers still reading it)
+          - rectcourse-edge-info-display: hidden status line
         """
         from physics import calculate_initial_compass_bearing
 
-        # Only run when rect_course maneuver is selected
         if current_maneuver != "rect_course":
             raise PreventUpdate
 
-        # Remove any existing rectangular course preview
         if layer_children is None:
             layer_children = []
 
+        # Strip any existing rect_course preview elements.
         def should_keep(c):
             if not isinstance(c, dict):
                 return True
-            el_id = c.get('props', {}).get('id', '')
-            # ID can be a string or a dict (for pattern-matching IDs)
-            if isinstance(el_id, str) and el_id.startswith('rectcourse-preview'):
+            el_id = c.get("props", {}).get("id", "")
+            if isinstance(el_id, str) and el_id.startswith("rectcourse-preview"):
                 return False
             return True
 
         layer_children = [c for c in layer_children if should_keep(c)]
 
-        # If we don't have the start point, return defaults
-        if not dw_start or not isinstance(dw_start, dict) or dw_start.get('lat') is None:
-            return {}, "Click both points to see downwind leg info", layer_children
+        # Collect non-empty clicks in order.
+        clicks = []
+        for c in (c1, c2, c3, c4):
+            if c and isinstance(c, dict) and c.get("lat") is not None:
+                clicks.append(c)
 
-        start_lat = dw_start['lat']
-        start_lon = dw_start['lon']
+        if not clicks:
+            return {}, {}, "Click corner 1 to begin.", layer_children
 
-        # Add start marker — Theme B start (green-500)
-        start_marker = dl.CircleMarker(
-            id='rectcourse-preview-start',
-            center=[start_lat, start_lon],
-            radius=8,
-            color="#22c55e",
-            fill=True,
-            fillColor="#22c55e",
-            fillOpacity=0.8,
-            children=dl.Tooltip("Downwind Start (Entry)")
-        )
-        layer_children.append(start_marker)
+        # Always render the click dots so the pilot can see exactly where
+        # they clicked vs. where the snap landed.
+        marker_colors = ["#22c55e", "#f59e0b", "#f59e0b", "#ef4444"]
+        for i, p in enumerate(clicks):
+            layer_children.append(dl.CircleMarker(
+                id=f"rectcourse-preview-dot-{i + 1}",
+                center=[p["lat"], p["lon"]],
+                radius=7,
+                color=marker_colors[i],
+                fill=True,
+                fillColor=marker_colors[i],
+                fillOpacity=0.85,
+                children=dl.Tooltip(f"Corner {i + 1}"),
+            ))
 
-        # If we have both points, calculate edge
-        if dw_end and isinstance(dw_end, dict) and dw_end.get('lat') is not None:
-            end_lat = dw_end['lat']
-            end_lon = dw_end['lon']
+        snapped: dict = {}
+        edge_data: dict = {}
+        status_text = ""
 
-            # Calculate bearing from start to end (this is the downwind track)
+        if len(clicks) == 1:
+            status_text = "1/4 clicks — set corner 2 (defines downwind direction)."
+
+        elif len(clicks) == 2:
+            # First edge (downwind direction).
+            p1, p2 = clicks[0], clicks[1]
             from geopy import Point as GeoPoint
-            start_geo = GeoPoint(start_lat, start_lon)
-            end_geo = GeoPoint(end_lat, end_lon)
-            bearing = calculate_initial_compass_bearing(start_geo, end_geo)
-            bearing = round(bearing, 1)
-
-            # Calculate distance
-            ft_per_deg_lat = 364567.2
-            ft_per_deg_lon = 364567.2 * math.cos(math.radians(start_lat))
-            dn = (end_lat - start_lat) * ft_per_deg_lat
-            de = (end_lon - start_lon) * ft_per_deg_lon
-            dist_ft = math.hypot(dn, de)
-            dist_nm = dist_ft / 6076.12
-
-            # Midpoint of downwind leg
-            mid_lat = (start_lat + end_lat) / 2
-            mid_lon = (start_lon + end_lon) / 2
-
-            # Theme B downwind preview — path-active dashed
-            edge_line = dl.Polyline(
-                id='rectcourse-preview-edge',
-                positions=[[start_lat, start_lon], [end_lat, end_lon]],
+            bearing = round(calculate_initial_compass_bearing(
+                GeoPoint(p1["lat"], p1["lon"]),
+                GeoPoint(p2["lat"], p2["lon"]),
+            ), 1)
+            layer_children.append(dl.Polyline(
+                id="rectcourse-preview-edge12",
+                positions=[[p1["lat"], p1["lon"]], [p2["lat"], p2["lon"]]],
                 color="#0d59f2",
                 weight=2,
-                opacity=0.65,
+                opacity=0.7,
                 dashArray="6,6",
-                children=dl.Tooltip(f"Downwind Leg: {dist_nm:.2f} nm, Track {bearing:.0f}°")
-            )
+                children=dl.Tooltip(f"Downwind edge — bearing {bearing:.0f}°"),
+            ))
+            status_text = f"2/4 clicks — downwind bearing {bearing:.0f}° set. Click corners 3 + 4 to define width."
 
-            # Theme B downwind end — end (red-500)
-            end_marker = dl.CircleMarker(
-                id='rectcourse-preview-end',
-                center=[end_lat, end_lon],
-                radius=8,
-                color="#ef4444",
-                fill=True,
-                fillColor="#ef4444",
-                fillOpacity=0.8,
-                children=dl.Tooltip("Downwind End")
-            )
+        elif len(clicks) == 3:
+            # Raw polyline 1→2→3.
+            positions = [[p["lat"], p["lon"]] for p in clicks]
+            layer_children.append(dl.Polyline(
+                id="rectcourse-preview-poly3",
+                positions=positions,
+                color="#0d59f2",
+                weight=2,
+                opacity=0.7,
+                dashArray="6,6",
+            ))
+            status_text = "3/4 clicks — set corner 4 to close the rectangle."
 
-            # Theme B midpoint — intermediate (amber-500)
-            mid_marker = dl.CircleMarker(
-                id='rectcourse-preview-center',
-                center=[mid_lat, mid_lon],
-                radius=5,
-                color="#f59e0b",
-                fill=True,
-                fillColor="#f59e0b",
-                fillOpacity=0.8,
-                children=dl.Tooltip("Downwind Midpoint")
-            )
-
-            layer_children.extend([edge_line, end_marker, mid_marker])
-
-            # Store calculated values
-            edge_data = {
-                "start_lat": start_lat,
-                "start_lon": start_lon,
-                "end_lat": end_lat,
-                "end_lon": end_lon,
-                "mid_lat": mid_lat,
-                "mid_lon": mid_lon,
-                "bearing": bearing,
-                "length_nm": round(dist_nm, 3),
-                "length_ft": round(dist_ft, 0),
-            }
-
-            edge_info = [
-                html.Span("Downwind Length: ", style={"fontWeight": "bold"}),
-                html.Span(f"{dist_nm:.2f} nm"),
-                html.Span(" | Track: ", style={"fontWeight": "bold", "marginLeft": "15px"}),
-                html.Span(f"{bearing:.0f}°"),
-            ]
-            return edge_data, edge_info, layer_children
         else:
-            # Only start point set
-            return {}, "Start point set - click end point", layer_children
+            # 4 clicks — snap and render the perfect rectangle. The
+            # downwind edge is either user-selected (Auto / 0..3) or
+            # auto-picked from wind. We rotate the click list so the
+            # chosen edge comes first, then snap.
+            wind_dir_v = float(wind_dir) if wind_dir not in (None, "", "null") else 0.0
+            if downwind_choice in (None, "", "auto"):
+                dw_idx = _auto_downwind_edge(clicks, wind_dir_v)
+                dw_choice_kind = "auto"
+            else:
+                try:
+                    dw_idx = int(downwind_choice)
+                except (TypeError, ValueError):
+                    dw_idx = _auto_downwind_edge(clicks, wind_dir_v)
+                dw_choice_kind = "manual"
+
+            rotated = _rotate_clicks(clicks, dw_idx)
+            snapped = _snap_corners_to_rectangle(*rotated)
+            if snapped:
+                # Track which raw-click indices form the downwind edge so
+                # the preview can highlight them.
+                snapped["downwind_click_indices"] = [dw_idx, (dw_idx + 1) % 4]
+                snapped["downwind_choice"] = dw_choice_kind
+
+                corners_snap = snapped["corners_snapped"]
+                # Draw the snapped rectangle as 4 separate edges so the
+                # downwind one can be colored green (highlighted) and
+                # the rest blue. Edge 0 = corners_snap[0] → [1] = downwind.
+                EDGE_COLOR_DOWNWIND = "#16a34a"  # green-600
+                EDGE_COLOR_OTHER = "#0d59f2"     # brand-blue
+                for i in range(4):
+                    a = corners_snap[i]
+                    b = corners_snap[(i + 1) % 4]
+                    is_downwind = (i == 0)
+                    layer_children.append(dl.Polyline(
+                        id=f"rectcourse-preview-edge-{i}",
+                        positions=[[a["lat"], a["lon"]], [b["lat"], b["lon"]]],
+                        color=EDGE_COLOR_DOWNWIND if is_downwind else EDGE_COLOR_OTHER,
+                        weight=4 if is_downwind else 3,
+                        opacity=0.9,
+                        children=dl.Tooltip(
+                            f"DOWNWIND leg — flown with the wind"
+                            if is_downwind else f"Edge {i + 1}"
+                        ),
+                    ))
+
+                # Dashed line showing the user's raw 3→4 edge for
+                # comparison (only when the snap moved it noticeably).
+                layer_children.append(dl.Polyline(
+                    id="rectcourse-preview-raw34",
+                    positions=[[clicks[2]["lat"], clicks[2]["lon"]],
+                               [clicks[3]["lat"], clicks[3]["lon"]]],
+                    color="#94a3b8",
+                    weight=1,
+                    opacity=0.5,
+                    dashArray="3,4",
+                ))
+
+                # Edge data for backward compat.
+                edge_data = {
+                    "start_lat": snapped["dw_start"]["lat"],
+                    "start_lon": snapped["dw_start"]["lon"],
+                    "end_lat": snapped["dw_end"]["lat"],
+                    "end_lon": snapped["dw_end"]["lon"],
+                    "mid_lat": (snapped["dw_start"]["lat"] + snapped["dw_end"]["lat"]) / 2,
+                    "mid_lon": (snapped["dw_start"]["lon"] + snapped["dw_end"]["lon"]) / 2,
+                    "length_nm": None,
+                    "length_ft": None,
+                }
+                choice_note = (
+                    f"auto-picked from wind {wind_dir_v:.0f}°"
+                    if dw_choice_kind == "auto"
+                    else "manual override"
+                )
+                status_text = (
+                    f"Rectangle set — DW = edge {dw_idx + 1}→{((dw_idx + 1) % 4) + 1} "
+                    f"({choice_note}); width {snapped['lateral_offset_nm']:.2f} nm. "
+                    f"Click Draw to simulate."
+                )
+            else:
+                status_text = "Could not snap rectangle — clicks 1 and 2 too close. Try again."
+
+        return snapped, edge_data, status_text, layer_children
 
     @app.callback(
         Output("rectcourse-edge-visible-info", "children"),
@@ -233,10 +432,9 @@ def register(app):
         Output("rectcourse-time-slider", "marks"),
         Output("rectcourse-time-slider", "value"),
         Input({"type": "draw-btn", "m_id": "rect_course"}, "n_clicks"),
-        State("rectcourse-calculated-edge", "data"),
+        State("rectcourse-snapped-store", "data"),
         State("rectcourse-altitude", "value"),
         State("rectcourse-ias", "value"),
-        State("rectcourse-width", "value"),
         State("rectcourse-direction", "value"),
         State("rectcourse-circuits", "value"),
         State("env-oat", "value"),
@@ -244,19 +442,20 @@ def register(app):
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
         State("aircraft-select", "value"),
+        State("engine-select", "value"),
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
         State("power-setting", "value"),
         State("cg-slider", "value"),
         State("layer", "children"),
+        State("wind-profile-store", "data"),
         prevent_initial_call=True
     )
     def draw_rectangular_course(
         n_clicks,
-        edge_data,
+        snapped,
         altitude_ft,
         ias_knots,
-        lateral_offset,
         pattern_direction,
         num_circuits,
         oat_f,
@@ -264,14 +463,16 @@ def register(app):
         wind_dir,
         wind_speed,
         aircraft_name,
+        engine_name,
         selected_airport_id,
         runtime_weight,
         power_setting,
         cg_position,
         layer_children,
+        wind_profile_data,
     ):
-        # Check we have the edge data from the two-click selection
-        if not n_clicks or not edge_data or not edge_data.get('start_lat'):
+        # Snapped rectangle from the 4-corner UX must be present.
+        if not n_clicks or not snapped or not snapped.get("dw_start"):
             raise PreventUpdate
 
         # Remove preview markers from layer
@@ -291,11 +492,17 @@ def register(app):
 
         layer_children = [c for c in layer_children if should_keep(c)]
 
-        # Extract downwind leg endpoints from the two clicks
-        dw_start = {"lat": edge_data['start_lat'], "lon": edge_data['start_lon']}
-        dw_end = {"lat": edge_data['end_lat'], "lon": edge_data['end_lon']}
-        dw_length_nm = edge_data.get('length_nm', 0.5)
-        dw_track = edge_data.get('bearing', 0.0)
+        # 4-corner snap output drives the sim's dw_start / dw_end /
+        # lateral_offset. Pre-fix used a separate user-typed
+        # `rectcourse-width` input; now derived from the 4 clicks.
+        dw_start = dict(snapped["dw_start"])
+        dw_end = dict(snapped["dw_end"])
+        lateral_nm = float(snapped.get("lateral_offset_nm", 0.5))
+        # Recompute DW length from the snapped corners for the panel.
+        _dn = (dw_end["lat"] - dw_start["lat"]) * 364567.2
+        _de = (dw_end["lon"] - dw_start["lon"]) * 364567.2 * math.cos(math.radians(dw_start["lat"]))
+        dw_length_nm = math.hypot(_dn, _de) / 6076.12
+        dw_track = math.degrees(math.atan2(_de, _dn)) % 360.0
 
         # Get aircraft data
         if aircraft_name and aircraft_name in aircraft_data:
@@ -311,7 +518,6 @@ def register(app):
         # Parse inputs
         altitude = float(altitude_ft) if altitude_ft not in [None, "", "null"] else 800.0
         ias = float(ias_knots) if ias_knots not in [None, "", "null"] else 95.0
-        lateral_nm = float(lateral_offset) if lateral_offset not in [None, "", "null"] else 0.25
         direction = str(pattern_direction) if pattern_direction not in [None, "", "null"] else "left"
         circuits = int(num_circuits) if num_circuits not in [None, "", "null"] else 1
 
@@ -332,6 +538,15 @@ def register(app):
         power_pct = float(power_setting) if power_setting not in [None, "", "null"] else 0.5
         cg_pct = float(cg_position) if cg_position not in [None, "", "null"] else 0.5
 
+        # Hydrate live winds-aloft column if airport-pick fetched one.
+        wind_profile = None
+        if wind_profile_data:
+            try:
+                from core.winds_aloft import WindProfile
+                wind_profile = WindProfile.from_store(wind_profile_data)
+            except Exception:
+                wind_profile = None
+
         # Run simulation
         from simulation import simulate_rectangular_course
         path, hover, sim_warnings = simulate_rectangular_course(
@@ -351,6 +566,8 @@ def register(app):
             weight_lb=weight_lb,
             power_setting=power_pct,
             cg_position=cg_pct,
+            wind_profile=wind_profile,
+            engine_option=engine_name,
         )
 
         if not path or not hover:
@@ -394,12 +611,14 @@ def register(app):
                 html.Div(warning_items, style={"color": "#856404", "backgroundColor": "#fff3cd", "padding": "8px", "borderRadius": "4px", "marginBottom": "5px"})
             )
 
-        # Calculate stall margins
-        vs_clean = sim_warnings.get('stall_speed_clean', 48)
-        vs_in_turn = sim_warnings.get('stall_speed_in_turn', vs_clean)
+        # Stall references — sim surfaces real values post-audit (was
+        # hardcoding stall_speed_clean=48 in the warnings dict).
+        vs_clean = sim_warnings.get('vs_clean_kt', sim_warnings.get('stall_speed_clean', 48))
+        vs_in_turn = sim_warnings.get('vs_at_max_bank_kt', sim_warnings.get('stall_speed_in_turn', vs_clean))
         min_ias_achieved = sim_warnings.get('min_ias_achieved', ias)
         max_bank = sim_warnings.get('max_bank_achieved', 0)
         load_factor = 1 / math.cos(math.radians(float(max_bank))) if max_bank > 0 else 1.0
+        stall_margin = min_ias_achieved - vs_in_turn
 
         # Calculate avg TAS from hover data
         if hover:
@@ -445,7 +664,22 @@ def register(app):
                               "a typical 30° pattern bank. Tighter bank shrinks this.",
                     ),
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
-                    html.Div(f"Vs turn: {vs_in_turn:.0f} kt | Margin: {min_ias_achieved - vs_in_turn:.0f} kt | Time: {sim_warnings.get('total_time_sec', 0):.0f}s", style={"fontSize": "11px"}),
+                    html.Div(
+                        f"Vs(clean): {vs_clean:.0f} → Vs×√n at {max_bank:.0f}°: {vs_in_turn:.0f} kt | min IAS: {min_ias_achieved:.0f} kt | Time: {sim_warnings.get('total_time_sec', 0):.0f}s",
+                        style={"fontSize": "11px"},
+                    ),
+                    html.Div(
+                        f"Stall margin: {stall_margin:+.0f} kt",
+                        style={
+                            "fontSize": "11px",
+                            "color": (
+                                "#dc2626" if stall_margin < 4
+                                else "#f59e0b" if stall_margin < 8
+                                else "#16a34a"
+                            ),
+                            "fontWeight": "500",
+                        },
+                    ),
                     html.Div(f"{direction.title()} pattern | {circuits} circuits", style={"fontSize": "11px"}),
                     # Phase C9 — Private ACS tolerances.
                     html.Div([
@@ -456,12 +690,37 @@ def register(app):
             ], start_collapsed=False, style={"marginTop": "8px"})
         )
 
-        # Slider configuration
-        num_points = len(hover)
-        slider_max = max(0, num_points - 1)
+        # Live winds-aloft chip — parity with other maneuvers.
+        chip = _winds_aloft_chip(wind_profile_data)
+        if chip is not None:
+            info_elements.append(chip)
+
+        # Time-based scrubber with leg-transition marks. Walks the hover
+        # stream once and records the time each new segment first appears
+        # (downwind → turn_to_base → base → turn_to_upwind → ...).
+        max_time = hover[-1].get("time", 0) if hover else 0
         slider_marks = {0: "Start"}
-        if slider_max > 0:
-            slider_marks[slider_max] = "End"
+        seen_segs = set()
+        SEG_SHORT = {
+            "entry": "Entry",
+            "downwind": "DW",
+            "turn_to_base": "↻Base",
+            "base": "Base",
+            "turn_to_upwind": "↻UW",
+            "upwind": "UW",
+            "turn_to_crosswind": "↻XW",
+            "crosswind": "XW",
+            "turn_to_downwind": "↻DW",
+        }
+        for pt in hover:
+            seg = pt.get("segment", "")
+            if seg and seg not in seen_segs:
+                seen_segs.add(seg)
+                label = SEG_SHORT.get(seg, seg.replace("_", " ").title())
+                t_mark = int(round(float(pt.get("time", 0))))
+                slider_marks[t_mark] = label
+        slider_marks[int(round(max_time))] = "End"
+        slider_max = int(round(max_time)) if max_time > 0 else 100
         slider_style = {"display": "block", "marginTop": "10px"}
 
         # Calculate bounds for auto-zoom
@@ -496,13 +755,25 @@ def register(app):
         prevent_initial_call=True
     )
     def update_rectangular_course_scrubber(slider_value, hover_data, path_data):
-        """Update the scrubber marker and tooltip based on slider position."""
+        """Update the scrubber marker and tooltip based on slider position.
+
+        Time-based lookup so leg labels (DW / Base / Upwind / Crosswind)
+        align with the actual transition ticks regardless of timestep."""
         if not hover_data or not path_data or slider_value is None:
             return []
 
-        idx = int(slider_value)
-        if idx < 0 or idx >= len(hover_data) or idx >= len(path_data):
-            return []
+        target_time = float(slider_value)
+        best_idx = 0
+        best_diff = abs(hover_data[0].get("time", 0) - target_time)
+        for i, hp in enumerate(hover_data):
+            diff = abs(hp.get("time", 0) - target_time)
+            if diff < best_diff:
+                best_diff = diff
+                best_idx = i
+
+        idx = best_idx
+        if idx >= len(path_data):
+            idx = len(path_data) - 1
 
         pt = hover_data[idx]
         pos = path_data[idx]

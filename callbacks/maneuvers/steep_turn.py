@@ -16,7 +16,7 @@ import dash_leaflet as dl
 from utility import simulate_steep_turn
 
 from callbacks.map import create_airplane_marker
-from layouts.maneuvers._shared import _acs_metric, _power_verdict
+from layouts.maneuvers._shared import _acs_metric, _power_verdict, _winds_aloft_chip
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -51,6 +51,7 @@ def register(app):
         State("runtime-total-weight-lb", "data"),
         State("selected-airport-id", "data"),
         State("power-setting", "value"),
+        State("wind-profile-store", "data"),
         prevent_initial_call=True
     )
     def draw_steep_turn(
@@ -71,6 +72,7 @@ def register(app):
         runtime_weight,
         selected_airport_id,
         power_setting,
+        wind_profile_data,
     ):
         if not n_clicks or not start or not aircraft_name or not engine_name:
             raise PreventUpdate
@@ -125,6 +127,15 @@ def register(app):
         except (TypeError, ValueError):
             power_pct = 0.70
 
+        # Hydrate live winds-aloft column if airport-pick fetched one.
+        wind_profile = None
+        if wind_profile_data:
+            try:
+                from core.winds_aloft import WindProfile
+                wind_profile = WindProfile.from_store(wind_profile_data)
+            except Exception:
+                wind_profile = None
+
         path, hover = simulate_steep_turn(
             entry_point={"lat": start["lat"], "lon": start["lon"]},
             entry_heading_deg=float(entry_heading),
@@ -138,6 +149,11 @@ def register(app):
             altimeter_inhg=float(altimeter_val),
             field_elev_ft=float(field_elev_ft),
             power_setting=power_pct,
+            # Post-2026-05-21 audit additions
+            ac=ac_rt,
+            weight_lbs=float(weight_lbs),
+            engine_option=engine_name,
+            wind_profile=wind_profile,
         )
 
         if not path or not hover:
@@ -172,13 +188,31 @@ def register(app):
 
         elements = [start_marker, end_marker, path_line]
 
-        # Prepare slider configuration
-        num_points = len(hover)
-        slider_max = max(0, num_points - 1)
-        slider_marks = {0: "Start"}
-        if slider_max > 0:
-            slider_marks[slider_max] = "End"
-
+        # Time-based scrubber (was index-based) with phase markers
+        # derived from the sim's segment field. Matches the marker
+        # convention used by impossible_turn / PO180.
+        SEGMENT_LABELS = {
+            "left_roll_in": "Roll In L",
+            "left_turn": "Steady L",
+            "left_roll_out": "Roll Out L",
+            "right_roll_in": "Roll In R",
+            "right_turn": "Steady R",
+            "right_roll_out": "Roll Out R",
+            "pause": "Wings Level",
+        }
+        max_time = hover[-1]["time"] if hover else 0
+        slider_marks = {}
+        seen = set()
+        for pt in hover:
+            seg = pt.get("segment")
+            if seg and seg not in seen:
+                seen.add(seg)
+                t_mark = int(round(float(pt.get("time", 0))))
+                label = SEGMENT_LABELS.get(seg, seg.replace("_", " ").title())
+                slider_marks[t_mark] = label
+        slider_marks[0] = slider_marks.get(0, "Start")
+        slider_marks[int(round(max_time))] = "End"
+        slider_max = int(round(max_time)) if max_time > 0 else 100
         slider_style = {"display": "block", "marginTop": "10px"}
 
         # Calculate performance metrics from hover data
@@ -202,9 +236,14 @@ def register(app):
             turn_radius_ft = (tas_fps ** 2) / (32.2 * math.tan(math.radians(float(bank_angle)))) if bank_angle else 0
             turn_radius_nm = turn_radius_ft / 6076.12
 
-            # Calculate stall speed in turn: Vs_turn = Vs * sqrt(load_factor)
-            vs_clean = float(ac.get("stall_speed_clean_kias", 48))
-            vs_in_turn = vs_clean * math.sqrt(load_factor)
+            # Stall speed at bank (Vs × √n) — uses the corrected
+            # weight-interpolated lookup the sim now surfaces on the
+            # final hover point. Pre-fix the callback read
+            # `stall_speed_clean_kias` which doesn't exist in any
+            # airframe JSON — fallback was always 48 kt.
+            last_pt = hover[-1] if hover else {}
+            vs_clean = float(last_pt.get("vs_clean_kt", 50))
+            vs_in_turn = float(last_pt.get("vs_at_bank_kt") or (vs_clean * math.sqrt(load_factor)))
 
             # Get wind info
             wind_dir_val = float(wind_dir) if wind_dir not in [None, "", "null"] else 0
@@ -229,6 +268,15 @@ def register(app):
         else:
             turn_rate_dps = 0.0
 
+        # Stall margin (post-fix, uses real Vs)
+        stall_margin = entry_ias - vs_in_turn
+        if stall_margin < 4:
+            sm_color = "#dc2626"
+        elif stall_margin < 8:
+            sm_color = "#f59e0b"
+        else:
+            sm_color = "#16a34a"
+
         # Build info panel with standardized format
         info_content = dbc.Accordion([
             dbc.AccordionItem([
@@ -237,7 +285,8 @@ def register(app):
                 html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                 html.Div(f"AOB: {max_bank:.0f}° | Load: {load_factor:.2f}G | Radius: {turn_radius_ft:.0f} ft", style={"fontSize": "11px"}),
                 html.Div(f"Turn rate: {turn_rate_dps:.1f} °/s", style={"fontSize": "11px"}),
-                html.Div(f"GS: {min_gs:.0f}-{max_gs:.0f} kt | Vs turn: {vs_in_turn:.0f} kt | Margin: {entry_ias - vs_in_turn:.0f} kt", style={"fontSize": "11px"}),
+                html.Div(f"GS: {min_gs:.0f}-{max_gs:.0f} kt | Vs(clean): {vs_clean:.0f} kt → Vs×√n: {vs_in_turn:.0f} kt", style={"fontSize": "11px"}),
+                html.Div(f"Stall margin: {stall_margin:+.0f} kt", style={"fontSize": "11px", "color": sm_color, "fontWeight": "500"}),
                 html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                 html.Div(f"Time: {total_time:.0f}s | {sequence.replace('-', ' → ').title()}", style={"fontSize": "11px"}),
                 # Phase C9 — ACS tolerance badges. Sim is "perfect" so
@@ -256,6 +305,11 @@ def register(app):
                 ),
             ], title="Simulation Results", style={"fontSize": "12px"}),
         ], start_collapsed=False, style={"marginTop": "8px"})
+
+        # Live winds-aloft chip — matches other maneuvers.
+        winds_chip = _winds_aloft_chip(wind_profile_data)
+        if winds_chip is not None:
+            info_content = html.Div([info_content, winds_chip])
 
         # Calculate bounds for auto-zoom
         if path:
@@ -285,32 +339,65 @@ def register(app):
         prevent_initial_call=True
     )
     def update_steep_turn_scrubber(slider_value, hover_data, path_data):
-        """Update the scrubber marker and tooltip based on slider position."""
+        """Update the scrubber marker and tooltip based on slider position.
+
+        Time-based lookup (post-2026-05-21) — finds the closest hover
+        entry by time rather than by index, so the marks "Roll In L /
+        Steady L / Roll Out L / ..." land on the right ticks even when
+        the segment timing doesn't divide the index range evenly."""
         if not hover_data or not path_data or slider_value is None:
             return []
 
-        idx = int(slider_value)
-        if idx < 0 or idx >= len(hover_data) or idx >= len(path_data):
-            return []
+        target_time = float(slider_value)
+        best_idx = 0
+        best_diff = abs(hover_data[0].get("time", 0) - target_time)
+        for i, hp in enumerate(hover_data):
+            diff = abs(hp.get("time", 0) - target_time)
+            if diff < best_diff:
+                best_diff = diff
+                best_idx = i
+
+        idx = best_idx
+        if idx >= len(path_data):
+            idx = len(path_data) - 1
 
         pt = hover_data[idx]
         pos = path_data[idx]
 
-        segment = pt.get('segment', 'turn')
+        # Friendly segment label
+        SEGMENT_LABELS = {
+            "left_roll_in": "Left Roll In",
+            "left_turn": "Steady Left Turn",
+            "left_roll_out": "Left Roll Out",
+            "right_roll_in": "Right Roll In",
+            "right_turn": "Steady Right Turn",
+            "right_roll_out": "Right Roll Out",
+            "pause": "Wings Level",
+        }
+        seg_raw = pt.get('segment', 'turn')
+        segment_label = SEGMENT_LABELS.get(seg_raw, seg_raw.replace("_", " ").title())
+
+        load_factor = pt.get("load_factor")
+        bank_for_lf = pt.get("aob", 0)
+        if load_factor is None and bank_for_lf is not None and abs(bank_for_lf) < 89.9:
+            load_factor = 1.0 / math.cos(math.radians(abs(bank_for_lf)))
 
         tooltip_content = [
-            html.Div(f"{segment.replace('_', ' ').title()}", style={"fontWeight": "bold", "borderBottom": "1px solid #ccc", "paddingBottom": "3px", "marginBottom": "3px"}),
-            html.Div(f"Altitude: {pt.get('alt', 0):.0f} ft AGL"),
+            html.Div(segment_label, style={"fontWeight": "bold", "borderBottom": "1px solid #ccc", "paddingBottom": "3px", "marginBottom": "3px"}),
+            html.Div(f"Altitude: {pt.get('alt', 0):.0f} ft (MSL)"),
             html.Div(f"Time: {pt.get('time', 0):.1f} sec"),
-            html.Div(f"TAS: {pt.get('tas', 0):.0f} kt | GS: {pt.get('gs', pt.get('tas', 0)):.0f} kt"),
-            html.Div(f"AOB: {'L ' if pt.get('aob', 0) < 0 else ('R ' if pt.get('aob', 0) > 0 else '')}{abs(pt.get('aob', 0)):.1f}°"),
+            html.Div(f"IAS: {pt.get('ias', pt.get('tas', 0)):.0f} kt | TAS: {pt.get('tas', 0):.0f} kt | GS: {pt.get('gs', pt.get('tas', 0)):.0f} kt"),
+            html.Div(f"AOB: {'L ' if pt.get('aob', 0) < 0 else ('R ' if pt.get('aob', 0) > 0 else '')}{abs(pt.get('aob', 0)):.1f}° | Load: {load_factor:.2f}G" if load_factor else f"AOB: {abs(pt.get('aob', 0)):.1f}°"),
             html.Div(f"VS: {pt.get('vs', 0):.0f} fpm"),
             html.Div(f"Heading: {pt.get('heading', 0):.0f}° | Track: {pt.get('track', 0):.0f}°"),
-            html.Div(f"Crab: {'R ' if pt.get('drift', 0) < 0 else ('L ' if pt.get('drift', 0) > 0 else '')}{abs(pt.get('drift', 0)):.1f}°"),
+            # Crab intentionally not shown — steep turn is a continuous
+            # 360° turn; crab varies constantly around the orbit and is
+            # noise to the pilot (consistent with chandelle / lazy 8).
+            # Marker visual still uses crab to orient the airplane icon.
         ]
 
         heading = pt.get('heading', 0)
         bank = pt.get('aob', 0)
-        crab = -pt.get('drift', 0)  # Negate: crab is opposite of drift (point into wind)
+        crab = -pt.get('drift', 0)  # marker convention: positive = right crab
         marker = create_airplane_marker(pos, heading, tooltip_content, bank, crab)
         return [marker]

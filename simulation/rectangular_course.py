@@ -57,6 +57,9 @@ def simulate_rectangular_course(
     turn_bank_deg: float = 30.0,
     points_per_leg: int = 20,
     points_per_turn: int = 24,  # More points for smoother turn rendering
+    # Post-2026-05-21 additions
+    wind_profile=None,
+    engine_option: str = None,
 ) -> tuple:
     """
     Simulate rectangular course with PERFECT ground track geometry.
@@ -91,6 +94,42 @@ def simulate_rectangular_course(
     if weight_lb is None or weight_lb <= 0:
         weight_lb = ac.get("total_weight_lb") or _ref_weight_lb(ac) or 2300.0
     weight_lb = float(weight_lb)
+
+    # User surface wind authoritative; column drives the single-altitude
+    # lookup. Pre-fix the sim had no wind_profile support at all.
+    if wind_profile is not None:
+        try:
+            wind_profile = wind_profile.with_surface_override(
+                wind_dir_deg, wind_speed_kt,
+                surface_alt_ft_msl=field_elev_ft,
+            )
+            wd, ws = wind_profile.at(field_elev_ft + altitude_ft)
+            wind_dir_deg = float(wd)
+            wind_speed_kt = float(ws)
+        except Exception:
+            pass
+
+    # Weight-interpolated Vs from the aircraft's stall_speeds table.
+    # Pre-fix the sim emitted a hardcoded 48 kt as `stall_speed_clean`
+    # in the warnings dict (line 505 below), so every airframe got the
+    # same Vs reference regardless of weight or aircraft type.
+    def _vs_clean_kt(ac_dict, weight):
+        sd = (ac_dict.get("stall_speeds") or {}).get("clean", {})
+        weights = sd.get("weights", [])
+        speeds = sd.get("speeds", [])
+        if not weights or not speeds:
+            return 50.0
+        if weight <= weights[0]:
+            return float(speeds[0])
+        if weight >= weights[-1]:
+            return float(speeds[-1])
+        for i in range(len(weights) - 1):
+            if weights[i] <= weight <= weights[i + 1]:
+                r = (weight - weights[i]) / (weights[i + 1] - weights[i])
+                return float(speeds[i]) + r * (float(speeds[i + 1]) - float(speeds[i]))
+        return float(speeds[-1])
+
+    vs_clean_kt = _vs_clean_kt(ac, weight_lb)
 
     # Compute TAS
     alt_msl = field_elev_ft + altitude_ft
@@ -482,6 +521,19 @@ def simulate_rectangular_course(
     # WARNINGS AND METADATA
     # =========================================================================
 
+    # Vs at the actual max bank (post-clamp) — used for stall-margin
+    # chip in the result panel.
+    max_bank_flown = stats["max_bank"] if stats["max_bank"] > 0.5 else turn_bank_deg
+    load_factor_max = (
+        1.0 / math.cos(math.radians(max_bank_flown))
+        if max_bank_flown < 89.9 else float("inf")
+    )
+    vs_at_max_bank = (
+        vs_clean_kt * math.sqrt(load_factor_max)
+        if math.isfinite(load_factor_max) else None
+    )
+    min_ias_achieved = float(ias_knots)  # constant in this sim — IAS is held
+
     warnings = {
         "stall_margin_warning": False,
         "g_limit_warning": False,
@@ -502,13 +554,21 @@ def simulate_rectangular_course(
         "total_time_sec": round(time_sec, 1),
         "weight_lb": round(weight_lb, 0),
         "tas_knots": round(tas_knots, 1),
-        "stall_speed_clean": 48.0,
         "density_altitude_ft": round(pressure_alt, 0),
         "entry_altitude_ft": round(altitude_ft, 0),
         "final_altitude_ft": round(altitude_ft, 0),
         "altitude_loss_ft": 0,
         "wind_dir": round(wind_dir_deg, 0),
         "wind_speed": round(wind_speed_kt, 0),
+        # Post-2026-05-21 audit additions — real Vs surfaced from the
+        # aircraft's stall_speeds table instead of a hardcoded 48 kt.
+        "stall_speed_clean": round(vs_clean_kt, 1),  # legacy key kept for callback compat
+        "vs_clean_kt": round(vs_clean_kt, 1),
+        "vs_at_max_bank_kt": round(vs_at_max_bank, 1) if vs_at_max_bank else None,
+        "stall_speed_in_turn": round(vs_at_max_bank, 1) if vs_at_max_bank else None,
+        "min_ias_achieved": round(min_ias_achieved, 1),
+        "wind_profile_used": wind_profile is not None,
+        "engine_option": engine_option,
     }
 
     return path, hover, warnings

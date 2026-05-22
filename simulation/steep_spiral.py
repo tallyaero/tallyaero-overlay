@@ -64,6 +64,7 @@ def simulate_steep_spiral(
     min_completion_agl: float = 1500.0,
     residual_power: float = 0.0,
     wind_profile=None,
+    engine_option: str = None,
 ) -> tuple:
     """
     Simulate a steep spiral maneuver with constant ground track and wind compensation.
@@ -107,33 +108,48 @@ def simulate_steep_spiral(
     wind_dir_deg = float(wind_dir_deg or 0.0)
     wind_speed_kt = float(wind_speed_kt or 0.0)
 
-    # Phase H — when a column profile is provided, use the wind at the
-    # spiral's MEAN altitude (midpoint between entry and min completion
-    # AGL, plus field elev to convert AGL→MSL). Steep spiral descends
-    # ~3500 ft over 3 turns; the mid-altitude wind is a fair average
-    # for the wind-corrected ground track the sim renders.
-    if wind_profile is not None:
-        try:
-            mid_agl = (float(entry_altitude_ft) + float(min_completion_agl)) / 2.0
-            mid_msl = float(field_elev_ft) + mid_agl
-            wd_eff, ws_eff = wind_profile.at(mid_msl)
-            wind_dir_deg = float(wd_eff)
-            wind_speed_kt = float(ws_eff)
-        except Exception:
-            pass
     oat_c = float(oat_c if oat_c is not None else 15.0)
     altimeter_inhg = float(altimeter_inhg if altimeter_inhg is not None else 29.92)
     field_elev_ft = float(field_elev_ft or 0.0)
     num_turns = max(3, int(num_turns or 3))
     min_completion_agl = float(min_completion_agl or 1500.0)
 
+    # User surface wind authoritative. When a column is provided, override
+    # its SFC layer with the user's value and then sample per-tick at the
+    # aircraft's current MSL altitude — boundary-layer shear over a 3500-ft
+    # descent matters a lot here. Pre-fix this branch silently overwrote
+    # `wind_dir_deg` / `wind_speed_kt` with the column's mid-altitude wind,
+    # dropping any pilot edit.
+    if wind_profile is not None:
+        try:
+            wind_profile = wind_profile.with_surface_override(
+                wind_dir_deg, wind_speed_kt,
+                surface_alt_ft_msl=field_elev_ft,
+            )
+        except Exception:
+            pass
+
+    # POH dynamics — required bank varies through each orbit (steeper
+    # downwind, shallower upwind). τ-smooth so a heavy airframe doesn't
+    # snap to a 60° downwind bank in one tick. Roll-rate clamps the
+    # per-tick change to physical limits.
+    try:
+        from core.dynamics import dynamics_for
+        pd_dyn = dynamics_for(ac) if ac is not None else {}
+    except Exception:
+        pd_dyn = {}
+    bank_response_tau_s = float(pd_dyn.get("bank_response_tau_s", 1.0))
+    roll_rate_dps = float(pd_dyn.get("roll_rate_dps", 40.0))
+
     # Turn direction: +1 for right (clockwise), -1 for left (counter-clockwise)
     turn_sign = -1.0 if str(turn_direction).lower().startswith('l') else 1.0
 
-    # Get aircraft glide performance
+    # Get aircraft glide performance — engine_option honored for variant-
+    # specific best-glide (pre-fix passed None, ignoring the user's
+    # engine pick on multi-variant airframes).
     if ac is None:
         ac = {}
-    bg_kias, base_glide_ratio = _get_best_glide_and_ratio(ac, None, "clean", "idle")
+    bg_kias, base_glide_ratio = _get_best_glide_and_ratio(ac, engine_option, "clean", "idle")
 
     # Get aircraft weight
     if weight_lb is None:
@@ -175,11 +191,25 @@ def simulate_steep_spiral(
     else:  # Right turn
         entry_heading = _wrap_360(entry_bearing + 90.0)
 
-    # Wind components (wind velocity in NE frame)
-    wind_to_rad = math.radians((wind_dir_deg + 180.0) % 360.0)
-    wind_fps = wind_speed_kt * 1.68781
-    wn_fps = wind_fps * math.cos(wind_to_rad)
-    we_fps = wind_fps * math.sin(wind_to_rad)
+    # Wind components — recomputed per-tick when wind_profile is present
+    # so a 3500-ft descent picks up shear correctly. Without a profile,
+    # constant from the user input.
+    def _resolve_wind_at(alt_msl_now: float):
+        if wind_profile is None:
+            wind_to = math.radians((wind_dir_deg + 180.0) % 360.0)
+            wfps = wind_speed_kt * 1.68781
+            return wfps * math.cos(wind_to), wfps * math.sin(wind_to)
+        try:
+            wd, ws = wind_profile.at(alt_msl_now)
+            wto = math.radians((float(wd) + 180.0) % 360.0)
+            wfps = float(ws) * 1.68781
+            return wfps * math.cos(wto), wfps * math.sin(wto)
+        except Exception:
+            wind_to = math.radians((wind_dir_deg + 180.0) % 360.0)
+            wfps = wind_speed_kt * 1.68781
+            return wfps * math.cos(wind_to), wfps * math.sin(wind_to)
+
+    wn_fps, we_fps = _resolve_wind_at(field_elev_ft + entry_altitude_ft)
 
     # Initialize warnings
     warnings = {
@@ -210,6 +240,18 @@ def simulate_steep_spiral(
     turn_altitude_losses = []
     current_turn = 0
 
+    # τ-smoothed bank state (POH bank_response_tau_s + roll_rate_dps cap).
+    # Required bank varies through each orbit (steeper downwind, shallower
+    # upwind); pre-fix the sim snapped instantly to the geometry-derived
+    # value. The smoother makes the trace match how a real pilot would
+    # actually fly the maneuver.
+    bank_state_deg = bank_angle_deg  # start at the user-input target
+    # Track unclamped peak (informational for the warning chip).
+    peak_unclamped_bank = 0.0
+    # Initial TAS state mirrors the entry-altitude calc; refreshed per tick.
+    glide_tas_knots_current = glide_tas_knots
+    glide_tas_fps_current = glide_tas_fps
+
     # Phase C7 — residual power reduces descent rate. Stock Steep Spiral
     # is idle (0.0); above 0.05 is off-design (surfaced via warnings). At
     # the design assumption of idle the formula is identical to the
@@ -238,6 +280,22 @@ def simulate_steep_spiral(
             warnings['impact_altitude_agl'] = 0.0
             alt_agl = 0.0
             break
+
+        # Per-tick TAS recomputation. Steep spiral descends ~3500 ft over
+        # 3 turns; freezing TAS at entry overstated GS / required bank on
+        # the lower turns.
+        try:
+            cur_alt_msl = field_elev_ft + alt_agl
+            cur_palt = compute_pressure_altitude(cur_alt_msl, altimeter_inhg)
+            cur_tas = compute_true_airspeed(bg_kias, cur_palt, oat_c)
+            if cur_tas and cur_tas > 1:
+                glide_tas_knots_current = float(cur_tas)
+                glide_tas_fps_current = glide_tas_knots_current * 1.68781
+        except Exception:
+            pass
+
+        # Per-tick wind refresh — picks up shear from the column.
+        wn_fps, we_fps = _resolve_wind_at(field_elev_ft + alt_agl)
 
         # Current turn number (0-indexed)
         new_turn = int(total_angle_traveled / (2 * math.pi))
@@ -281,10 +339,10 @@ def simulate_steep_spiral(
         # Wind component across track (positive = wind from left pushing right)
         wind_across_track = -wn_fps * track_e + we_fps * track_n
 
-        # To maintain track, aircraft must crab into crosswind
-        # sin(crab) = -wind_across / TAS
-        cross_ratio = wind_across_track / max(glide_tas_fps, 50.0)
-        cross_ratio = max(-0.95, min(0.95, cross_ratio))  # Limit for asin
+        # To maintain track, aircraft must crab into crosswind.
+        # sin(crab) = -wind_across / TAS  — uses CURRENT (per-tick) TAS.
+        cross_ratio = wind_across_track / max(glide_tas_fps_current, 50.0)
+        cross_ratio = max(-0.95, min(0.95, cross_ratio))
         crab_rad = math.asin(-cross_ratio)
         crab_deg = math.degrees(crab_rad)
 
@@ -292,34 +350,41 @@ def simulate_steep_spiral(
         hdg_deg = _wrap_360(track_deg + crab_deg)
         hdg_rad = math.radians(hdg_deg)
 
-        # Groundspeed along track
-        along_air = glide_tas_fps * math.cos(crab_rad)
+        # Groundspeed along track (per-tick TAS)
+        along_air = glide_tas_fps_current * math.cos(crab_rad)
         gs_fps = along_air + wind_along_track
-        gs_fps = max(10.0, gs_fps)  # Minimum groundspeed
+        gs_fps = max(10.0, gs_fps)
         gs_kt = gs_fps / 1.68781
 
-        # Required bank angle to maintain turn at this groundspeed
-        # Turn rate = V / R, and turn rate = g * tan(bank) / V
-        # So: g * tan(bank) / TAS = GS / R (angular rate from groundspeed)
-        # But we need: bank such that aircraft follows the circular ground track
-
-        # For ground reference maneuver, the key is that the GROUND track is circular
-        # The required centripetal acceleration (in ground frame) is: a = GS² / R
-        # This must come from the horizontal component of lift
-        # Bank angle: tan(bank) = a / g = GS² / (R * g)
-
+        # Required bank from ground-track centripetal physics.
         required_centripetal = (gs_fps ** 2) / orbit_radius_ft
         tan_bank = required_centripetal / G_FPS2
         unclamped_bank_deg = math.degrees(math.atan(tan_bank))
-        # Phase C7 — track if the *unclamped* required bank ever exceeded
-        # the 60° ACS limit. If so, the maneuver is technically out of
-        # spec even though we cap it at 60° for safety.
+        if unclamped_bank_deg > peak_unclamped_bank:
+            peak_unclamped_bank = unclamped_bank_deg
         if unclamped_bank_deg > 60.0:
             warnings['peak_bank_exceeded_60'] = True
-        actual_bank_deg = max(15.0, min(60.0, unclamped_bank_deg))  # Safety limits
+        target_bank_deg = max(15.0, min(60.0, unclamped_bank_deg))
 
-        # Compute descent rate at this bank angle
-        descent_fpm = compute_descent_rate(actual_bank_deg, glide_tas_knots)
+        # τ-smoothed bank toward the target. Pre-fix snapped instantly
+        # to `target_bank_deg` each tick — visually OK at low wind, but
+        # at strong winds the bank step at the downwind crossing was
+        # unrealistic. POH τ + roll-rate clamp produces a flyable trace.
+        if bank_response_tau_s > 0:
+            alpha = min(1.0, dt / bank_response_tau_s)
+        else:
+            alpha = 1.0
+        delta_bank = (target_bank_deg - bank_state_deg) * alpha
+        max_step = roll_rate_dps * dt
+        if delta_bank > max_step:
+            delta_bank = max_step
+        elif delta_bank < -max_step:
+            delta_bank = -max_step
+        bank_state_deg += delta_bank
+        actual_bank_deg = bank_state_deg
+
+        # Descent rate at the ACTUAL flown bank.
+        descent_fpm = compute_descent_rate(actual_bank_deg, glide_tas_knots_current)
 
         # Drift angle (difference between heading and track)
         drift_deg = _angle_diff_deg(track_deg, hdg_deg)
@@ -329,7 +394,7 @@ def simulate_steep_spiral(
         hover.append({
             "time": round(t, 2),
             "alt": round(alt_agl, 1),
-            "tas": round(glide_tas_knots, 1),
+            "tas": round(glide_tas_knots_current, 1),
             "ias": round(bg_kias, 1),
             "gs": round(gs_kt, 1),
             "aob": round(turn_sign * actual_bank_deg, 1),
@@ -373,10 +438,10 @@ def simulate_steep_spiral(
         hover.append({
             "time": round(t, 2),
             "alt": round(alt_agl, 1),
-            "tas": round(glide_tas_knots, 1),
+            "tas": round(glide_tas_knots_current, 1),
             "ias": round(bg_kias, 1),
             "gs": round(gs_kt, 1),
-            "aob": round(turn_sign * actual_bank_deg, 1),  # Apply turn_sign for L/R display
+            "aob": round(turn_sign * actual_bank_deg, 1),
             "load_factor": round(load_factor2, 2) if load_factor2 is not None else None,
             "vs": round(-descent_fpm, 0),
             "track": round(track_deg, 1),
@@ -422,5 +487,49 @@ def simulate_steep_spiral(
     # idle" and outside the ACS Steep Spiral assumption).
     if res_pwr > 0.05:
         warnings['off_design_residual_power'] = round(res_pwr * 100, 0)
+
+    # Post-2026-05-21 audit additions on the last hover entry — fields
+    # the callback needs to render a correct stall-margin chip and a
+    # peak-bank diagnostic. Pre-fix the callback read a non-existent
+    # `stall_speed_clean_kias` from the aircraft JSON (→ Vs=48 for
+    # every airframe).
+    if hover:
+        # Stall reference uses weight-interpolated Vs (clean config —
+        # idle power, so no propwash benefit assumed).
+        try:
+            from .impossible_turn import _get_stall_speed
+            vs_clean_kt = _get_stall_speed(ac, float(weight_lb), "clean")
+        except Exception:
+            # Fallback: read from stall_speeds table directly
+            sd = (ac.get("stall_speeds") or {}).get("clean", {})
+            speeds = sd.get("speeds", [50])
+            vs_clean_kt = float(speeds[0]) if speeds else 50.0
+        # Max bank actually flown (post-τ smoothing) — distinct from the
+        # geometry's required bank, which is the `peak_unclamped` value.
+        max_bank_flown = max(
+            (abs(pt.get("aob", 0)) for pt in hover),
+            default=bank_angle_deg,
+        )
+        load_factor_max = (
+            1.0 / math.cos(math.radians(max_bank_flown))
+            if max_bank_flown < 89.9 else float("inf")
+        )
+        vs_at_bank = (
+            vs_clean_kt * math.sqrt(load_factor_max)
+            if math.isfinite(load_factor_max) else None
+        )
+        min_ias_through_run = min(
+            (pt.get("ias", bg_kias) for pt in hover),
+            default=bg_kias,
+        )
+        last = hover[-1]
+        last["vs_clean_kt"] = round(vs_clean_kt, 1)
+        last["vs_at_bank_kt"] = round(vs_at_bank, 1) if vs_at_bank else None
+        last["min_ias_kt"] = round(min_ias_through_run, 1)
+        last["max_bank_flown_deg"] = round(max_bank_flown, 1)
+        last["peak_unclamped_bank_deg"] = round(peak_unclamped_bank, 1)
+        last["roll_rate_dps_used"] = round(roll_rate_dps, 1)
+        last["wind_profile_used"] = wind_profile is not None
+        last["engine_option"] = engine_option
 
     return path, hover, warnings

@@ -45,6 +45,9 @@ def simulate_eights_on_pylons(
     bank_angle_deg: float = 30.0,
     timestep_sec: float = 0.5,
     entry_direction: str = "downwind",
+    # Post-2026-05-21 additions
+    wind_profile=None,
+    engine_option: str = None,
 ) -> tuple:
     """
     Simulate Eights on Pylons.
@@ -72,6 +75,44 @@ def simulate_eights_on_pylons(
     if weight_lb is None or weight_lb <= 0:
         weight_lb = ac.get("total_weight_lb") or _ref_weight_lb(ac) or 2300.0
     weight_lb = float(weight_lb)
+
+    # User surface wind authoritative; column drives the single-altitude
+    # lookup at maneuver altitude (= pivotal altitude). Pre-fix the sim
+    # had no wind_profile support at all.
+    if wind_profile is not None:
+        try:
+            wind_profile = wind_profile.with_surface_override(
+                wind_dir_deg, wind_speed_kt,
+                surface_alt_ft_msl=field_elev_ft,
+            )
+            # Pivotal alt is roughly GS²/11.3 — close to IAS²/11.3 for the
+            # lookup. We refine after computing TAS below.
+            wd, ws = wind_profile.at(field_elev_ft + (ias_knots ** 2) / 11.3)
+            wind_dir_deg = float(wd)
+            wind_speed_kt = float(ws)
+        except Exception:
+            pass
+
+    # Weight-interpolated Vs from the aircraft's stall_speeds table.
+    # Pre-fix the callback read `stall_speed_clean` (never emitted by
+    # this sim) and fell back to 48 kt for every airframe.
+    def _vs_clean_kt(ac_dict, weight):
+        sd = (ac_dict.get("stall_speeds") or {}).get("clean", {})
+        weights = sd.get("weights", [])
+        speeds = sd.get("speeds", [])
+        if not weights or not speeds:
+            return 50.0
+        if weight <= weights[0]:
+            return float(speeds[0])
+        if weight >= weights[-1]:
+            return float(speeds[-1])
+        for i in range(len(weights) - 1):
+            if weights[i] <= weight <= weights[i + 1]:
+                r = (weight - weights[i]) / (weights[i + 1] - weights[i])
+                return float(speeds[i]) + r * (float(speeds[i + 1]) - float(speeds[i]))
+        return float(speeds[-1])
+
+    vs_clean_kt = _vs_clean_kt(ac, weight_lb)
 
     # Compute TAS and turn radius
     estimated_pa = compute_pivotal_altitude(ias_knots)
@@ -148,6 +189,9 @@ def simulate_eights_on_pylons(
             "tas": round(tas_knots, 1), "ias": round(ias_knots, 1), "gs": round(gs, 1),
             "aob": round(aob, 1), "vs": 0, "track": round(track, 1),
             "heading": round(hdg, 1), "drift": round(drift, 1),
+            # `wind_correction` is the magnitude the scrubber tooltip displays
+            # (pre-fix it was missing → tooltip showed 0 every tick).
+            "wind_correction": round(drift, 1),
             "load_factor": round(lf, 2), "segment": seg,
         })
 
@@ -185,8 +229,14 @@ def simulate_eights_on_pylons(
                 gs, _, _, _ = get_gs_pa(hdg)
                 t += seg_ft / (gs * 1.68781) if gs > 0 else 0.5
 
-    def line(start, end, seg, npts=10):
-        """Draw straight line."""
+    def line(start, end, seg, npts=40):
+        """Draw straight line.
+
+        npts bumped from 10 → 40 (post-2026-05-21) so the scrubber on
+        the straight tangent feels as smooth as on the arcs (which
+        use 40+1 samples). Pre-fix the straights had 11 samples,
+        making the airplane marker jump in chunks on the time slider.
+        """
         nonlocal t
         dlat = end.latitude - start.latitude
         dlon = end.longitude - start.longitude
@@ -212,11 +262,26 @@ def simulate_eights_on_pylons(
 
     bearing_to_p1 = _wrap_360(bearing_to_p2 + 180)
 
-    # Compute internal tangent offset
+    # Compute internal tangent offset.
+    #
+    # The internal tangent only exists when the two orbit circles do
+    # NOT overlap: pylon_dist > 2 · turn_radius. Near the boundary
+    # (D ≈ 2R, sin(α) ≈ 1, α ≈ 90°) the tangent becomes degenerate —
+    # the heading the orbit ends at no longer matches the line's
+    # geometric direction, which surfaces as a visible altitude /
+    # groundspeed step at each transition.
+    #
+    # We compute a spacing-quality ratio (D/R) so the callback can
+    # render an ACS-style warning and suggest a target range. The
+    # commercial ACS doesn't give a hard pylon-distance number, but
+    # a healthy figure-8 needs ~3-6 turn-radii between pylons so the
+    # straight tangent is long enough to roll wings-level briefly
+    # without compressing the maneuver.
+    d_over_r = (pylon_dist_nm / turn_radius_nm) if turn_radius_nm > 0 else 0.0
     if pylon_dist_nm > 2 * turn_radius_nm:
         tangent_offset = math.degrees(math.asin(2 * turn_radius_nm / pylon_dist_nm))
     else:
-        tangent_offset = 30.0  # Fallback if circles overlap
+        tangent_offset = 30.0  # Fallback if circles overlap — sim still runs but geometry is invalid
 
     # P1→P2 transition (internal tangent)
     # Tangent line bearing = bearing_to_p2 + tangent_offset
@@ -271,6 +336,24 @@ def simulate_eights_on_pylons(
 
     # Results
     avg_pa = (max_pa + min_pa) / 2
+
+    # Bank/crab extremes from hover stream.
+    banks_seen = [abs(p.get("aob", 0)) for p in hover if p.get("aob") is not None]
+    crabs_seen = [abs(p.get("drift", 0)) for p in hover if p.get("drift") is not None]
+    max_bank_achieved = max(banks_seen) if banks_seen else bank_angle_deg
+    min_bank_achieved = min((b for b in banks_seen if b > 1.0), default=0.0)
+    max_crab = max(crabs_seen) if crabs_seen else 0.0
+
+    # Vs at the actual max bank flown.
+    load_factor_at_max = (
+        1.0 / math.cos(math.radians(max_bank_achieved))
+        if max_bank_achieved < 89.9 else float("inf")
+    )
+    vs_at_max_bank = (
+        vs_clean_kt * math.sqrt(load_factor_at_max)
+        if math.isfinite(load_factor_at_max) else None
+    )
+
     warnings = {
         "pylon_distance_ft": round(pylon_dist_ft, 0),
         "pylon_distance_nm": round(pylon_dist_nm, 2),
@@ -292,6 +375,79 @@ def simulate_eights_on_pylons(
         "eights_completed": num_eights,
         "p1_turn_direction": "left",
         "p2_turn_direction": "right",
+        # Post-2026-05-21 audit additions — fields the callback needs to
+        # render a correct stall-margin chip and per-leg/per-bank stats.
+        "vs_clean_kt": round(vs_clean_kt, 1),
+        "vs_at_max_bank_kt": round(vs_at_max_bank, 1) if vs_at_max_bank else None,
+        "stall_speed_clean": round(vs_clean_kt, 1),  # legacy callback key
+        "stall_speed_in_turn": round(vs_at_max_bank, 1) if vs_at_max_bank else None,
+        "min_ias_achieved": round(ias_knots, 1),
+        "max_bank_achieved": round(max_bank_achieved, 1),
+        "min_bank_achieved": round(min_bank_achieved, 1),
+        "max_crab_angle": round(max_crab, 1),
+        "wind_dir": round(wind_dir_deg, 0),
+        "wind_speed": round(wind_speed_kt, 0),
+        "wind_profile_used": wind_profile is not None,
+        "engine_option": engine_option,
     }
+
+    # Pylon-spacing ACS validation (post-2026-05-21 audit). The
+    # internal tangent geometry needs D > 2R to exist at all, and
+    # D ≥ ~3R to look like a proper figure-8. Beyond ~6R the figure-8
+    # stretches and the maneuver loses its rhythm. Surface tier +
+    # ideal range so the callback can either error or warn the pilot.
+    #
+    # IDEAL_MIN / IDEAL_MAX from common GA training references — the
+    # commercial ACS itself only says "appropriate pylons", which leaves
+    # it to instructor judgment. These thresholds match the practical
+    # range CFIs use.
+    IDEAL_MIN_RATIO = 3.0
+    IDEAL_MAX_RATIO = 6.0
+    HARD_MIN_RATIO = 2.0   # below this the tangent geometry breaks
+    SOFT_MIN_RATIO = 2.5   # below this the transitions visibly snap
+    SOFT_MAX_RATIO = 8.0   # above this the figure-8 is too stretched
+
+    if d_over_r < HARD_MIN_RATIO:
+        warnings["pylon_spacing_tier"] = "error"
+        warnings["pylon_spacing_error"] = (
+            f"Pylons too close: distance {pylon_dist_nm:.2f} NM = {d_over_r:.1f}× "
+            f"turn radius {turn_radius_nm:.2f} NM. Orbits overlap — "
+            f"figure-8 geometry is impossible. Need ≥ {HARD_MIN_RATIO:.0f}× turn radius "
+            f"({HARD_MIN_RATIO * turn_radius_nm:.2f} NM minimum)."
+        )
+    elif d_over_r < SOFT_MIN_RATIO:
+        warnings["pylon_spacing_tier"] = "error"
+        warnings["pylon_spacing_error"] = (
+            f"Pylons too close: {d_over_r:.1f}× turn radius. "
+            f"Internal tangent is degenerate — altitude/groundspeed will jump at "
+            f"each transition. Move pylons farther apart "
+            f"({IDEAL_MIN_RATIO * turn_radius_nm:.2f}-{IDEAL_MAX_RATIO * turn_radius_nm:.2f} NM is ideal)."
+        )
+    elif d_over_r < IDEAL_MIN_RATIO:
+        warnings["pylon_spacing_tier"] = "warning"
+        warnings["pylon_spacing_warning"] = (
+            f"Pylons close: {d_over_r:.1f}× turn radius. Straight tangent is brief — "
+            f"consider {IDEAL_MIN_RATIO:.0f}-{IDEAL_MAX_RATIO:.0f}× ideal "
+            f"({IDEAL_MIN_RATIO * turn_radius_nm:.2f}-{IDEAL_MAX_RATIO * turn_radius_nm:.2f} NM)."
+        )
+    elif d_over_r > SOFT_MAX_RATIO:
+        warnings["pylon_spacing_tier"] = "warning"
+        warnings["pylon_spacing_warning"] = (
+            f"Pylons far apart: {d_over_r:.1f}× turn radius. Figure-8 stretches — "
+            f"ACS expects a coherent figure-8 rhythm. Consider "
+            f"{IDEAL_MIN_RATIO * turn_radius_nm:.2f}-{IDEAL_MAX_RATIO * turn_radius_nm:.2f} NM."
+        )
+    elif d_over_r > IDEAL_MAX_RATIO:
+        warnings["pylon_spacing_tier"] = "warning"
+        warnings["pylon_spacing_warning"] = (
+            f"Pylons stretching: {d_over_r:.1f}× turn radius. "
+            f"{IDEAL_MIN_RATIO:.0f}-{IDEAL_MAX_RATIO:.0f}× is the ideal training range."
+        )
+    else:
+        warnings["pylon_spacing_tier"] = "ok"
+
+    warnings["pylon_spacing_ratio"] = round(d_over_r, 2)
+    warnings["pylon_spacing_ideal_min_nm"] = round(IDEAL_MIN_RATIO * turn_radius_nm, 2)
+    warnings["pylon_spacing_ideal_max_nm"] = round(IDEAL_MAX_RATIO * turn_radius_nm, 2)
 
     return path, hover, warnings

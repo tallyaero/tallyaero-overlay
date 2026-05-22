@@ -1,10 +1,16 @@
 """Tests for the Phase D2 _power_verdict helper.
 
-Covers the three-tier grading:
-  - |delta| < 0.10  → green badge ("Power: X%")
-  - |delta| < 0.20  → amber chip ("Off-design power: ...")
-  - |delta| >= 0.20 → red banner ("Maneuver failed — ...")
-And clamping / None-fallback behavior.
+Post-2026-05-21 audit: red banner now requires BOTH a slider delta
+≥ 0.20 AND `actually_failed=True`. The pre-fix logic painted any
+maneuver with <80% of design power as "failed", even when the sim
+itself reported a clean completion at reduced performance.
+
+Tiers:
+  - |delta| < 0.10                              → green badge
+  - |delta| < 0.20                              → amber chip
+  - |delta| >= 0.20 AND actually_failed=True    → red banner
+  - |delta| >= 0.20 AND actually_failed=False   → amber chip (sim
+    completed the maneuver despite off-design power)
 """
 from dash import html
 
@@ -52,15 +58,27 @@ def test_15pct_off_is_amber():
     assert _is_amber_chip(v)
 
 
-def test_21pct_off_is_red():
-    """At 0.21 absolute delta we're past the red threshold."""
+def test_21pct_off_without_failure_is_amber():
+    """At 0.21 absolute delta the SIM might still have completed —
+    if it did, the verdict is amber off-design, not red."""
     v = _power_verdict(0.49, 0.70, "c", "fail-text")
+    assert _is_amber_chip(v)
+
+
+def test_21pct_off_with_failure_is_red():
+    """Same delta, but the sim actually failed → red."""
+    v = _power_verdict(0.49, 0.70, "c", "fail-text", actually_failed=True)
     assert _is_red_banner(v)
     assert "Maneuver failed — fail-text" in v.children
 
 
-def test_far_off_is_red():
+def test_far_off_without_failure_is_amber():
     v = _power_verdict(1.00, 0.30, "c", "fail-text")
+    assert _is_amber_chip(v)
+
+
+def test_far_off_with_failure_is_red():
+    v = _power_verdict(1.00, 0.30, "c", "fail-text", actually_failed=True)
     assert _is_red_banner(v)
 
 

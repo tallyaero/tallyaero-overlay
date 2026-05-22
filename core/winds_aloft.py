@@ -347,6 +347,35 @@ class WindProfile:
             return None
         return cls([(a, d, k) for a, d, k in layers])
 
+    def with_surface_override(
+        self,
+        surface_dir_deg: float,
+        surface_speed_kt: float,
+        surface_alt_ft_msl: float = 0.0,
+    ) -> "WindProfile":
+        """Return a new profile with the lowest layer replaced by (dir, kt).
+
+        Used when the user has overridden env-wind-dir / env-wind-speed in
+        the sidebar: the API-fetched column gave the boundary-layer shape,
+        but the pilot wants their wind at the surface (METAR-edit, gust
+        adjustment, planning scenario). The shape aloft is preserved so a
+        per-tick `at(alt)` lookup interpolates smoothly from the user's
+        surface to the model's higher layers.
+
+        If the column's lowest layer is already at or above
+        `surface_alt_ft_msl`, that layer is replaced. Otherwise a new
+        layer is inserted at the given altitude. Higher layers are kept
+        verbatim so wind shear above the surface stays intact.
+        """
+        layers = list(self.layers())
+        if not layers:
+            return WindProfile([(surface_alt_ft_msl, surface_dir_deg, surface_speed_kt)])
+        new_layers = [
+            (a, d, k) for (a, d, k) in layers if a > surface_alt_ft_msl + 1.0
+        ]
+        new_layers.insert(0, (surface_alt_ft_msl, float(surface_dir_deg), float(surface_speed_kt)))
+        return WindProfile(new_layers)
+
     def __repr__(self) -> str:
         cells = ", ".join(
             f"{a:.0f}:{d:.0f}/{k:.0f}"

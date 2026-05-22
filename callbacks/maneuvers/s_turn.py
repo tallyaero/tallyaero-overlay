@@ -13,7 +13,7 @@ import dash_bootstrap_components as dbc
 import dash_leaflet as dl
 
 from callbacks.map import create_airplane_marker
-from layouts.maneuvers._shared import _acs_metric
+from layouts.maneuvers._shared import _acs_metric, _winds_aloft_chip
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -159,10 +159,12 @@ def register(app):
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
         State("aircraft-select", "value"),
+        State("engine-select", "value"),
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
         State("power-setting", "value"),
         State("cg-slider", "value"),
+        State("wind-profile-store", "data"),
         prevent_initial_call=True
     )
     def draw_s_turn(
@@ -181,10 +183,12 @@ def register(app):
         wind_dir,
         wind_speed,
         aircraft_name,
+        engine_name,
         selected_airport_id,
         runtime_weight,
         power_setting,
         cg_position,
+        wind_profile_data,
     ):
         if not n_clicks or not ref_point:
             raise PreventUpdate
@@ -231,6 +235,15 @@ def register(app):
         # Parse CG position (slider is 0.0-1.0, where 0=forward, 1=aft within envelope)
         cg_pct = float(cg_position) if cg_position not in [None, "", "null"] else 0.5
 
+        # Hydrate live winds-aloft column if airport-pick fetched one.
+        wind_profile = None
+        if wind_profile_data:
+            try:
+                from core.winds_aloft import WindProfile
+                wind_profile = WindProfile.from_store(wind_profile_data)
+            except Exception:
+                wind_profile = None
+
         # Run simulation
         from simulation import simulate_s_turn
         path, hover, sim_warnings = simulate_s_turn(
@@ -251,6 +264,8 @@ def register(app):
             weight_lb=weight_lb,
             power_setting=power_pct,
             cg_position=cg_pct,
+            wind_profile=wind_profile,
+            engine_option=engine_name,
         )
 
         if not path or not hover:
@@ -382,10 +397,15 @@ def register(app):
         wind_dir_val = float(wind_dir) if wind_dir not in [None, "", "null"] else 0.0
         wind_speed_val = float(wind_speed) if wind_speed not in [None, "", "null"] else 0.0
 
-        # Calculate stall margin
-        vs_clean = sim_warnings.get('stall_speed_clean', 48)
-        vs_in_turn = sim_warnings.get('stall_speed_in_turn', 48)
+        # Stall references — sim now surfaces both vs_clean_kt (real
+        # weight-interpolated Vs) and vs_at_max_bank_kt (Vs × √n at the
+        # actually-flown max bank, post τ-smoothing). The min_ias_achieved
+        # field was referenced before but never emitted; now it's real.
+        vs_clean = sim_warnings.get('vs_clean_kt', sim_warnings.get('stall_speed_clean', 48))
+        vs_in_turn = sim_warnings.get('vs_at_max_bank_kt', sim_warnings.get('stall_speed_in_turn', 48))
         min_ias_achieved = sim_warnings.get('min_ias_achieved', ias)
+        stall_margin = min_ias_achieved - vs_in_turn
+        peak_unclamped = sim_warnings.get('peak_unclamped_bank_deg')
 
         # Calculate avg TAS from hover data
         if hover:
@@ -403,7 +423,24 @@ def register(app):
                     html.Div(f"AOB: {sim_warnings.get('min_bank_achieved', 0):.0f}-{sim_warnings.get('max_bank_achieved', 0):.0f}° | Load: {sim_warnings.get('load_factor', 1):.2f}G | GS: {sim_warnings.get('min_groundspeed', 0):.0f}-{sim_warnings.get('max_groundspeed', 0):.0f} kt", style={"fontSize": "11px"}),
                     html.Div(f"Radius: {sim_warnings.get('turn_radius_ft', 0):.0f} ft | Alt loss: {sim_warnings.get('altitude_loss_ft', 0):.0f} ft", style={"fontSize": "11px"}),
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
-                    html.Div(f"Vs turn: {vs_in_turn:.0f} kt | Margin: {min_ias_achieved - vs_in_turn:.0f} kt | Time: {sim_warnings.get('total_time_sec', 0):.0f}s", style={"fontSize": "11px"}),
+                    html.Div(
+                        f"Vs(clean): {vs_clean:.0f} → Vs×√n at {sim_warnings.get('max_bank_achieved', 0):.0f}°: {vs_in_turn:.0f} kt | min IAS: {min_ias_achieved:.0f} kt | Time: {sim_warnings.get('total_time_sec', 0):.0f}s",
+                        style={"fontSize": "11px"},
+                    ),
+                    html.Div(
+                        f"Stall margin: {stall_margin:+.0f} kt"
+                        + (f"  ·  Wind-dictated geometry needed {peak_unclamped:.0f}° (capped at {sim_warnings.get('max_bank_achieved', 45):.0f}°)"
+                           if peak_unclamped is not None and peak_unclamped > sim_warnings.get('max_bank_achieved', 45) + 0.5 else ""),
+                        style={
+                            "fontSize": "11px",
+                            "color": (
+                                "#dc2626" if stall_margin < 4
+                                else "#f59e0b" if stall_margin < 8
+                                else "#16a34a"
+                            ),
+                            "fontWeight": "500",
+                        },
+                    ),
                     html.Div(f"S-Turns: {num_turns} | Ref: {line_bearing:.0f}° | {entry_side.title()} entry", style={"fontSize": "11px"}),
                     # Phase C9 — Private ACS tolerances.
                     html.Div([
@@ -415,14 +452,22 @@ def register(app):
             ], start_collapsed=False, style={"marginTop": "8px"})
         )
 
-        # Prepare slider configuration
-        num_points = len(hover)
-        slider_max = max(0, num_points - 1)
+        # Live winds-aloft chip — matches other maneuvers.
+        winds_chip = _winds_aloft_chip(wind_profile_data)
+        if winds_chip is not None:
+            info_elements.append(winds_chip)
 
-        # Create marks at key intervals
+        # Time-based scrubber with reference-line crossing markers (pre-fix
+        # was index-keyed with bare Start/End). Crossings come from the
+        # sim's `crossing_times` list — each marks a reference-line
+        # crossing between successive semicircles.
+        max_time = hover[-1].get("time", 0) if hover else 0
         slider_marks = {0: "Start"}
-        if slider_max > 0:
-            slider_marks[slider_max] = "End"
+        for i, ct in enumerate(sim_warnings.get("crossing_times", []) or []):
+            t_mark = int(round(float(ct)))
+            slider_marks[t_mark] = f"Cross {i + 1}"
+        slider_marks[int(round(max_time))] = "End"
+        slider_max = int(round(max_time)) if max_time > 0 else 100
 
         # Show slider container
         slider_style = {"display": "block", "marginTop": "10px"}
@@ -455,13 +500,25 @@ def register(app):
         prevent_initial_call=True
     )
     def update_s_turn_scrubber(slider_value, hover_data, path_data):
-        """Update the scrubber marker and tooltip based on slider position."""
+        """Update the scrubber marker and tooltip based on slider position.
+
+        Time-based lookup so "Cross 1" / "Cross 2" marks land on the
+        actual line-crossing ticks regardless of timestep granularity."""
         if not hover_data or not path_data or slider_value is None:
             return []
 
-        idx = int(slider_value)
-        if idx < 0 or idx >= len(hover_data) or idx >= len(path_data):
-            return []
+        target_time = float(slider_value)
+        best_idx = 0
+        best_diff = abs(hover_data[0].get("time", 0) - target_time)
+        for i, hp in enumerate(hover_data):
+            diff = abs(hp.get("time", 0) - target_time)
+            if diff < best_diff:
+                best_diff = diff
+                best_idx = i
+
+        idx = best_idx
+        if idx >= len(path_data):
+            idx = len(path_data) - 1
 
         pt = hover_data[idx]
         pos = path_data[idx]

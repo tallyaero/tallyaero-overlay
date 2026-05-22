@@ -100,11 +100,21 @@ def _interpolate_stall_speed(ac: dict, weight_lb: float, config: str = "clean") 
     return float(speeds[-1])
 
 
-def _get_engine_horsepower(ac: dict, altitude_ft: float) -> float:
+def _get_engine_horsepower(ac: dict, altitude_ft: float, engine_option: str = None) -> float:
     """
-    Get available engine horsepower at altitude.
+    Get TOTAL available engine horsepower at altitude (sum across all
+    installed engines).
 
-    Uses engine power curve data from aircraft JSON to derate for altitude.
+    Pre-fix this returned per-engine HP regardless of `engine_count` and
+    always picked the first engine option. Now honors the caller's
+    `engine_option` choice (multi-variant aircraft) and multiplies the
+    per-engine HP by `engine_count` for twins.
+
+    Args:
+        ac: Aircraft data dict
+        altitude_ft: Altitude in feet (used for DA derate)
+        engine_option: Name of engine in `engine_options` to use; defaults
+                       to first entry when omitted.
     """
     if not ac:
         return 180.0  # Default fallback
@@ -113,8 +123,10 @@ def _get_engine_horsepower(ac: dict, altitude_ft: float) -> float:
     if not engine_options:
         return 180.0
 
-    # Get first engine option
-    engine_name = list(engine_options.keys())[0]
+    if engine_option and engine_option in engine_options:
+        engine_name = engine_option
+    else:
+        engine_name = list(engine_options.keys())[0]
     engine_data = engine_options[engine_name]
 
     # Get power curve
@@ -126,7 +138,9 @@ def _get_engine_horsepower(ac: dict, altitude_ft: float) -> float:
     altitude_factor = 1.0 - (altitude_ft / 1000.0) * derate_per_1000ft
     altitude_factor = max(0.5, altitude_factor)  # Don't go below 50%
 
-    return float(sea_level_max) * altitude_factor
+    # Total installed HP — twins use both engines for this maneuver.
+    n_engines = int(ac.get("engine_count", 1) or 1)
+    return float(sea_level_max) * altitude_factor * n_engines
 
 
 def _compute_climb_rate(
@@ -134,7 +148,10 @@ def _compute_climb_rate(
     weight_lb: float,
     tas_knots: float,
     bank_deg: float,
-    ac: dict = None
+    ac: dict = None,
+    altitude_ft: float = 3000.0,
+    oat_c: float = 15.0,
+    altimeter_inhg: float = 29.92,
 ) -> float:
     """
     Compute climb rate based on excess power.
@@ -144,13 +161,13 @@ def _compute_climb_rate(
 
     HP_required is estimated from drag at current speed.
     Bank angle reduces effective climb due to increased load factor.
+
+    Density is now computed from the aircraft's actual altitude + OAT
+    (pre-fix used `rho_sl * 0.9` for every alt — a 3000-ft proxy that
+    over-estimated drag at high alt and under-estimated near SL).
     """
     if weight_lb <= 0 or tas_knots <= 0:
         return 0.0
-
-    # Estimate power required for level flight at this speed
-    # Simplified: P_req = D × V, where D is drag
-    # For a typical light aircraft, power required increases with V^3
 
     # Get aircraft drag characteristics if available
     if ac:
@@ -164,12 +181,14 @@ def _compute_climb_rate(
         aspect_ratio = 7.3
         e = 0.81
 
-    # Convert TAS to fps
     tas_fps = tas_knots * 1.68781
 
-    # Dynamic pressure (assume sea level density for simplicity)
-    # q = 0.5 * rho * V^2
-    rho = rho_sl * 0.9  # Approximate for ~3000 ft
+    # Density at current altitude (ISA + altimeter setting + OAT).
+    try:
+        palt = compute_pressure_altitude(altitude_ft, altimeter_inhg)
+        rho = compute_air_density(palt, oat_c)
+    except Exception:
+        rho = rho_sl * 0.9  # legacy fallback
     q = 0.5 * rho * tas_fps**2
 
     # Lift coefficient required for level flight
@@ -222,6 +241,7 @@ def simulate_chandelle(
     timestep_sec: float = 0.5,
     power_setting: float = 1.0,
     wind_profile=None,
+    engine_option: str = None,
 ) -> tuple:
     """
     Simulate a chandelle maneuver with proper wind effects and aircraft data.
@@ -266,21 +286,34 @@ def simulate_chandelle(
     entry_heading_deg = _wrap_360(float(entry_heading_deg or 0.0))
     wind_dir_deg = float(wind_dir_deg or 0.0)
 
-    # Phase H — when a column profile is provided, use its mid-altitude
-    # wind. Chandelle climbs ~500-1000 ft so mid-alt captures the bulk
-    # of the maneuver's column without per-tick overhead.
-    if wind_profile is not None:
-        try:
-            mean_alt_msl = float(field_elev_ft) + float(entry_altitude_ft) + 250.0
-            wd_eff, ws_eff = wind_profile.at(mean_alt_msl)
-            wind_dir_deg = float(wd_eff)
-            wind_speed_kt = float(ws_eff)
-        except Exception:
-            pass
     wind_speed_kt = float(wind_speed_kt or 0.0)
     oat_c = float(oat_c if oat_c is not None else 15.0)
     altimeter_inhg = float(altimeter_inhg if altimeter_inhg is not None else 29.92)
     field_elev_ft = float(field_elev_ft or 0.0)
+
+    # Wind handling: user surface wind is authoritative. When a column is
+    # provided we override its SFC layer with the user value and then
+    # sample per-tick by altitude inside the loop. (Pre-fix this branch
+    # silently overwrote wind_dir_deg/wind_speed_kt with the column's
+    # mid-altitude wind — user edits ignored.)
+    if wind_profile is not None:
+        try:
+            wind_profile = wind_profile.with_surface_override(
+                wind_dir_deg, wind_speed_kt,
+                surface_alt_ft_msl=field_elev_ft,
+            )
+        except Exception:
+            pass
+
+    # POH dynamics — roll_rate_dps drives the chandelle entry roll-in
+    # rate. Pre-fix this was a single hardcoded 10 dps for every
+    # airframe; some aircraft have POH-cited rates 5-10x higher.
+    try:
+        from core.dynamics import dynamics_for
+        pd_dyn = dynamics_for(ac) if ac is not None else {}
+    except Exception:
+        pd_dyn = {}
+    poh_roll_rate_dps = float(pd_dyn.get("roll_rate_dps", 10.0))
 
     # Turn direction: left = -1, right = +1
     turn_sign = -1.0 if str(turn_direction).lower().startswith('l') else 1.0
@@ -315,8 +348,9 @@ def simulate_chandelle(
     # Aim for 1.05 * Vs_power_on (just slightly above stall)
     target_exit_ias = vs_power_on * 1.05
 
-    # Get full throttle horsepower at entry altitude
-    hp_available = _get_engine_horsepower(ac, entry_altitude_ft)
+    # Get full throttle horsepower at entry altitude. Honors engine_option
+    # + multi-engine total power.
+    hp_available = _get_engine_horsepower(ac, entry_altitude_ft, engine_option)
 
     # Design Directive — Chandelle is a FULL-POWER maneuver (design = 1.0).
     # Scale HP by power_setting. Below 50% the airplane cannot complete the
@@ -341,8 +375,18 @@ def simulate_chandelle(
     # lands where the airplane actually quit (not 180° away).
     target_heading = _wrap_360(entry_heading_deg + turn_sign * max_progress_deg)
 
-    # Wind components
-    wn_fps, we_fps = _wind_components_from_dir(wind_dir_deg, wind_speed_kt)
+    # Wind components — recomputed per-tick when wind_profile present
+    # (per-altitude lookup); constant otherwise.
+    def _resolve_wind_at(alt_msl_now: float):
+        if wind_profile is None:
+            return _wind_components_from_dir(wind_dir_deg, wind_speed_kt)
+        try:
+            wd, ws = wind_profile.at(alt_msl_now)
+            return _wind_components_from_dir(float(wd), float(ws))
+        except Exception:
+            return _wind_components_from_dir(wind_dir_deg, wind_speed_kt)
+
+    wn_fps, we_fps = _resolve_wind_at(field_elev_ft + entry_altitude_ft)
 
     # Initialize state
     cur = GeoPoint(entry_point["lat"], entry_point["lon"])
@@ -393,6 +437,11 @@ def simulate_chandelle(
             "ias": round(ias, 1),
             "gs": round(gs_kt, 1),
             "aob": round(aob_deg, 1),
+            # Heading progress so far through the maneuver (degrees from
+            # entry). Used by the callback to mark "90°" / "Exit" on the
+            # time scrubber. Pre-fix the slider tried to read this field
+            # but it was never emitted.
+            "turn_progress": round(accumulated_turn, 1),
             "load_factor": round(load_factor, 2) if load_factor is not None else None,
             "vs": round(vs_fpm, 0),
             "track": round(track_deg, 1),
@@ -416,8 +465,9 @@ def simulate_chandelle(
     bank = 0.0
     pitch = 0.0
 
-    # Roll rate for smooth transitions (degrees per second)
-    roll_rate = 10.0  # Faster roll-in for chandelle
+    # Roll rate — POH-cited (or class-derived) per airframe, not the
+    # blanket 10 dps the chandelle used to assume.
+    roll_rate = poh_roll_rate_dps
 
     # Phase tracking
     phase = "roll_in"  # roll_in -> first_90 -> second_90 -> done
@@ -505,14 +555,21 @@ def simulate_chandelle(
         hdg = _wrap_360(hdg + turn_sign * dpsi)
         accumulated_turn += dpsi
 
-        # Compute climb rate using physics-based model
-        # Full power is applied throughout the chandelle
-        # Update available HP for current altitude
-        current_hp = _get_engine_horsepower(ac, alt_agl)
+        # Per-tick wind sampling — picks up boundary-layer shear when a
+        # wind_profile is provided.
+        wn_fps, we_fps = _resolve_wind_at(field_elev_ft + alt_agl)
 
-        # Compute climb rate from excess power
-        # This accounts for: available HP, weight, TAS, bank angle, and aircraft drag
-        base_climb_fpm = _compute_climb_rate(current_hp, weight_lb, tas, bank, ac)
+        # Compute climb rate using physics-based model.
+        # Full power scaled by power_setting; HP derates by altitude.
+        # Density now reflects current altitude + OAT (not a flat 3000-ft
+        # proxy as in the pre-fix code).
+        current_hp = _get_engine_horsepower(ac, alt_agl, engine_option)
+        current_hp *= power_pct
+
+        base_climb_fpm = _compute_climb_rate(
+            current_hp, weight_lb, tas, bank, ac,
+            altitude_ft=alt_agl, oat_c=oat_c, altimeter_inhg=altimeter_inhg,
+        )
 
         # Scale climb by pitch angle (0 pitch = level flight, max pitch = max climb)
         pitch_factor = pitch / max_pitch_deg if max_pitch_deg > 0 else 0.0
@@ -526,13 +583,10 @@ def simulate_chandelle(
         speed_margin = max(0.0, min(1.0, speed_margin))
         vs_fpm = vs_fpm * (0.3 + 0.7 * speed_margin)  # Never fully zero climb
 
-        # Design Directive — scale climb rate proportional to power_setting.
-        # The existing chandelle physics treats the maneuver as an idealized
-        # energy trade (IAS → altitude) which would gain the same altitude
-        # regardless of HP. In reality less power means less excess energy
-        # in → less altitude gained. Multiply the climb rate by power_pct
-        # so off-design power produces a visibly smaller climb.
-        vs_fpm = vs_fpm * power_pct
+        # Power-setting penalty is now applied UPSTREAM via
+        # `current_hp *= power_pct` (which makes the excess-power math
+        # honest about how much energy the engine is actually delivering).
+        # The earlier extra `vs_fpm *= power_pct` here was double-scaling.
 
         vs_fpm = max(0.0, vs_fpm)  # No descent during chandelle
 
@@ -595,6 +649,39 @@ def simulate_chandelle(
         last["design_power"] = design_power
         last["max_progress_deg"] = round(max_progress_deg, 1)
         last["altitude_gain_ft"] = round(alt_agl - entry_altitude_ft, 1)
+        # Surface the correct Vs + load-factor-adjusted stall speed so the
+        # callback no longer needs to read the broken
+        # `stall_speed_clean_kias` key. Power-on Vs is ~7% below power-off.
+        load_factor_at_max_bank = (1.0 / math.cos(math.radians(abs(bank_angle_deg)))
+                                   if abs(bank_angle_deg) < 89.9 else float("inf"))
+        vs_at_max_bank = (vs_power_on * math.sqrt(load_factor_at_max_bank)
+                           if math.isfinite(load_factor_at_max_bank) else None)
+        # min IAS during the maneuver — the worst-case approach to stall.
+        min_ias_through_run = min(p.get("ias", float("inf")) for p in hover) if hover else None
+        # Two margins worth reporting separately:
+        #   - max-bank margin: how close min-IAS came to Vs×√n at 30°
+        #     (the "in-turn" stall threat the pilot is fighting)
+        #   - exit margin: how close min-IAS is to wings-level power-on Vs
+        #     (the ACS-graded exit condition)
+        exit_margin = (
+            round(min_ias_through_run - vs_power_on, 1)
+            if (min_ias_through_run is not None and vs_power_on)
+            else None
+        )
+        max_bank_margin = (
+            round(min_ias_through_run - vs_at_max_bank, 1)
+            if (min_ias_through_run is not None and vs_at_max_bank)
+            else None
+        )
+        last["vs_clean_kt"] = round(vs_clean, 1)
+        last["vs_power_on_kt"] = round(vs_power_on, 1)
+        last["vs_at_bank_kt"] = round(vs_at_max_bank, 1) if vs_at_max_bank else None
+        last["min_ias_kt"] = round(min_ias_through_run, 1) if min_ias_through_run is not None else None
+        last["stall_margin_kt"] = exit_margin  # ACS-graded exit margin
+        last["stall_margin_in_turn_kt"] = max_bank_margin
+        last["roll_rate_dps_used"] = round(roll_rate, 1)
+        last["wind_profile_used"] = wind_profile is not None
+        last["engine_option"] = engine_option
         if power_pct < 0.5:
             last["failure_reason"] = (
                 f"Insufficient power to complete 180° — reached "

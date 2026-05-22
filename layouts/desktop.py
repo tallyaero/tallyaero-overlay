@@ -809,7 +809,14 @@ def desktop_layout():
             # Turns Around a Point (center point)
             dcc.Store(id={"type": "point-store", "m_id": "turns_point", "role": "center"}),
 
-            # Rectangular Course (downwind edge points)
+            # Rectangular Course — pilot clicks the 4 corners; the
+            # rectcourse-corner-store callback snaps them to a perfect
+            # rectangle. Legacy dw_start/dw_end roles kept so an old
+            # click pattern still routes (just unused now).
+            dcc.Store(id={"type": "point-store", "m_id": "rect_course", "role": "c1"}),
+            dcc.Store(id={"type": "point-store", "m_id": "rect_course", "role": "c2"}),
+            dcc.Store(id={"type": "point-store", "m_id": "rect_course", "role": "c3"}),
+            dcc.Store(id={"type": "point-store", "m_id": "rect_course", "role": "c4"}),
             dcc.Store(id={"type": "point-store", "m_id": "rect_course", "role": "dw_start"}),
             dcc.Store(id={"type": "point-store", "m_id": "rect_course", "role": "dw_end"}),
 
@@ -829,6 +836,19 @@ def desktop_layout():
             dcc.Store(id="rectcourse-calculated-edge", data={}),
             # Hidden display element for callback (visible version in rect_course_layout)
             html.Div(id="rectcourse-edge-info-display", style={"display": "none"}),
+            # Downwind-edge selection store — mirrored from the shelf
+            # dropdown (rectcourse-downwind-edge-select) when rect_course
+            # is the active maneuver. Lives in the always-present layout
+            # so the snap callback can read it from any maneuver context
+            # without raising "nonexistent object" errors.
+            dcc.Store(id="rectcourse-downwind-edge", data="auto"),
+            # Snap-to-rectangle output: written by the 4-corner preview
+            # callback whenever any of the corner stores change. Same
+            # reason as `rectcourse-downwind-edge` — the snap callback's
+            # Inputs are the corner point-stores (always present), so
+            # the Output target must also live here to remain valid in
+            # every maneuver context.
+            dcc.Store(id="rectcourse-snapped-store", data={}),
 
             html.Div(
                 [

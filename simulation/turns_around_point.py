@@ -122,6 +122,9 @@ def simulate_turns_around_point(
     power_setting: float = 0.5,
     cg_position: float = 0.5,
     angular_step_deg: float = 2.0,
+    # Post-2026-05-21 additions
+    wind_profile=None,
+    engine_option: str = None,
 ) -> tuple:
     """
     Simulate PERFECT Turns Around a Point for briefing/debriefing.
@@ -185,6 +188,21 @@ def simulate_turns_around_point(
     # Aircraft data defaults
     if ac is None:
         ac = {}
+
+    # User surface wind authoritative; column drives the per-tick wind
+    # lookup. TAP is a single-altitude maneuver so we sample once at the
+    # maneuver altitude. Pre-fix there was no wind_profile support at all.
+    if wind_profile is not None:
+        try:
+            wind_profile = wind_profile.with_surface_override(
+                wind_dir_deg, wind_speed_kt,
+                surface_alt_ft_msl=field_elev_ft,
+            )
+            wd, ws = wind_profile.at(field_elev_ft + altitude_ft)
+            wind_dir_deg = float(wd)
+            wind_speed_kt = float(ws)
+        except Exception:
+            pass
 
     # Weight handling
     if weight_lb is None or weight_lb <= 0:
@@ -291,6 +309,16 @@ def simulate_turns_around_point(
     min_pa = 1e9
     pa_sum = 0.0
     pa_count = 0
+    # Post-2026-05-21 audit additions:
+    # - peak_unclamped_bank tracks geometry-required bank BEFORE the 45° clamp
+    # - min_ias_achieved is constant in this sim (IAS is held) but emitted
+    #   so the callback's margin chip uses a real value instead of a fallback
+    # - turn_complete_times records the time at each completed 360° boundary
+    #   so the scrubber can label them
+    peak_unclamped_bank = 0.0
+    min_ias_achieved = ias_knots
+    turn_complete_times: list = []
+    last_turn_number = 1
 
     # Generate points along the PERFECT circular path
     # We go around the circle, starting from the entry point
@@ -388,6 +416,12 @@ def simulate_turns_around_point(
         tan_bank = centripetal_accel / G_FPS2
         bank_deg = math.degrees(math.atan(tan_bank))
 
+        # Track peak geometric required bank BEFORE the 45° clamp so the
+        # callback can surface "geometry needed N° (capped at 45)" when
+        # the clamp engages.
+        if bank_deg > peak_unclamped_bank:
+            peak_unclamped_bank = bank_deg
+
         # Clamp bank to safe limits (max 45° per FAA standards for this maneuver)
         original_bank = bank_deg
         bank_deg = max(5.0, min(45.0, bank_deg))
@@ -419,6 +453,16 @@ def simulate_turns_around_point(
             arc_length_ft = orbit_radius_ft * math.radians(angular_step_deg)
             segment_time = arc_length_ft / gs_fps
             total_time += segment_time
+
+        # Detect 360° boundary crossings for the scrubber phase marks.
+        if turn_number != last_turn_number:
+            turn_complete_times.append(round(total_time, 2))
+            last_turn_number = turn_number
+
+        # Track min IAS (constant in this sim, but surface it so callback
+        # uses a real value).
+        if ias_knots < min_ias_achieved:
+            min_ias_achieved = ias_knots
 
         # Convert position to lat/lon
         pos_latlon = local_to_latlon(pos_n_ft, pos_e_ft)
@@ -472,5 +516,26 @@ def simulate_turns_around_point(
     warnings["entry_heading"] = round(entry_heading_deg, 0)
     warnings["wind_dir"] = round(wind_dir_deg, 0)
     warnings["wind_speed"] = round(wind_speed_kt, 0)
+
+    # Post-2026-05-21 audit additions — fields the callback needs to
+    # render a correct stall-margin chip and a peak-bank diagnostic.
+    # Vs at the actual max bank flown (post 45° clamp).
+    max_bank_for_vs = max(max_bank_achieved, 1.0)
+    load_factor_at_max = (
+        1.0 / math.cos(math.radians(max_bank_for_vs))
+        if max_bank_for_vs < 89.9 else float("inf")
+    )
+    vs_at_max_bank = (
+        stall_speed_clean * math.sqrt(load_factor_at_max)
+        if math.isfinite(load_factor_at_max) else None
+    )
+    warnings["min_ias_achieved"] = round(min_ias_achieved, 1)
+    warnings["vs_clean_kt"] = round(stall_speed_clean, 1)
+    warnings["vs_at_max_bank_kt"] = round(vs_at_max_bank, 1) if vs_at_max_bank else None
+    warnings["stall_speed_in_turn"] = warnings["vs_at_max_bank_kt"]  # callback compat
+    warnings["peak_unclamped_bank_deg"] = round(peak_unclamped_bank, 1)
+    warnings["wind_profile_used"] = wind_profile is not None
+    warnings["engine_option"] = engine_option
+    warnings["turn_complete_times"] = list(turn_complete_times)
 
     return path, hover, warnings

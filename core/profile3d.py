@@ -75,6 +75,7 @@ def make_3d_track_figure(*,
                           phases: list[str] | None = None,
                           phase_markers: list[dict] | None = None,
                           runway: dict | None = None,
+                          vertical_features: list[dict] | None = None,
                           title: str | None = None,
                           height: int = 420,
                           z_exaggeration: float = 4.0) -> go.Figure:
@@ -176,6 +177,44 @@ def make_3d_track_figure(*,
             hovertemplate="<b>%{text}</b><br>Alt: %{z:.0f} ft<extra></extra>",
         ))
 
+    # Optional vertical features (e.g. eights-on-pylons reference pylons).
+    # Each entry: {lat, lon, alt_ft_base, alt_ft_top, label, color}.
+    # Renders as a colored vertical pole + a base dot + a label at the top.
+    # Used by maneuvers where ground objects need to be visible in the
+    # 3D side view to give the pilot spatial context.
+    if vertical_features:
+        for vf in vertical_features:
+            try:
+                vx, vy = _ll_to_xy_nm(vf["lat"], vf["lon"], lat0, lon0)
+            except (KeyError, TypeError):
+                continue
+            base = float(vf.get("alt_ft_base", 0.0))
+            top = float(vf.get("alt_ft_top", base + 1000.0))
+            color = vf.get("color", "#dc2626")
+            label = vf.get("label", "")
+            # Vertical pole from base to top.
+            traces.append(go.Scatter3d(
+                x=[vx, vx], y=[vy, vy], z=[base, top],
+                mode="lines",
+                line={"color": color, "width": 6},
+                name=label or "Pylon",
+                showlegend=bool(label),
+                hovertemplate=(f"<b>{label}</b><br>"
+                               "Alt: %{z:.0f} ft<extra></extra>"),
+            ))
+            # Base marker + label at top.
+            traces.append(go.Scatter3d(
+                x=[vx, vx], y=[vy, vy], z=[base, top],
+                mode="markers+text",
+                marker={"size": [8, 6], "color": color,
+                        "line": {"color": "#fff", "width": 1}},
+                text=["", label],
+                textposition="top center",
+                textfont={"size": 11, "color": color},
+                showlegend=False,
+                hoverinfo="skip",
+            ))
+
     # Optional runway rectangle on the ground plane
     if runway and all(k in runway for k in ("start_lat", "start_lon",
                                               "end_lat", "end_lon")):
@@ -230,3 +269,109 @@ def make_3d_track_figure(*,
         plot_bgcolor="rgba(0,0,0,0)",
     )
     return fig
+
+
+def build_3d_side_view_block(*,
+                              path: list,
+                              hover: list,
+                              elev_ft: float = 0.0,
+                              runway: dict | None = None,
+                              phase_markers: list[dict] | None = None,
+                              vertical_features: list[dict] | None = None,
+                              height: int = 380,
+                              alt_key_priority: tuple = ("alt", "alt_agl", "alt_msl"),
+                              ):
+    """One-shot helper used by every altitude-changing maneuver's
+    results modal. Returns a Dash component ready to drop into an
+    AccordionItem — either a `dcc.Graph` with the figure or a styled
+    fallback `<div>` if the path can't be reconstructed.
+
+    Args:
+        path: per-step [lat, lon] pairs (length-matched to hover).
+        hover: per-step telemetry dicts. Reads altitude from the first
+            present key in `alt_key_priority` and the phase from
+            `phase` or `segment`.
+        elev_ft: field elevation in MSL feet, ADDED to per-step alt
+            when the chosen alt key looks AGL (i.e. key is "alt" or
+            "alt_agl"). If the key is "alt_msl" the value is passed
+            through unchanged.
+        runway: optional {start_lat, start_lon, end_lat, end_lon, elev_ft}
+            drawn as a ground centerline.
+        phase_markers: optional [{label, lat, lon, alt_ft}, ...].
+        height: pixels.
+        alt_key_priority: keys to check in order when picking altitude.
+
+    Falls back gracefully if `path` is empty / hover is short / etc. —
+    the modal always renders.
+    """
+    from dash import dcc, html
+
+    try:
+        if not path or not hover:
+            return html.Div("3D side view unavailable: no path data.",
+                            style={"fontSize": "11px", "color": "#94a3b8",
+                                   "padding": "12px"})
+
+        # Resolve the altitude PER STEP, not once for the whole stream —
+        # impossible_turn's takeoff/climb hover entries use `alt_agl`,
+        # but the post-failure glide entries use `alt`. Picking one key
+        # globally would zero-out the half that doesn't have it, which
+        # collapsed the entire glide-back portion onto the ground in
+        # earlier builds.
+        agl_keys = {"alt", "alt_agl"}
+
+        def _resolve_alt(h: dict) -> float:
+            for k in alt_key_priority:
+                v = h.get(k)
+                if v is not None:
+                    f = float(v)
+                    return f + float(elev_ft) if k in agl_keys else f
+            return float(elev_ft)
+
+        lat3d = [p[0] for p in path]
+        lon3d = [p[1] for p in path]
+        alts3d = [_resolve_alt(h) for h in hover]
+        phases3d = [h.get("phase") or h.get("segment") or "" for h in hover]
+
+        # Length-align to the shortest stream so off-by-ones don't crash.
+        n = min(len(lat3d), len(alts3d), len(phases3d))
+        if n < 2:
+            return html.Div("3D side view unavailable: path too short.",
+                            style={"fontSize": "11px", "color": "#94a3b8",
+                                   "padding": "12px"})
+        lat3d, lon3d = lat3d[:n], lon3d[:n]
+        alts3d, phases3d = alts3d[:n], phases3d[:n]
+
+        fig = make_3d_track_figure(
+            path_lat=lat3d, path_lon=lon3d, alts_ft=alts3d,
+            phases=phases3d, runway=runway, phase_markers=phase_markers,
+            vertical_features=vertical_features,
+            height=height,
+        )
+        return dcc.Graph(figure=fig,
+                         config={"displayModeBar": False},
+                         style={"width": "100%"})
+    except Exception:
+        return html.Div("3D side view unavailable for this run.",
+                        style={"fontSize": "11px", "color": "#94a3b8",
+                               "padding": "12px"})
+
+
+def side_view_accordion_item(side_view_block, title: str = "3D Side View"):
+    """Wraps a 3D block in a `dbc.AccordionItem` with the same
+    rotate-zoom hint used by engine-out, so every maneuver picks up
+    the affordance for free.
+    """
+    from dash import html
+    import dash_bootstrap_components as dbc
+    return dbc.AccordionItem(
+        [
+            html.Div("Drag to rotate. Scroll to zoom. "
+                     "Vertical axis is exaggerated for readability.",
+                     style={"fontSize": "10px", "color": "#94a3b8",
+                            "marginBottom": "4px"}),
+            side_view_block,
+        ],
+        title=title,
+        style={"fontSize": "12px"},
+    )

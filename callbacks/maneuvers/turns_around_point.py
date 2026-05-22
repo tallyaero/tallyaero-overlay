@@ -14,7 +14,7 @@ import dash_bootstrap_components as dbc
 import dash_leaflet as dl
 
 from callbacks.map import create_airplane_marker
-from layouts.maneuvers._shared import _acs_metric
+from layouts.maneuvers._shared import _acs_metric, _winds_aloft_chip
 
 from core.data_loader import aircraft_data, airport_data
 
@@ -46,10 +46,12 @@ def register(app):
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
         State("aircraft-select", "value"),
+        State("engine-select", "value"),
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
         State("power-setting", "value"),
         State("cg-slider", "value"),
+        State("wind-profile-store", "data"),
         prevent_initial_call=True
     )
     def draw_turns_around_point(
@@ -66,10 +68,12 @@ def register(app):
         wind_dir,
         wind_speed,
         aircraft_name,
+        engine_name,
         selected_airport_id,
         runtime_weight,
         power_setting,
         cg_position,
+        wind_profile_data,
     ):
         if not n_clicks or not center_point:
             raise PreventUpdate
@@ -110,6 +114,15 @@ def register(app):
         power_pct = float(power_setting) if power_setting not in [None, "", "null"] else 0.5
         cg_pct = float(cg_position) if cg_position not in [None, "", "null"] else 0.5
 
+        # Hydrate live winds-aloft column if airport-pick fetched one.
+        wind_profile = None
+        if wind_profile_data:
+            try:
+                from core.winds_aloft import WindProfile
+                wind_profile = WindProfile.from_store(wind_profile_data)
+            except Exception:
+                wind_profile = None
+
         # Run simulation
         from simulation import simulate_turns_around_point
         path, hover, sim_warnings = simulate_turns_around_point(
@@ -129,6 +142,8 @@ def register(app):
             weight_lb=weight_lb,
             power_setting=power_pct,
             cg_position=cg_pct,
+            wind_profile=wind_profile,
+            engine_option=engine_name,
         )
 
         if not path or not hover:
@@ -229,12 +244,16 @@ def register(app):
         wind_dir_val = float(wind_dir) if wind_dir not in [None, "", "null"] else 0.0
         wind_speed_val = float(wind_speed) if wind_speed not in [None, "", "null"] else 0.0
 
-        # Calculate stall margin
-        vs_clean = sim_warnings.get('stall_speed_clean', 48)
-        vs_in_turn = sim_warnings.get('stall_speed_in_turn', vs_clean)
+        # Stall references — sim surfaces real values post-audit (was
+        # falling back to plain Vs because `stall_speed_in_turn` and
+        # `min_ias_achieved` were never emitted by the sim).
+        vs_clean = sim_warnings.get('vs_clean_kt', sim_warnings.get('stall_speed_clean', 48))
+        vs_in_turn = sim_warnings.get('vs_at_max_bank_kt', sim_warnings.get('stall_speed_in_turn', vs_clean))
         min_ias_achieved = sim_warnings.get('min_ias_achieved', ias)
         max_bank = sim_warnings.get('max_bank_achieved', 0)
         load_factor = 1 / math.cos(math.radians(float(max_bank))) if max_bank > 0 else 1.0
+        stall_margin = min_ias_achieved - vs_in_turn
+        peak_unclamped = sim_warnings.get('peak_unclamped_bank_deg')
 
         # Calculate avg TAS from hover data
         if hover:
@@ -269,7 +288,24 @@ def register(app):
                               "Informational only — TAP is flown at constant altitude.",
                     ),
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
-                    html.Div(f"Vs turn: {vs_in_turn:.0f} kt | Margin: {min_ias_achieved - vs_in_turn:.0f} kt | Time: {sim_warnings.get('total_time_sec', 0):.0f}s", style={"fontSize": "11px"}),
+                    html.Div(
+                        f"Vs(clean): {vs_clean:.0f} → Vs×√n at {max_bank:.0f}°: {vs_in_turn:.0f} kt | min IAS: {min_ias_achieved:.0f} kt | Time: {sim_warnings.get('total_time_sec', 0):.0f}s",
+                        style={"fontSize": "11px"},
+                    ),
+                    html.Div(
+                        f"Stall margin: {stall_margin:+.0f} kt"
+                        + (f"  ·  Wind-dictated geometry needed {peak_unclamped:.0f}° (capped at 45°)"
+                           if peak_unclamped is not None and peak_unclamped > 45.5 else ""),
+                        style={
+                            "fontSize": "11px",
+                            "color": (
+                                "#dc2626" if stall_margin < 4
+                                else "#f59e0b" if stall_margin < 8
+                                else "#16a34a"
+                            ),
+                            "fontWeight": "500",
+                        },
+                    ),
                     html.Div(f"Turns: {turns} | {direction.title()} | Entry: {sim_warnings.get('entry_heading', 0):.0f}°", style={"fontSize": "11px"}),
                     # Phase C9 — Private ACS tolerances.
                     html.Div([
@@ -280,14 +316,22 @@ def register(app):
             ], start_collapsed=False, style={"marginTop": "8px"})
         )
 
-        # Prepare slider configuration
-        num_points = len(hover)
-        slider_max = max(0, num_points - 1)
+        # Live winds-aloft chip — parity with the other maneuvers.
+        winds_chip = _winds_aloft_chip(wind_profile_data)
+        if winds_chip is not None:
+            info_elements.append(winds_chip)
 
-        # Create marks at key intervals
+        # Time-based scrubber with T2 / T3 / ... boundary marks. Pre-fix
+        # was index-keyed with bare Start/End; the sim now emits
+        # `turn_complete_times` (the time at each completed 360°
+        # boundary) and the marks are keyed by hover time.
+        max_time = hover[-1].get("time", 0) if hover else 0
         slider_marks = {0: "Start"}
-        if slider_max > 0:
-            slider_marks[slider_max] = "End"
+        for i, tct in enumerate(sim_warnings.get("turn_complete_times", []) or []):
+            t_mark = int(round(float(tct)))
+            slider_marks[t_mark] = f"T{i + 2}"
+        slider_marks[int(round(max_time))] = "End"
+        slider_max = int(round(max_time)) if max_time > 0 else 100
 
         # Show slider container
         slider_style = {"display": "block", "marginTop": "10px"}
@@ -321,13 +365,25 @@ def register(app):
         prevent_initial_call=True
     )
     def update_turns_around_point_scrubber(slider_value, hover_data, path_data):
-        """Update the scrubber marker and tooltip based on slider position."""
+        """Update the scrubber marker and tooltip based on slider position.
+
+        Time-based lookup so "T2 / T3 / ..." marks land on actual 360°
+        boundaries regardless of timestep granularity."""
         if not hover_data or not path_data or slider_value is None:
             return []
 
-        idx = int(slider_value)
-        if idx < 0 or idx >= len(hover_data) or idx >= len(path_data):
-            return []
+        target_time = float(slider_value)
+        best_idx = 0
+        best_diff = abs(hover_data[0].get("time", 0) - target_time)
+        for i, hp in enumerate(hover_data):
+            diff = abs(hp.get("time", 0) - target_time)
+            if diff < best_diff:
+                best_diff = diff
+                best_idx = i
+
+        idx = best_idx
+        if idx >= len(path_data):
+            idx = len(path_data) - 1
 
         pt = hover_data[idx]
         pos = path_data[idx]
@@ -344,7 +400,11 @@ def register(app):
             html.Div(f"Load factor: {pt.get('load_factor', 1.0):.2f}G"),
             html.Div(f"Heading: {pt.get('heading', 0):.0f}°"),
             html.Div(f"Track: {pt.get('track', 0):.0f}°"),
-            html.Div(f"Crab: {'R ' if pt.get('drift', 0) < 0 else ('L ' if pt.get('drift', 0) > 0 else '')}{abs(pt.get('drift', 0)):.1f}°"),
+            # Crab intentionally not shown — TAP is a continuous orbit
+            # where crab varies through every 360°. The `wind_correction`
+            # line below is the maneuver-meaningful variant of the same
+            # number (signed by orbit phase). Marker visual still uses
+            # crab to orient the airplane icon.
             html.Div(
                 f"Wind correction: {pt.get('wind_correction', 0):+.1f}° "
                 f"(orbit phase {pt.get('turn_progress', 0):.0f}°)"

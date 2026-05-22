@@ -15,9 +15,10 @@ import dash_bootstrap_components as dbc
 import dash_leaflet as dl
 
 from callbacks.map import create_airplane_marker
-from layouts.maneuvers._shared import _acs_metric
+from layouts.maneuvers._shared import _acs_metric, _winds_aloft_chip
 
 from core.data_loader import aircraft_data, airport_data
+from core.profile3d import build_3d_side_view_block, side_view_accordion_item
 
 
 def register(app):
@@ -45,11 +46,13 @@ def register(app):
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
         State("aircraft-select", "value"),
+        State("engine-select", "value"),
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
         State("power-setting", "value"),
         State("cg-slider", "value"),
         State("layer", "children"),
+        State("wind-profile-store", "data"),
         prevent_initial_call=True
     )
     def draw_eights_on_pylons(
@@ -65,11 +68,13 @@ def register(app):
         wind_dir,
         wind_speed,
         aircraft_name,
+        engine_name,
         selected_airport_id,
         runtime_weight,
         power_setting,
         cg_position,
         layer_children,
+        wind_profile_data,
     ):
         """Draw Eights on Pylons with integrated pivotal altitude calculator."""
         if not n_clicks:
@@ -145,6 +150,15 @@ def register(app):
             if ap:
                 selected_airport_elev_ft = ap.get("elevation_ft", 0.0)
 
+        # Hydrate live winds-aloft column when staged.
+        wind_profile = None
+        if wind_profile_data:
+            try:
+                from core.winds_aloft import WindProfile
+                wind_profile = WindProfile.from_store(wind_profile_data)
+            except Exception:
+                wind_profile = None
+
         # Run simulation
         from simulation import simulate_eights_on_pylons
         path, hover, sim_warnings = simulate_eights_on_pylons(
@@ -163,6 +177,8 @@ def register(app):
             cg_position=float(cg_position) if cg_position not in [None, "", "null"] else 0.5,
             bank_angle_deg=bank_deg,
             entry_direction=entry_dir,
+            wind_profile=wind_profile,
+            engine_option=engine_name,
         )
 
         if not path:
@@ -233,6 +249,50 @@ def register(app):
 
         # Build warnings if any
         warning_elements = []
+
+        # ACS pylon-spacing — most actionable. Surface FIRST so it isn't
+        # lost below other warnings. Error tier means the geometry is
+        # invalid; the sim still draws a path but transitions will snap.
+        spacing_tier = sim_warnings.get("pylon_spacing_tier", "ok")
+        if spacing_tier == "error":
+            warning_elements.append(html.Div(
+                [
+                    html.Strong("Pylon spacing invalid — "),
+                    html.Span(sim_warnings.get("pylon_spacing_error", "")),
+                    html.Br(),
+                    html.Span(
+                        f"Ideal: {sim_warnings.get('pylon_spacing_ideal_min_nm', 0):.2f}–"
+                        f"{sim_warnings.get('pylon_spacing_ideal_max_nm', 0):.2f} NM "
+                        f"(for {sim_warnings.get('turn_radius_nm', 0):.2f} NM turn radius).",
+                        style={"fontSize": "11px", "opacity": 0.95},
+                    ),
+                ],
+                style={
+                    "color": "white",
+                    "backgroundColor": "var(--ta-path-fail, #dc2626)",
+                    "padding": "8px 10px",
+                    "borderRadius": "4px",
+                    "marginBottom": "6px",
+                    "fontSize": "12px",
+                    "lineHeight": "1.35",
+                },
+            ))
+        elif spacing_tier == "warning":
+            warning_elements.append(html.Div(
+                [
+                    html.Strong("Pylon spacing — "),
+                    html.Span(sim_warnings.get("pylon_spacing_warning", "")),
+                ],
+                style={
+                    "borderLeft": "3px solid var(--acs-marginal, #f59e0b)",
+                    "color": "var(--acs-marginal, #f59e0b)",
+                    "padding": "4px 8px",
+                    "marginBottom": "6px",
+                    "fontSize": "11px",
+                    "backgroundColor": "rgba(245, 158, 11, 0.05)",
+                },
+            ))
+
         if sim_warnings.get("airspeed_warning"):
             warning_elements.append(html.Div(f"Warning: {sim_warnings['airspeed_warning']}", style={"color": "#c0392b", "fontWeight": "bold"}))
         if sim_warnings.get("bank_limited"):
@@ -268,12 +328,14 @@ def register(app):
                 },
             ))
 
-        # Calculate stall margins
-        vs_clean = sim_warnings.get('stall_speed_clean', 48)
-        vs_in_turn = sim_warnings.get('stall_speed_in_turn', vs_clean)
+        # Stall references — sim surfaces real values post-audit (was
+        # falling back to hardcoded 48 because the key was never emitted).
+        vs_clean = sim_warnings.get('vs_clean_kt', sim_warnings.get('stall_speed_clean', 48))
+        vs_in_turn = sim_warnings.get('vs_at_max_bank_kt', sim_warnings.get('stall_speed_in_turn', vs_clean))
         min_ias_achieved = sim_warnings.get('min_ias_achieved', ias)
         max_bank = sim_warnings.get('max_bank_achieved', 0)
         load_factor = 1 / math.cos(math.radians(float(max_bank))) if max_bank > 0 else 1.0
+        stall_margin = min_ias_achieved - vs_in_turn
 
         # Calculate avg TAS from hover data
         if hover:
@@ -308,7 +370,22 @@ def register(app):
                               "chosen pivotal altitude (typically 0.4-0.7 NM at GA IAS).",
                     ),
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
-                    html.Div(f"Stall margin: {min_ias_achieved - vs_in_turn:.0f} kt | Time: {sim_warnings.get('total_time_sec', 0):.0f}s | {n_eights} eights", style={"fontSize": "11px"}),
+                    html.Div(
+                        f"Vs(clean): {vs_clean:.0f} → Vs×√n at {max_bank:.0f}°: {vs_in_turn:.0f} kt | Time: {sim_warnings.get('total_time_sec', 0):.0f}s | {n_eights} eights",
+                        style={"fontSize": "11px"},
+                    ),
+                    html.Div(
+                        f"Stall margin: {stall_margin:+.0f} kt",
+                        style={
+                            "fontSize": "11px",
+                            "color": (
+                                "#dc2626" if stall_margin < 4
+                                else "#f59e0b" if stall_margin < 8
+                                else "#16a34a"
+                            ),
+                            "fontWeight": "500",
+                        },
+                    ),
                     html.Div([
                         html.Span("Color: ", style={"fontSize": "10px"}),
                         html.Span("■ Low PA", style={"color": "#ff0000", "fontSize": "10px", "marginRight": "6px"}),
@@ -320,17 +397,78 @@ def register(app):
                         _acs_metric("Heading", 0, "°", target=0, tol=10, cert_level="commercial"),
                     ], style={"display": "flex", "flexWrap": "wrap", "marginTop": "6px"}),
                 ], title="Simulation Results", style={"fontSize": "12px"}),
+                # 3D Side View — the two reference pylons rise from the
+                # ground (field elevation) up to the pivotal altitude so
+                # the pilot can see the geometric relationship between
+                # the aircraft's orbit and the pylons in 3-space. The
+                # wing tip "points at" the pylon all the way around.
+                side_view_accordion_item(
+                    build_3d_side_view_block(
+                        path=path,
+                        hover=hover,
+                        elev_ft=float(selected_airport_elev_ft or 0.0),
+                        vertical_features=[
+                            {
+                                "lat": pylon1["lat"],
+                                "lon": pylon1["lon"],
+                                "alt_ft_base": float(selected_airport_elev_ft or 0.0),
+                                # Pylon top at the maneuver's average
+                                # pivotal altitude (MSL): field elev +
+                                # average PA. This makes the pole
+                                # visibly extend to the aircraft's
+                                # orbit altitude.
+                                "alt_ft_top": float(selected_airport_elev_ft or 0.0)
+                                              + float(sim_warnings.get("pivotal_alt_avg", 800) or 800),
+                                "label": "Pylon 1",
+                                "color": "#e74c3c",  # red — matches map marker
+                            },
+                            {
+                                "lat": pylon2["lat"],
+                                "lon": pylon2["lon"],
+                                "alt_ft_base": float(selected_airport_elev_ft or 0.0),
+                                "alt_ft_top": float(selected_airport_elev_ft or 0.0)
+                                              + float(sim_warnings.get("pivotal_alt_avg", 800) or 800),
+                                "label": "Pylon 2",
+                                "color": "#3498db",  # blue — matches map marker
+                            },
+                        ],
+                    )
+                ),
             ], start_collapsed=False, style={"marginTop": "8px"})
         )
 
+        # Live winds-aloft chip — parity with other maneuvers.
+        chip = _winds_aloft_chip(wind_profile_data)
+        if chip is not None:
+            info_children.append(chip)
+
         info_elements = html.Div(info_children)
 
-        # Slider configuration
-        num_points = len(hover)
-        slider_max = max(0, num_points - 1)
+        # Time-based scrubber with segment markers. Walks the hover stream
+        # and records the first time each segment appears. Pylon-orbit
+        # segments are emitted by the sim as "pylon_1_entry", "pylon_1",
+        # "pylon_2", "transition_p1_to_p2", "transition_p2_to_p1".
+        SEG_LABELS = {
+            "entry": "Entry",
+            "pylon_1_entry": "P1",
+            "pylon_1": "P1",
+            "pylon_2": "P2",
+            "transition_p1_to_p2": "→P2",
+            "transition_p2_to_p1": "→P1",
+        }
+        max_time = hover[-1].get("time", 0) if hover else 0
         slider_marks = {0: "Start"}
-        if slider_max > 0:
-            slider_marks[slider_max] = "End"
+        prev_label = None
+        for pt in hover:
+            seg = pt.get("segment", "")
+            label = SEG_LABELS.get(seg, seg.replace("_", " ").title())
+            # Avoid stamping the same label twice in a row at the same second.
+            t_mark = int(round(float(pt.get("time", 0))))
+            if label != prev_label and t_mark not in slider_marks:
+                slider_marks[t_mark] = label
+                prev_label = label
+        slider_marks[int(round(max_time))] = "End"
+        slider_max = int(round(max_time)) if max_time > 0 else 100
         slider_style = {"display": "block", "marginTop": "10px"}
 
         # Calculate bounds for auto-zoom
@@ -363,13 +501,25 @@ def register(app):
         prevent_initial_call=True
     )
     def update_eights_on_pylons_scrubber(slider_value, hover_data, path_data):
-        """Update the scrubber marker and tooltip based on slider position."""
+        """Update the scrubber marker and tooltip based on slider position.
+
+        Time-based lookup so segment marks (P1 / →P2 / P2 / …) land on
+        actual transition ticks regardless of timestep granularity."""
         if not hover_data or not path_data or slider_value is None:
             return []
 
-        idx = int(slider_value)
-        if idx < 0 or idx >= len(hover_data) or idx >= len(path_data):
-            return []
+        target_time = float(slider_value)
+        best_idx = 0
+        best_diff = abs(hover_data[0].get("time", 0) - target_time)
+        for i, hp in enumerate(hover_data):
+            diff = abs(hp.get("time", 0) - target_time)
+            if diff < best_diff:
+                best_diff = diff
+                best_idx = i
+
+        idx = best_idx
+        if idx >= len(path_data):
+            idx = len(path_data) - 1
 
         pt = hover_data[idx]
         pos = path_data[idx]

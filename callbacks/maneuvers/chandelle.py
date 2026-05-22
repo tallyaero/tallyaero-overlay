@@ -20,6 +20,7 @@ from layouts.maneuvers._charts import altitude_profile_chart
 from layouts.maneuvers._shared import _acs_metric, _power_verdict, _winds_aloft_chip
 
 from core.data_loader import aircraft_data, airport_data
+from core.profile3d import build_3d_side_view_block, side_view_accordion_item
 
 
 def register(app):
@@ -47,6 +48,7 @@ def register(app):
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
         State("aircraft-select", "value"),
+        State("engine-select", "value"),
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
         State("power-setting", "value"),
@@ -66,6 +68,7 @@ def register(app):
         wind_dir,
         wind_speed,
         aircraft_name,
+        engine_name,
         selected_airport_id,
         weight_lb,
         power_setting,
@@ -140,6 +143,7 @@ def register(app):
             weight_lb=weight,
             power_setting=power_pct,
             wind_profile=wind_profile,
+            engine_option=engine_name,
         )
 
         if not path or not hover:
@@ -204,18 +208,34 @@ def register(app):
 
         elements = [start_marker, end_marker] + path_segments
 
-        # Prepare slider configuration
-        num_points = len(hover)
-        slider_max = max(0, num_points - 1)
-        slider_marks = {0: "Start"}
-        if slider_max > 0:
-            slider_marks[slider_max] = "End"
-            # Add 90° point marker
-            for i, pt in enumerate(hover):
-                if abs(pt.get('turn_progress', 0) - 90) < 5:
-                    slider_marks[i] = "90°"
-                    break
-
+        # Time-based scrubber with phase markers. Mirrors the convention
+        # used by impossible_turn / PO180 / steep_turn — pilot can scrub
+        # directly to entry / 90° point / rollout / exit.
+        SEGMENT_LABELS = {
+            "roll_in": "Roll In",
+            "first_90": "First 90°",
+            "second_90": "Second 90°",
+            "rollout": "Rollout",
+        }
+        max_time = hover[-1].get("time", 0) if hover else 0
+        slider_marks = {}
+        # Phase transitions
+        seen_seg = set()
+        ninety_marked = False
+        for pt in hover:
+            t_mark = int(round(float(pt.get("time", 0))))
+            seg = pt.get("segment")
+            if seg and seg not in seen_seg:
+                seen_seg.add(seg)
+                label = SEGMENT_LABELS.get(seg, seg.replace("_", " ").title())
+                slider_marks[t_mark] = label
+            # 90° pin — first tick at or past 90° heading change.
+            if not ninety_marked and pt.get("turn_progress", 0) >= 90.0:
+                slider_marks[t_mark] = "90°"
+                ninety_marked = True
+        slider_marks[0] = slider_marks.get(0, "Start")
+        slider_marks[int(round(max_time))] = "Exit"
+        slider_max = int(round(max_time)) if max_time > 0 else 100
         slider_style = {"display": "block", "marginTop": "10px"}
 
         # Calculate performance metrics
@@ -246,10 +266,19 @@ def register(app):
         # Calculate load factor at max bank
         load_factor = 1 / math.cos(math.radians(float(max_bank))) if max_bank > 0 else 1.0
 
-        # Stall speed calculations
-        vs_clean = float(ac.get("stall_speed_clean_kias", 48))
-        vs_in_turn = vs_clean * math.sqrt(load_factor)
-        min_ias = min([pt.get('tas', entry_ias) for pt in hover]) if hover else entry_ias
+        # Stall reference — surfaced by the sim. The ACS-graded chandelle
+        # exit condition is "wings-level within 10 KIAS of power-on
+        # stall", so the margin we surface is min_IAS against
+        # vs_power_on (sim field `stall_margin_kt`). The in-turn margin
+        # (min_IAS against Vs×√n at max bank) is also surfaced for
+        # context.
+        last_hover = hover[-1] if hover else {}
+        vs_clean = float(last_hover.get("vs_clean_kt", 50))
+        vs_power_on = float(last_hover.get("vs_power_on_kt", vs_clean * 0.93))
+        vs_in_turn = float(last_hover.get("vs_at_bank_kt") or (vs_clean * math.sqrt(load_factor)))
+        min_ias = float(last_hover.get("min_ias_kt") or entry_ias)
+        exit_margin = float(last_hover.get("stall_margin_kt", min_ias - vs_power_on))
+        in_turn_margin = float(last_hover.get("stall_margin_in_turn_kt", min_ias - vs_in_turn))
 
         # Build info panel with standardized format
         info_accordion = dbc.Accordion([
@@ -259,7 +288,23 @@ def register(app):
                 html.Div(f"AOB: {max_bank:.0f}° | Load: {load_factor:.2f}G | GS: {min_gs:.0f}-{max_gs:.0f} kt", style={"fontSize": "11px"}),
                 html.Div(f"Alt: {altitude_ft:.0f}→{exit_alt:.0f} ft (+{alt_gain:.0f}) | {direction.title()} 180°", style={"fontSize": "11px"}),
                 html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
-                html.Div(f"Vs turn: {vs_in_turn:.0f} kt | Margin: {min_ias - vs_in_turn:.0f} kt | Time: {total_time:.0f}s", style={"fontSize": "11px"}),
+                html.Div(
+                    f"Vs(clean): {vs_clean:.0f} → Vs(power-on): {vs_power_on:.0f} kt | min IAS: {min_ias:.0f} kt | Time: {total_time:.0f}s",
+                    style={"fontSize": "11px"},
+                ),
+                html.Div(
+                    f"Exit margin vs power-on Vs: {exit_margin:+.0f} kt"
+                    f"  ·  In-turn margin (Vs×√n at {max_bank:.0f}°): {in_turn_margin:+.0f} kt",
+                    style={
+                        "fontSize": "11px",
+                        "color": (
+                            "#dc2626" if exit_margin < 4
+                            else "#f59e0b" if exit_margin < 8
+                            else "#16a34a"
+                        ),
+                        "fontWeight": "500",
+                    },
+                ),
                 html.Div([
                     html.Span("Color: ", style={"fontSize": "10px"}),
                     html.Span("■ Low", style={"color": "#ff0000", "fontSize": "10px", "marginRight": "6px"}),
@@ -267,17 +312,35 @@ def register(app):
                     html.Span("■ High", style={"color": "#0000ff", "fontSize": "10px"}),
                 ], style={"marginTop": "4px"}),
                 # Phase C9 — Commercial ACS tolerances.
+                # Stall margin = min IAS over the maneuver vs. power-on
+                # Vs at exit (the ACS-graded reference). ACS target is
+                # "within 10 KIAS of power-on stall" → tolerance ±10.
                 html.Div([
                     _acs_metric("Roll-out", 0, "°", target=0, tol=10, cert_level="commercial"),
-                    _acs_metric("Stall margin", min_ias - vs_in_turn, "kt", target=10, tol=10, cert_level="commercial"),
+                    _acs_metric("Exit stall margin", exit_margin, "kt", target=10, tol=10, cert_level="commercial"),
                 ], style={"display": "flex", "flexWrap": "wrap", "marginTop": "6px"}),
-                # Phase D2 — Design Directive power verdict.
+                # Phase D2 — Design Directive power verdict. The sim
+                # only writes `failure_reason` when power_pct < 0.5
+                # caused it to truncate the maneuver short of 180°;
+                # at 50-80% power the maneuver still completes (with
+                # less altitude gain), so the red "failed" banner is
+                # gated on the sim's actual outcome, not the slider.
                 _power_verdict(
                     power_pct, 1.0,
                     "altitude gained reduced",
                     "could not reach 180° within target IAS",
+                    actually_failed=bool(last_hover.get("failure_reason")),
                 ),
             ], title="Simulation Results", style={"fontSize": "12px"}),
+            # 3D Side View — chandelle is a climbing turn so vertical
+            # profile is the entire point of the maneuver.
+            side_view_accordion_item(
+                build_3d_side_view_block(
+                    path=path,
+                    hover=hover,
+                    elev_ft=float(field_elev_ft or 0.0),
+                )
+            ),
         ], start_collapsed=False, style={"marginTop": "8px"})
 
         # Phase C5 — altitude profile chart with phase markers at 90° pitch (transition
@@ -332,32 +395,61 @@ def register(app):
         prevent_initial_call=True
     )
     def update_chandelle_scrubber(slider_value, hover_data, path_data):
-        """Update the scrubber marker and tooltip based on slider position."""
+        """Update the scrubber marker and tooltip based on slider position.
+
+        Time-based lookup (post-2026-05-21) — finds the closest hover
+        entry by time, so phase marks land on the right ticks even when
+        segment timing doesn't divide the index range evenly.
+        """
         if not hover_data or not path_data or slider_value is None:
             return []
 
-        idx = int(slider_value)
-        if idx < 0 or idx >= len(hover_data) or idx >= len(path_data):
-            return []
+        target_time = float(slider_value)
+        best_idx = 0
+        best_diff = abs(hover_data[0].get("time", 0) - target_time)
+        for i, hp in enumerate(hover_data):
+            diff = abs(hp.get("time", 0) - target_time)
+            if diff < best_diff:
+                best_diff = diff
+                best_idx = i
+
+        idx = best_idx
+        if idx >= len(path_data):
+            idx = len(path_data) - 1
 
         pt = hover_data[idx]
         pos = path_data[idx]
 
-        segment = pt.get('segment', 'climb')
+        SEGMENT_LABELS = {
+            "roll_in": "Roll In",
+            "first_90": "First 90°",
+            "second_90": "Second 90°",
+            "rollout": "Rollout",
+        }
+        seg_raw = pt.get("segment", "climb")
+        segment_label = SEGMENT_LABELS.get(seg_raw, seg_raw.replace("_", " ").title())
+        progress = pt.get("turn_progress", 0)
+
+        load_factor = pt.get("load_factor")
+        if load_factor is None and pt.get("aob") is not None and abs(pt["aob"]) < 89.9:
+            load_factor = 1.0 / math.cos(math.radians(abs(pt["aob"])))
 
         tooltip_content = [
-            html.Div(f"{segment.replace('_', ' ').title()}", style={"fontWeight": "bold", "borderBottom": "1px solid #ccc", "paddingBottom": "3px", "marginBottom": "3px"}),
-            html.Div(f"Altitude: {pt.get('alt', 0):.0f} ft AGL"),
+            html.Div(segment_label, style={"fontWeight": "bold", "borderBottom": "1px solid #ccc", "paddingBottom": "3px", "marginBottom": "3px"}),
+            html.Div(f"Altitude: {pt.get('alt', 0):.0f} ft AGL  ·  Turn: {progress:.0f}° of 180°"),
             html.Div(f"Time: {pt.get('time', 0):.1f} sec"),
             html.Div(f"IAS: {pt.get('ias', 0):.0f} kt | TAS: {pt.get('tas', 0):.0f} kt"),
-            html.Div(f"AOB: {'L ' if pt.get('aob', 0) < 0 else ('R ' if pt.get('aob', 0) > 0 else '')}{abs(pt.get('aob', 0)):.1f}° | Pitch: {pt.get('pitch', 0):.1f}°"),
+            html.Div(
+                f"AOB: {'L ' if pt.get('aob', 0) < 0 else ('R ' if pt.get('aob', 0) > 0 else '')}{abs(pt.get('aob', 0)):.1f}° | Pitch: {pt.get('pitch', 0):.1f}°"
+                + (f" | Load: {load_factor:.2f}G" if load_factor else "")
+            ),
             html.Div(f"VS: {pt.get('vs', 0):.0f} fpm"),
             html.Div(f"Heading: {pt.get('heading', 0):.0f}°"),
-            html.Div(f"Stall Margin: +{pt.get('speed_margin', 0):.0f} kt"),
+            html.Div(f"Margin above power-on Vs: {pt.get('speed_margin', 0):+.0f} kt"),
         ]
 
         heading = pt.get('heading', 0)
         bank = pt.get('aob', 0)
-        crab = -pt.get('drift', 0)  # Negate: crab is opposite of drift (point into wind)
+        crab = -pt.get('drift', 0)  # marker visual only — crab not displayed in tooltip per user note (continuous turn)
         marker = create_airplane_marker(pos, heading, tooltip_content, bank, crab)
         return [marker]

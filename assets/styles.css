@@ -3594,9 +3594,10 @@ input[type="radio"] {
 /* === Phase H · live-data field tint =========================
    Env inputs (wind dir/speed, OAT, altimeter) get the .field-live
    class when the airport-pick callback filled them from METAR. The
-   tint sticks until the next airport pick — user edits keep the
-   tint (the field still reflects live data plus their adjustment).
-   Pick a different airport to recompute; clear the airport to reset.
+   tint clears the moment the user edits the field (clear_*_live_tint
+   in callbacks/environment.py) so the sidebar reflects that the
+   sim is now using the user's value, not the live METAR. Pick a
+   different airport to recompute and re-tint.
 */
 .input-small.field-live,
 input.field-live {

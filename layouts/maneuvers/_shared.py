@@ -156,14 +156,24 @@ def _winds_aloft_chip(wind_profile_data):
     )
 
 
-def _power_verdict(power_pct, design_power, consequence_text, failure_reason):
+def _power_verdict(power_pct, design_power, consequence_text, failure_reason,
+                   actually_failed: bool = False):
     """Render the Design Directive power verdict for a maneuver (Phase D2).
 
     Compares actual power (0-1) to the maneuver's design power and emits
-    one of three components based on |delta|:
+    one of three components based on |delta| AND the sim's actual outcome:
       - abs_delta < 0.10 → green badge: "Power: X%" (within tolerance)
       - abs_delta < 0.20 → amber chip: "Off-design power: X% (design Y%) — <consequence>"
-      - abs_delta >= 0.20 → red banner: "Maneuver failed — <failure_reason>"
+      - abs_delta >= 0.20 AND `actually_failed` → red banner: "Maneuver failed — <failure_reason>"
+      - abs_delta >= 0.20 AND NOT `actually_failed` → amber chip
+        (the sim completed the maneuver despite the off-design power —
+        don't lie to the pilot by saying it "failed" when it didn't)
+
+    `actually_failed` should be wired by the caller to the sim's outcome
+    (e.g. the `failure_reason` field on the last hover entry, or the
+    `success=False` flag in meta). Pre-fix the verdict relied purely on
+    the slider delta, which painted every <80%-power chandelle red even
+    though the sim cleanly completed 180° down to ~50% power.
 
     Returns an html.Div. consequence_text and failure_reason are short
     strings supplied by each callback per the Design Directive table.
@@ -186,12 +196,16 @@ def _power_verdict(power_pct, design_power, consequence_text, failure_reason):
             className="acs-metric",
             **{"data-cert-level": "design-directive"},
         )
-    if abs_delta < 0.20:
+
+    # Off-design (delta >= 0.10). Show red ONLY if the sim itself
+    # reported failure; otherwise it's just degraded performance and
+    # the pilot needs the amber consequence note, not a panic banner.
+    if abs_delta >= 0.20 and actually_failed:
         return html.Div(
-            f"Off-design power: {p * 100:.0f}% (design {d * 100:.0f}%) — {consequence_text}",
-            className="power-chip power-chip-amber",
+            f"Maneuver failed — {failure_reason}",
+            className="power-banner power-banner-red",
         )
     return html.Div(
-        f"Maneuver failed — {failure_reason}",
-        className="power-banner power-banner-red",
+        f"Off-design power: {p * 100:.0f}% (design {d * 100:.0f}%) — {consequence_text}",
+        className="power-chip power-chip-amber",
     )

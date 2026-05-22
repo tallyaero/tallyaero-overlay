@@ -15,8 +15,57 @@ from core.log import get_logger
 from callbacks.map import create_airplane_marker
 
 from core.data_loader import aircraft_data, airport_data
+from core.profile3d import build_3d_side_view_block, side_view_accordion_item
+from layouts.maneuvers._shared import _winds_aloft_chip
 
 log = get_logger(__name__)
+
+
+def _po180_crab_display(pt: dict) -> str:
+    """Format the crab line for PO180's scrubber tooltip.
+
+    PO180's sim emits `drift = heading − track` (positive ⇒ nose right
+    of track ⇒ RIGHT crab). If the explicit `drift` is zero / missing,
+    fall back to heading − track derived from the same hover entry so
+    a re-serialized hover store that lost the field still renders.
+    """
+    drift = pt.get("drift")
+    if drift in (None, 0, 0.0):
+        h = pt.get("heading")
+        t = pt.get("track")
+        if h is not None and t is not None:
+            drift = ((float(h) - float(t)) + 540.0) % 360.0 - 180.0
+    drift = float(drift or 0.0)
+    side = "R " if drift > 0.05 else ("L " if drift < -0.05 else "")
+    return f"Crab: {side}{abs(drift):.1f}°"
+
+
+def _po180_runway_3d_dict(runway_threshold: dict,
+                           runway_heading_deg: float,
+                           runway_length_ft: float,
+                           elev_ft: float) -> dict:
+    """Build the `runway` dict the profile3d helper consumes for PO180.
+
+    PO180's user-clicked point is the TOUCHDOWN end of the runway
+    (where the aircraft is aiming). The departure end sits opposite at
+    runway_heading + 180°. Drawing both into the ground plane gives the
+    same orientation cue the 2D map already has.
+    """
+    from physics import point_from, FT_PER_NM
+    from geopy.point import Point as _GP
+
+    td_pt = _GP(float(runway_threshold["lat"]), float(runway_threshold["lon"]))
+    # The OPPOSITE threshold is `runway_length_ft` behind the touchdown,
+    # in the direction the runway points back toward (heading + 180°).
+    far_hdg = (float(runway_heading_deg) + 180.0) % 360.0
+    far_pt = point_from(td_pt, far_hdg, float(runway_length_ft) / FT_PER_NM)
+    return {
+        "start_lat": far_pt.latitude,
+        "start_lon": far_pt.longitude,
+        "end_lat": td_pt.latitude,
+        "end_lon": td_pt.longitude,
+        "elev_ft": float(elev_ft or 0.0),
+    }
 
 
 def _phase_transition_indices(hover):
@@ -35,6 +84,103 @@ def _phase_transition_indices(hover):
         if seg != prev:
             out.append((i, seg))
             prev = seg
+    return out
+
+
+def _po180_procedure_indices(hover, path, td_lat: float, td_lon: float,
+                              pattern_direction: str):
+    """Procedural milestone indices for the Power-Off 180:
+
+      abeam_idx   — on downwind, touchdown is 90° off the wing (on the
+                    correct side per `pattern_direction`).
+      key45_idx   — on downwind, AFTER abeam, touchdown is 45° behind
+                    the wing (the "key" visual checkpoint at which most
+                    pilots begin the descending base turn).
+      turn90_idx  — middle of the 180° turn (turn segment midpoint),
+                    aircraft has turned 90° from downwind heading and
+                    is perpendicular to the runway centerline.
+
+    Returns a dict so callers can render only the milestones that
+    resolved cleanly (any value may be `None` if the corresponding
+    geometry doesn't appear in the hover stream — e.g. very short
+    downwind that never went abeam).
+    """
+    import math
+
+    out = {"abeam_idx": None, "key45_idx": None, "turn90_idx": None}
+    if not hover or not path:
+        return out
+
+    # Left pattern → touchdown is to the LEFT of the aircraft on downwind
+    # (relative bearing negative); right pattern → touchdown is to the
+    # right (positive). We use this sign to disambiguate which side of
+    # the aircraft "90° off the wing" means.
+    side = -1.0 if str(pattern_direction).lower().startswith("l") else 1.0
+
+    def _bearing_to_td(lat: float, lon: float) -> float:
+        # Initial-bearing approximation; for the short distances in a
+        # standard pattern (<2 NM), the great-circle term is negligible.
+        dlon = math.radians(td_lon - lon)
+        lat1 = math.radians(lat)
+        lat2 = math.radians(td_lat)
+        x = math.sin(dlon) * math.cos(lat2)
+        y = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dlon)
+        return (math.degrees(math.atan2(x, y)) + 360.0) % 360.0
+
+    def _signed_diff(a: float, b: float) -> float:
+        d = (a - b + 180.0) % 360.0 - 180.0
+        return d
+
+    # Walk hover; for each downwind / turn tick compute relative bearing.
+    # Track which side abeam appears on, then find the 45° angle past it.
+    n = min(len(hover), len(path))
+    abeam_idx = None
+    abeam_err = 1e9   # accumulator finding tightest |rel - 90 × side|
+    key45_idx = None
+    key45_err = 1e9
+    turn_indices: list[int] = []
+
+    for i in range(n):
+        pt = hover[i]
+        seg = pt.get("segment")
+        if seg == "turn":
+            turn_indices.append(i)
+            continue
+        if seg != "downwind":
+            continue
+        lat, lon = path[i]
+        track = float(pt.get("track") or pt.get("heading") or 0.0)
+        rel = _signed_diff(_bearing_to_td(lat, lon), track)
+        # Abeam: |rel| ≈ 90° on the pattern-direction side.
+        target_abeam = 90.0 * side
+        err_abeam = abs(rel - target_abeam)
+        if err_abeam < abeam_err:
+            abeam_err = err_abeam
+            abeam_idx = i
+        # 45° behind the wing → relative bearing 135° on the same side
+        # ("behind" = away from the nose). Only valid AFTER abeam, so
+        # we keep the running tightest match but rely on the search
+        # naturally hitting it later in the downwind sweep.
+        target_45 = 135.0 * side
+        err_45 = abs(rel - target_45)
+        if err_45 < key45_err:
+            key45_err = err_45
+            key45_idx = i
+
+    out["abeam_idx"] = abeam_idx if abeam_err < 20.0 else None
+    # Only honor the 45° pick if it lies AFTER the abeam tick — otherwise
+    # we'd be flagging the approach side of the abeam (touchdown 45°
+    # AHEAD of the wing), which isn't the procedural key position.
+    if (key45_idx is not None and abeam_idx is not None
+            and key45_idx > abeam_idx and key45_err < 20.0):
+        out["key45_idx"] = key45_idx
+
+    if turn_indices:
+        # Midpoint of the turn ticks is the 90° point (90° into the
+        # 180° turn) by construction — the sim emits ticks with even
+        # ground-distance steps along the arc.
+        out["turn90_idx"] = turn_indices[len(turn_indices) // 2]
+
     return out
 
 
@@ -70,6 +216,7 @@ def register(app):
         State("poweroff180-abeam-distance-nm", "value"),
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
+        State("wind-profile-store", "data"),
         prevent_initial_call=True
     )
     def draw_poweroff180(
@@ -89,7 +236,8 @@ def register(app):
         prop_condition,
         abeam_distance_nm,
         selected_airport_id,
-        runtime_weight
+        runtime_weight,
+        wind_profile_data,
     ):
         """Draw Power-Off 180 accuracy approach using energy-based simulation."""
         from simulation import simulate_power_off_180
@@ -152,6 +300,15 @@ def register(app):
             ac = dict(aircraft_data[ac_name])
             ac["total_weight_lb"] = float(total_wt)
 
+            # Hydrate live winds-aloft column when an airport pick fetched one.
+            wind_profile = None
+            if wind_profile_data:
+                try:
+                    from core.winds_aloft import WindProfile
+                    wind_profile = WindProfile.from_store(wind_profile_data)
+                except Exception:
+                    wind_profile = None
+
             # Run simulation
             path, hover_data, results = simulate_power_off_180(
                 runway_threshold=runway_threshold,
@@ -170,6 +327,8 @@ def register(app):
                 field_elev_ft=elev_ft,
                 pattern_altitude_agl=pattern_alt,
                 timestep_sec=0.5,
+                engine_option=engine_key,
+                wind_profile=wind_profile,
             )
 
             if not path or not hover_data:
@@ -228,31 +387,42 @@ def register(app):
                 )
                 elements.append(impact_marker)
 
-            # Phase C4 — ACS Gap 5 — phase-transition markers on the map.
-            # Drop amber CircleMarkers at the abeam / 90°-turn / final
-            # boundaries so the geometry reads at a glance.
-            PHASE_LABELS = {
-                "downwind": "Abeam",
-                "turn": "90° turn",
-                "final": "45° / Final",
-                "touchdown": "Touchdown",
-            }
-            for idx, seg in _phase_transition_indices(hover_data):
-                if idx >= len(path):
-                    continue
+            # Procedural-milestone markers on the map. Replaces the
+            # earlier "fire on each segment transition" logic, which
+            # placed the "Abeam" / "90° turn" / "45° / Final" labels at
+            # segment BOUNDARIES — none of which line up with the actual
+            # procedural reference points the pilot is judging by:
+            #
+            #   Abeam  — on downwind, touchdown 90° off the wing
+            #   45°    — on downwind, touchdown 45° behind the wing
+            #   90°    — middle of the 180° turn (base-leg position)
+            #   TD     — touchdown / impact end of run
+            proc_idxs = _po180_procedure_indices(
+                hover_data, path,
+                float(runway_threshold["lat"]),
+                float(runway_threshold["lon"]),
+                pattern_dir or "left",
+            )
+
+            def _milestone(idx, label):
+                if idx is None or idx >= len(path):
+                    return
                 lat, lon = path[idx]
-                label = PHASE_LABELS.get(seg, seg.title())
                 pt = hover_data[idx]
-                tooltip_text = (f"{label} — alt {pt.get('alt', 0):.0f} ft AGL"
-                                f", IAS {pt.get('ias', 0):.0f} kt")
+                tip = (f"{label} — alt {pt.get('alt', 0):.0f} ft AGL, "
+                       f"IAS {pt.get('ias', 0):.0f} kt")
                 elements.append(dl.CircleMarker(
                     center=[lat, lon],
                     radius=6,
                     color="#f59e0b",
                     fill=True,
                     fillOpacity=0.85,
-                    children=dl.Tooltip(tooltip_text),
+                    children=dl.Tooltip(tip),
                 ))
+
+            _milestone(proc_idxs["abeam_idx"], "Abeam")
+            _milestone(proc_idxs["key45_idx"], "45° key")
+            _milestone(proc_idxs["turn90_idx"], "90° (base)")
 
             # Build status message
             success = results.get('success', False)
@@ -277,11 +447,46 @@ def register(app):
                 lons.append(impact_point[1])
             bounds = [[min(lats), min(lons)], [max(lats), max(lons)]]
 
-            # Slider setup
+            # Slider setup. Phase-transition marks let the pilot scrub
+            # directly to downwind start / 45° key / 90° (base) / final
+            # entry / touchdown without hunting. Mirrors the marker layout
+            # used by impossible_turn.
             max_time = hover_data[-1]["time"] if hover_data else 100
-            slider_marks = {0: "Start", int(max_time): "End"}
+            slider_marks = {}
+            # Procedural milestones (positions in hover_data) → time labels.
+            milestone_label_at = {}
+            if proc_idxs.get("abeam_idx") is not None:
+                milestone_label_at[int(round(
+                    hover_data[proc_idxs["abeam_idx"]]["time"]))] = "Abeam"
+            if proc_idxs.get("key45_idx") is not None:
+                milestone_label_at[int(round(
+                    hover_data[proc_idxs["key45_idx"]]["time"]))] = "45° key"
+            if proc_idxs.get("turn90_idx") is not None:
+                milestone_label_at[int(round(
+                    hover_data[proc_idxs["turn90_idx"]]["time"]))] = "90° base"
+            # Segment-transition labels for the remaining boundaries.
+            for idx, seg in _phase_transition_indices(hover_data):
+                if idx >= len(hover_data):
+                    continue
+                t_mark = int(round(float(hover_data[idx].get("time", 0))))
+                if seg == "downwind" and t_mark == 0:
+                    slider_marks[0] = "Start"
+                elif seg == "final":
+                    slider_marks[t_mark] = "Final"
+            # Overlay procedural milestones LAST so they win any collision.
+            slider_marks.update(milestone_label_at)
+            # End label
+            end_label = ("Touchdown" if results.get("success", False)
+                         else "Impact")
+            slider_marks[int(max_time)] = end_label
+            if 0 not in slider_marks:
+                slider_marks[0] = "Start"
 
-            # Prepare hover store with slip data
+            # Prepare hover store with slip data. The sim emits `slip_pct`
+            # (a percentage 0-100 ready for display) per tick — earlier
+            # builds dropped that key and only kept `slip_intensity`
+            # (a 0-1 ratio used internally), so the scrubber tooltip's
+            # `pt.get('slip_pct', 0)` always returned 0 even mid-slip.
             hover_store = [
                 {
                     "time": pt.get("time", 0),
@@ -297,6 +502,7 @@ def register(app):
                     "segment": pt.get("segment", ""),
                     "slip_active": pt.get("slip_active", False),
                     "slip_intensity": pt.get("slip_intensity", 0),
+                    "slip_pct": pt.get("slip_pct", 0),
                 }
                 for pt in hover_data
             ]
@@ -338,6 +544,40 @@ def register(app):
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
                 ]
 
+            # Post-2026-05-21 audit fields — surface stall margin + clamp
+            # warning + bank-cap state so the pilot sees what the sim
+            # had to compromise on.
+            stall_margin = results.get("stall_margin_kt")
+            stall_v_at_n = results.get("stall_speed_at_bank_kt")
+            stall_capped = results.get("bank_stall_capped", False)
+            bank_geo_unclamped = results.get("bank_geometry_unclamped_deg")
+            final_clamp = results.get("final_distance_clamp")
+
+            if isinstance(stall_margin, (int, float)):
+                if stall_margin < 4:
+                    sc_color = "#dc2626"
+                elif stall_margin < 8:
+                    sc_color = "#f59e0b"
+                else:
+                    sc_color = "#16a34a"
+                stall_line = (f"Stall margin: {stall_margin:+.1f} kt "
+                              f"(Vs×√n = {stall_v_at_n:.0f} kt)")
+                if stall_capped:
+                    stall_line += f" · bank capped from {bank_geo_unclamped:.0f}° to keep margin"
+            else:
+                sc_color = "#666"
+                stall_line = "Stall margin: n/a"
+
+            clamp_msg = None
+            if final_clamp == "too_short":
+                clamp_msg = ("Energy budget: too LITTLE altitude for this "
+                             "abeam distance — final-leg clamped to 300 ft. "
+                             "Consider higher pattern altitude or shorter abeam.")
+            elif final_clamp == "too_long":
+                clamp_msg = ("Energy budget: too MUCH altitude for this "
+                             "abeam distance — final-leg clamped to 1,500 ft. "
+                             "Consider lower pattern altitude or longer abeam.")
+
             info_content = dbc.Accordion([
                 dbc.AccordionItem([
                     result_banner,
@@ -346,6 +586,7 @@ def register(app):
                     html.Div([html.Strong("Aircraft Performance")], style={"marginBottom": "4px"}),
                     html.Div(f"Best Glide: {best_glide:.0f} KIAS | Weight: {total_wt:.0f} lb", style={"fontSize": "11px"}),
                     html.Div(f"Glide Ratio: {base_gr:.1f}:1 | Max Bank: {max_bank:.1f}°", style={"fontSize": "11px"}),
+                    html.Div(stall_line, style={"fontSize": "11px", "color": sc_color, "fontWeight": "500"}),
                     html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
 
                     *slip_section,
@@ -359,8 +600,33 @@ def register(app):
                     html.Div(f"Altitude: {pattern_alt:.0f} ft AGL | Abeam: {abeam_dist:.2f} nm", style={"fontSize": "11px"}),
                     html.Div(f"Runway: {runway_heading:.0f}° | {pattern_dir.title()} pattern", style={"fontSize": "11px"}),
                     html.Div(f"Flaps: {flap_setting or 'clean'} | Time: {max_time:.1f}s", style={"fontSize": "11px"}),
+                    *([html.Div(clamp_msg, style={"fontSize": "11px", "color": "#f59e0b", "fontWeight": "500", "marginTop": "4px"})]
+                      if clamp_msg else []),
                 ], title="Simulation Results", style={"fontSize": "12px"}),
+                # 3D Side View — the entire power-off 180 maneuver is a
+                # glide from pattern altitude down to touchdown; the side
+                # view shows the descent profile through the turn. Runway
+                # is rendered on the ground plane so the pilot can see
+                # exactly where the path lands relative to the strip.
+                side_view_accordion_item(
+                    build_3d_side_view_block(
+                        path=path,
+                        hover=hover_data,
+                        elev_ft=float(elev_ft or 0.0),
+                        runway=_po180_runway_3d_dict(
+                            runway_threshold,
+                            float(runway_heading),
+                            float(runway_length_ft),
+                            float(elev_ft or 0.0),
+                        ),
+                    )
+                ),
             ], start_collapsed=False, style={"marginTop": "8px"})
+
+            # Live winds-aloft chip — matches impossible_turn / engine-out.
+            winds_chip = _winds_aloft_chip(wind_profile_data)
+            if winds_chip is not None:
+                info_content = html.Div([info_content, winds_chip])
 
             btn_class = (BTN_BASE + " shelf-action-success" if success
                           else BTN_BASE + " shelf-action-failure")
@@ -413,12 +679,26 @@ def register(app):
             html.Div(f"AOB: {'L ' if pt.get('aob', 0) < 0 else ('R ' if pt.get('aob', 0) > 0 else '')}{abs(pt.get('aob', 0)):.1f}°"),
             html.Div(f"VS: {pt.get('vs', 0):.0f} fpm"),
             html.Div(f"Heading: {pt.get('heading', 0):.0f}° | Track: {pt.get('track', 0):.0f}°"),
-            html.Div(f"Crab: {'R ' if pt.get('drift', 0) < 0 else ('L ' if pt.get('drift', 0) > 0 else '')}{abs(pt.get('drift', 0)):.1f}°"),
+            # PO180 sim emits `drift = heading − track` (positive ⇒ nose
+            # right of track ⇒ RIGHT crab). The earlier label flipped the
+            # sign — same code path as impossible_turn's tooltip, but
+            # impossible_turn's sim uses the opposite convention, so the
+            # label happened to be correct there. Resolve drift via
+            # heading/track if the explicit value isn't present.
+            html.Div(
+                _po180_crab_display(pt),
+            ),
             html.Div(f"Slip: {slip_pct:.0f}%", style={"color": "#fd7e14" if slip_pct > 0 else "#666", "fontWeight": "bold" if slip_pct > 0 else "normal"}),
         ]
 
         heading = pt.get('heading', 0)
         bank = pt.get('aob', 0)
-        crab = -pt.get('drift', 0)  # Negate: crab is opposite of drift (point into wind)
+        # Marker `crab` parameter expects "nose offset from track" in
+        # the standard right-positive convention, which matches the
+        # sim's drift sign. (Earlier code negated — but that produced
+        # the visually wrong marker orientation as well; the visual
+        # being "approximately right" before was a coincidence of
+        # symmetric scenarios.)
+        crab = float(pt.get('drift', 0) or 0)
         marker = create_airplane_marker(pos, heading, tooltip_content, bank, crab)
         return [marker]

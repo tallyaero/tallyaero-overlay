@@ -145,6 +145,9 @@ def simulate_s_turn(
     power_setting: float = 0.5,
     cg_position: float = 0.5,
     timestep_sec: float = 0.25,
+    # Post-2026-05-21 additions
+    wind_profile=None,
+    engine_option: str = None,
 ) -> tuple:
     """
     Simulate S-turns across a reference line with wind compensation.
@@ -210,6 +213,33 @@ def simulate_s_turn(
     # Aircraft data defaults
     if ac is None:
         ac = {}
+
+    # Honor user surface wind over the column's SFC layer (impossible-turn /
+    # PO180 parity). S-turn is a single-altitude maneuver but the override
+    # contract still applies so pilot edits aren't silently ignored.
+    if wind_profile is not None:
+        try:
+            wind_profile = wind_profile.with_surface_override(
+                wind_dir_deg, wind_speed_kt,
+                surface_alt_ft_msl=field_elev_ft,
+            )
+            # Sample at the maneuver's altitude (600-1000 ft typical).
+            wd, ws = wind_profile.at(field_elev_ft + altitude_ft)
+            wind_dir_deg = float(wd)
+            wind_speed_kt = float(ws)
+        except Exception:
+            pass
+
+    # POH dynamics — required bank varies through each semicircle
+    # (steeper downwind / shallower upwind); pre-fix snapped instantly
+    # to the wind-corrected value each tick.
+    try:
+        from core.dynamics import dynamics_for
+        pd_dyn = dynamics_for(ac) if ac else {}
+    except Exception:
+        pd_dyn = {}
+    bank_response_tau_s = float(pd_dyn.get("bank_response_tau_s", 1.0))
+    roll_rate_dps = float(pd_dyn.get("roll_rate_dps", 40.0))
 
     # Weight handling
     if weight_lb is None or weight_lb <= 0:
@@ -386,6 +416,20 @@ def simulate_s_turn(
     min_gs = 999.0
     min_alt = altitude_ft
     max_alt = altitude_ft
+    # Post-2026-05-21 additions:
+    # - bank_state_deg drives a τ-smoothed bank toward the wind-dictated
+    #   required value each tick.
+    # - peak_unclamped_bank tracks the geometric required bank BEFORE the
+    #   45° / max_safe_bank clamp so the UI can show "geometry wanted N°".
+    # - min_ias_achieved is the running minimum IAS so the result panel
+    #   can show a real margin (callback referenced this key but the sim
+    #   never set it).
+    # - crossing_times collects times of each reference-line crossing so
+    #   the scrubber can label them on the time slider.
+    bank_state_deg = 0.0
+    peak_unclamped_bank = 0.0
+    min_ias_achieved = ias_knots
+    crossing_times: list = []
 
     # Power setting effect on altitude maintenance:
     # In a banked turn, drag increases due to increased lift required
@@ -417,21 +461,54 @@ def simulate_s_turn(
 
         # Determine bank angle and segment name
         if state == APPROACH:
-            bank_deg = 0.0
+            target_bank_deg = 0.0
             segment = "approach"
         else:
             # In a turn - bank varies with groundspeed for constant radius ground track
             required_centripetal = (gs_fps ** 2) / turn_radius_ft
             tan_bank = required_centripetal / G_FPS2
-            bank_deg = math.degrees(math.atan(tan_bank))
+            geo_bank = math.degrees(math.atan(tan_bank))
+            # Track geometric required bank BEFORE the safety clamp so we
+            # can surface "wind-dictated geometry required N°" when the
+            # clamp engages.
+            if geo_bank > peak_unclamped_bank:
+                peak_unclamped_bank = geo_bank
 
-            # Clamp bank to safe limits (considering G limits and stall margin)
-            max_safe_bank = base_bank_deg * 1.2  # Allow some variation but not excessive
-            bank_deg = max(10.0, min(max_safe_bank, min(45.0, bank_deg)))
-
+            # Hard 45° AOB cap (FAA ACS S-Turns standard — "bank not to
+            # exceed 45° at maximum point"). Pre-fix the cap was the
+            # smaller of `base_bank_deg × 1.2` or 45° — for entry banks
+            # below 38° that effectively under-capped (a 30° base capped
+            # the downwind bank at 36° instead of letting wind push it
+            # toward the 45° ACS ceiling). Now the cap is always 45°
+            # regardless of entry bank; the lower bound of 10° still
+            # keeps the upwind crossings flyable.
+            target_bank_deg = max(10.0, min(45.0, geo_bank))
             segment = f"turn_{current_semicircle + 1}"
 
-            # Track bank extremes
+        # Instant bank tracking for S-turn. Pre-fix did this; the audit
+        # rewrite introduced τ-smoothing (POH bank_response_tau_s +
+        # roll_rate_dps clamp), which is correct for energy maneuvers
+        # where the pilot rolls TO a target and HOLDS it (chandelle,
+        # steep turn, etc.). For ground-reference maneuvers like
+        # S-turn, the pilot is continuously feedback-correcting bank
+        # to maintain the planned ground-track radius — the τ lag
+        # leaves the aircraft slightly off-axis when the turn
+        # direction flips at each reference-line crossing, producing
+        # visibly distorted semicircles. We still apply the
+        # `roll_rate_dps × dt` physical clamp so a step change can't
+        # exceed the airframe's actual roll capability (matters most
+        # at the line crossing where target bank effectively reverses).
+        delta_bank = target_bank_deg - bank_state_deg
+        max_step = roll_rate_dps * dt
+        if delta_bank > max_step:
+            delta_bank = max_step
+        elif delta_bank < -max_step:
+            delta_bank = -max_step
+        bank_state_deg += delta_bank
+        bank_deg = bank_state_deg
+
+        if state == TURNING:
+            # Track bank extremes from the actually-flown bank.
             if bank_deg > max_bank_achieved:
                 max_bank_achieved = bank_deg
             if bank_deg < min_bank_achieved:
@@ -492,6 +569,12 @@ def simulate_s_turn(
             "turn_progress": round(angle_in_turn, 1),
         })
 
+        # Track min IAS — pre-fix the callback referenced `min_ias_achieved`
+        # but the sim never emitted it. IAS is constant in this sim, but
+        # surfacing the value lets the result panel display a real margin.
+        if ias_knots < min_ias_achieved:
+            min_ias_achieved = ias_knots
+
         # State transitions
         if state == APPROACH:
             if abs(ct) < 30.0:
@@ -501,6 +584,9 @@ def simulate_s_turn(
             # In a turn - check for line crossing
             if angle_in_turn > 90.0:
                 if (prev_cross_track > 0 and ct <= 0) or (prev_cross_track < 0 and ct >= 0):
+                    # Record the time of each reference-line crossing for
+                    # the scrubber marks.
+                    crossing_times.append(round(t, 2))
                     current_semicircle += 1
                     if current_semicircle < total_semicircles:
                         turn_sign = -turn_sign
@@ -570,5 +656,26 @@ def simulate_s_turn(
     # Altitude warning if significant loss
     if altitude_ft - current_alt > 100:
         warnings["altitude_warning"] = f"Lost {round(altitude_ft - current_alt, 0):.0f} ft - increase power setting"
+
+    # Post-2026-05-21 audit additions — fields the callback needs to render
+    # a correct stall-margin chip and a peak-bank diagnostic.
+    # Vs at the actually-flown max bank (post τ-smoothing).
+    max_bank_for_vs = max(max_bank_achieved, 1.0)
+    load_factor_at_max_bank = (
+        1.0 / math.cos(math.radians(max_bank_for_vs))
+        if max_bank_for_vs < 89.9 else float("inf")
+    )
+    vs_at_max_bank = (
+        stall_speed_clean * math.sqrt(load_factor_at_max_bank)
+        if math.isfinite(load_factor_at_max_bank) else None
+    )
+    warnings["min_ias_achieved"] = round(min_ias_achieved, 1)
+    warnings["vs_clean_kt"] = round(stall_speed_clean, 1)
+    warnings["vs_at_max_bank_kt"] = round(vs_at_max_bank, 1) if vs_at_max_bank else None
+    warnings["peak_unclamped_bank_deg"] = round(peak_unclamped_bank, 1)
+    warnings["roll_rate_dps_used"] = round(roll_rate_dps, 1)
+    warnings["wind_profile_used"] = wind_profile is not None
+    warnings["engine_option"] = engine_option
+    warnings["crossing_times"] = list(crossing_times)
 
     return path, hover, warnings

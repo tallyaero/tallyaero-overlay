@@ -1666,15 +1666,26 @@ def run_simulation(
     tas_fps = max(1.0, knots_to_fps(tas_knots))
 
     # Phase H · use the live winds-aloft column when provided. The
-    # engine_out sim is segment-based (not tick-based), so threading
-    # per-tick wind through every helper would be a deep refactor.
-    # Iteration 1: compute the wind at the GLIDE'S MEAN altitude
-    # (midpoint between failure alt and touchdown elev MSL) and use
-    # that for the whole simulation. That picks up real boundary-layer
-    # shear when the column has it. Future iterations can do per-bucket
-    # wind for finer accuracy.
+    # engine_out sim is segment-based (not tick-based), so per-tick
+    # wind threading is a future refactor (~one bucket = one wind sample
+    # using `wind_profile.at(bucket_mid_alt_msl)` would be the natural
+    # split). Iteration 1: compute the wind at the GLIDE'S MEAN altitude
+    # and use that for the whole simulation.
+    #
+    # 2026-05-21: the user-supplied wind_dir / wind_speed are treated as
+    # the surface wind. When a column is available, we override its SFC
+    # layer to the user's values before sampling the mean so the pilot's
+    # sidebar edits are honored (previously this branch silently
+    # clobbered them with the column's surface layer).
     wind_layers_used: list[tuple[float, float, float]] = []
     if wind_profile is not None:
+        try:
+            wind_profile = wind_profile.with_surface_override(
+                float(wind_dir), float(wind_speed),
+                surface_alt_ft_msl=float(touchdown_elev_ft),
+            )
+        except Exception:
+            pass  # fall through to the unmodified profile
         try:
             wind_layers_used = wind_profile.layers()
         except Exception:

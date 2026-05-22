@@ -441,3 +441,27 @@ def register(app):
             raise PreventUpdate
 
         return {"center": [ap["lat"], ap["lon"]], "zoom": 14, "transition": "flyTo"}
+
+    # === Phase 1 (impossible-turn audit) · user-override feedback =========
+    # When the user types into env-wind-dir or env-wind-speed (n_blur / n_submit
+    # fire only on real user interaction, not on programmatic value changes
+    # from the airport-pick callback), strip the green `field-live` tint so
+    # the sidebar makes it obvious that this field is no longer mirroring
+    # METAR — and so they know the sim will use exactly what they typed.
+    @app.callback(
+        Output("env-wind-dir", "className", allow_duplicate=True),
+        Input("env-wind-dir", "n_blur"),
+        Input("env-wind-dir", "n_submit"),
+        prevent_initial_call=True,
+    )
+    def clear_wind_dir_live_tint(_blur, _submit):
+        return "input-small"
+
+    @app.callback(
+        Output("env-wind-speed", "className", allow_duplicate=True),
+        Input("env-wind-speed", "n_blur"),
+        Input("env-wind-speed", "n_submit"),
+        prevent_initial_call=True,
+    )
+    def clear_wind_speed_live_tint(_blur, _submit):
+        return "input-small"

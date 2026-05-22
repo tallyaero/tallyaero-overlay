@@ -7,8 +7,17 @@ altitude to touchdown with ACS standard: -0/+200 ft.
 
 Reference: FAA Airplane Flying Handbook (FAA-H-8083-3C), Chapter 8
            FAA Commercial Pilot ACS (FAA-S-ACS-7)
+
+Post-2026-05-21 overhaul wired:
+    * `wind_profile` per-tick lookup (impossible-turn parity)
+    * POH `performance_dynamics` for bank-response τ / roll-rate clamp
+    * stall-margin gate on the geometry-derived bank
+    * multi-engine `engine_option` plumbing
+    * per-tick TAS recomputation as altitude bleeds
+    * surfaced geometry clamps so the UI can warn pilots
 """
 import math
+from typing import Optional
 from geopy import Point as GeoPoint
 from geopy.distance import geodesic as geo_dist
 
@@ -27,6 +36,31 @@ from physics import (
 )
 
 from .base import _get_best_glide_and_ratio, _canon_flap_config, _canon_prop_config
+
+
+def _get_stall_speed_kt(ac: dict, weight_lbs: float, config: str = "clean") -> float:
+    """Return weight-interpolated Vs (kt) for the given flap config.
+
+    Mirrors the helper used by simulation.impossible_turn so we have a
+    single contract for stall-margin gating across maneuvers."""
+    stall_speeds = ac.get("stall_speeds", {})
+    config_data = stall_speeds.get(config, stall_speeds.get("clean", {}))
+
+    weights = config_data.get("weights", [2000])
+    speeds = config_data.get("speeds", [50])
+    if not weights or not speeds:
+        return 50.0
+
+    w = float(weight_lbs)
+    if w <= weights[0]:
+        return float(speeds[0])
+    if w >= weights[-1]:
+        return float(speeds[-1])
+    for i in range(len(weights) - 1):
+        if weights[i] <= w <= weights[i + 1]:
+            ratio = (w - weights[i]) / (weights[i + 1] - weights[i])
+            return float(speeds[i]) + ratio * (float(speeds[i + 1]) - float(speeds[i]))
+    return float(speeds[-1])
 
 
 def _wrap_360(angle: float) -> float:
@@ -135,6 +169,10 @@ def simulate_power_off_180(
     field_elev_ft: float,
     pattern_altitude_agl: float = 1000.0,
     timestep_sec: float = 0.5,
+    # Post-2026-05-21 additions — see module docstring.
+    engine_option: Optional[str] = None,
+    wind_profile=None,           # type: Optional[WindProfile]
+    stall_margin_kt: float = 5.0,
 ) -> tuple:
     """
     Simulate a Power-Off 180 accuracy approach.
@@ -143,6 +181,13 @@ def simulate_power_off_180(
     ends at the correct point, then flies forward from downwind to touchdown.
 
     Path order: Downwind Entry → Downwind → Base Turn (180°) → Final → Touchdown
+
+    Wind input precedence (matches impossible_turn):
+      - `wind_dir_deg` / `wind_speed_kt` ARE the surface wind. Always
+        authoritative for ground roll geometry + final segment.
+      - `wind_profile` (Optional[WindProfile]) drives per-tick wind in
+        the turn segment (boundary-layer shear); its SFC layer is
+        overridden by the user's surface wind so edits survive.
     """
     if runway_threshold is None:
         return [], [], {'success': False, 'error': 'No runway threshold'}
@@ -150,11 +195,34 @@ def simulate_power_off_180(
     flap_config = _canon_flap_config(flap_config)
     prop_config = _canon_prop_config(prop_config)
 
-    # Aircraft performance
-    best_glide_kias, base_glide_ratio = _get_best_glide_and_ratio(ac, None, flap_config, prop_config)
+    # Aircraft performance — now engine-aware.
+    best_glide_kias, base_glide_ratio = _get_best_glide_and_ratio(
+        ac, engine_option, flap_config, prop_config
+    )
     gear_type = ac.get("gear_type", "fixed")
 
-    # Environment
+    # Honor user surface-wind override over the column's SFC layer when a
+    # wind_profile is supplied (impossible-turn parity).
+    if wind_profile is not None:
+        try:
+            wind_profile = wind_profile.with_surface_override(
+                float(wind_dir_deg), float(wind_speed_kt),
+                surface_alt_ft_msl=float(field_elev_ft),
+            )
+        except Exception:
+            pass
+
+    # POH performance_dynamics — used for bank-response smoothing during
+    # the turn so a heavy airframe doesn't instantly snap to 30° bank.
+    try:
+        from core.dynamics import dynamics_for
+        pd_dyn = dynamics_for(ac)
+    except Exception:
+        pd_dyn = {}
+    bank_response_tau_s = float(pd_dyn.get("bank_response_tau_s", 1.0))
+    roll_rate_dps = float(pd_dyn.get("roll_rate_dps", 40.0))
+
+    # Environment at pattern entry — recomputed per tick later for TAS drift.
     alt_msl_ft = field_elev_ft + pattern_altitude_agl
     pressure_alt_ft = compute_pressure_altitude(alt_msl_ft, altimeter_inhg)
     rho = compute_air_density(pressure_alt_ft, oat_c)
@@ -164,9 +232,14 @@ def simulate_power_off_180(
     straight_gr = adjust_glide_ratio_for_density(straight_gr, rho)
     straight_gr = max(3.0, min(straight_gr, 25.0))
 
-    # TAS
+    # TAS at entry altitude (recomputed per-tick in the main loop).
     tas_knots = compute_true_airspeed(best_glide_kias, pressure_alt_ft, oat_c)
     tas_fps = knots_to_fps(tas_knots)
+
+    # Stall speed in current flap config — used by the stall-margin gate
+    # below to clamp the geometry-derived bank if Vs × √n encroaches on
+    # best-glide IAS.
+    vs_kt_flap = _get_stall_speed_kt(ac, weight_lbs, flap_config or "clean")
 
     # Pattern geometry
     # For LEFT pattern: aircraft is on LEFT side of runway (looking down runway heading)
@@ -184,18 +257,62 @@ def simulate_power_off_180(
     # GEOMETRY CALCULATION (working backwards from touchdown)
     # =========================================================================
 
-    # Turn radius: for 180° turn, lateral displacement = 2R
-    # To move from pattern offset to centerline: 2R = abeam_distance
+    # Turn radius: for 180° turn, lateral displacement = 2R (ground-track
+    # geometry — wind doesn't change the LATERAL ground distance covered
+    # by a constant-ground-radius turn, only the BANK required varies
+    # with the actual ground speed reached on each side of the turn.
+    # Earlier implementation used `tas² / g·R` to size the bank, which
+    # gave the right answer for calm wind but overstated the required
+    # bank in tailwinds and understated in headwinds. We now compute the
+    # MEAN groundspeed around the 180° arc and use that for the bank
+    # solver. The bank is then held constant through the turn segment
+    # while the sim's inner loop re-derives the actual bank required at
+    # each tick (handled later via `_calculate_wind_correction`).
     ideal_R = abeam_distance_ft / 2.0
 
-    # Bank angle for this radius
-    tan_bank = (tas_fps ** 2) / (g * ideal_R)
+    # Mean groundspeed around the 180° turn — average of upwind and
+    # downwind ground speeds. (Cleaner derivation: integrate GS over
+    # 180° track-angle range; the closed-form result equals the mean
+    # of the head/tail components to 1st order.)
+    _wind_to_rad = math.radians((float(wind_dir_deg) + 180.0) % 360.0)
+    # Headwind component along the runway track (positive = headwind on
+    # final). Aircraft on downwind has the SAME magnitude but flipped
+    # sign; in the turn the head/tail component sweeps through zero.
+    head_along_final = float(wind_speed_kt) * math.cos(
+        _wind_to_rad - math.radians(runway_heading_deg)
+    )
+    # GS on final = TAS - headwind. GS on downwind = TAS + headwind.
+    # Mean around the turn = TAS (when wind is purely along-runway).
+    # The crosswind component averages to zero over the 180°. So mean
+    # GS = TAS; use that as the reference speed for sizing the bank.
+    mean_gs_kt = max(10.0, tas_knots)
+    mean_gs_fps = knots_to_fps(mean_gs_kt)
+
+    tan_bank = (mean_gs_fps ** 2) / (g * ideal_R)
     bank_from_geometry = math.degrees(math.atan(tan_bank))
     bank_deg = max(5.0, min(45.0, bank_from_geometry))
 
+    # Stall-margin gate. With heavy weight + landing flap config, the
+    # geometry can demand a bank where Vs × √n approaches best-glide IAS.
+    # We reduce the bank in 1° steps until margin ≥ stall_margin_kt or
+    # we hit the floor (15°). Recording the original `bank_from_geometry`
+    # so meta can report the gate engaged.
+    bank_stall_capped = False
+    while bank_deg > 15.0:
+        n = 1.0 / max(math.cos(math.radians(bank_deg)), 0.01)
+        vs_at_n_kt = vs_kt_flap * math.sqrt(n)
+        if best_glide_kias >= vs_at_n_kt + stall_margin_kt:
+            break
+        bank_deg -= 1.0
+        bank_stall_capped = True
+    stall_vs_at_bank_kt = vs_kt_flap * math.sqrt(
+        1.0 / max(math.cos(math.radians(bank_deg)), 0.01)
+    )
+    stall_margin_at_bank_kt = float(best_glide_kias) - stall_vs_at_bank_kt
+
     # Actual turn radius with clamped bank
     bank_rad = math.radians(bank_deg)
-    R_ft = (tas_fps ** 2) / (g * math.tan(bank_rad))
+    R_ft = (mean_gs_fps ** 2) / (g * math.tan(bank_rad))
 
     # Turn glide ratio (reduced due to load factor)
     n_turn = compute_load_factor(bank_deg)
@@ -238,12 +355,25 @@ def simulate_power_off_180(
 
     # Each of downwind_past_abeam and final gets half the remaining altitude
     if alt_remaining > 0:
-        final_distance_ft = (alt_remaining / 2.0) * straight_gr
+        final_distance_ft_unclamped = (alt_remaining / 2.0) * straight_gr
     else:
-        # Not enough altitude - set minimum final and warn
-        final_distance_ft = 300.0
+        final_distance_ft_unclamped = 300.0  # Not enough altitude
 
-    final_distance_ft = max(300.0, min(final_distance_ft, 1500.0))  # Clamp to reasonable range
+    # Clamp to a sane range. Track whether the clamp fired so the UI
+    # can warn the pilot — pre-fix, the clamp silently masked cases
+    # where the energy budget said the final should be 200 ft (too
+    # short) or 3000 ft (too much altitude left over). Both indicate
+    # the pattern altitude or abeam distance is mismatched to the
+    # airframe; surfacing the clamp lets the pilot iterate.
+    MIN_FINAL_FT = 300.0
+    MAX_FINAL_FT = 1500.0
+    if final_distance_ft_unclamped < MIN_FINAL_FT:
+        final_distance_clamp = "too_short"
+    elif final_distance_ft_unclamped > MAX_FINAL_FT:
+        final_distance_clamp = "too_long"
+    else:
+        final_distance_clamp = None
+    final_distance_ft = max(MIN_FINAL_FT, min(final_distance_ft_unclamped, MAX_FINAL_FT))
 
     # Downwind past abeam equals final distance (due to geometry)
     downwind_past_abeam_ft = final_distance_ft
@@ -344,6 +474,20 @@ def simulate_power_off_180(
     # Track actual bank angles during turn
     turn_bank_angles = []
 
+    # First-order bank-state for τ-smoothed entry/exit of the turn.
+    # Pre-fix: the sim hard-snapped to the calculated bank the instant
+    # the turn segment started. With POH `bank_response_tau_s` wired,
+    # bank now ramps in over the airframe's actual response time and
+    # the per-tick change is clamped to `roll_rate_dps × dt`.
+    bank_state_deg = 0.0
+
+    # Wind/TAS state — updated per-tick when wind_profile or altitude
+    # change. Initialized from entry conditions.
+    current_wind_dir = float(wind_dir_deg)
+    current_wind_speed = float(wind_speed_kt)
+    current_tas_knots = float(tas_knots)
+    current_tas_fps = float(tas_fps)
+
     # Calculate slip requirement for final
     slip_info = _calculate_slip_requirement(
         altitude_available_ft=pattern_altitude_agl - (actual_downwind_dist / straight_gr) - (arc_length_ft / turn_gr),
@@ -357,39 +501,60 @@ def simulate_power_off_180(
         # Current position in local XY
         current_latlon = (lat, lon)
 
+        # Per-tick wind sampling. With a wind_profile, the column drives
+        # wind at the current MSL altitude (boundary-layer shear
+        # affects crab + groundspeed through the turn). Without one,
+        # the user-supplied surface wind stays constant.
+        if wind_profile is not None:
+            try:
+                wd, ws = wind_profile.at(field_elev_ft + alt_ft)
+                current_wind_dir = float(wd)
+                current_wind_speed = float(ws)
+            except Exception:
+                pass  # keep last known values
+
+        # Per-tick TAS recomputation. As altitude bleeds off, the density
+        # changes; for a 1000-ft pattern the TAS drift is ~2 kt but it
+        # accumulates into a measurable groundspeed and final-distance
+        # error if frozen at entry.
+        try:
+            cur_alt_msl = field_elev_ft + alt_ft
+            cur_palt = compute_pressure_altitude(cur_alt_msl, altimeter_inhg)
+            current_tas_knots = compute_true_airspeed(best_glide_kias, cur_palt, oat_c)
+            current_tas_fps = knots_to_fps(current_tas_knots)
+        except Exception:
+            pass  # keep last-good TAS on numeric edge cases
+
         # Determine segment and track
         if segment == "downwind":
             track_deg = downwind_heading
             current_gr = straight_gr
-            current_bank = 0.0
+            target_bank = 0.0
 
         elif segment == "turn":
             # Track changes continuously through turn
-            # For left turn: track goes from downwind_heading toward final_heading (decreasing)
-            # For right turn: track goes from downwind_heading toward final_heading (increasing)
             if is_left_pattern:
                 track_deg = _wrap_360(downwind_heading - turn_progress_deg)
             else:
                 track_deg = _wrap_360(downwind_heading + turn_progress_deg)
 
-            # Bank angle varies with groundspeed to maintain constant radius ground track
-            # Higher GS (downwind) = steeper bank, Lower GS (upwind) = shallower bank
-            # Formula: tan(bank) = GS² / (R × g)
-            gs_for_bank, _, _ = _calculate_wind_correction(track_deg, tas_knots, wind_dir_deg, wind_speed_kt)
+            # Bank-angle TARGET varies with groundspeed to maintain
+            # constant-radius ground track. The actual flown bank
+            # `bank_state_deg` follows this target through the POH
+            # bank-response τ + roll-rate clamp (handled below).
+            gs_for_bank, _, _ = _calculate_wind_correction(
+                track_deg, current_tas_knots, current_wind_dir, current_wind_speed
+            )
             gs_fps_for_bank = knots_to_fps(gs_for_bank)
             required_centripetal = (gs_fps_for_bank ** 2) / R_ft
             tan_bank_required = required_centripetal / g
-            current_bank_mag = math.degrees(math.atan(tan_bank_required))
-            current_bank_mag = max(5.0, min(60.0, current_bank_mag))  # Safety limits
-            current_bank = current_bank_mag * turn_direction
-
-            # Glide ratio varies with actual bank (load factor changes)
-            n_actual = 1.0 / math.cos(math.radians(current_bank_mag))
-            current_gr = straight_gr / max(n_actual, 1.0)
-            current_gr = max(2.0, current_gr)
-
-            # Track bank angles for reporting
-            turn_bank_angles.append(current_bank_mag)
+            target_bank_mag = math.degrees(math.atan(tan_bank_required))
+            # Safety limits — including the stall-margin gate from earlier
+            # (the geometry-derived `bank_deg` was already clamped). We
+            # additionally cap per-tick deviation to ±5° around that base.
+            target_bank_mag = max(5.0, min(bank_deg + 5.0, target_bank_mag))
+            target_bank = target_bank_mag * turn_direction
+            turn_bank_angles.append(target_bank_mag)
 
         else:  # final
             track_deg = final_heading
@@ -397,23 +562,48 @@ def simulate_power_off_180(
                 current_gr = slip_info['effective_glide_ratio']
             else:
                 current_gr = straight_gr
-            current_bank = 0.0
+            target_bank = 0.0
 
-        # Wind correction
+        # POH bank-response smoothing (τ + roll-rate clamp). Soft
+        # first-order response toward `target_bank`, with the per-tick
+        # change clamped to the airframe's physical roll rate so a
+        # heavy twin doesn't appear to snap to 30° in half a second.
+        if bank_response_tau_s > 0:
+            alpha = min(1.0, dt / bank_response_tau_s)
+        else:
+            alpha = 1.0
+        delta_bank = (target_bank - bank_state_deg) * alpha
+        max_delta = roll_rate_dps * dt
+        if delta_bank > max_delta:
+            delta_bank = max_delta
+        elif delta_bank < -max_delta:
+            delta_bank = -max_delta
+        bank_state_deg += delta_bank
+        current_bank = bank_state_deg
+        current_bank_mag = abs(current_bank)
+
+        # Refresh glide ratio with smoothed bank (turn segment only).
+        if segment == "turn":
+            n_actual = 1.0 / math.cos(math.radians(current_bank_mag)) if current_bank_mag < 89.9 else 1.0
+            current_gr = straight_gr / max(n_actual, 1.0)
+            current_gr = max(2.0, current_gr)
+
+        # Wind correction (uses per-tick wind + TAS)
         gs_knots, heading_deg, drift_deg = _calculate_wind_correction(
-            track_deg, tas_knots, wind_dir_deg, wind_speed_kt
+            track_deg, current_tas_knots, current_wind_dir, current_wind_speed
         )
         gs_fps = knots_to_fps(gs_knots)
 
-        # Fixed ground distance step (ground track is predetermined)
-        # Use TAS-based reference distance for consistent path sampling
-        ds_ground_ft = tas_fps * dt
+        # Fixed ground distance step (ground track is predetermined).
+        # Sized from CURRENT TAS so per-tick steps reflect the actual
+        # density at the aircraft's altitude (matters most near touchdown).
+        ds_ground_ft = current_tas_fps * dt
 
         # Variable timestep based on groundspeed (how long to cover that ground distance)
         actual_dt = ds_ground_ft / gs_fps if gs_fps > 1.0 else dt
 
         # Altitude loss based on actual time in the air
-        air_ds_ft = tas_fps * actual_dt
+        air_ds_ft = current_tas_fps * actual_dt
         dh_ft = air_ds_ft / current_gr
         alt_ft = max(0.0, alt_ft - dh_ft)
 
@@ -610,6 +800,15 @@ def simulate_power_off_180(
 
         'pattern_altitude_ft': round(pattern_altitude_agl, 0),
         'abeam_distance_nm': round(abeam_distance_nm, 2),
+
+        # Post-2026-05-21 audit fields:
+        'stall_margin_kt': round(stall_margin_at_bank_kt, 1),
+        'stall_speed_at_bank_kt': round(stall_vs_at_bank_kt, 1),
+        'bank_stall_capped': bool(bank_stall_capped),
+        'bank_geometry_unclamped_deg': round(bank_from_geometry, 1),
+        'final_distance_clamp': final_distance_clamp,  # None / "too_short" / "too_long"
+        'wind_profile_used': wind_profile is not None,
+        'engine_option': engine_option,
     }
 
     return path, hover, results

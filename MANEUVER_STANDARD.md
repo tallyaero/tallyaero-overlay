@@ -539,6 +539,77 @@ warnings = {
 - Turn back to runway analysis
 - Minimum altitude for successful return
 
+#### Physics model (post-2026-05-21 overhaul)
+
+The impossible-turn simulator threads four data sources through the maneuver:
+
+1. **Surface wind** — `wind_dir` / `wind_speed` from the sidebar (METAR-filled or user-typed).
+2. **Winds-aloft column** — `wind_profile` from Open-Meteo, optional. When provided, the sim overrides its SFC layer with the user's surface wind (preserving shear shape aloft) and looks up per-tick wind during climb + glide.
+3. **POH performance dynamics** — `core.dynamics.dynamics_for(ac)` returns `bank_response_tau_s`, `speed_response_tau_s`, `roll_rate_dps`, `takeoff_accel_factor` (POH-cited where available, class-derived otherwise).
+4. **Airframe drag / thrust** — `wing_area`, `CD0`, `e`, `aspect_ratio`, plus `prop_thrust_decay` for parabolic thrust-vs-V.
+
+##### Phase chain
+
+```
+takeoff  →  climb (Vy + crab)  →  reaction (glide, runway heading)
+   ↓            ↓                          ↓
+surface       per-tick wind          per-tick wind
+wind only     from profile           from profile
+                                          ↓
+                          turn1  →  straight  →  turn2  →  final
+                          (constant bank,  with     final
+                          POH-roll-rate-  centerline alignment
+                          clamped, stall-  intercept  + slip-
+                          gated)           tracking   modulated
+                                                      energy mgmt
+```
+
+##### Wind input precedence
+
+| Source | Used as |
+|---|---|
+| `env-wind-dir` / `env-wind-speed` | Surface wind. Always authoritative for ground roll. Overrides SFC layer of `wind_profile` when present. |
+| `wind-profile-store` (Open-Meteo column) | Shape aloft. Per-tick lookup in climb + glide. |
+
+The user-edit detection (`field-live` className clear in `callbacks/environment.py`) is a UX affordance — the sim's contract is "the value in `env-wind-dir` is the surface wind, period."
+
+##### Climb rate-of-climb
+
+```
+ROC_fpm = ((P_avail − P_req) × 60) / W × 0.85
+        ┌── parabolic prop-thrust model
+P_avail = T_static × (1 − (V/V_max)²) × V
+T_static = factor × (HP × 550 / V_max_fps)
+factor = 1.85 (fixed-pitch) / 2.5 (constant-speed)  ← prop_thrust_decay.T_static_factor
+
+P_req = drag × V
+drag  = q × S × (CD0 + CL² / (π × e × AR))
+CL    = W / (q × S)
+q     = ½ × ρ(DA) × V²
+
+0.85 = empirical calibration to match POH ground-truth across the fleet
+       (real ROC includes cooling drag + climb AoA + pilot losses).
+```
+
+Multi-engine: `HP_total = HP_per_engine × engine_count`. Verified for Baron 58.
+
+##### Min-altitude search
+
+`find_min_alt=True` (default) runs a bisection between `min_alt_floor_agl` (300) and `max_alt_ceiling_agl` (2000). After the 2026-05-21 overhaul:
+
+- Per-altitude evaluations are **cached** (dict keyed by `round(alt)`).
+- If the requested ceiling fails, the search **adaptively raises** the ceiling in 500-ft steps up to 5000 ft AGL before giving up.
+- If even 5000 ft fails, `meta["min_feasible_alt_exceeds_ceiling"] = True` is set so the UI can say "exceeds 5,000 ft" instead of "n/a".
+
+##### Stall-margin gate
+
+Each candidate bank in the search is gated by `Vs(weight, flap_config) × √(load_factor) ≤ best_glide_kias − STALL_MARGIN_KT` where `STALL_MARGIN_KT = 5`. Rejected banks never run — the lowest rejected bank is reported back as `stall_capped_bank_deg` so the UI shows "bank capped at N° (stall)". Each returned run includes:
+
+- `stall_margin_kt` — best-glide − Vs×√n at recommended bank.
+- `stall_speed_at_bank_kt` — Vs × √n.
+
+Headlines color amber when margin < 8 kt, red when < 4 kt.
+
 ---
 
 ## Callback State Requirements

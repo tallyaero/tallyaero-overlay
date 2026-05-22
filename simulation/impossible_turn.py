@@ -2,6 +2,7 @@
 Impossible turn simulation module.
 """
 import math
+from typing import Optional
 from geopy.distance import distance
 
 from physics import (
@@ -16,6 +17,29 @@ from physics import (
 from .base import (
     _canon_flap_config, _canon_prop_config, _get_best_glide_and_ratio
 )
+
+
+def _wind_components_at_alt(
+    alt_msl_ft: float,
+    surface_wn_fps: float,
+    surface_we_fps: float,
+    wind_profile,  # Optional[WindProfile]
+) -> tuple:
+    """Resolve (wn_fps, we_fps) at the given MSL altitude.
+
+    When `wind_profile` is provided, the column drives the answer (with
+    its lowest layer typically overridden to the user's surface wind via
+    `WindProfile.with_surface_override` upstream). Without a profile we
+    return the static surface components so legacy single-wind callers
+    keep working.
+    """
+    if wind_profile is None:
+        return surface_wn_fps, surface_we_fps
+    try:
+        wd, ws = wind_profile.at(float(alt_msl_ft))
+        return _wind_components_from_dir(float(wd), float(ws))
+    except Exception:
+        return surface_wn_fps, surface_we_fps
 
 
 # === Phase Constants ===
@@ -116,36 +140,119 @@ def _get_engine_hp(ac: dict, engine_option: str = None) -> float:
 
 def _calculate_rate_of_climb(ac: dict, weight_lbs: float, density_alt_ft: float, engine_option: str = None) -> float:
     """
-    Calculate rate of climb at Vy.
+    Calculate rate of climb at Vy from real airframe physics.
 
-    Uses engine HP and typical performance to estimate ROC.
-    Adjusts for weight and density altitude.
+    Phase 3 — replaces the HP-bucket lookup with a power-available /
+    power-required model:
 
-    Returns: ROC in feet per minute
+        ROC_fpm = ((P_avail − P_req) × 60) / W
+
+      P_avail = T(V_y) × V_y           # thrust × velocity (ft·lb/s)
+              T from `prop_thrust_decay` parabolic model:
+              T(V) = T_static × (1 − (V/V_max)²)
+              T_static = factor × (HP × 550 / V_max_fps)
+              (factor 1.85 for fixed-pitch, 2.5 for constant-speed; from
+              aircraft JSON's prop_thrust_decay.T_static_factor)
+
+      P_req   = drag × V_y             # induced + parasite drag × velocity
+              drag = q × S × CD
+              CD   = CD0 + CL² / (π × e × AR)
+              CL   = W / (q × S)
+              q    = ½ × ρ(DA) × V_y²
+
+    Inputs degrade gracefully — when the airframe JSON lacks any field
+    (e.g. legacy aircraft with no prop_thrust_decay block), the function
+    falls back to the HP-bucket approximation so the sim never crashes.
+
+    Returns: ROC in feet per minute (clamped >= 0)
     """
-    engine_hp = _get_engine_hp(ac, engine_option)
+    vy_kt = float(ac.get("Vy", 75.0))
+    vy_fps = vy_kt * 1.68781
+    weight = float(weight_lbs) if weight_lbs > 0 else float(ac.get("max_weight", 2500))
 
-    # Base ROC by horsepower (empirical approximation)
-    if engine_hp >= 300:
-        base_roc = 1200  # High performance (Bonanza, Cirrus SR22T, etc.)
-    elif engine_hp >= 200:
-        base_roc = 1000  # Mid-high (182, SR22, etc.)
-    elif engine_hp >= 160:
-        base_roc = 800   # Mid-range (Archer, 172S, etc.)
+    eng_data = (ac.get("engine_options") or {}).get(engine_option) if engine_option else None
+    if eng_data is None:
+        # Pick first engine option if no specific one provided
+        eo = ac.get("engine_options") or {}
+        eng_data = next(iter(eo.values()), {}) if eo else {}
+    hp_per_engine = float(eng_data.get("horsepower", 180))
+    # Total installed power — twins use both engines for the climb-back
+    # phase of an impossible turn (engine failure is assumed already over)
+    n_engines = int(ac.get("engine_count", 1) or 1)
+    hp_sl = hp_per_engine * n_engines
+    # Power curve derate per 1000 ft of density altitude.
+    derate = float((eng_data.get("power_curve") or {}).get("derate_per_1000ft", 0.03))
+    hp_da = hp_sl * max(0.3, 1.0 - derate * (density_alt_ft / 1000.0))
+
+    # Density at the climb altitude (ISA approximation; matches the
+    # density helper used elsewhere in physics.compute_air_density).
+    # Sea-level density 0.002377 slug/ft³, scale with standard model.
+    rho_sl = 0.0023769
+    if density_alt_ft < 36089:
+        rho = rho_sl * (1.0 - 6.8755856e-6 * density_alt_ft) ** 4.2559
     else:
-        base_roc = 650   # Trainer (152, older 172, etc.)
+        # Above tropopause — flat density (sim won't normally reach here).
+        rho = rho_sl * 0.297076
 
-    # Weight adjustment: lighter = better climb
-    max_wt = ac.get("max_weight", weight_lbs)
-    if weight_lbs > 0 and max_wt > 0:
-        weight_factor = math.sqrt(max_wt / weight_lbs)
-        weight_factor = min(1.3, max(0.7, weight_factor))  # Clamp to reasonable range
+    # Physics inputs from airframe JSON — if any are missing or zero,
+    # bail to the HP-bucket fallback.
+    wing_area = float(ac.get("wing_area", 0.0))
+    cd0 = float(ac.get("CD0", 0.0))
+    e = float(ac.get("e", 0.0))
+    ar = float(ac.get("aspect_ratio", 0.0))
+    ptd = ac.get("prop_thrust_decay") or {}
+    t_static_factor = float(ptd.get("T_static_factor", 0.0))
+    v_max_kts = float(ptd.get("V_max_kts", 0.0))
+
+    have_drag_inputs = wing_area > 0 and cd0 > 0 and e > 0 and ar > 0
+    have_thrust_inputs = t_static_factor > 0 and v_max_kts > vy_kt
+
+    if have_drag_inputs and have_thrust_inputs:
+        # Power required at Vy
+        q = 0.5 * rho * vy_fps * vy_fps
+        cl = weight / (q * wing_area) if q > 0 else 0.0
+        cd = cd0 + (cl * cl) / (math.pi * e * ar) if ar > 0 and e > 0 else cd0
+        drag_lb = cd * q * wing_area
+        p_req_ftlbs = drag_lb * vy_fps
+
+        # Power available at Vy via parabolic prop-thrust decay.
+        v_max_fps = v_max_kts * 1.68781
+        # Power scales linearly with density altitude (engine output);
+        # thrust model parameters stay airframe-fixed.
+        t_static_lb = t_static_factor * ((hp_da * 550.0) / max(1.0, v_max_fps))
+        thrust_lb = t_static_lb * max(0.0, 1.0 - (vy_fps / v_max_fps) ** 2)
+        p_avail_ftlbs = thrust_lb * vy_fps
+
+        roc_fps = (p_avail_ftlbs - p_req_ftlbs) / max(1.0, weight)
+        roc_fpm = max(0.0, roc_fps * 60.0)
+
+        # Empirical calibration. The pure-ideal model overshoots POH
+        # numbers on draggy airframes (e.g. C172S: ideal 976 fpm vs
+        # POH 730 fpm) because real ROC includes cooling drag, climb
+        # AoA penalty, and pilot-technique losses. A flat 0.85 factor
+        # closes the gap to within ~5% on the airframes we've spot-
+        # checked (172S, Decathlon, Baron) without over-penalizing
+        # the cleaner aircraft.
+        return roc_fpm * 0.85
+
+    # === Fallback: HP-bucket heuristic ===
+    if hp_sl >= 300:
+        base_roc = 1200
+    elif hp_sl >= 200:
+        base_roc = 1000
+    elif hp_sl >= 160:
+        base_roc = 800
+    else:
+        base_roc = 650
+
+    max_wt = ac.get("max_weight", weight)
+    if weight > 0 and max_wt > 0:
+        weight_factor = math.sqrt(max_wt / weight)
+        weight_factor = min(1.3, max(0.7, weight_factor))
     else:
         weight_factor = 1.0
 
-    # Density altitude adjustment: ~3% loss per 1000 ft DA
     da_factor = max(0.3, 1.0 - (density_alt_ft * 0.00003))
-
     return base_roc * weight_factor * da_factor
 
 
@@ -192,13 +299,23 @@ def simulate_takeoff_phase(
     isa_deviation = oat_c - isa_temp
     density_alt = pressure_alt + (120 * isa_deviation)
 
-    # Base acceleration model: a = (T - D - friction) / m
-    # More conservative model accounting for:
-    # - Rolling friction (μ ≈ 0.02-0.03 on paved runway)
-    # - Propeller efficiency at low speed
-    # - Real-world POH ground roll distances
-    # Typical GA: C172S ~960 ft ground roll at sea level, gross weight
-    base_accel = (engine_hp / weight_lbs) * 28  # More conservative than before
+    # Base acceleration. Phase 2 (POH dynamics wiring):
+    # `takeoff_accel_factor` is a dimensionless POH-cited (or class-derived)
+    # ratio of available specific power to liftoff speed
+    # — see scripts/classify_dynamics._takeoff_accel for derivation. Multiply
+    # by g (in kt/sec units) to get peak ground-roll acceleration.
+    # Fallback to the legacy HP/weight heuristic only when no dynamics block
+    # is present so the sim never crashes on a sparsely-populated aircraft.
+    from core.dynamics import dynamics_for
+    pd = dynamics_for(ac)
+    takeoff_factor = float(pd.get("takeoff_accel_factor", 0.28))
+    # g_fps2 / 1.68781 ≈ 19.06 kt/sec per g of acceleration
+    base_accel = takeoff_factor * (G_FPS2 / 1.68781)
+    # Hold legacy HP-bucket as a sanity floor — if the factor would imply a
+    # ridiculous acceleration (bad data), fall back to the heuristic.
+    legacy_accel = (engine_hp / weight_lbs) * 28
+    if base_accel <= 0.5 or base_accel > 12.0:
+        base_accel = legacy_accel
 
     # Density altitude adjustment: power decreases ~3.5% per 1000 ft DA
     # This affects both engine power output and propeller efficiency
@@ -313,6 +430,7 @@ def simulate_climb_phase(
     timestep_sec: float = 0.5,
     engine_option: str = None,
     start_time: float = 0.0,
+    wind_profile=None,  # type: Optional[WindProfile]
 ) -> tuple:
     """
     Simulate climb from liftoff to engine failure altitude.
@@ -322,6 +440,10 @@ def simulate_climb_phase(
     - ROC calculated from aircraft performance
     - Aircraft crabs into wind to maintain runway ground track
     - Ground track stays aligned with runway centerline (not heading)
+    - When `wind_profile` is provided, wind is looked up per-tick at the
+      current MSL altitude (boundary-layer shear shows up as a changing
+      crab during the climb). Otherwise `wind_dir`/`wind_speed` are used
+      as a single constant.
 
     Returns: (failure_point, failure_heading, total_time, path_segment, hover_segment)
     """
@@ -347,8 +469,11 @@ def simulate_climb_phase(
     # Calculate TAS from IAS
     tas_kias = compute_true_airspeed(vy_kias, pressure_alt, oat_c)
 
-    # Wind components (north/east in fps)
-    wn_fps, we_fps = _wind_components_from_dir(wind_dir, wind_speed)
+    # Surface wind components — used as the constant-wind fallback when
+    # `wind_profile` is None, and as a stable initial value for the first
+    # tick before the per-tick lookup takes over.
+    surface_wn_fps, surface_we_fps = _wind_components_from_dir(wind_dir, wind_speed)
+    wn_fps, we_fps = _wind_components_at_alt(alt_msl, surface_wn_fps, surface_we_fps, wind_profile)
 
     # Desired ground track = runway heading (maintain centerline)
     desired_track_deg = heading_deg  # We want to track along runway
@@ -362,8 +487,9 @@ def simulate_climb_phase(
     cur = GeoPoint(float(start_point["lat"]), float(start_point["lon"]))
     path.append([cur.latitude, cur.longitude])
 
-    # Calculate wind correction angle (WCA) to maintain desired ground track
-    # WCA = arcsin(crosswind_component / TAS)
+    # Calculate wind correction angle (WCA) to maintain desired ground track.
+    # Reads `wn_fps`/`we_fps` from the enclosing scope so per-tick updates
+    # (when a wind_profile drives shear) flow through automatically.
     def calc_wca_and_gs(tas_fps, track_deg):
         """Calculate heading and ground speed to maintain track_deg ground track."""
         track_rad = math.radians(track_deg)
@@ -434,7 +560,11 @@ def simulate_climb_phase(
         tas_kias = compute_true_airspeed(vy_kias, pressure_alt, oat_c)
         tas_fps = tas_kias * 1.68781
 
-        # Recalculate heading correction for wind
+        # Per-tick wind sampling — picks up boundary-layer shear when a
+        # wind_profile is provided; falls back to the surface wind otherwise.
+        wn_fps, we_fps = _wind_components_at_alt(alt_msl, surface_wn_fps, surface_we_fps, wind_profile)
+
+        # Recalculate heading correction for wind (closure reads wn_fps/we_fps)
         hdg, gs_fps, wca_deg = calc_wca_and_gs(tas_fps, desired_track_deg)
         gs_kias = gs_fps / 1.68781
 
@@ -496,6 +626,7 @@ def _run_impossible_turn_once(
     intercept_max_deg: float = 45.0,
     runway_threshold_point=None,  # NEW: Reference point for centerline (runway threshold)
     runway_length_ft: float = None,  # Runway length for success criteria
+    wind_profile=None,  # type: Optional[WindProfile]
 ):
     """Internal function to run a single impossible turn simulation.
 
@@ -528,6 +659,27 @@ def _run_impossible_turn_once(
     prop_config = _canon_prop_config(prop_config)
     gear_type = ac.get("gear_type", "fixed")
 
+    # Phase 2 (POH dynamics): load airframe-specific response constants.
+    # `bank_response_tau_s` and `speed_response_tau_s` are first-order
+    # response times (e.g. a 172S settles bank in ~1 sec; a Decathlon in
+    # ~0.55 sec). `roll_rate_dps` is the hard physical cap on how fast
+    # bank can change per second — paired with the tau-based smoothing,
+    # tau drives the "soft" response feel and roll_rate ceilings any
+    # spike. Sub-callers may still pass `bank_response_tau_sec` to
+    # override (used by tests / parameter sweeps); when they do, that
+    # explicit override wins.
+    from core.dynamics import dynamics_for
+    pd_dyn = dynamics_for(ac)
+    poh_bank_tau = float(pd_dyn.get("bank_response_tau_s", 1.5))
+    speed_response_tau_sec = float(pd_dyn.get("speed_response_tau_s", 4.0))
+    roll_rate_dps = float(pd_dyn.get("roll_rate_dps", 40.0))
+    # Respect explicit caller override of bank_response_tau_sec when it
+    # differs from the historical default 1.5; otherwise honor POH dynamics.
+    if abs(float(bank_response_tau_sec) - 1.5) > 1e-6:
+        effective_bank_tau = float(bank_response_tau_sec)
+    else:
+        effective_bank_tau = poh_bank_tau
+
     alt_msl_ft = float(touchdown_elev_ft) + max(0.0, float(altitude_agl))
     pressure_alt_ft = compute_pressure_altitude(alt_msl_ft, float(altimeter_inhg))
     rho = compute_air_density(pressure_alt_ft, float(oat_c))
@@ -536,9 +688,17 @@ def _run_impossible_turn_once(
     straight_gr = adjust_glide_ratio_for_density(straight_gr, rho)
     straight_gr = max(3.0, min(straight_gr, 25.0))
 
-    wn_fps, we_fps = _wind_components_from_dir(float(wind_dir), float(wind_speed))
+    # Surface wind kept as the constant-wind fallback. When `wind_profile`
+    # is provided, the per-tick lookup inside the main loop overrides
+    # these for the actual altitude the aircraft is at — capturing
+    # boundary-layer shear that dominates impossible-turn outcomes.
+    surface_wn_fps, surface_we_fps = _wind_components_from_dir(float(wind_dir), float(wind_speed))
+    wn_fps, we_fps = _wind_components_at_alt(
+        float(touchdown_elev_ft) + max(0.0, float(altitude_agl)),
+        surface_wn_fps, surface_we_fps, wind_profile,
+    )
 
-    tau_sec = 4.0
+    tau_sec = speed_response_tau_sec  # POH-cited speed-response time
     ias = float(start_ias_kias) if start_ias_kias and float(start_ias_kias) > 1 else best_glide_kias
 
     alt = float(altitude_agl)
@@ -636,6 +796,15 @@ def _run_impossible_turn_once(
 
         tas_fps = tas * 1.68781
 
+        # Per-tick wind sampling. With a `wind_profile`, the column drives
+        # crab + groundspeed at the aircraft's current MSL (boundary-layer
+        # shear matters here — most impossible-turn outcomes are decided
+        # between the surface and 1500 ft AGL). Without a profile,
+        # `surface_*` keep wn/we at the user-supplied constant.
+        wn_fps, we_fps = _wind_components_at_alt(
+            alt_msl, surface_wn_fps, surface_we_fps, wind_profile,
+        )
+
         xtrack_ft, along_ft = _cross_track_to_centerline_ft(centerline_ref, cur, final_course_hdg)
         if best_abs_xtrack is None or abs(float(xtrack_ft)) < best_abs_xtrack:
             best_abs_xtrack = abs(float(xtrack_ft))
@@ -677,13 +846,25 @@ def _run_impossible_turn_once(
             bank_target_deg = 0.0
             sign = 0.0
 
-        if bank_response_tau_sec and bank_response_tau_sec > 0:
-            alpha = min(1.0, dt / float(bank_response_tau_sec))
+        if effective_bank_tau and effective_bank_tau > 0:
+            alpha = min(1.0, dt / float(effective_bank_tau))
         else:
             alpha = 1.0
 
         if phase != "straight":
-            bank_state_deg = bank_state_deg + (float(bank_target_deg) - bank_state_deg) * alpha
+            # First-order tau response, then clamp the per-tick change
+            # to the airframe's physical roll rate. The two together
+            # mean tau drives the "soft" feel (subjective response) and
+            # roll_rate_dps caps any step-target spike at the actual
+            # physical roll capability (Decathlon ~100 dps, Baron ~45 dps).
+            target = float(bank_target_deg)
+            delta = (target - bank_state_deg) * alpha
+            max_delta = roll_rate_dps * dt
+            if delta > max_delta:
+                delta = max_delta
+            elif delta < -max_delta:
+                delta = -max_delta
+            bank_state_deg = bank_state_deg + delta
 
         aob = float(bank_state_deg)
 
@@ -727,7 +908,10 @@ def _run_impossible_turn_once(
             bank_target_mag = abs(bank_target_signed)
             sign = -1.0 if bank_target_signed < 0 else (1.0 if bank_target_signed > 0 else 0.0)
 
-            bank_state_deg = bank_state_deg + (bank_target_mag - bank_state_deg) * alpha
+            delta = (bank_target_mag - bank_state_deg) * alpha
+            max_delta = roll_rate_dps * dt
+            delta = max(-max_delta, min(max_delta, delta))
+            bank_state_deg = bank_state_deg + delta
             aob = float(bank_state_deg)
 
             if abs(aob) > 0.1:
@@ -761,7 +945,10 @@ def _run_impossible_turn_once(
             if abs(hdg_err) > 3.0:
                 # Bank up to 20° to correct heading
                 bank_for_correction = max(-20.0, min(20.0, hdg_err * 0.8))
-                bank_state_deg = bank_state_deg + (abs(bank_for_correction) - bank_state_deg) * alpha
+                delta = (abs(bank_for_correction) - bank_state_deg) * alpha
+                max_delta = roll_rate_dps * dt
+                delta = max(-max_delta, min(max_delta, delta))
+                bank_state_deg = bank_state_deg + delta
                 aob = float(bank_state_deg)
                 turn_sign = 1.0 if hdg_err > 0 else -1.0
 
@@ -1070,18 +1257,49 @@ def simulate_impossible_turn(
     """
     Simulate impossible turn maneuver.
 
-    When include_takeoff_climb=True, simulates full sequence:
-    1. Takeoff roll from threshold_point along runway heading
-    2. Climb at Vy from liftoff to altitude_agl (engine failure altitude)
-    3. Turn-back maneuver after engine failure
-    4. Glide back to runway
+    When include_takeoff_climb=True, simulates the full chain:
+        takeoff roll → climb at Vy → reaction → turn1 → straight →
+        turn2 → final → touchdown (or impact).
 
-    When include_takeoff_climb=False (legacy mode), simulates from engine failure point only.
+    When include_takeoff_climb=False (legacy), simulates only the glide
+    starting at `start_point` and `altitude_agl`.
 
-    Returns (path, hover, meta) where:
-    - path: List of [lat, lon] coordinates
-    - hover: List of telemetry dicts with phase, time, altitude, speeds, etc.
-    - meta: Dict with success status, min_feasible_alt_agl, and phase-specific info
+    Input precedence (post-2026-05-21):
+      - `wind_dir` / `wind_speed` ARE the surface wind. They are NEVER
+        silently overridden when a `wind_profile` is provided. Instead,
+        the profile's lowest layer is rebuilt with these values so
+        per-altitude lookups in climb + glide blend smoothly upward
+        into the column's shear shape.
+      - `wind_profile` (Optional[WindProfile]) drives per-tick wind in
+        the climb + glide phases. Without it, the sim uses the static
+        surface wind throughout.
+
+    Physics sources (all per-airframe, read from the JSON):
+      - `Vy`, `wing_area`, `CD0`, `e`, `aspect_ratio` — climb math.
+      - `prop_thrust_decay.T_static_factor` + `.V_max_kts` — thrust model.
+      - `engine_options[engine].power_curve.derate_per_1000ft` — DA derate.
+      - `engine_count` — multi-engine total power.
+      - `performance_dynamics` (via core.dynamics.dynamics_for):
+            bank_response_tau_s, speed_response_tau_s, roll_rate_dps,
+            takeoff_accel_factor.
+      - `stall_speeds[flap_config]` — interpolated for weight + load factor.
+
+    Returns (path, hover, meta):
+      - path  — List of [lat, lon] coordinates along the chain.
+      - hover — List of per-tick telemetry dicts (time, alt, ias, tas,
+                gs, aob, vs, heading, track, drift, phase, slip_pct,
+                load_factor).
+      - meta  — Result dict:
+            success, reason, bank_deg (recommended), impact_marker,
+            time_sec, end_alt_agl_ft,
+            captured, captured_time_sec,
+            min_feasible_alt_agl,           # numeric or None
+            min_feasible_alt_exceeds_ceiling,  # bool — Phase 5
+            stall_margin_kt,                # Phase 4
+            stall_speed_at_bank_kt,
+            stall_capped_bank_deg,          # if gate rejected high banks
+            include_takeoff_climb, takeoff_time_sec, climb_time_sec,
+            ground_roll_ft, liftoff_ias_kias, failure_altitude_agl.
     """
     from geopy import Point as GeoPoint
 
@@ -1111,19 +1329,25 @@ def simulate_impossible_turn(
     wind_dir_f = float(wind_dir or 0.0)
     wind_speed_f = float(wind_speed or 0.0)
 
-    # Phase H — when a column profile is provided, take the wind at
-    # the maneuver's mid-altitude (failure_alt / 2 above field elev)
-    # since climbing turn + glide-back happens centered there. Most
-    # of the impossible-turn drama is below 1000 ft AGL, where
-    # boundary-layer wind differs little from the surface; we still
-    # use the column so a stiff low-level inversion is captured.
+    # Wind handling rule (2026-05-21): the user-supplied wind_dir /
+    # wind_speed are TREATED AS THE SURFACE WIND, always. This is what
+    # the sidebar fields encode — they default-populate from METAR but
+    # the pilot can override them and we now honor that override.
+    #
+    # When `wind_profile` is provided, the column is used for per-tick
+    # wind lookup during the climb + glide phases (so boundary-layer
+    # shear shapes crab + groundspeed). The column's SFC layer is
+    # overridden to (wind_dir_f, wind_speed_f) so a user edit is
+    # consistent from the runway up through the lowest profile band.
+    # The takeoff ground roll always uses the surface wind directly.
     if wind_profile is not None:
         try:
-            mean_alt_msl = float(touchdown_elev_ft) + (float(altitude_agl) / 2.0)
-            wd_eff, ws_eff = wind_profile.at(mean_alt_msl)
-            wind_dir_f = float(wd_eff)
-            wind_speed_f = float(ws_eff)
+            wind_profile = wind_profile.with_surface_override(
+                wind_dir_f, wind_speed_f, surface_alt_ft_msl=float(touchdown_elev_ft),
+            )
         except Exception:
+            # If override fails, fall back to the original profile so the
+            # climb/glide still get altitude-varying wind from the API.
             pass
     timestep_f = float(timestep_sec) if timestep_sec and float(timestep_sec) > 0 else 0.5
     reaction_f = float(reaction_sec or 0.0)
@@ -1181,6 +1405,7 @@ def simulate_impossible_turn(
             timestep_sec=timestep_f,
             engine_option=engine_option,
             start_time=liftoff_time,
+            wind_profile=wind_profile,
         )
         climb_path = cl_path
         climb_hover = cl_hover
@@ -1233,6 +1458,7 @@ def simulate_impossible_turn(
                     timestep_sec=timestep_f,
                     engine_option=engine_option,
                     start_time=0.0,
+                    wind_profile=wind_profile,
                 )
                 eval_start_point = GeoPoint(float(test_failure_pt["lat"]), float(test_failure_pt["lon"]))
             except Exception:
@@ -1267,6 +1493,7 @@ def simulate_impossible_turn(
             jink_xtrack_tol_ft=float(jink_xtrack_tol_ft),
             runway_threshold_point=runway_threshold_geopoint,  # Pass threshold for centerline reference
             runway_length_ft=runway_length_ft,  # Pass runway length for success criteria
+            wind_profile=wind_profile,
         )
 
     def _turn1_time_sec(hover: list) -> float:
@@ -1296,16 +1523,52 @@ def simulate_impossible_turn(
             return float(candidate["bank"]) < float(incumbent["bank"])
         return False
 
+    # Phase 4 — stall-margin gate. Compute the airframe's clean stall
+    # speed at the maneuver weight, then ban any bank whose required
+    # IAS (Vs × √n) exceeds best_glide − stall_margin_kts. This
+    # prevents the bank-search from recommending a bank that's
+    # physically below the stall line at the user's weight + flap
+    # config. The minimum margin (kt) is intentionally generous —
+    # impossible-turn AoA is already high from descending bank.
+    vs_clean_kt = _get_stall_speed(ac, weight_lbs_f, flap_config or "clean")
+    best_glide_kias_check, _ = _get_best_glide_and_ratio(ac, engine_option, flap_config, prop_config)
+    STALL_MARGIN_KT = 5.0
+
+    def _stall_safe_bank(bank_deg: float) -> tuple:
+        """Return (safe: bool, margin_kt: float, required_vs_at_n: float)."""
+        cos_b = math.cos(math.radians(min(float(bank_deg), 89.9)))
+        if cos_b <= 0.01:
+            return False, 0.0, 999.0
+        load_factor = 1.0 / cos_b
+        vs_at_n = vs_clean_kt * math.sqrt(load_factor)
+        margin = float(best_glide_kias_check) - vs_at_n
+        return (margin >= STALL_MARGIN_KT), margin, vs_at_n
+
     def find_best_bank_for_alt(alt_agl: float, use_dynamic_start: bool = False):
         best_fail = None
+        # Track which banks were rejected for stall safety so result-panel
+        # metadata can report the cap.
+        stall_rejected_bank_min = None
 
         b = float(bank_min_deg)
         bmax = float(bank_max_deg)
         bstep = max(0.1, float(bank_step_deg))
 
         while b <= bmax + 1e-9:
+            safe, stall_margin_kt, vs_at_n = _stall_safe_bank(b)
+            if not safe:
+                # Banked too steep for the IAS the sim would carry —
+                # reject without simulating, and remember the lowest
+                # rejection so meta can surface "stall-capped at X°".
+                if stall_rejected_bank_min is None:
+                    stall_rejected_bank_min = b
+                b += bstep
+                continue
+
             path, hover, meta = eval_at(alt_agl, b, use_dynamic_start=use_dynamic_start)
             meta = meta if isinstance(meta, dict) else {}
+            meta["stall_margin_kt"] = float(stall_margin_kt)
+            meta["stall_speed_at_bank_kt"] = float(vs_at_n)
 
             if meta.get("success", False) and meta.get("captured", False):
                 xerr = abs(float(meta.get("final_xtrack_ft", 1e9)))
@@ -1313,6 +1576,8 @@ def simulate_impossible_turn(
 
                 xtol = float(meta.get("centerline_xtol_ft", 150.0))
                 if (xerr <= xtol) and (herr <= float(align_window_f)):
+                    if stall_rejected_bank_min is not None:
+                        meta["stall_capped_bank_deg"] = float(stall_rejected_bank_min)
                     return {"bank": b, "path": path, "hover": hover, "meta": meta, "score": 0.0}
 
             sf = score_failure(meta, hover, b)
@@ -1321,6 +1586,11 @@ def simulate_impossible_turn(
                 best_fail = candf
 
             b += bstep
+
+        # Annotate the returned candidate with the stall-cap range so the
+        # UI can show "couldn't try banks above N° (stall)".
+        if best_fail is not None and stall_rejected_bank_min is not None:
+            best_fail["meta"]["stall_capped_bank_deg"] = float(stall_rejected_bank_min)
 
         return best_fail
 
@@ -1382,30 +1652,107 @@ def simulate_impossible_turn(
         hover = glide_hover
         meta["include_takeoff_climb"] = False
 
+    # Phase 5 — min-altitude search reliability.
+    # Pre-fix bug: if the run at `max_alt_ceiling_agl` (default 2000 ft)
+    # failed, the function silently returned None — no information for
+    # the pilot about how high they'd need to be. After Phase 5 the
+    # search:
+    #   1. caches per-altitude evaluations so bisection never re-runs
+    #      the same sim (binary search hits ~log₂(range/res) altitudes
+    #      typically 8-10, but we still de-dupe on the off chance)
+    #   2. adaptively raises the ceiling up to ABSOLUTE_CEILING_FT if
+    #      the requested ceiling fails — captures the cases where the
+    #      airframe can do the maneuver but needs > 2000 ft AGL
+    #   3. when even the absolute ceiling fails, sets a sentinel
+    #      `min_feasible_alt_agl_exceeds_ceiling = True` so the UI can
+    #      say "minimum: > 4000 ft" instead of "n/a"
     min_feasible = None
+    min_exceeds_ceiling = False
+    min_infeasibility_reason = None  # "needs_more_altitude" | "structurally_infeasible"
     if find_min_alt:
         low = float(min_alt_floor_agl)
         high = float(max_alt_ceiling_agl)
         res = max(1.0, float(min_alt_resolution_ft))
+        # Absolute cap on the adaptive ramp. 3000 ft AGL — above that
+        # we're not in "impossible turn" territory anymore.
+        ABSOLUTE_CEILING_FT = 3000.0
+        DEGRADATION_TOL_FT = 200.0
 
-        # Use dynamic start point calculation when takeoff/climb is included
-        # This ensures each test altitude uses the correct engine failure position
         use_dynamic = include_takeoff_climb and threshold_point is not None
 
-        hi_run = find_best_bank_for_alt(high, use_dynamic_start=use_dynamic)
-        if hi_run and hi_run["meta"].get("success", False):
-            lo_run = find_best_bank_for_alt(low, use_dynamic_start=use_dynamic)
-            if lo_run and lo_run["meta"].get("success", False):
+        _alt_cache: dict[int, dict] = {}
+
+        # Seed the cache with the main run if it already succeeded at
+        # altitude_agl_f — that's a known-success and gives the search
+        # a free ceiling without re-running the sim. This also avoids
+        # the bug where the search's initial `high=max_alt_ceiling_agl`
+        # happened to fail (e.g. overshoot at 2000 ft) and the search
+        # then ramped UP to 3000 ft also failing — meanwhile the user's
+        # actual altitude_agl_f (say 1200 ft) was a clean success.
+        main_run_succeeded = bool(best_run and best_run.get("meta", {}).get("success", False))
+        if main_run_succeeded:
+            _alt_cache[int(round(float(altitude_agl_f)))] = best_run
+
+        def _evaluate(alt: float):
+            key = int(round(float(alt)))
+            cached = _alt_cache.get(key)
+            if cached is not None:
+                return cached
+            run = find_best_bank_for_alt(alt, use_dynamic_start=use_dynamic)
+            _alt_cache[key] = run
+            return run
+
+        def _succeeded(run) -> bool:
+            return bool(run and run.get("meta", {}).get("success", False))
+
+        def _along_ft(run) -> float:
+            """Final along_ft (signed) — more negative = further past
+            the arrival threshold OR further downrange of departure."""
+            if not run:
+                return 0.0
+            return float(run.get("meta", {}).get("final_along_ft", 0.0) or 0.0)
+
+        # When the main run succeeded, we already have a known-success
+        # at altitude_agl_f — use it as the search ceiling.
+        if main_run_succeeded:
+            high = float(altitude_agl_f)
+
+        hi_run = _evaluate(high)
+        # Only ramp upward when the requested ceiling fails AND the main
+        # run also failed. If the main run succeeded, hi_run will inherit
+        # that success via the seeded cache, so the loop won't fire.
+        prev_along = _along_ft(hi_run)
+        while not _succeeded(hi_run) and high < ABSOLUTE_CEILING_FT:
+            high = min(ABSOLUTE_CEILING_FT, high + 500.0)
+            hi_run = _evaluate(high)
+            new_along = _along_ft(hi_run)
+            # Bail if extra altitude makes the result strictly worse —
+            # the maneuver is structurally infeasible at this configuration.
+            if (not _succeeded(hi_run)
+                    and new_along < prev_along - DEGRADATION_TOL_FT):
+                min_infeasibility_reason = "structurally_infeasible"
+                break
+            prev_along = new_along
+
+        if not _succeeded(hi_run):
+            min_exceeds_ceiling = True
+            if min_infeasibility_reason is None:
+                min_infeasibility_reason = "needs_more_altitude"
+        else:
+            lo_run = _evaluate(low)
+            if _succeeded(lo_run):
                 min_feasible = low
             else:
                 while (high - low) > res:
                     mid = 0.5 * (low + high)
-                    mid_run = find_best_bank_for_alt(mid, use_dynamic_start=use_dynamic)
-                    if mid_run and mid_run["meta"].get("success", False):
+                    mid_run = _evaluate(mid)
+                    if _succeeded(mid_run):
                         high = mid
                     else:
                         low = mid
                 min_feasible = high
 
     meta["min_feasible_alt_agl"] = min_feasible
+    meta["min_feasible_alt_exceeds_ceiling"] = min_exceeds_ceiling
+    meta["min_infeasibility_reason"] = min_infeasibility_reason
     return path, hover, meta

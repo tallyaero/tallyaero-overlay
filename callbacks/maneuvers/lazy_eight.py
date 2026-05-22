@@ -20,6 +20,7 @@ from layouts.maneuvers._charts import altitude_profile_chart
 from layouts.maneuvers._shared import _acs_metric, _power_verdict, _winds_aloft_chip
 
 from core.data_loader import aircraft_data, airport_data
+from core.profile3d import build_3d_side_view_block, side_view_accordion_item
 
 
 def register(app):
@@ -47,6 +48,7 @@ def register(app):
         State("env-wind-dir", "value"),
         State("env-wind-speed", "value"),
         State("aircraft-select", "value"),
+        State("engine-select", "value"),
         State("selected-airport-id", "data"),
         State("runtime-total-weight-lb", "data"),
         State("power-setting", "value"),
@@ -66,6 +68,7 @@ def register(app):
         wind_dir,
         wind_speed,
         aircraft_name,
+        engine_name,
         selected_airport_id,
         weight_lb,
         power_setting,
@@ -140,6 +143,7 @@ def register(app):
             weight_lb=weight,
             power_setting=power_pct,
             wind_profile=wind_profile,
+            engine_option=engine_name,
         )
 
         if not path or not hover:
@@ -204,15 +208,18 @@ def register(app):
             ),
         )
 
-        # Phase C8c — drop amber CircleMarkers at the 8 reversal points within
-        # the figure-8 (turn_progress = 45/90/135 in each half). The map then
-        # shows where the bank peaks and pitch reverses.
+        # Drop amber CircleMarkers at the six interior progress checkpoints
+        # of the figure-8 (45° / 90° / 135° in each of the two halves).
+        # Pre-fix the H1/H2 disambiguation read segment strings for
+        # "half_1" / "first" — neither appears in lazy-8 segments, so
+        # every marker fell into "1" and the H2 ones never rendered.
+        # Now uses the sim's `turn_number` field (1 or 2), which the
+        # sim writes on every hover entry post-2026-05-21.
         reversal_markers = []
         seen_keys = set()
         for i, pt in enumerate(hover):
             prog = float(pt.get("turn_progress", 0))
-            seg = pt.get("segment", "")
-            half = "1" if "half_1" in seg or "first" in seg else "2"
+            half = int(pt.get("turn_number", 1))
             for target in (45, 90, 135):
                 if abs(prog - target) < 3:
                     key = (half, target)
@@ -233,23 +240,25 @@ def register(app):
 
         elements = [start_marker, end_marker] + path_segments + reversal_markers
 
-        # Prepare slider configuration
-        num_points = len(hover)
-        slider_max = max(0, num_points - 1)
-        slider_marks = {0: "Start"}
-        if slider_max > 0:
-            slider_marks[slider_max] = "End"
-            # Add key point markers (45°, 90°, 135°, 180°)
-            for i, pt in enumerate(hover):
-                progress = pt.get('turn_progress', 0)
-                if abs(progress - 45) < 3:
-                    slider_marks[i] = "45°"
-                elif abs(progress - 90) < 3:
-                    slider_marks[i] = "90°"
-                elif abs(progress - 135) < 3:
-                    slider_marks[i] = "135°"
-                elif abs(progress - 180) < 3:
-                    slider_marks[i] = "180°"
+        # Time-based scrubber (was index). Marks: Start · H1 45° · H1 90° ·
+        # H1 135° · H1 180° (= reversal) · H2 45° · H2 90° · H2 135° · End.
+        # Pre-fix used index-keyed marks AND only labeled the FIRST tick
+        # that matched a progress angle — so H2 milestones never rendered
+        # because H1's angles already occupied those slider positions.
+        max_time = hover[-1].get("time", 0) if hover else 0
+        slider_marks = {}
+        seen_pairs = set()
+        for pt in hover:
+            prog = float(pt.get("turn_progress", 0))
+            half = int(pt.get("turn_number", 1))
+            for target, label in ((45, "45°"), (90, "90°"), (135, "135°"), (180, "180°")):
+                if abs(prog - target) < 3 and (half, target) not in seen_pairs:
+                    seen_pairs.add((half, target))
+                    t_mark = int(round(float(pt.get("time", 0))))
+                    slider_marks[t_mark] = f"H{half} {label}"
+        slider_marks[0] = "Start"
+        slider_marks[int(round(max_time))] = "End"
+        slider_max = int(round(max_time)) if max_time > 0 else 100
 
         slider_style = {"display": "block", "marginTop": "10px"}
 
@@ -283,10 +292,17 @@ def register(app):
         # Calculate load factor at max bank
         load_factor = 1 / math.cos(math.radians(float(max_bank))) if max_bank > 0 else 1.0
 
-        # Stall speed calculations
-        vs_clean = float(ac.get("stall_speed_clean_kias", 48))
-        vs_in_turn = vs_clean * math.sqrt(load_factor)
-        min_ias = min([pt.get('ias', pt.get('tas', entry_ias)) for pt in hover]) if hover else entry_ias
+        # Stall references — surfaced by the sim. Pre-fix this code read
+        # `stall_speed_clean_kias` (non-existent key) and got Vs=48 for
+        # every airframe. Now uses the actual weight-interpolated Vs +
+        # the load-factor-adjusted Vs at the max bank flown.
+        last_hover = hover[-1] if hover else {}
+        vs_clean = float(last_hover.get("vs_clean_kt", 50))
+        vs_in_turn = float(last_hover.get("vs_at_max_bank_kt") or (vs_clean * math.sqrt(load_factor)))
+        min_ias = float(last_hover.get("min_ias_kt") or (
+            min([pt.get('ias', entry_ias) for pt in hover]) if hover else entry_ias
+        ))
+        stall_margin_min = min_ias - vs_in_turn
 
         # Build info panel with standardized format
         info_accordion = dbc.Accordion([
@@ -296,7 +312,22 @@ def register(app):
                 html.Div(f"AOB: {max_bank:.0f}° | Load: {load_factor:.2f}G | GS: {min_gs:.0f}-{max_gs:.0f} kt", style={"fontSize": "11px"}),
                 html.Div(f"Alt: {min_alt:.0f}-{max_alt_val:.0f} ft (±{alt_variation/2:.0f}) | {first_turn_direction.title()}-first", style={"fontSize": "11px"}),
                 html.Hr(style={"margin": "5px 0", "borderTop": "1px solid #ddd"}),
-                html.Div(f"Vs turn: {vs_in_turn:.0f} kt | Margin: {min_ias - vs_in_turn:.0f} kt | Time: {total_time:.0f}s", style={"fontSize": "11px"}),
+                html.Div(
+                    f"Vs(clean): {vs_clean:.0f} kt → Vs×√n at {max_bank:.0f}°: {vs_in_turn:.0f} kt | min IAS: {min_ias:.0f} kt | Time: {total_time:.0f}s",
+                    style={"fontSize": "11px"},
+                ),
+                html.Div(
+                    f"Stall margin at 90° point: {stall_margin_min:+.0f} kt",
+                    style={
+                        "fontSize": "11px",
+                        "color": (
+                            "#dc2626" if stall_margin_min < 4
+                            else "#f59e0b" if stall_margin_min < 8
+                            else "#16a34a"
+                        ),
+                        "fontWeight": "500",
+                    },
+                ),
                 html.Div([
                     html.Span("Color: ", style={"fontSize": "10px"}),
                     html.Span("■ Low", style={"color": "#ff0000", "fontSize": "10px", "marginRight": "6px"}),
@@ -315,6 +346,16 @@ def register(app):
                     "altitude oscillation out of phase, exit bank > 60°",
                 ),
             ], title="Simulation Results", style={"fontSize": "12px"}),
+            # 3D Side View — lazy eight climbs and descends through two
+            # 180° heading reversals; the 3D view shows the figure-eight
+            # ribbon in space.
+            side_view_accordion_item(
+                build_3d_side_view_block(
+                    path=path,
+                    hover=hover,
+                    elev_ft=float(field_elev_ft or 0.0),
+                )
+            ),
         ], start_collapsed=False, style={"marginTop": "8px"})
 
         # Phase C6 — altitude profile chart with heading-reversal markers.
@@ -374,32 +415,56 @@ def register(app):
         prevent_initial_call=True
     )
     def update_lazy8_scrubber(slider_value, hover_data, path_data):
-        """Update the scrubber marker and tooltip based on slider position."""
+        """Update the scrubber marker and tooltip based on slider position.
+
+        Time-based lookup (post-2026-05-21) — finds the closest hover
+        entry by time, so phase marks like "H2 90°" land on the right
+        ticks even when segment timing doesn't divide the index range
+        evenly across the two halves of the figure-eight.
+        """
         if not hover_data or not path_data or slider_value is None:
             return []
 
-        idx = int(slider_value)
-        if idx < 0 or idx >= len(hover_data) or idx >= len(path_data):
-            return []
+        target_time = float(slider_value)
+        best_idx = 0
+        best_diff = abs(hover_data[0].get("time", 0) - target_time)
+        for i, hp in enumerate(hover_data):
+            diff = abs(hp.get("time", 0) - target_time)
+            if diff < best_diff:
+                best_diff = diff
+                best_idx = i
+
+        idx = best_idx
+        if idx >= len(path_data):
+            idx = len(path_data) - 1
 
         pt = hover_data[idx]
         pos = path_data[idx]
 
-        segment = pt.get('segment', 'turn')
+        half = int(pt.get("turn_number", 1))
+        prog = pt.get("turn_progress", 0)
+        segment_label = f"H{half} · {prog:.0f}°"
+
+        load_factor = pt.get("load_factor")
+        if load_factor is None and pt.get("aob") is not None and abs(pt["aob"]) < 89.9:
+            load_factor = 1.0 / math.cos(math.radians(abs(pt["aob"])))
 
         tooltip_content = [
-            html.Div(f"{segment.replace('_', ' ').title()} - {pt.get('turn_progress', 0):.0f}°", style={"fontWeight": "bold", "borderBottom": "1px solid #ccc", "paddingBottom": "3px", "marginBottom": "3px"}),
+            html.Div(segment_label, style={"fontWeight": "bold", "borderBottom": "1px solid #ccc", "paddingBottom": "3px", "marginBottom": "3px"}),
             html.Div(f"Altitude: {pt.get('alt', 0):.0f} ft AGL"),
             html.Div(f"Time: {pt.get('time', 0):.1f} sec"),
             html.Div(f"IAS: {pt.get('ias', 0):.0f} kt | TAS: {pt.get('tas', 0):.0f} kt"),
-            html.Div(f"AOB: {'L ' if pt.get('aob', 0) < 0 else ('R ' if pt.get('aob', 0) > 0 else '')}{abs(pt.get('aob', 0)):.1f}° | Pitch: {pt.get('pitch', 0):.1f}°"),
+            html.Div(
+                f"AOB: {'L ' if pt.get('aob', 0) < 0 else ('R ' if pt.get('aob', 0) > 0 else '')}{abs(pt.get('aob', 0)):.1f}° | Pitch: {pt.get('pitch', 0):.1f}°"
+                + (f" | Load: {load_factor:.2f}G" if load_factor else "")
+            ),
             html.Div(f"VS: {pt.get('vs', 0):.0f} fpm"),
             html.Div(f"Heading: {pt.get('heading', 0):.0f}°"),
-            html.Div(f"Stall Margin: +{pt.get('speed_margin', 0):.0f} kt"),
+            html.Div(f"Margin above Vs: {pt.get('speed_margin', 0):+.0f} kt"),
         ]
 
         heading = pt.get('heading', 0)
         bank = pt.get('aob', 0)
-        crab = -pt.get('drift', 0)  # Negate: crab is opposite of drift (point into wind)
+        crab = -pt.get('drift', 0)  # marker visual; tooltip crab not shown (continuous turn)
         marker = create_airplane_marker(pos, heading, tooltip_content, bank, crab)
         return [marker]

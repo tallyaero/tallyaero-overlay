@@ -3,8 +3,17 @@ Steep turn simulation module.
 
 Simulates steep turn maneuvers with proper wind integration using time-step
 simulation, matching the pattern of other maneuver simulations.
+
+Post-2026-05-21 audit wired:
+    * `wind_profile` honored with user-surface-wind override
+    * POH `roll_rate_dps` + `bank_response_tau_s` drive bank dynamics
+    * `_get_stall_speed_kt` weight-interpolated lookup (fixes the
+      legacy `stall_speed_clean_kias` fallback that always returned 48)
+    * `engine_option` accepted for per-engine performance
+    * per-tick TAS recomputation as altitude drifts under off-design power
 """
 import math
+from typing import Optional
 from geopy import Point as GeoPoint
 from geopy.distance import distance as geo_dist
 
@@ -15,6 +24,31 @@ from physics import (
     G_FPS2,
     FT_PER_NM,
 )
+
+
+def _get_stall_speed_kt(ac: dict, weight_lbs: float, config: str = "clean") -> float:
+    """Weight-interpolated Vs (kt) from `ac.stall_speeds[config]`.
+
+    Pre-fix steep_turn read a key that doesn't exist in our aircraft
+    JSONs (`stall_speed_clean_kias`) and silently fell back to 48 kt
+    for every airframe. This helper mirrors the one used by
+    impossible_turn / po180 so the three sims share one Vs contract."""
+    stall_speeds = ac.get("stall_speeds", {})
+    config_data = stall_speeds.get(config, stall_speeds.get("clean", {}))
+    weights = config_data.get("weights", [2000])
+    speeds = config_data.get("speeds", [50])
+    if not weights or not speeds:
+        return 50.0
+    w = float(weight_lbs)
+    if w <= weights[0]:
+        return float(speeds[0])
+    if w >= weights[-1]:
+        return float(speeds[-1])
+    for i in range(len(weights) - 1):
+        if weights[i] <= w <= weights[i + 1]:
+            r = (w - weights[i]) / (weights[i + 1] - weights[i])
+            return float(speeds[i]) + r * (float(speeds[i + 1]) - float(speeds[i]))
+    return float(speeds[-1])
 
 
 def _wrap_360(angle: float) -> float:
@@ -61,11 +95,16 @@ def simulate_steep_turn(
     altimeter_inhg: float = 29.92,
     field_elev_ft: float = 0.0,
     timestep_sec: float = 0.5,
-    roll_rate_dps: float = 5.0,
+    roll_rate_dps: float = None,           # None = honor POH; explicit overrides
     pause_sec: float = 1.0,
     power_setting: float = 0.7,
     # Legacy parameter name support
     tas_knots: float = None,
+    # Post-2026-05-21 additions
+    ac: dict = None,                       # required for POH dynamics + Vs lookup
+    weight_lbs: float = None,
+    engine_option: Optional[str] = None,
+    wind_profile=None,                     # Optional[WindProfile]
 ) -> tuple:
     """
     Simulate steep turn maneuver with proper wind effects using time-step integration.
@@ -111,8 +150,33 @@ def simulate_steep_turn(
     oat_c = float(oat_c if oat_c is not None else 15.0)
     altimeter_inhg = float(altimeter_inhg if altimeter_inhg is not None else 29.92)
     field_elev_ft = float(field_elev_ft or 0.0)
-    roll_rate_dps = float(roll_rate_dps or 5.0)
     pause_sec = float(pause_sec or 1.0)
+
+    # POH dynamics. Pre-fix used a 5 dps default for every airframe —
+    # 9–20× slower than reality. Now reads roll_rate + bank_response_tau
+    # from the loader (POH-cited or class-derived) and only honors a
+    # caller-provided roll_rate_dps when explicitly set.
+    try:
+        from core.dynamics import dynamics_for
+        pd_dyn = dynamics_for(ac) if ac is not None else {}
+    except Exception:
+        pd_dyn = {}
+    if roll_rate_dps is None:
+        roll_rate_dps = float(pd_dyn.get("roll_rate_dps", 40.0))
+    else:
+        roll_rate_dps = float(roll_rate_dps)
+    bank_response_tau_s = float(pd_dyn.get("bank_response_tau_s", 0.0))
+
+    # User-surface-wind authoritative; column drives the (single)
+    # altitude lookup for steep turns. The override survives.
+    if wind_profile is not None:
+        try:
+            wind_profile = wind_profile.with_surface_override(
+                wind_dir_deg, wind_speed_kt,
+                surface_alt_ft_msl=field_elev_ft,
+            )
+        except Exception:
+            pass
 
     # Design Directive — off-design power produces altitude drift in a
     # nominally level steep turn. Design power = 0.70 (cruise+).
@@ -125,15 +189,34 @@ def simulate_steep_turn(
     design_power = 0.70
     altitude_drift_fpm = (power_pct - design_power) * 200.0
 
-    # Compute TAS from IAS
+    # Compute TAS from IAS at entry altitude — recomputed per-tick in
+    # the main loop so altitude drift from off-design power is reflected.
     alt_msl_ft = field_elev_ft + altitude_ft
     pressure_alt_ft = compute_pressure_altitude(alt_msl_ft, altimeter_inhg)
     tas_knots_computed = compute_true_airspeed(float(ias_knots), pressure_alt_ft, oat_c)
     tas_knots_val = float(tas_knots_computed) if tas_knots_computed and tas_knots_computed > 1 else float(ias_knots)
     tas_fps = tas_knots_val * 1.68781
 
-    # Wind components (north, east) in ft/s
-    wn_fps, we_fps = _wind_components_from_dir(wind_dir_deg, wind_speed_kt)
+    # Wind components (north, east) in ft/s — refreshed per-tick when
+    # wind_profile present, otherwise constant from user input.
+    def _resolve_wind_at(alt_msl_now: float):
+        if wind_profile is None:
+            return _wind_components_from_dir(wind_dir_deg, wind_speed_kt)
+        try:
+            wd, ws = wind_profile.at(alt_msl_now)
+            return _wind_components_from_dir(float(wd), float(ws))
+        except Exception:
+            return _wind_components_from_dir(wind_dir_deg, wind_speed_kt)
+
+    wn_fps, we_fps = _resolve_wind_at(alt_msl_ft)
+
+    # Stall reference Vs at current weight + clean config (used by
+    # downstream telemetry — not gated here since pilots fly steep
+    # turns at Va, which is already structurally above stall × √n).
+    weight_for_vs = float(weight_lbs) if weight_lbs not in (None, 0) else (
+        ac.get("max_weight", 2000) if ac is not None else 2000
+    )
+    vs_clean_kt = _get_stall_speed_kt(ac or {}, weight_for_vs, "clean")
 
     # Turn physics
     bank_rad = math.radians(abs(bank_angle_deg))
@@ -263,6 +346,24 @@ def simulate_steep_turn(
             turn_entry_heading = hdg
 
             while phase != "done":
+                # Per-tick TAS recomputation. Altitude drift from off-design
+                # power means TAS isn't constant; recompute each tick so
+                # turn-rate / radius reflect the current state.
+                try:
+                    cur_alt_msl = field_elev_ft + alt_state
+                    cur_palt = compute_pressure_altitude(cur_alt_msl, altimeter_inhg)
+                    cur_tas = compute_true_airspeed(float(ias_knots), cur_palt, oat_c)
+                    if cur_tas and cur_tas > 1:
+                        tas_knots_val = float(cur_tas)
+                        tas_fps = tas_knots_val * 1.68781
+                except Exception:
+                    pass
+
+                # Per-tick wind refresh — single-altitude lookup for steep
+                # turn, but a sheared column at the climb-to-pattern entry
+                # band could legitimately differ from the surface wind.
+                wn_fps, we_fps = _resolve_wind_at(field_elev_ft + alt_state)
+
                 # Determine target bank based on phase
                 if phase == "roll_in":
                     # Ramp up bank
@@ -374,5 +475,16 @@ def simulate_steep_turn(
         hover[-1]["design_power"] = design_power
         hover[-1]["altitude_change_ft"] = round(alt_state - altitude_ft, 1)
         hover[-1]["altitude_drift_fpm"] = round(altitude_drift_fpm, 0)
+        # Surface the correct Vs + load-factor-adjusted stall speed so the
+        # callback can render a real stall-margin chip (pre-fix it used a
+        # broken 48-kt fallback for every airframe).
+        load_factor = (1.0 / math.cos(math.radians(abs(bank_angle_deg)))
+                       if abs(bank_angle_deg) < 89.9 else float("inf"))
+        vs_at_n_kt = vs_clean_kt * math.sqrt(load_factor) if math.isfinite(load_factor) else None
+        hover[-1]["vs_clean_kt"] = round(vs_clean_kt, 1)
+        hover[-1]["vs_at_bank_kt"] = round(vs_at_n_kt, 1) if vs_at_n_kt else None
+        hover[-1]["stall_margin_kt"] = round(float(ias_knots) - vs_at_n_kt, 1) if vs_at_n_kt else None
+        hover[-1]["roll_rate_dps_used"] = round(roll_rate_dps, 1)
+        hover[-1]["wind_profile_used"] = wind_profile is not None
 
     return path, hover
