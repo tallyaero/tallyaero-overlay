@@ -122,12 +122,21 @@ if _EM_DIR not in _sys.path:
 try:
     import em_callbacks as _em_callbacks_pkg
     import em_layouts as _em_layouts_pkg
+    from em_core import AIRCRAFT_DATA as _EM_AIRCRAFT_DATA
+    from em_root_components import root_components as _em_root_components
     # Register EM's callbacks on the SHARED Dash app — one unified
     # callback graph.
     _em_callbacks_pkg.register_all(app)
     # Expose EM's layout builders for the unified router to consume.
     em_diagram_layout = _em_layouts_pkg.em_diagram_layout
     em_edit_aircraft_layout = _em_layouts_pkg.edit_aircraft_layout
+    # EM expects ~30 root-level Stores + Modals (aircraft-data-store,
+    # stored-total-weight, compare-aircraft, hv-*, etc.) to be present
+    # in app.layout. Hoist them into the unified layout via
+    # em_root_components() — Dash callbacks reference them by ID and
+    # silently fail (with browser-console warnings) when they're not
+    # mounted.
+    em_root_layout_components = _em_root_components(_EM_AIRCRAFT_DATA)
     EM_LOADED = True
 except Exception as _em_exc:
     # Best-effort: if EM fails to import (broken state, missing deps),
@@ -136,6 +145,7 @@ except Exception as _em_exc:
     log.warning("EM subapp failed to load: %r", _em_exc)
     em_diagram_layout = None
     em_edit_aircraft_layout = None
+    em_root_layout_components = []
     EM_LOADED = False
 
 # Keep tools/em on sys.path so deferred imports inside EM modules
@@ -189,6 +199,11 @@ app.layout = html.Div([
     # localStorage; the syncThemeFromStorage clientside callback mirrors
     # the same value into this Store after layout mounts. Light is default.
     dcc.Store(id="theme-pref", storage_type="local", data="light"),
+    # Phase 3b: EM subapp's root-level Stores + Modals. These need to
+    # be always-mounted regardless of which page (/ or /em) the router
+    # renders into page-content, because EM callbacks reference them
+    # by ID. Empty list when EM_LOADED=False.
+    *em_root_layout_components,
     html.Div(id="page-content"),
 ])
 

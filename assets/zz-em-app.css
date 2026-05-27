@@ -1,0 +1,962 @@
+/* ══════════════════════════════════════════════════════════════
+   TALLYAERO EM DIAGRAM — Phase 5b component overrides
+
+   Loads alphabetically last so it wins the cascade against
+   styles.css legacy rules and dash-bootstrap-components defaults.
+   File-name 'zz-' prefix is deliberate; do not rename without
+   re-validating asset load order.
+
+   Scope:
+   - Sidebar shell + header
+   - Accordion section pattern (TallyAero left-bar active state)
+   - Input labels (micro-caps)
+   - Dropdowns (focus ring)
+   - Buttons (brand orange, brand blue)
+   - Sliders (brand blue track/handle)
+   - Read-only metric boxes (mono numerics)
+   - Quick-links bar
+   - Modals (header accent)
+   - Chart container
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Sidebar shell ────────────────────────────────────────── */
+.resizable-sidebar {
+  background: var(--ta-surface-secondary);
+  border-right: 1px solid var(--ta-border-primary);
+  box-shadow: var(--ta-shadow-xs);
+  padding: 0 !important;             /* component-level padding goes inside */
+}
+
+/* ── Sidebar header (top bar inside the sidebar) ────────── */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--ta-border-secondary);
+  background: var(--ta-surface-secondary);
+}
+.sidebar-header > div:first-child {
+  font-family: var(--ta-font-display) !important;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: var(--ta-letter-spacing-display);
+  color: var(--ta-text-primary) !important;     /* override inline hex */
+  line-height: 1.2;
+}
+
+.sidebar-collapse-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--ta-border-primary);
+  background: var(--ta-surface-tertiary);
+  border-radius: var(--ta-radius-sm);
+  color: var(--ta-text-secondary);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all var(--ta-motion-fast) var(--ta-ease-standard);
+}
+.sidebar-collapse-btn:hover {
+  background: var(--ta-surface-field);
+  border-color: var(--ta-text-tertiary);
+  color: var(--ta-text-primary);
+}
+
+/* ── Sidebar Accordion (the section pattern) ────────────── */
+.sidebar-accordion {
+  --bs-accordion-bg: transparent;
+  --bs-accordion-border-color: transparent;
+  --bs-accordion-active-bg: transparent;
+  --bs-accordion-active-color: var(--ta-text-primary);
+  --bs-accordion-btn-focus-border-color: var(--ta-brand-blue);
+  --bs-accordion-btn-focus-box-shadow: 0 0 0 3px color-mix(in srgb, var(--ta-brand-blue) 20%, transparent);
+  padding: 8px 0 16px;
+}
+
+.sidebar-accordion .accordion-item {
+  margin: 0;
+  border: none;
+  border-bottom: 1px solid var(--ta-border-primary);  /* divider between sections */
+  background: transparent;
+  border-radius: 0;
+}
+.sidebar-accordion .accordion-item:last-child {
+  border-bottom: none;
+}
+
+/* Section header (collapsed) */
+.sidebar-accordion .accordion-button {
+  font-family: var(--ta-font-family) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ta-text-tertiary) !important;
+  background: transparent !important;
+  padding: 10px 16px !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transition:
+    background-color var(--ta-motion-fast) var(--ta-ease-standard),
+    color var(--ta-motion-fast) var(--ta-ease-standard),
+    border-color var(--ta-motion-fast) var(--ta-ease-standard);
+  border-left: 3px solid transparent !important;
+}
+.sidebar-accordion .accordion-button:hover {
+  background: color-mix(in srgb, var(--ta-brand-blue) 4%, transparent) !important;
+  color: var(--ta-text-secondary) !important;
+}
+
+/* Active section header (expanded) */
+.sidebar-accordion .accordion-button:not(.collapsed) {
+  background: color-mix(in srgb, var(--ta-brand-blue) 8%, transparent) !important;
+  color: var(--ta-brand-blue) !important;
+  border-left: 3px solid var(--ta-brand-blue) !important;
+  padding-left: 13px !important;     /* compensate for 3px border */
+}
+
+/* The chevron icon */
+.sidebar-accordion .accordion-button::after {
+  filter: grayscale(1) opacity(0.55);
+  transition: transform var(--ta-motion-base) var(--ta-ease-spring);
+}
+.sidebar-accordion .accordion-button:not(.collapsed)::after {
+  filter: none;
+  --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%230d59f2'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+/* Section body */
+.sidebar-accordion .accordion-body {
+  padding: 12px 16px 16px !important;
+  background: transparent;
+  font-size: 13px;
+  color: var(--ta-text-primary);
+}
+
+/* ── Input labels (micro-caps) ──────────────────────────── */
+.input-label,
+.input-label-sm,
+label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ta-text-tertiary) !important;
+  margin-bottom: 4px !important;
+  line-height: 1.4;
+}
+
+/* ── Dropdowns (react-select inside Dash) ───────────────── */
+.dash-dropdown .Select-control,
+.Select-control {
+  border-radius: var(--ta-radius-sm) !important;
+  border: 1px solid var(--ta-border-primary) !important;
+  background: var(--ta-surface-elevated) !important;
+  transition:
+    border-color var(--ta-motion-fast) var(--ta-ease-standard),
+    box-shadow var(--ta-motion-fast) var(--ta-ease-standard);
+}
+.dash-dropdown:hover .Select-control,
+.Select-control:hover {
+  border-color: var(--ta-text-tertiary) !important;
+}
+.dash-dropdown .is-focused:not(.is-open) > .Select-control,
+.is-focused:not(.is-open) > .Select-control {
+  border-color: var(--ta-brand-blue) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ta-brand-blue) 20%, transparent) !important;
+}
+/* ─── react-select dropdown menu ──────────────────────────────────────
+   Dash dcc.Dropdown renders via react-select. Older Dash uses v1 class
+   names (.Select-menu, .Select-option). Newer versions use v5+ CSS-in-JS
+   with dynamic classes like `css-XXX-menu`. We target BOTH naming
+   conventions plus the stable ARIA roles so dark-mode text contrast
+   works regardless of which react-select build Dash ships.
+   ───────────────────────────────────────────────────────────────────── */
+
+/* Menu panel — outer + inner containers across v1 and v5 */
+.Select-menu-outer,
+.Select-menu,
+[class*="select__menu"],
+[class*="-MenuList"],
+[role="listbox"] {
+  background: var(--ta-surface-elevated) !important;
+  border: 1px solid var(--ta-border-primary) !important;
+  border-radius: var(--ta-radius-sm) !important;
+  box-shadow: var(--ta-shadow-md) !important;
+  color: var(--ta-text-primary) !important;
+  overflow: hidden;
+}
+
+/* Individual option rows — across v1, v5, and the ARIA role */
+.Select-option,
+[class*="select__option"],
+[role="option"] {
+  background: var(--ta-surface-elevated) !important;
+  color: var(--ta-text-primary) !important;
+  font-size: 13px !important;
+  padding: 8px 12px !important;
+  cursor: pointer;
+  transition: background-color var(--ta-motion-fast) var(--ta-ease-standard);
+}
+
+/* Hover / keyboard-focused option */
+.Select-option.is-focused,
+[class*="select__option--is-focused"],
+[role="option"]:hover,
+[role="option"][aria-selected="false"]:focus {
+  background: color-mix(in srgb, var(--ta-brand-blue) 12%, transparent) !important;
+  color: var(--ta-text-primary) !important;
+}
+
+/* Selected option */
+.Select-option.is-selected,
+[class*="select__option--is-selected"],
+[role="option"][aria-selected="true"] {
+  background: var(--ta-brand-blue) !important;
+  color: #ffffff !important;
+}
+
+/* Selected AND keyboard-focused */
+.Select-option.is-selected.is-focused,
+[class*="select__option--is-selected"][class*="select__option--is-focused"] {
+  background: var(--ta-brand-blue-dark) !important;
+  color: #ffffff !important;
+}
+
+/* Empty / no-results message */
+.Select-noresults,
+[class*="select__menu-notice"] {
+  background: var(--ta-surface-elevated) !important;
+  color: var(--ta-text-tertiary) !important;
+  font-size: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+/* Selected value chip inside the control (collapsed state).
+   Force transparent background — by default react-select renders the
+   value as a chip with a tinted background when `clearable=True`, which
+   looked like a "highlighted/selected" treatment we did NOT want. */
+.Select-value,
+.Select-value-label,
+[class*="select__single-value"],
+[class*="select__value-container"],
+[class*="select__multi-value"],
+[class*="select__multi-value__label"],
+[class*="select__multi-value__remove"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: var(--ta-text-primary) !important;
+  border: none !important;
+}
+
+/* Placeholder text */
+.Select-placeholder,
+[class*="select__placeholder"] {
+  color: var(--ta-text-tertiary) !important;
+}
+
+/* The search input inside searchable dropdowns */
+.Select-input > input,
+[class*="select__input"] input {
+  color: var(--ta-text-primary) !important;
+  background: transparent !important;
+}
+
+/* Indicators (caret + clear ×) */
+[class*="select__indicator"] {
+  color: var(--ta-text-tertiary) !important;
+}
+[class*="select__indicator"]:hover {
+  color: var(--ta-text-secondary) !important;
+}
+
+/* Indicator separator line */
+[class*="select__indicator-separator"] {
+  background-color: var(--ta-border-primary) !important;
+}
+
+/* Disabled dropdown */
+.Select.is-disabled > .Select-control,
+[class*="select__control--is-disabled"] {
+  background: var(--ta-surface-field) !important;
+}
+
+/* ── Buttons ────────────────────────────────────────────── */
+.btn-standard,
+.btn-primary-orange,
+.btn-primary-blue {
+  font-family: var(--ta-font-family) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+  padding: 8px 14px !important;
+  border-radius: var(--ta-radius-sm) !important;
+  border: none !important;
+  cursor: pointer;
+  transition:
+    background var(--ta-motion-fast) var(--ta-ease-standard),
+    box-shadow var(--ta-motion-fast) var(--ta-ease-standard),
+    transform 80ms var(--ta-ease-spring);
+}
+.btn-primary-orange {
+  background: var(--ta-brand-orange) !important;
+  color: white !important;
+}
+.btn-primary-orange:hover {
+  background: var(--ta-brand-orange-dark) !important;
+  box-shadow: var(--ta-shadow-sm);
+}
+.btn-primary-orange:active { transform: translateY(1px); }
+
+.btn-primary-blue {
+  background: var(--ta-brand-blue) !important;
+  color: white !important;
+}
+.btn-primary-blue:hover {
+  background: var(--ta-brand-blue-dark) !important;
+  box-shadow: var(--ta-shadow-sm);
+}
+.btn-primary-blue:active { transform: translateY(1px); }
+
+/* ── Sliders (dash-core-components) ─────────────────────── */
+.rc-slider-handle {
+  border-color: var(--ta-brand-blue) !important;
+  background: var(--ta-brand-blue) !important;
+  box-shadow: 0 0 0 2px var(--ta-surface-secondary), 0 0 0 4px color-mix(in srgb, var(--ta-brand-blue) 30%, transparent);
+  width: 16px !important;
+  height: 16px !important;
+  margin-top: -6px !important;
+  transition: box-shadow var(--ta-motion-fast) var(--ta-ease-standard);
+}
+.rc-slider-handle:hover,
+.rc-slider-handle:focus,
+.rc-slider-handle-dragging {
+  border-color: var(--ta-brand-blue-dark) !important;
+  background: var(--ta-brand-blue-dark) !important;
+  box-shadow: 0 0 0 2px var(--ta-surface-secondary), 0 0 0 6px color-mix(in srgb, var(--ta-brand-blue) 35%, transparent) !important;
+}
+.rc-slider-track {
+  background: var(--ta-brand-blue) !important;
+  height: 4px !important;
+}
+.rc-slider-rail {
+  background: var(--ta-border-primary) !important;
+  height: 4px !important;
+}
+.rc-slider-mark-text {
+  font-size: 10px !important;
+  color: var(--ta-text-tertiary) !important;
+  font-weight: 500;
+}
+.rc-slider-tooltip-inner {
+  /* Inverted color pair — bg uses primary-text token, text uses surface
+     token. Net effect: dark-on-light in light mode, light-on-dark in dark
+     mode. Always high contrast against the slider's own background. */
+  background: var(--ta-text-primary) !important;
+  color: var(--ta-surface-secondary) !important;
+  border: 1px solid var(--ta-text-primary) !important;
+  border-radius: var(--ta-radius-xs) !important;
+  font-family: var(--ta-font-mono) !important;
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px !important;
+  box-shadow: var(--ta-shadow-md);
+  min-width: 28px;
+  text-align: center;
+}
+/* Tooltip arrow should match the new bg color */
+.rc-slider-tooltip-arrow {
+  border-top-color: var(--ta-text-primary) !important;
+  border-bottom-color: var(--ta-text-primary) !important;
+}
+
+/* ── Number inputs ──────────────────────────────────────── */
+.input-small,
+input[type="number"],
+input[type="text"]:not(.form-control-large) {
+  border: 1px solid var(--ta-border-primary) !important;
+  border-radius: var(--ta-radius-sm) !important;
+  padding: 6px 10px !important;
+  font-size: 13px !important;
+  font-family: var(--ta-font-mono) !important;
+  font-variant-numeric: tabular-nums;
+  background: var(--ta-surface-elevated) !important;
+  color: var(--ta-text-primary) !important;
+  transition: border-color var(--ta-motion-fast) var(--ta-ease-standard), box-shadow var(--ta-motion-fast) var(--ta-ease-standard);
+}
+.input-small:focus,
+input[type="number"]:focus,
+input[type="text"]:focus {
+  outline: none !important;
+  border-color: var(--ta-brand-blue) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ta-brand-blue) 20%, transparent) !important;
+}
+
+/* ── Read-only metric box (e.g., total weight display) ─── */
+.weight-box {
+  display: inline-block;
+  font-family: var(--ta-font-mono) !important;
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ta-text-primary);
+  background: var(--ta-surface-field);
+  padding: 6px 10px;
+  border-radius: var(--ta-radius-sm);
+  border: 1px solid var(--ta-border-primary);
+  min-width: 90px;
+  text-align: right;
+}
+
+/* ── Segmented controls (KIAS/MPH, prop condition) ──────── */
+.segment-btn {
+  font-family: var(--ta-font-family) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 6px 10px !important;
+  border: 1px solid var(--ta-border-primary) !important;
+  background: var(--ta-surface-secondary) !important;
+  color: var(--ta-text-secondary) !important;
+  cursor: pointer;
+  transition: all var(--ta-motion-fast) var(--ta-ease-standard);
+}
+.segment-btn:first-child { border-top-left-radius: var(--ta-radius-sm); border-bottom-left-radius: var(--ta-radius-sm); }
+.segment-btn:last-child  { border-top-right-radius: var(--ta-radius-sm); border-bottom-right-radius: var(--ta-radius-sm); }
+.segment-btn:hover { background: var(--ta-surface-field) !important; color: var(--ta-text-primary) !important; }
+.segment-btn.active {
+  background: var(--ta-brand-blue) !important;
+  border-color: var(--ta-brand-blue) !important;
+  color: white !important;
+  box-shadow: inset 0 1px 2px color-mix(in srgb, var(--ta-brand-blue-dark) 30%, transparent);
+}
+
+/* ── Quick-links bar ────────────────────────────────────── */
+.quick-links-bar-slim {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--ta-surface-tertiary);
+  border-bottom: 1px solid var(--ta-border-primary);
+  font-size: 12px;
+}
+.quick-link {
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--ta-motion-fast) var(--ta-ease-standard);
+}
+.quick-link:hover { color: var(--ta-brand-blue) !important; }
+.link-blue    { color: var(--ta-brand-blue); }
+.link-orange  { color: var(--ta-brand-orange); }
+.link-danger  { color: var(--ta-danger); }
+.link-success { color: var(--ta-success); }
+.separator    { color: var(--ta-text-quaternary); user-select: none; }
+
+/* ── Banner header (logo row) ───────────────────────────── */
+.banner-logo {
+  height: 36px;
+  width: auto;
+  transition: opacity var(--ta-motion-fast) var(--ta-ease-standard);
+}
+.banner-logo:hover { opacity: 0.85; }
+
+/* ── Modal styling (dbc.Modal) ──────────────────────────── */
+.modal-content {
+  border: 1px solid var(--ta-border-primary) !important;
+  border-radius: var(--ta-radius-lg) !important;
+  box-shadow: var(--ta-shadow-lg) !important;
+}
+.modal-header {
+  border-bottom: 1px solid var(--ta-border-secondary) !important;
+  background: var(--ta-surface-secondary);
+  padding: 16px 20px;
+}
+.modal-title {
+  font-family: var(--ta-font-display) !important;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: var(--ta-letter-spacing-display);
+  color: var(--ta-text-primary);
+}
+.modal-body {
+  padding: 18px 20px;
+  font-size: 14px;
+  color: var(--ta-text-secondary);
+  line-height: 1.55;
+}
+.modal-footer {
+  border-top: 1px solid var(--ta-border-secondary) !important;
+  padding: 12px 20px;
+  background: var(--ta-surface-tertiary);
+}
+
+/* ── Chart container ────────────────────────────────────── */
+.graph-column {
+  background: var(--ta-surface-primary);
+  padding: 12px 16px 16px;
+}
+.full-height-container {
+  background: var(--ta-surface-primary);
+}
+
+/* ── dcc.Checklist + Switch (overlay toggles, etc.) ──────── */
+.form-check-input:checked {
+  background-color: var(--ta-brand-blue) !important;
+  border-color: var(--ta-brand-blue) !important;
+}
+.form-check-input:focus {
+  border-color: var(--ta-brand-blue) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ta-brand-blue) 20%, transparent) !important;
+}
+.form-check-label {
+  font-size: 12px;
+  color: var(--ta-text-secondary);
+  font-weight: 500;
+}
+
+/* ── Tooltip (Plotly hover + Bootstrap tooltips) ────────── */
+.tooltip-inner {
+  background: var(--ta-text-primary) !important;
+  color: var(--ta-surface-secondary) !important;
+  border-radius: var(--ta-radius-sm) !important;
+  font-size: 11px;
+  font-family: var(--ta-font-mono);
+  padding: 6px 10px;
+  box-shadow: var(--ta-shadow-md);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 5c — STATE PANEL
+   Six hero metric cards above the chart. Apple Health-grade.
+   Updated live by callbacks/main.update_state_panel.
+   ══════════════════════════════════════════════════════════════ */
+
+.state-panel {
+  display: flex;
+  gap: 10px;
+  padding: 10px 16px 14px;
+  background: var(--ta-surface-secondary);
+  border-bottom: 1px solid var(--ta-border-primary);
+  flex-wrap: nowrap;
+  overflow-x: auto;             /* horizontal scroll on narrow viewports */
+  scrollbar-width: thin;
+}
+
+.state-card {
+  flex: 1 1 0;
+  min-width: 110px;
+  padding: 10px 14px 12px;
+  background: var(--ta-surface-elevated);
+  border: 1px solid var(--ta-border-primary);
+  border-radius: var(--ta-radius-md);
+  transition:
+    border-color var(--ta-motion-fast) var(--ta-ease-standard),
+    box-shadow var(--ta-motion-fast) var(--ta-ease-standard),
+    transform 120ms var(--ta-ease-spring);
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+.state-card::before {
+  /* Subtle accent rail on the left */
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12%;
+  bottom: 12%;
+  width: 2px;
+  background: var(--ta-brand-blue);
+  border-radius: 0 var(--ta-radius-full) var(--ta-radius-full) 0;
+  opacity: 0;
+  transition: opacity var(--ta-motion-base) var(--ta-ease-standard);
+}
+.state-card:hover {
+  border-color: var(--ta-text-tertiary);
+  box-shadow: var(--ta-shadow-sm);
+  transform: translateY(-1px);
+}
+.state-card:hover::before { opacity: 1; }
+
+.state-label {
+  font-family: var(--ta-font-family) !important;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ta-text-tertiary);
+  margin-bottom: 4px;
+  line-height: 1;
+}
+.state-value {
+  font-family: var(--ta-font-display) !important;
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: -0.025em;
+  color: var(--ta-text-primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ── Flag states (limit violations etc.) ────────────────── */
+.state-card.flag-danger {
+  border-color: var(--ta-danger);
+  background: var(--ta-danger-bg);
+}
+.state-card.flag-danger::before { background: var(--ta-danger); opacity: 1; }
+.state-card.flag-danger .state-value { color: var(--ta-danger-text); }
+.state-card.flag-danger .state-label { color: var(--ta-danger-text); }
+
+.state-card.flag-warning {
+  border-color: var(--ta-warning);
+  background: var(--ta-warning-bg);
+}
+.state-card.flag-warning::before { background: var(--ta-warning); opacity: 1; }
+.state-card.flag-warning .state-value { color: var(--ta-warning-text); }
+.state-card.flag-warning .state-label { color: var(--ta-warning-text); }
+
+.state-card.flag-success {
+  border-color: var(--ta-success);
+}
+.state-card.flag-success::before { background: var(--ta-success); opacity: 1; }
+.state-card.flag-success .state-value { color: var(--ta-success-text); }
+
+/* ── Mobile: hide on narrow viewports (chart takes the space) ── */
+@media (max-width: 767px) {
+  .state-panel { display: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 5e — THEME TOGGLE (Auto / Light / Dark)
+   Lives in the top quick-links bar. Driven by clientside callback
+   in app.py that sets data-theme on <html> + persists to localStorage.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Right-aligned tool cluster (theme toggle + export). One wrapper so we
+   only have one element claiming `margin-left: auto`. */
+.quick-links-right {
+  margin-left: auto;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Both toggle groups share the same segmented-control look */
+.theme-toggle-group,
+.export-toggle-group {
+  display: inline-flex;
+  gap: 0;
+  border: 1px solid var(--ta-border-primary);
+  border-radius: var(--ta-radius-sm);
+  overflow: hidden;
+  background: var(--ta-surface-secondary);
+}
+/* Unified segmented-control base — both theme and export buttons share
+   identical metrics so they render the same width/height regardless of
+   label length. Only the accent color differs between the two groups. */
+.theme-toggle-group .theme-btn,
+.export-toggle-group .export-btn {
+  font-family: var(--ta-font-family);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 0;                /* horizontal padding handled by min-width */
+  min-width: 48px;               /* fits the widest label ("LIGHT") with margin */
+  height: 26px;                  /* fixed so PNG/PDF and LIGHT/DARK align pixel-perfect */
+  line-height: 1;
+  text-align: center;
+  background: transparent;
+  color: var(--ta-text-tertiary);
+  border: none;
+  border-right: 1px solid var(--ta-border-primary);
+  margin: 0;
+  cursor: pointer;
+  transition: all var(--ta-motion-fast) var(--ta-ease-standard);
+  box-sizing: border-box;
+}
+.theme-toggle-group .theme-btn:last-child,
+.export-toggle-group .export-btn:last-child { border-right: none; }
+
+/* Theme buttons — blue accent on hover, active = solid blue */
+.theme-toggle-group .theme-btn:hover {
+  background: color-mix(in srgb, var(--ta-brand-blue) 6%, transparent);
+  color: var(--ta-text-secondary);
+}
+.theme-toggle-group .theme-btn.active {
+  background: var(--ta-brand-blue);
+  color: white;
+}
+
+/* Export buttons — orange accent on hover, pressed = solid orange */
+.export-toggle-group .export-btn:hover {
+  background: color-mix(in srgb, var(--ta-brand-orange) 10%, transparent);
+  color: var(--ta-brand-orange);
+}
+.export-toggle-group .export-btn:active {
+  background: var(--ta-brand-orange);
+  color: white;
+}
+
+/* Quick-links bar reflow: use flex so the toggle group flows to the right */
+.quick-links-bar-slim {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 6px;
+}
+
+/* Phase 5e DARK-MODE Plotly bg fix — RETIRED.
+   This block was a band-aid before Phase 5g wired paper_bgcolor/plot_bgcolor
+   into update_graph per-render. With both colors flowing through the
+   palette, the legacy !important overrides were fighting the figure's own
+   colors and ended up flattening the chart to a single colour in dark mode.
+   Deliberately left here as a comment so future-me doesn't reintroduce it. */
+
+/* Subtle border on the graph card so it pops on either theme */
+.graph-panel {
+  border: 1px solid var(--ta-border-primary);
+  border-radius: var(--ta-radius-md);
+  background: var(--ta-surface-elevated);
+  overflow: hidden;
+  transition:
+    background var(--ta-motion-base) var(--ta-ease-standard),
+    border-color var(--ta-motion-base) var(--ta-ease-standard);
+}
+
+/* Body color transition for clean theme swap */
+html, body {
+  transition:
+    background-color var(--ta-motion-base) var(--ta-ease-standard),
+    color var(--ta-motion-base) var(--ta-ease-standard);
+}
+body {
+  background: var(--ta-surface-primary);
+  color: var(--ta-text-primary);
+}
+
+/* Ensure modals respect dark mode too */
+[data-theme="dark"] .modal-content {
+  background: var(--ta-surface-elevated);
+  color: var(--ta-text-primary);
+}
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+  background: var(--ta-surface-secondary);
+}
+[data-theme="dark"] .modal-body {
+  color: var(--ta-text-secondary);
+}
+[data-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(1) opacity(0.7);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 5e+ — DARK-MODE COVERAGE CLEAN-UP
+   These rules patch elements I didn't theme-wire earlier so the
+   dark-mode toggle covers the whole app, not just the chart area.
+   ══════════════════════════════════════════════════════════════ */
+
+/* Top quick-links bar — explicitly set bg + border for dark mode */
+.quick-links-bar-slim {
+  background: var(--ta-surface-tertiary);
+  border-bottom: 1px solid var(--ta-border-primary);
+}
+
+/* Legal-links footer below the chart */
+.legal-links {
+  background: var(--ta-surface-secondary);
+  border-top: 1px solid var(--ta-border-primary);
+  padding: 8px 16px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 11px;
+  color: var(--ta-text-tertiary);
+}
+.legal-link {
+  color: var(--ta-text-secondary) !important;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--ta-motion-fast) var(--ta-ease-standard);
+}
+.legal-link:hover {
+  color: var(--ta-brand-blue) !important;
+}
+
+/* Help bubble icon (the "?" next to inputs) */
+.help-bubble,
+[id^="help-"] span,
+.bi-question-circle {
+  background: color-mix(in srgb, var(--ta-brand-blue) 12%, transparent) !important;
+  color: var(--ta-brand-blue) !important;
+  border-radius: var(--ta-radius-full);
+  width: 16px;
+  height: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--ta-motion-fast) var(--ta-ease-standard);
+}
+.help-bubble:hover {
+  background: var(--ta-brand-blue) !important;
+  color: white !important;
+}
+
+/* Mobile config toggle bar — the "Configuration ▼" header on mobile */
+.mobile-config-bar {
+  background: var(--ta-surface-secondary);
+  border-bottom: 1px solid var(--ta-border-primary);
+  color: var(--ta-text-primary);
+}
+.mobile-config-btn {
+  background: transparent;
+  color: var(--ta-text-secondary);
+  border: 1px solid var(--ta-border-primary);
+  border-radius: var(--ta-radius-sm);
+}
+
+/* Edit-aircraft accordion (separate from sidebar-accordion) */
+#edit-accordion .accordion-item,
+.edit-page .accordion-item {
+  background: var(--ta-surface-secondary) !important;
+  border: 1px solid var(--ta-border-primary) !important;
+  border-radius: var(--ta-radius-md);
+  margin-bottom: 8px;
+}
+#edit-accordion .accordion-button,
+.edit-page .accordion-button {
+  background: var(--ta-surface-tertiary) !important;
+  color: var(--ta-text-primary) !important;
+  font-family: var(--ta-font-display);
+  font-weight: 700;
+  font-size: 13px;
+}
+#edit-accordion .accordion-button:not(.collapsed),
+.edit-page .accordion-button:not(.collapsed) {
+  background: color-mix(in srgb, var(--ta-brand-blue) 8%, transparent) !important;
+  color: var(--ta-brand-blue) !important;
+}
+#edit-accordion .accordion-body,
+.edit-page .accordion-body {
+  background: var(--ta-surface-secondary) !important;
+  color: var(--ta-text-primary) !important;
+}
+
+/* Generic Bootstrap card fallback */
+.card {
+  background: var(--ta-surface-elevated) !important;
+  border-color: var(--ta-border-primary) !important;
+  color: var(--ta-text-primary) !important;
+}
+
+/* Dash Markdown / Loading spinner background */
+.dash-loading {
+  background: var(--ta-surface-secondary) !important;
+}
+
+/* Resize handle on the sidebar (vertical drag bar) */
+.resize-handle {
+  background: var(--ta-border-primary);
+  width: 4px;
+  cursor: ew-resize;
+  transition: background-color var(--ta-motion-fast) var(--ta-ease-standard);
+}
+.resize-handle:hover {
+  background: var(--ta-brand-blue);
+}
+
+/* dbc.Switch / toggle (used for overlay toggles, OEI switch, etc.) */
+.form-switch .form-check-input {
+  background-color: var(--ta-border-primary) !important;
+  border-color: var(--ta-border-primary) !important;
+}
+.form-switch .form-check-input:checked {
+  background-color: var(--ta-brand-blue) !important;
+  border-color: var(--ta-brand-blue) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 5h — CHANDELLE REPLAY SCRUBBER
+   Lives in the maneuver-options-container when chandelle is the
+   active maneuver. Slider drives a clientside callback that
+   positions an orange marker along the chandelle trace.
+   ══════════════════════════════════════════════════════════════ */
+
+.maneuver-replay {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: var(--ta-surface-tertiary);
+  border: 1px solid var(--ta-border-primary);
+  border-radius: var(--ta-radius-sm);
+}
+.replay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.replay-header .overlay-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ta-text-tertiary);
+}
+.replay-readout {
+  font-family: var(--ta-font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ta-brand-orange);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+/* Override the default brand-blue slider styling for THIS slider only —
+   orange to match the replay marker on the chart. */
+#maneuver-replay-slider .rc-slider-handle {
+  border-color: var(--ta-brand-orange) !important;
+  background: var(--ta-brand-orange) !important;
+  box-shadow:
+    0 0 0 2px var(--ta-surface-secondary),
+    0 0 0 4px color-mix(in srgb, var(--ta-brand-orange) 30%, transparent) !important;
+}
+#maneuver-replay-slider .rc-slider-handle:hover,
+#maneuver-replay-slider .rc-slider-handle:active,
+#maneuver-replay-slider .rc-slider-handle-dragging {
+  border-color: var(--ta-brand-orange-dark) !important;
+  background: var(--ta-brand-orange-dark) !important;
+  box-shadow:
+    0 0 0 2px var(--ta-surface-secondary),
+    0 0 0 6px color-mix(in srgb, var(--ta-brand-orange) 35%, transparent) !important;
+}
+#maneuver-replay-slider .rc-slider-track {
+  background: var(--ta-brand-orange) !important;
+}
+#maneuver-replay-slider .rc-slider-mark-text {
+  font-size: 9px !important;
+  color: var(--ta-text-tertiary) !important;
+}
+
+/* ── Scrollbar (subtle, modern) ─────────────────────────── */
+.resizable-sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+.resizable-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.resizable-sidebar::-webkit-scrollbar-thumb {
+  background: var(--ta-border-primary);
+  border-radius: var(--ta-radius-full);
+}
+.resizable-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--ta-text-tertiary);
+}
