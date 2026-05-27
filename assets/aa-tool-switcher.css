@@ -1,0 +1,51 @@
+/* Tool-context switcher (Overlay ⇄ EM Diagram). Lives in its own
+ * stylesheet so it's ALWAYS loaded — neither overlay nor EM's
+ * per-page CSS toggle disables this file. Filename is `aa-`
+ * prefixed so Dash loads it alphabetically before everything else,
+ * letting later sheets override if needed.
+ */
+
+.tool-switcher-root {
+  position: fixed;
+  top: 6px;
+  right: 12px;
+  z-index: 10000;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 2px;
+  display: inline-flex;
+  gap: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+}
+.tool-switcher-root .tool-switcher-link {
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #475569;
+  text-decoration: none;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+.tool-switcher-root .tool-switcher-link:hover {
+  background: #e2e8f0;
+  text-decoration: none;
+  color: #1e293b;
+}
+.tool-switcher-root .tool-switcher-link.tool-switcher-active {
+  background: #0d59f2;
+  color: #ffffff;
+}
+[data-theme="dark"] .tool-switcher-root {
+  background: #1e293b;
+  border-color: #334155;
+}
+[data-theme="dark"] .tool-switcher-root .tool-switcher-link {
+  color: #cbd5e1;
+}
+[data-theme="dark"] .tool-switcher-root .tool-switcher-link:hover {
+  background: #334155;
+  color: #f1f5f9;
+}

@@ -1,31 +1,47 @@
-/* Toggle EM-specific stylesheets on/off based on the current URL.
- * Dash auto-serves every .css file under assets/, so the EM
- * stylesheets are loaded regardless of route. They contain global
- * selectors (body, html, h1-h3, a) that override overlay's
- * styling when on /overlay. Setting `link.disabled = true` removes
- * the sheet from the cascade without unloading it — flip the
- * other way when the user navigates to /em.
+/* Symmetric per-page stylesheet gating.
  *
- * Sheets gated:
- *   em-tokens.css
- *   em-styles.css
- *   zz-em-app.css
+ * Overlay's styles.css and EM's em-styles.css both contain global
+ * selectors (body, html, h1-h3, a, .dropdown, etc.) that collide
+ * cross-tool. Loaded together they cause z-index, width, layout
+ * overlap, and dropdown-stacking bugs.
  *
- * Note: this runs at page-load only. With the html.A hard-nav
- * tool switcher (not dcc.Link), every URL change reloads the
- * page, so this script re-runs and picks the right state.
+ * Solution: enable EXACTLY ONE tool's CSS based on URL.
+ *   /em*       → EM stylesheets ON, overlay stylesheets OFF
+ *   /  + else  → overlay stylesheets ON, EM stylesheets OFF
+ *
+ * Stylesheets that ALWAYS load (regardless of route):
+ *   aa-tool-switcher.css  — the tool-switcher chip styling
+ *   tokens.css            — shared design tokens (overlay's)
+ *
+ * Note: html.A hard-nav tool switcher means each URL change
+ * reloads the page; this script re-runs and picks the right
+ * state cleanly on every load.
  */
 (function () {
   "use strict";
 
+  // Sheets that should ONLY load on /em routes.
   var EM_SHEETS = [
     "em-tokens.css",
     "em-styles.css",
     "zz-em-app.css",
   ];
 
+  // Sheets that should ONLY load on /overlay (default) routes.
+  var OVERLAY_SHEETS = [
+    "/styles.css",   // overlay's main stylesheet (leading slash to
+                     // avoid matching em-styles.css)
+  ];
+
   function isEmPath() {
     return (window.location.pathname || "/").indexOf("/em") === 0;
+  }
+
+  function sheetMatches(href, list) {
+    for (var j = 0; j < list.length; j++) {
+      if (href.indexOf(list[j]) !== -1) return true;
+    }
+    return false;
   }
 
   function applyToggle() {
@@ -33,24 +49,15 @@
     var links = document.querySelectorAll("link[rel='stylesheet']");
     for (var i = 0; i < links.length; i++) {
       var href = links[i].getAttribute("href") || "";
-      // Match any of our gated sheets — Dash serves them at
-      // /assets/<name> with a cache-bust query string.
-      var match = false;
-      for (var j = 0; j < EM_SHEETS.length; j++) {
-        if (href.indexOf(EM_SHEETS[j]) !== -1) {
-          match = true;
-          break;
-        }
+      if (sheetMatches(href, EM_SHEETS)) {
+        links[i].disabled = !em;       // EM sheets: on for /em only
+      } else if (sheetMatches(href, OVERLAY_SHEETS)) {
+        links[i].disabled = em;        // overlay sheets: off on /em
       }
-      if (match) {
-        links[i].disabled = !em;
-      }
+      // aa-tool-switcher.css, em-clientside.js, etc. left alone.
     }
   }
 
-  // Apply once stylesheets are loaded. Dash injects them during
-  // initial paint, so listen on both DOMContentLoaded (early DOM
-  // ready) and on the 'load' event (after all <link>s are in).
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", applyToggle);
   } else {
