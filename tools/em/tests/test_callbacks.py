@@ -14,14 +14,14 @@ import pytest
 
 
 def test_register_all_exists():
-    from callbacks import register_all
+    from em_callbacks import register_all
     assert callable(register_all)
 
 
 # Auto-discover every submodule in callbacks/ (excluding __init__).
 def _submodules():
     import pkgutil
-    import callbacks as pkg
+    import em_callbacks as pkg
     return [
         name
         for _, name, _ in pkgutil.iter_modules(pkg.__path__)
@@ -35,7 +35,7 @@ def test_each_submodule_exports_register():
     import importlib
 
     for name in _submodules():
-        mod = importlib.import_module(f"callbacks.{name}")
+        mod = importlib.import_module(f"em_callbacks.{name}")
         assert hasattr(mod, "register"), f"callbacks.{name} missing register()"
         sig = inspect.signature(mod.register)
         params = list(sig.parameters.values())
@@ -50,10 +50,10 @@ def test_register_all_invokes_each_submodule():
     covered without test edits.
     """
     import importlib
-    import callbacks as pkg
+    import em_callbacks as pkg
 
     submods = _submodules()
-    modules = [importlib.import_module(f"callbacks.{n}") for n in submods]
+    modules = [importlib.import_module(f"em_callbacks.{n}") for n in submods]
 
     called: list[tuple[str, object]] = []
     originals: dict[str, callable] = {}

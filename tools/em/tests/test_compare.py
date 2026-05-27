@@ -12,7 +12,7 @@ import pytest
 from em_core import init_data
 init_data()
 from em_core import AIRCRAFT_DATA
-from callbacks.figure import update_graph
+from em_callbacks.figure import update_graph
 
 
 def _call_with_compare(ac_name: str, compare: str | None):

@@ -26,7 +26,7 @@ def _state_card_popovers():
     """Phase 5V-2 — emit one click-popover per State Panel card. Pulled out
     of callbacks.main so the layout module has the only import dependency
     needed at render time."""
-    from callbacks.main import build_state_card_popovers
+    from em_callbacks.main import build_state_card_popovers
     return build_state_card_popovers()
 
 

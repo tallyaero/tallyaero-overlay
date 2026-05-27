@@ -98,6 +98,49 @@ def _serve_chart_tile(layer: str, z: int, x: int, y: int):
 from callbacks import register_all
 register_all(app)
 
+
+# === Phase 3b: mount EM Diagram subapp under /em ===
+# After the great repo merge, EM lives at tools/em/ as a subtree. All
+# of EM's previously-colliding namespaces were renamed so they
+# coexist with overlay in a single Python process:
+#   tools/em/core/      → tools/em/em_core/
+#   tools/em/callbacks/ → tools/em/em_callbacks/
+#   tools/em/layouts/   → tools/em/em_layouts/
+#   tools/em/data/      → tools/em/em_data/
+# Component IDs in EM also prefixed with `em-` (80 of them), so the
+# Dash callback graph stays collision-free.
+#
+# Loading: prepend tools/em to sys.path JUST for the import block —
+# EM's modules contain `from em_core import ...` etc., and that
+# resolves to tools/em/em_core/ once tools/em is on sys.path.
+import sys as _sys
+import os as _os
+_EM_DIR = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "tools", "em")
+if _EM_DIR not in _sys.path:
+    _sys.path.insert(0, _EM_DIR)
+
+try:
+    import em_callbacks as _em_callbacks_pkg
+    import em_layouts as _em_layouts_pkg
+    # Register EM's callbacks on the SHARED Dash app — one unified
+    # callback graph.
+    _em_callbacks_pkg.register_all(app)
+    # Expose EM's layout builders for the unified router to consume.
+    em_diagram_layout = _em_layouts_pkg.em_diagram_layout
+    em_edit_aircraft_layout = _em_layouts_pkg.edit_aircraft_layout
+    EM_LOADED = True
+except Exception as _em_exc:
+    # Best-effort: if EM fails to import (broken state, missing deps),
+    # log it and keep overlay working. Router sees EM_LOADED=False
+    # and skips /em routing.
+    log.warning("EM subapp failed to load: %r", _em_exc)
+    em_diagram_layout = None
+    em_edit_aircraft_layout = None
+    EM_LOADED = False
+
+# Keep tools/em on sys.path so deferred imports inside EM modules
+# (function-local `from em_core import ...`) still resolve at call time.
+
 app.title = "Maneuver Overlay Tool | TallyAero"
 
 # Phase 4 — Theme system + early-paint mirror the EM Diagram. The inline

@@ -24,8 +24,8 @@ import dash_bootstrap_components as dbc
 from flask import send_from_directory
 
 from em_core import AIRCRAFT_DATA
-from layouts import edit_aircraft_layout, em_diagram_layout
-from callbacks import register_all
+from em_layouts import edit_aircraft_layout, em_diagram_layout
+from em_callbacks import register_all
 
 
 # =============================================================================

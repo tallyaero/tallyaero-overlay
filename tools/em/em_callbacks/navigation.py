@@ -13,7 +13,7 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
 from em_core import AIRCRAFT_DATA, aircraft_data
-from layouts import edit_aircraft_layout, em_diagram_layout
+from em_layouts import edit_aircraft_layout, em_diagram_layout
 
 
 def register(app):

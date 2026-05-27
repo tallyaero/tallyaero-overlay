@@ -65,6 +65,27 @@ def register(app):
 
         is_mobile = screen_width < 768  # BREAKPOINT: 768px
 
+        # Route to EM subapp when path starts with /em. App.py exposes
+        # the EM layout builders after subtree merge (Phase 3b). Falls
+        # through to overlay when EM didn't load or path is /.
+        try:
+            from app import (
+                EM_LOADED,
+                em_diagram_layout,
+                em_edit_aircraft_layout,
+            )
+        except ImportError:
+            EM_LOADED = False
+            em_diagram_layout = None
+            em_edit_aircraft_layout = None
+
+        path = (pathname or "/").rstrip("/")
+        if EM_LOADED and path.startswith("/em"):
+            if path in ("/em-edit-aircraft", "/em/edit-aircraft"):
+                return em_edit_aircraft_layout()
+            return em_diagram_layout(is_mobile=is_mobile)
+
+        # Default: overlay layout (route planner + maneuvers).
         if is_mobile:
             return mobile_layout()
         else:
