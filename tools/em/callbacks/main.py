@@ -10,7 +10,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import ALL, Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from core import (
+from em_core import (
     AIRCRAFT_DATA, AIRPORT_DATA, AIRPORT_OPTIONS, aircraft_data,
     extract_vmca_value, get_airport_by_id,
     dprint, log_feature,
@@ -217,7 +217,7 @@ def register(app):
         # with the current altitude-slider value. The Energy split is a
         # static "where are you on the constant-energy curve" snapshot —
         # the chart hover already shows per-point Ps for dynamic state.
-        from core import compute_energy_state
+        from em_core import compute_energy_state
         ref_ias_kt = (
             ac.get("Vy") or ac.get("best_glide") or vno_kt or 100
         )

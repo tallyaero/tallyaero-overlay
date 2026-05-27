@@ -14,7 +14,7 @@ Run with:
 import math
 import pytest
 
-from core.calculations import (
+from em_core.calculations import (
     # Constants
     g,
     KTS_TO_FPS,
@@ -194,7 +194,7 @@ class TestDensityAltitude:
     def test_isa(self):
         # When OAT equals ISA temp at the given PA, DA == PA.
         # ISA at 5000 ft = 15 − 5000·0.0019812 = 5.094 °C (ICAO lapse, not the 2°C/1000ft rule).
-        from core.calculations import TEMP_SL_C, LAPSE_RATE_K_FT
+        from em_core.calculations import TEMP_SL_C, LAPSE_RATE_K_FT
         isa_oat = TEMP_SL_C - 5000 * LAPSE_RATE_K_FT
         da = compute_density_altitude(5000, oat_c=isa_oat)
         assert da == pytest.approx(5000, abs=0.01)

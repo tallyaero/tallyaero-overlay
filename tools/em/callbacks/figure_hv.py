@@ -26,7 +26,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 import math
-from core import (
+from em_core import (
     KTS_TO_FPS, FPS_TO_KTS, KTS_TO_MPH, g,
     aircraft_data,
     get_chart_palette,

@@ -12,7 +12,7 @@ from dash import html
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from core import AIRCRAFT_DATA, aircraft_data
+from em_core import AIRCRAFT_DATA, aircraft_data
 from layouts import edit_aircraft_layout, em_diagram_layout
 
 

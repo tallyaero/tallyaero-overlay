@@ -6,7 +6,7 @@ import os
 from dash.exceptions import PreventUpdate
 
 # Import shared aircraft data from core module
-from core import AIRCRAFT_DATA, aircraft_data
+from em_core import AIRCRAFT_DATA, aircraft_data
 
 
 def create_field_row(label, component, width="100%"):

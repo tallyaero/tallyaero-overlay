@@ -15,7 +15,7 @@ from dash.exceptions import PreventUpdate
 import plotly.graph_objects as go
 import plotly.io as pio
 
-from core import (
+from em_core import (
     AIRCRAFT_DATA, aircraft_data,
     dprint, log_feature,
 )

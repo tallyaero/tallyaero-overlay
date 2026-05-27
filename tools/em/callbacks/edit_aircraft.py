@@ -25,7 +25,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import ALL, Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from core import (
+from em_core import (
     KTS_TO_MPH,
     aircraft_data,
     dprint,

@@ -19,7 +19,7 @@ from __future__ import annotations
 from dash import dcc, html
 import dash_bootstrap_components as dbc
 
-from core import AIRPORT_OPTIONS
+from em_core import AIRPORT_OPTIONS
 
 
 def _state_card_popovers():

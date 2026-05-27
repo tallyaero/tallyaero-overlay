@@ -67,10 +67,10 @@ LEDGER: list[LedgerEntry] = [
     LedgerEntry("Core calculations",      "core/calculations.py",  "core/calculations.py"),
     LedgerEntry("Vmca dynamic",           "core/vmca.py",          "core/vmca.py"),
     LedgerEntry("Vyse dynamic",           "core/vyse.py",          "core/vyse.py"),
-    LedgerEntry("Constants",              "core/constants.py",     "core/constants.py"),
+    LedgerEntry("Constants",              "em_core/constants.py",     "em_core/constants.py"),
     LedgerEntry("Plotly themes",          "core/plotly_themes.py", "core/plotly_themes.py"),
     LedgerEntry("Aircraft schema",        "core/schema.py",        "core/schema.py"),
-    LedgerEntry("Aircraft loader",        "core/aircraft_loader.py","core/aircraft_loader.py"),
+    LedgerEntry("Aircraft loader",        "em_core/aircraft_loader.py","em_core/aircraft_loader.py"),
     # ── Data ─────────────────────────────────────────────────────────────
     LedgerEntry("Aircraft JSONs",         "aircraft_data/*.json",  "aircraft_data/*.json", is_glob=True),
     LedgerEntry("Airport data",           "airports/airports.json","airports/airports.json"),

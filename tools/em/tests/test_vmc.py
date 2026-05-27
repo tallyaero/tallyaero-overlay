@@ -10,7 +10,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from core.vmca import calculate_vmca
+from em_core.vmca import calculate_vmca
 
 
 # Baron 58 reference — published Vmca = 84 KIAS at max weight 5500 lb, aft CG

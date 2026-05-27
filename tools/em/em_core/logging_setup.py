@@ -12,7 +12,7 @@ variable:
 
 Call `setup_logging()` once at app startup. Then anywhere in the codebase:
 
-    from core.logging_setup import get_logger
+    from em_core.logging_setup import get_logger
     log = get_logger(__name__)
     log.debug("Ps min %.2f", ps_min)
     log.info("loaded %d aircraft", n)

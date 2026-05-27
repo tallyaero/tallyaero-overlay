@@ -7,7 +7,7 @@ from dash import dcc, html
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from core import (
+from em_core import (
     LAPSE_RATE_K_FT, TEMP_SL_C,
     compute_density_altitude, compute_pressure_altitude,
     AIRPORT_DATA, AIRPORT_OPTIONS, get_airport_by_id,

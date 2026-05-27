@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from core import compute_energy_state
+from em_core import compute_energy_state
 
 
 # 1 KIAS = 1.68781 fps, so V_fps² / (2·g) at 100 KIAS:

@@ -25,7 +25,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from core.schema import Aircraft, find_sanity_warnings
+from em_core.schema import Aircraft, find_sanity_warnings
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = REPO_ROOT / "aircraft_data"
@@ -145,7 +145,7 @@ def test_no_schema_drift_with_overlay_tool() -> None:
     if not target.exists():
         pytest.skip("overlay tool tree not present — sync check deferred")
 
-    em_schema = REPO_ROOT / "core" / "schema.py"
+    em_schema = REPO_ROOT / "em_core" / "schema.py"
     em_bytes = em_schema.read_bytes()
     overlay_bytes = target.read_bytes()
     assert em_bytes == overlay_bytes, (

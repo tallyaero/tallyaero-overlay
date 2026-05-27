@@ -26,7 +26,7 @@ import dash
 from dash.dependencies import ALL, Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from core import (
+from em_core import (
     # Physical constants
     G_FT_S2,
     KTS_TO_FPS,
@@ -92,7 +92,7 @@ def update_graph(
     # Structural colors (paper bg, foreground lines, gridlines, title,
     # mute-gray contour lines, annotation text) flip between light and dark.
     # Brand/signal colors (stall red, Vyse blue, corner orange) stay stable.
-    from core import get_chart_palette
+    from em_core import get_chart_palette
     palette = get_chart_palette(theme_pref)
     
     # ---- existing validation, etc. ----

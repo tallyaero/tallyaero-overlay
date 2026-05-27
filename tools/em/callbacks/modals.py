@@ -6,7 +6,7 @@ from dash import ctx, dcc, html
 from dash.dependencies import ALL, Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from core import dprint
+from em_core import dprint
 
 
 def register(app):

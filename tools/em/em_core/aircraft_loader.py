@@ -214,7 +214,7 @@ def get_airport_by_id(airports, airport_id):
 # DATA INITIALIZATION
 # =============================================================================
 # Data loading is explicit. `init_data()` is the public API. By default the
-# module auto-calls it at import time so existing `from core import AIRCRAFT_DATA`
+# module auto-calls it at import time so existing `from em_core import AIRCRAFT_DATA`
 # patterns continue to work; set `TALLYAERO_NO_AUTO_INIT=1` in the environment
 # to skip this (used by tests that want to load a curated subset).
 #
@@ -246,7 +246,7 @@ def init_data(
 
     log.info("Loading aircraft data from folder once...")
     new_aircraft = load_aircraft_data_from_folder(aircraft_folder)
-    # In-place update so existing `from core import AIRCRAFT_DATA` references
+    # In-place update so existing `from em_core import AIRCRAFT_DATA` references
     # still see the new content (rebinding the module global would NOT update
     # already-imported names).
     AIRCRAFT_DATA.clear()

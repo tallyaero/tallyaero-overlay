@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from core.vyse import calculate_dynamic_vyse
+from em_core.vyse import calculate_dynamic_vyse
 
 
 # Baron 58 reference — published Vyse = 105 KIAS at certified conditions

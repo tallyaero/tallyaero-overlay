@@ -32,7 +32,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-from core.calculations import (
+from em_core.calculations import (
     KTS_TO_FPS,
     FPS_TO_KTS,
     g,

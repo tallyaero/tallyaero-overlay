@@ -12,7 +12,7 @@ import pytest
 
 def test_init_data_idempotent():
     """init_data() can be called repeatedly without leaking state."""
-    from core.aircraft_loader import init_data, AIRCRAFT_DATA, AIRPORT_DATA
+    from em_core.aircraft_loader import init_data, AIRCRAFT_DATA, AIRPORT_DATA
 
     n_aircraft_first = len(AIRCRAFT_DATA)
     n_airports_first = len(AIRPORT_DATA)
@@ -26,7 +26,7 @@ def test_init_data_idempotent():
 
 def test_init_data_returns_references():
     """init_data() returns the same objects it populated."""
-    from core.aircraft_loader import init_data, AIRCRAFT_DATA, AIRPORT_DATA
+    from em_core.aircraft_loader import init_data, AIRCRAFT_DATA, AIRPORT_DATA
 
     a, p, opts, wrapper = init_data()
     assert a is AIRCRAFT_DATA
@@ -34,11 +34,11 @@ def test_init_data_returns_references():
 
 
 def test_loader_mutates_in_place_so_existing_imports_see_changes(tmp_path):
-    """If a caller has done `from core import AIRCRAFT_DATA` and then init_data
+    """If a caller has done `from em_core import AIRCRAFT_DATA` and then init_data
     is re-run with a different folder, the previously-imported reference must
     reflect the new contents — i.e., loader mutates in place rather than rebinding.
     """
-    from core.aircraft_loader import init_data, AIRCRAFT_DATA
+    from em_core.aircraft_loader import init_data, AIRCRAFT_DATA
 
     # Write a single fake aircraft JSON into a tmp folder, with a name that
     # would be obvious if it leaked into the main run.
@@ -83,7 +83,7 @@ def test_no_auto_init_env_var_documented():
     # The string must match the one referenced in core/aircraft_loader.py.
     expected = "TALLYAERO_NO_AUTO_INIT"
     src = (
-        os.path.join(os.path.dirname(__file__), "..", "core", "aircraft_loader.py")
+        os.path.join(os.path.dirname(__file__), "..", "em_core", "aircraft_loader.py")
     )
     with open(src, "r") as fh:
         body = fh.read()
