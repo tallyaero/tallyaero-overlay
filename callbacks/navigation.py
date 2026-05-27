@@ -66,20 +66,20 @@ def register(app):
         is_mobile = screen_width < 768  # BREAKPOINT: 768px
 
         # Route to EM subapp when path starts with /em. App.py exposes
-        # the EM layout builders after subtree merge (Phase 3b). Falls
-        # through to overlay when EM didn't load or path is /.
-        try:
-            from app import (
-                EM_LOADED,
-                em_diagram_layout,
-                em_edit_aircraft_layout,
-            )
-        except ImportError:
-            EM_LOADED = False
-            em_diagram_layout = None
-            em_edit_aircraft_layout = None
+        # EM_LOADED + em_diagram_layout at module scope, but when
+        # the app is launched via `python app.py`, the entry file
+        # registers in sys.modules as `__main__`, not `app`. So
+        # `from app import EM_LOADED` raises ImportError and we'd
+        # silently fall through to overlay. Look up via sys.modules
+        # with both names as fallbacks.
+        import sys as _sys
+        _app_mod = _sys.modules.get("app") or _sys.modules.get("__main__")
+        EM_LOADED = getattr(_app_mod, "EM_LOADED", False)
+        em_diagram_layout = getattr(_app_mod, "em_diagram_layout", None)
+        em_edit_aircraft_layout = getattr(_app_mod, "em_edit_aircraft_layout", None)
 
         path = (pathname or "/").rstrip("/")
+
         if EM_LOADED and path.startswith("/em"):
             if path in ("/em-edit-aircraft", "/em/edit-aircraft"):
                 return em_edit_aircraft_layout()

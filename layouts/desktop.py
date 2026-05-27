@@ -86,19 +86,26 @@ def _top_strip():
         [
             html.Div(
                 [
-                    html.Span("TallyAero Overlay", className="top-strip-brand"),
-                    # Phase 3b: tool-context switcher. Links between
-                    # the route-planner (overlay, /) and the EM diagram
-                    # (/em). dcc.Link renders without a page reload —
-                    # the unified router callback swaps page-content
-                    # based on url.pathname.
+                    # Phase 3b: tool-context switcher doubles as the
+                    # brand. Replaces the static "TallyAero Overlay"
+                    # title — the active chip tells you which tool
+                    # you're in.
+                    #
+                    # Uses html.A (hard nav) rather than dcc.Link
+                    # because EM's layout drags in its own dcc.Location
+                    # / page-routing that fights overlay's SPA router.
+                    # A real page reload guarantees a clean Dash
+                    # bootstrap into the chosen tool.
                     html.Div(
                         [
-                            dcc.Link("Overlay", href="/",
-                                     className="tool-switcher-link tool-switcher-active"),
-                            dcc.Link("EM Diagram", href="/em",
-                                     className="tool-switcher-link"),
+                            html.A("Overlay", href="/",
+                                   id="tool-switcher-overlay",
+                                   className="tool-switcher-link"),
+                            html.A("EM Diagram", href="/em",
+                                   id="tool-switcher-em",
+                                   className="tool-switcher-link"),
                         ],
+                        id="tool-switcher",
                         className="tool-switcher",
                     ),
                     html.Div(
