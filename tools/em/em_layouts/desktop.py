@@ -45,7 +45,9 @@ def _top_strip():
             # ─── Left: brand + primary input + env chips ──────────────────
             html.Div(
                 [
-                    html.Span("TallyAero EM", className="top-strip-brand"),
+                    # Phase 3b merge: brand removed — the tool-switcher
+                    # at app.layout root serves as the brand on both
+                    # /em and /overlay.
 
                     # Aircraft picker — the single most important input
                     html.Div(

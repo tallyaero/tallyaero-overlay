@@ -1409,15 +1409,44 @@ input[type="radio"] {
   border: 1px solid var(--gray-200, #e2e8f0);
   border-radius: 6px;
 }
-/* The root-level switcher floats top-left over whichever page is
-   mounted, so it's visible on both /overlay and /em. */
+/* The root-level switcher sits as the leftmost element of overlay's
+   top-strip / EM's top bar via absolute positioning anchored to the
+   page content. We push the top-strip RIGHT to make room for the
+   switcher chips. */
 .tool-switcher-root {
-  position: fixed;
-  top: 8px;
+  position: absolute;
+  top: 10px;
   left: 12px;
-  z-index: 10000;
-  background: var(--ta-surface-elevated, white);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  z-index: 5000;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.tool-switcher-root .tool-switcher-link {
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 4px;
+  background: var(--gray-100, #f1f5f9);
+  border: 1px solid var(--gray-200, #e2e8f0);
+}
+.tool-switcher-root .tool-switcher-link.tool-switcher-active {
+  background: var(--brand-blue, #0d59f2);
+  color: white;
+  border-color: var(--brand-blue, #0d59f2);
+}
+/* Push overlay's top-strip-left first cell to the right to make
+   room for the root switcher chips (about 175 px wide). */
+.top-strip-left {
+  padding-left: 195px;
+}
+/* EM's layout uses its own top bar — give it the same offset. */
+[data-tool="em"] .top-strip-left,
+[data-tool="em"] .em-topbar,
+[data-tool="em"] .em-topbar-left {
+  padding-left: 195px;
 }
 .tool-switcher-link {
   display: inline-flex;
