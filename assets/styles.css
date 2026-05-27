@@ -1409,6 +1409,16 @@ input[type="radio"] {
   border: 1px solid var(--gray-200, #e2e8f0);
   border-radius: 6px;
 }
+/* The root-level switcher floats top-left over whichever page is
+   mounted, so it's visible on both /overlay and /em. */
+.tool-switcher-root {
+  position: fixed;
+  top: 8px;
+  left: 12px;
+  z-index: 10000;
+  background: var(--ta-surface-elevated, white);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
 .tool-switcher-link {
   display: inline-flex;
   align-items: center;

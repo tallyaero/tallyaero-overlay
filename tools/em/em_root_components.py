@@ -52,12 +52,30 @@ def root_components(aircraft_data: dict) -> list:
                             **{"aria-label": "Dismiss update banner"}),
             ],
         ),
-        # Modals — kept minimal placeholders here (full body lives in
-        # tools/em/app.py for now; callbacks just need the IDs to be
-        # mountable). Empty modals are fine — they don't render until
-        # toggled to is_open=True by a callback.
-        dbc.Modal(id="em-disclaimer-modal", is_open=False),
-        dbc.Modal(id="em-terms-policy-modal", is_open=False),
+        # Modals — minimal placeholders with the internal button IDs
+        # the EM callbacks reference (em-close-disclaimer, em-close-
+        # terms-policy). They render hidden by default; only toggled
+        # on by user clicks elsewhere.
+        dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("TallyAero Disclaimer")),
+                dbc.ModalFooter(
+                    dbc.Button("Close", id="em-close-disclaimer",
+                               className="ms-auto", color="secondary"),
+                ),
+            ],
+            id="em-disclaimer-modal", is_open=False,
+        ),
+        dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("Terms of Use & Privacy")),
+                dbc.ModalFooter(
+                    dbc.Button("Close", id="em-close-terms-policy",
+                               className="ms-auto", color="secondary"),
+                ),
+            ],
+            id="em-terms-policy-modal", is_open=False,
+        ),
         dbc.Modal(id="readme-modal", is_open=False),
         dbc.Modal(
             [

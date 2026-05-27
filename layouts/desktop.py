@@ -86,28 +86,11 @@ def _top_strip():
         [
             html.Div(
                 [
-                    # Phase 3b: tool-context switcher doubles as the
-                    # brand. Replaces the static "TallyAero Overlay"
-                    # title — the active chip tells you which tool
-                    # you're in.
-                    #
-                    # Uses html.A (hard nav) rather than dcc.Link
-                    # because EM's layout drags in its own dcc.Location
-                    # / page-routing that fights overlay's SPA router.
-                    # A real page reload guarantees a clean Dash
-                    # bootstrap into the chosen tool.
-                    html.Div(
-                        [
-                            html.A("Overlay", href="/",
-                                   id="tool-switcher-overlay",
-                                   className="tool-switcher-link"),
-                            html.A("EM Diagram", href="/em",
-                                   id="tool-switcher-em",
-                                   className="tool-switcher-link"),
-                        ],
-                        id="tool-switcher",
-                        className="tool-switcher",
-                    ),
+                    # Phase 3b: tool-context switcher LIFTED to the
+                    # unified app.layout root so it shows on /em too.
+                    # The element with id="tool-switcher" lives one
+                    # level up; we leave a spacer here for the
+                    # top-strip's first-cell alignment.
                     html.Div(
                         dcc.Dropdown(
                             id="aircraft-select",

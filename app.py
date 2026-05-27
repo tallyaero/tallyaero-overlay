@@ -204,6 +204,22 @@ app.layout = html.Div([
     # renders into page-content, because EM callbacks reference them
     # by ID. Empty list when EM_LOADED=False.
     *em_root_layout_components,
+    # Tool-context switcher (Overlay / EM Diagram) lifted to root so
+    # it renders on EVERY page, not just overlay's desktop_layout.
+    # Uses html.A for hard navigation — bypasses the SPA router's
+    # quirks with EM's nested dcc.Location.
+    html.Div(
+        [
+            html.A("Overlay", href="/",
+                   id="tool-switcher-overlay",
+                   className="tool-switcher-link"),
+            html.A("EM Diagram", href="/em",
+                   id="tool-switcher-em",
+                   className="tool-switcher-link"),
+        ],
+        id="tool-switcher",
+        className="tool-switcher tool-switcher-root",
+    ),
     html.Div(id="page-content"),
 ])
 
