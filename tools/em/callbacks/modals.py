@@ -24,17 +24,17 @@ def register(app):
         raise PreventUpdate
 
     @app.callback(
-        Output("disclaimer-modal", "is_open"),
-        Output("terms-policy-modal", "is_open"),
+        Output("em-disclaimer-modal", "is_open"),
+        Output("em-terms-policy-modal", "is_open"),
         Output("readme-modal", "is_open"),
-        Input("open-disclaimer", "n_clicks"),
-        Input("close-disclaimer", "n_clicks"),
-        Input("open-terms-policy", "n_clicks"),
-        Input("close-terms-policy", "n_clicks"),
+        Input("em-open-disclaimer", "n_clicks"),
+        Input("em-close-disclaimer", "n_clicks"),
+        Input("em-open-terms-policy", "n_clicks"),
+        Input("em-close-terms-policy", "n_clicks"),
         Input("open-readme", "n_clicks"),
         Input("close-readme", "n_clicks"),
-        State("disclaimer-modal", "is_open"),
-        State("terms-policy-modal", "is_open"),
+        State("em-disclaimer-modal", "is_open"),
+        State("em-terms-policy-modal", "is_open"),
         State("readme-modal", "is_open"),
         prevent_initial_call=True
     )

@@ -50,7 +50,7 @@ def _top_strip():
                     # Aircraft picker — the single most important input
                     html.Div(
                         dcc.Dropdown(
-                            id="aircraft-select",
+                            id="em-aircraft-select",
                             options=[],
                             placeholder="Select an aircraft…",
                             className="dropdown aircraft-dropdown",
@@ -85,13 +85,13 @@ def _top_strip():
                     # callback signature (3 button inputs) keeps wiring.
                     html.Div(
                         [
-                            html.Button("Light", id="theme-btn-light", className="theme-btn active", title="Light mode"),
-                            html.Button("Dark",  id="theme-btn-dark",  className="theme-btn",        title="Dark mode"),
+                            html.Button("Light", id="em-theme-btn-light", className="theme-btn active", title="Light mode"),
+                            html.Button("Dark",  id="em-theme-btn-dark",  className="theme-btn",        title="Dark mode"),
                         ],
                         className="theme-toggle-group",
                         **{"data-role": "theme-toggle"},
                     ),
-                    html.Button("", id="theme-btn-auto", n_clicks=0, style={"display": "none"}),
+                    html.Button("", id="em-theme-btn-auto", n_clicks=0, style={"display": "none"}),
 
                     # Export cluster
                     html.Div(
@@ -184,7 +184,7 @@ def _settings_accordion():
                                     html.Div(
                                         [
                                             html.Label("Engine", className="input-label-sm"),
-                                            dcc.Dropdown(id="engine-select", className="dropdown"),
+                                            dcc.Dropdown(id="em-engine-select", className="dropdown"),
                                         ],
                                         className="mb-2",
                                     ),
@@ -389,7 +389,7 @@ def _settings_accordion():
                                         style={"display": "flex", "alignItems": "center", "marginBottom": "4px"},
                                     ),
                                     dcc.Dropdown(
-                                        id="maneuver-select",
+                                        id="em-maneuver-select",
                                         className="dropdown",
                                         options=[
                                             {"label": "Steep Turn", "value": "steep_turn"},
@@ -563,9 +563,9 @@ def _weight_controls():
                 className="rail-control-row",
             ),
 
-            # Hidden target for the update_state Output("total-weight-display").
+            # Hidden target for the update_state Output("em-total-weight-display").
             # Visible readout moved to the WEIGHT state tile in the top bar.
-            html.Div(id="total-weight-display", style={"display": "none"}),
+            html.Div(id="em-total-weight-display", style={"display": "none"}),
         ],
         className="rail-live-controls rail-weight",
     )
@@ -585,7 +585,7 @@ def _live_controls():
                 [
                     html.Label("Power", className="input-label-sm rail-control-label"),
                     dcc.Slider(
-                        id="power-setting",
+                        id="em-power-setting",
                         min=0.05, max=1.0, step=0.05, value=0.50,
                         marks={0.05: "IDLE", 0.4: "40%", 0.6: "60%", 0.8: "80%", 1: "100%"},
                         tooltip={"always_visible": True, "placement": "bottom"},
@@ -598,7 +598,7 @@ def _live_controls():
             html.Div(
                 [
                     html.Label("CG (inches)", className="input-label-sm rail-control-label"),
-                    dcc.Slider(id="cg-slider", min=0, max=1, value=0.5, step=0.01),
+                    dcc.Slider(id="em-cg-slider", min=0, max=1, value=0.5, step=0.01),
                 ],
                 id="cg-slider-container",
                 className="rail-control-row",
@@ -704,7 +704,7 @@ def _settings_drawer():
                     ),
                     dbc.Col(
                         dcc.Upload(
-                            id="upload-aircraft",
+                            id="em-upload-aircraft",
                             children=html.Button(
                                 [
                                     html.Span("LOAD", className="chip-prefix"),
@@ -889,9 +889,9 @@ def _chart_area():
             ),
             html.Div(
                 [
-                    html.Span("Full Legal Disclaimer", id="open-disclaimer", className="legal-link"),
+                    html.Span("Full Legal Disclaimer", id="em-open-disclaimer", className="legal-link"),
                     html.Span("|", className="separator"),
-                    html.Span("Terms of Use & Privacy Policy", id="open-terms-policy", className="legal-link"),
+                    html.Span("Terms of Use & Privacy Policy", id="em-open-terms-policy", className="legal-link"),
                     html.Span("|", className="separator"),
                     html.Span("© 2026 Nicholas Len, TallyAero. All rights reserved.", className="legal-copyright"),
                 ],

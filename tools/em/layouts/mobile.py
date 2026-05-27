@@ -53,12 +53,12 @@ def _top_bar():
     return html.Div(
         [
             html.Div([
-                html.Button("☰", id="mobile-settings-toggle",
+                html.Button("☰", id="em-mobile-settings-toggle",
                             className="mobile-hamburger",
                             **{"aria-label": "Open settings drawer"}),
                 html.Div(
                     dcc.Dropdown(
-                        id="aircraft-select", options=[],
+                        id="em-aircraft-select", options=[],
                         placeholder="Select Aircraft…",
                         className="dropdown",
                         clearable=False,
@@ -144,7 +144,7 @@ def _settings_drawer():
             html.Div("Aircraft", className="mobile-section-title"),
             html.Div([
                 html.Label("Engine", className="input-label-sm"),
-                dcc.Dropdown(id="engine-select", className="dropdown"),
+                dcc.Dropdown(id="em-engine-select", className="dropdown"),
             ], className="mb-2"),
             html.Div([
                 html.Label("Category", className="input-label-sm"),
@@ -217,13 +217,13 @@ def _settings_drawer():
             html.Div("Live Controls", className="mobile-section-title"),
             html.Div([
                 html.Label("Power", className="input-label-sm"),
-                dcc.Slider(id="power-setting", min=0.05, max=1.0, step=0.05, value=0.50,
+                dcc.Slider(id="em-power-setting", min=0.05, max=1.0, step=0.05, value=0.50,
                            marks={0.05: "IDLE", 0.5: "50%", 1: "100%"},
                            tooltip={"always_visible": True, "placement": "bottom"}),
             ], className="mb-3"),
             html.Div([
                 html.Label("CG (inches)", className="input-label-sm"),
-                dcc.Slider(id="cg-slider", min=0, max=1, value=0.5, step=0.01),
+                dcc.Slider(id="em-cg-slider", min=0, max=1, value=0.5, step=0.01),
             ], id="cg-slider-container", className="mb-3"),
             html.Div([
                 html.Label("Flight Path Angle", className="input-label-sm"),
@@ -277,7 +277,7 @@ def _settings_drawer():
             # Maneuver picker
             html.Div("Maneuvers", className="mobile-section-title"),
             html.Div([
-                dcc.Dropdown(id="maneuver-select",
+                dcc.Dropdown(id="em-maneuver-select",
                              options=[{"label": "Steep Turn", "value": "steep_turn"},
                                       {"label": "Chandelle",  "value": "chandelle"}],
                              placeholder="None"),
@@ -290,7 +290,7 @@ def _settings_drawer():
             html.Div([
                 dbc.Button("Edit / Create Aircraft", id="edit-aircraft-button",
                            className="w-100 mb-2", size="sm", color="primary"),
-                dcc.Upload(id="upload-aircraft",
+                dcc.Upload(id="em-upload-aircraft",
                            children=dbc.Button("Load Aircraft File",
                                                className="w-100", size="sm",
                                                color="secondary"),
@@ -298,7 +298,7 @@ def _settings_drawer():
             ]),
 
             # Total weight (hidden — used as a callback target)
-            html.Div(id="total-weight-display", style={"display": "none"}),
+            html.Div(id="em-total-weight-display", style={"display": "none"}),
             html.Div(id="config-details", style={"display": "block"}),
         ],
         id="mobile-settings-drawer",
@@ -393,9 +393,9 @@ def mobile_layout():
             # Legal footer
             html.Div(
                 [
-                    html.Span("Disclaimer", id="open-disclaimer", className="legal-link-sm"),
+                    html.Span("Disclaimer", id="em-open-disclaimer", className="legal-link-sm"),
                     html.Span(" · ", style={"color": "var(--ta-text-tertiary, #999)"}),
-                    html.Span("Terms", id="open-terms-policy", className="legal-link-sm"),
+                    html.Span("Terms", id="em-open-terms-policy", className="legal-link-sm"),
                     html.Span(" · ", style={"color": "var(--ta-text-tertiary, #999)"}),
                     html.A("Contact", href="mailto:info@tallyaero.com",
                            className="legal-link-sm"),

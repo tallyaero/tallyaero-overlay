@@ -148,7 +148,7 @@ def register(app):
 
     @app.callback(
         Output("state-panel", "children"),
-        Input("aircraft-select", "value"),
+        Input("em-aircraft-select", "value"),
         Input("config-select", "value"),
         Input("category-select", "value"),
         Input("stored-total-weight", "data"),
@@ -239,7 +239,7 @@ def register(app):
         ]
 
     @app.callback(
-        Output("aircraft-select", "options"),
+        Output("em-aircraft-select", "options"),
         Input("aircraft-data-store", "data"),
     )
     def update_aircraft_options(data):
@@ -272,7 +272,7 @@ def register(app):
     @app.callback(
         Output("category-select", "options"),
         Output("category-select", "value"),
-        Input("aircraft-select", "value"),
+        Input("em-aircraft-select", "value"),
         prevent_initial_call=True,
     )
     def update_category_dropdown(ac_name):
@@ -288,7 +288,7 @@ def register(app):
     @app.callback(
         Output("config-details", "style"),
         Output("sidebar-accordion", "active_item"),
-        Input("aircraft-select", "value"),
+        Input("em-aircraft-select", "value"),
         prevent_initial_call=True,
     )
     def expand_ui_on_aircraft_select(ac_name):
@@ -300,7 +300,7 @@ def register(app):
     @app.callback(
         Output("multi-engine-toggles", "style"),
         Output("prop-condition-container", "style"),
-        Input("aircraft-select", "value"),
+        Input("em-aircraft-select", "value"),
         Input("oei-toggle", "value"),
         Input("multi-engine-toggle-options", "data"),
         prevent_initial_call=True
@@ -325,15 +325,15 @@ def register(app):
         return show_vmca_block, show_prop_condition
 
     @app.callback(
-        Output("engine-select", "options"),
-        Output("engine-select", "value"),
+        Output("em-engine-select", "options"),
+        Output("em-engine-select", "value"),
         Output("occupants-select", "options"),
         Output("occupants-select", "value"),
         Output("fuel-slider", "max"),
         Output("fuel-slider", "marks"),
         Output("altitude-slider", "max"),
         Output("altitude-slider", "marks"),
-        Input("aircraft-select", "value"),
+        Input("em-aircraft-select", "value"),
         prevent_initial_call=True,
     )
     def update_aircraft_dependent_inputs(ac_name):
@@ -399,7 +399,7 @@ def register(app):
 
     @app.callback(
         Output("cg-slider-container", "children"),
-        Input("aircraft-select", "value"),
+        Input("em-aircraft-select", "value"),
         prevent_initial_call=True,
     )
     def render_cg_slider(ac_name):
@@ -449,7 +449,7 @@ def register(app):
         return html.Div([
             html.Label("CG (inches)", className="input-label-sm rail-control-label"),
             dcc.Slider(
-                id="cg-slider",
+                id="em-cg-slider",
                 min=cg_min,
                 max=cg_max,
                 value=round((cg_min + cg_max) / 2, 2),
@@ -462,7 +462,7 @@ def register(app):
     @app.callback(
         Output("config-select", "options"),
         Output("config-select", "value"),
-        Input("aircraft-select", "value"),
+        Input("em-aircraft-select", "value"),
         prevent_initial_call=True,
     )
     def update_config_dropdown(ac_name):
@@ -477,7 +477,7 @@ def register(app):
     @app.callback(
         Output("gear-select", "options"),
         Output("gear-select", "value"),
-        Input("aircraft-select", "value"),
+        Input("em-aircraft-select", "value"),
         prevent_initial_call=True,
     )
     def update_gear_dropdown(ac_name):
@@ -493,7 +493,7 @@ def register(app):
 
     @app.callback(
         Output("gear-select-container", "style"),
-        Input("aircraft-select", "value"),
+        Input("em-aircraft-select", "value"),
         prevent_initial_call=True,
     )
     def toggle_gear_selector_visibility(ac_name):
@@ -504,10 +504,10 @@ def register(app):
         return {"display": "block"} if gear_type == "retractable" else {"display": "none"}
 
     @app.callback(
-        Output("total-weight-display", "children"),
-        Output("total-weight-display", "style"),
+        Output("em-total-weight-display", "children"),
+        Output("em-total-weight-display", "style"),
         Output("stored-total-weight", "data"),
-        Input("aircraft-select", "value"),
+        Input("em-aircraft-select", "value"),
         Input("fuel-slider", "value"),
         Input("occupants-select", "value"),
         Input("passenger-weight-input", "value"),
@@ -565,7 +565,7 @@ def register(app):
 
     @app.callback(
         Output("maneuver-options-container", "children"),
-        Input("maneuver-select", "value"),
+        Input("em-maneuver-select", "value"),
         prevent_initial_call=True,
     )
     def render_maneuver_options(maneuver):

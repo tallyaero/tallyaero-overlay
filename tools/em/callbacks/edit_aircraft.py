@@ -38,7 +38,7 @@ def register(app):
 
     # ─── Phase 5T: aircraft-search options + auto-load wiring ───────────
     @app.callback(
-        Output("aircraft-search", "options"),
+        Output("em-aircraft-search", "options"),
         Input("aircraft-data-store", "data"),
     )
     def _populate_aircraft_search_options(data):
@@ -48,7 +48,7 @@ def register(app):
         return [{"label": name, "value": name} for name in sorted(data.keys())]
 
     @app.callback(
-        Output("aircraft-search", "value"),
+        Output("em-aircraft-search", "value"),
         Input("editing-aircraft", "data"),
         prevent_initial_call=False,
     )
@@ -62,8 +62,8 @@ def register(app):
 
     @app.callback(
         Output("edit-page-title", "children"),
-        Input("aircraft-search", "value"),
-        Input("aircraft-name", "value"),
+        Input("em-aircraft-search", "value"),
+        Input("em-aircraft-name", "value"),
     )
     def _update_edit_page_title(loaded_name, current_name):
         """Title reflects the currently-loaded aircraft. Falls back to the
@@ -77,11 +77,11 @@ def register(app):
         return "New aircraft profile"
 
     @app.callback(
-        Output("aircraft-name", "value", allow_duplicate=True),
-        Output("search-result", "children", allow_duplicate=True),
-        Output("aircraft-search", "value", allow_duplicate=True),
+        Output("em-aircraft-name", "value", allow_duplicate=True),
+        Output("em-search-result", "children", allow_duplicate=True),
+        Output("em-aircraft-search", "value", allow_duplicate=True),
         Input("duplicate-aircraft-button", "n_clicks"),
-        State("aircraft-name", "value"),
+        State("em-aircraft-name", "value"),
         prevent_initial_call=True,
     )
     def _duplicate_current_aircraft(n_clicks, current_name):
@@ -97,52 +97,52 @@ def register(app):
 
     @app.callback(
         [
-            Output("aircraft-name", "value"),
-            Output("aircraft-type", "value"),
+            Output("em-aircraft-name", "value"),
+            Output("em-aircraft-type", "value"),
             Output("gear-type", "value"),
-            Output("engine-count", "value"),
-            Output("wing-area", "value"),
-            Output("aspect-ratio", "value"),
-            Output("cd0", "value"),
-            Output("oswald-efficiency", "value"),
-            Output("stored-flap-configs", "data"),
-            Output("stored-g-limits", "data"),
-            Output("g-limits-container", "children"),
-            Output("stored-stall-speeds", "data"),
-            Output("stall-speeds-container", "children"),
-            Output("stored-single-engine-limits", "data"),
-            Output("stored-engine-options", "data"),
-            Output("engine-options-container", "children"),
-            Output("empty-weight", "value"),
-            Output("max-weight", "value"),
-            Output("best-glide", "value"),
-            Output("best-glide-ratio", "value"),
-            Output("seats", "value"),
-            Output("cg-fwd", "value"),
-            Output("cg-aft", "value"),
+            Output("em-engine-count", "value"),
+            Output("em-wing-area", "value"),
+            Output("em-aspect-ratio", "value"),
+            Output("em-cd0", "value"),
+            Output("em-oswald-efficiency", "value"),
+            Output("em-stored-flap-configs", "data"),
+            Output("em-stored-g-limits", "data"),
+            Output("em-g-limits-container", "children"),
+            Output("em-stored-stall-speeds", "data"),
+            Output("em-stall-speeds-container", "children"),
+            Output("em-stored-single-engine-limits", "data"),
+            Output("em-stored-engine-options", "data"),
+            Output("em-engine-options-container", "children"),
+            Output("em-empty-weight", "value"),
+            Output("em-max-weight", "value"),
+            Output("em-best-glide", "value"),
+            Output("em-best-glide-ratio", "value"),
+            Output("em-seats", "value"),
+            Output("em-cg-fwd", "value"),
+            Output("em-cg-aft", "value"),
             Output({"type": "vfe-input", "config": "takeoff"}, "value"),
             Output({"type": "vfe-input", "config": "landing"}, "value"),
             Output({"type": "clmax-input", "config": "clean"}, "value"),
             Output({"type": "clmax-input", "config": "takeoff"}, "value"),
             Output({"type": "clmax-input", "config": "landing"}, "value"),
-            Output("fuel-capacity-gal", "value"),
-            Output("fuel-weight-per-gal", "value"),
-            Output("arc-white-bottom", "value"),
-            Output("arc-white-top", "value"),
-            Output("arc-green-bottom", "value"),
-            Output("arc-green-top", "value"),
-            Output("arc-yellow-bottom", "value"),
-            Output("arc-yellow-top", "value"),
-            Output("arc-red", "value"),
-            Output("prop-static-factor", "value"),
-            Output("prop-vmax-kts", "value"),
-            Output("stored-oei-performance", "data"),
-            Output("max-altitude", "value"),
-            Output("vne", "value"),
-            Output("vno", "value"),
-            Output("search-result", "children", allow_duplicate=True),
+            Output("em-fuel-capacity-gal", "value"),
+            Output("em-fuel-weight-per-gal", "value"),
+            Output("em-arc-white-bottom", "value"),
+            Output("em-arc-white-top", "value"),
+            Output("em-arc-green-bottom", "value"),
+            Output("em-arc-green-top", "value"),
+            Output("em-arc-yellow-bottom", "value"),
+            Output("em-arc-yellow-top", "value"),
+            Output("em-arc-red", "value"),
+            Output("em-prop-static-factor", "value"),
+            Output("em-prop-vmax-kts", "value"),
+            Output("em-stored-oei-performance", "data"),
+            Output("em-max-altitude", "value"),
+            Output("em-vne", "value"),
+            Output("em-vno", "value"),
+            Output("em-search-result", "children", allow_duplicate=True),
         ],
-        Input("aircraft-search", "value"),
+        Input("em-aircraft-search", "value"),
         prevent_initial_call=True,
     )
     def load_aircraft_full(selected_name):
@@ -321,36 +321,36 @@ def register(app):
 
     @app.callback(
         # Basic info
-        Output("aircraft-type", "value", allow_duplicate=True),
+        Output("em-aircraft-type", "value", allow_duplicate=True),
         Output("gear-type", "value", allow_duplicate=True),
-        Output("engine-count", "value", allow_duplicate=True),
+        Output("em-engine-count", "value", allow_duplicate=True),
         # Aerodynamics
-        Output("wing-area", "value", allow_duplicate=True),
-        Output("aspect-ratio", "value", allow_duplicate=True),
-        Output("cd0", "value", allow_duplicate=True),
-        Output("oswald-efficiency", "value", allow_duplicate=True),
-        Output("prop-static-factor", "value", allow_duplicate=True),
-        Output("prop-vmax-kts", "value", allow_duplicate=True),
+        Output("em-wing-area", "value", allow_duplicate=True),
+        Output("em-aspect-ratio", "value", allow_duplicate=True),
+        Output("em-cd0", "value", allow_duplicate=True),
+        Output("em-oswald-efficiency", "value", allow_duplicate=True),
+        Output("em-prop-static-factor", "value", allow_duplicate=True),
+        Output("em-prop-vmax-kts", "value", allow_duplicate=True),
         # Weights
-        Output("empty-weight", "value", allow_duplicate=True),
-        Output("max-weight", "value", allow_duplicate=True),
-        Output("seats", "value", allow_duplicate=True),
-        Output("fuel-capacity-gal", "value", allow_duplicate=True),
-        Output("fuel-weight-per-gal", "value", allow_duplicate=True),
+        Output("em-empty-weight", "value", allow_duplicate=True),
+        Output("em-max-weight", "value", allow_duplicate=True),
+        Output("em-seats", "value", allow_duplicate=True),
+        Output("em-fuel-capacity-gal", "value", allow_duplicate=True),
+        Output("em-fuel-weight-per-gal", "value", allow_duplicate=True),
         # Speeds
-        Output("vne", "value", allow_duplicate=True),
-        Output("vno", "value", allow_duplicate=True),
-        Output("best-glide", "value", allow_duplicate=True),
-        Output("best-glide-ratio", "value", allow_duplicate=True),
-        Output("max-altitude", "value", allow_duplicate=True),
+        Output("em-vne", "value", allow_duplicate=True),
+        Output("em-vno", "value", allow_duplicate=True),
+        Output("em-best-glide", "value", allow_duplicate=True),
+        Output("em-best-glide-ratio", "value", allow_duplicate=True),
+        Output("em-max-altitude", "value", allow_duplicate=True),
         # Arcs
-        Output("arc-white-bottom", "value", allow_duplicate=True),
-        Output("arc-white-top", "value", allow_duplicate=True),
-        Output("arc-green-bottom", "value", allow_duplicate=True),
-        Output("arc-green-top", "value", allow_duplicate=True),
-        Output("arc-yellow-bottom", "value", allow_duplicate=True),
-        Output("arc-yellow-top", "value", allow_duplicate=True),
-        Output("arc-red", "value", allow_duplicate=True),
+        Output("em-arc-white-bottom", "value", allow_duplicate=True),
+        Output("em-arc-white-top", "value", allow_duplicate=True),
+        Output("em-arc-green-bottom", "value", allow_duplicate=True),
+        Output("em-arc-green-top", "value", allow_duplicate=True),
+        Output("em-arc-yellow-bottom", "value", allow_duplicate=True),
+        Output("em-arc-yellow-top", "value", allow_duplicate=True),
+        Output("em-arc-red", "value", allow_duplicate=True),
         # Flaps
         Output({"type": "vfe-input", "config": "takeoff"}, "value", allow_duplicate=True),
         Output({"type": "vfe-input", "config": "landing"}, "value", allow_duplicate=True),
@@ -358,17 +358,17 @@ def register(app):
         Output({"type": "clmax-input", "config": "takeoff"}, "value", allow_duplicate=True),
         Output({"type": "clmax-input", "config": "landing"}, "value", allow_duplicate=True),
         # Stores
-        Output("stored-engine-options", "data", allow_duplicate=True),
-        Output("stored-g-limits", "data", allow_duplicate=True),
-        Output("stored-stall-speeds", "data", allow_duplicate=True),
-        Output("stored-oei-performance", "data", allow_duplicate=True),
+        Output("em-stored-engine-options", "data", allow_duplicate=True),
+        Output("em-stored-g-limits", "data", allow_duplicate=True),
+        Output("em-stored-stall-speeds", "data", allow_duplicate=True),
+        Output("em-stored-oei-performance", "data", allow_duplicate=True),
         # Inputs
-        Input("default-trainer", "n_clicks"),
-        Input("default-single", "n_clicks"),
+        Input("em-default-trainer", "n_clicks"),
+        Input("em-default-single", "n_clicks"),
         Input("default-highperf", "n_clicks"),
-        Input("default-multi", "n_clicks"),
-        Input("default-aerobatic", "n_clicks"),
-        Input("default-experimental", "n_clicks"),
+        Input("em-default-multi", "n_clicks"),
+        Input("em-default-aerobatic", "n_clicks"),
+        Input("em-default-experimental", "n_clicks"),
         prevent_initial_call=True
     )
     def apply_default_performance(trainer, single, highperf, multi, aero, exp):
@@ -669,7 +669,7 @@ def register(app):
     # Hide multi-engine sections for single-engine aircraft
     @app.callback(
         Output("multi-engine-sections", "style"),
-        Input("aircraft-type", "value"),
+        Input("em-aircraft-type", "value"),
         prevent_initial_call=True
     )
     def toggle_multi_engine_sections(aircraft_type):
@@ -689,9 +689,9 @@ def register(app):
     # === G LIMITS SECTION ===
 
     @app.callback(
-        Output("stored-g-limits", "data", allow_duplicate=True),
-        Input("add-g-limit", "n_clicks"),
-        State("stored-g-limits", "data"),
+        Output("em-stored-g-limits", "data", allow_duplicate=True),
+        Input("em-add-g-limit", "n_clicks"),
+        State("em-stored-g-limits", "data"),
         prevent_initial_call=True
     )
     def add_g_limit(n_clicks, current_data):
@@ -702,8 +702,8 @@ def register(app):
         return updated
 
     @app.callback(
-        Output("g-limits-container", "children", allow_duplicate=True),
-        Input("stored-g-limits", "data"),
+        Output("em-g-limits-container", "children", allow_duplicate=True),
+        Input("em-stored-g-limits", "data"),
         prevent_initial_call=True
     )
     def render_g_limits(g_limits):
@@ -752,13 +752,13 @@ def register(app):
         ]
 
     @app.callback(
-        Output("stored-g-limits", "data", allow_duplicate=True),
+        Output("em-stored-g-limits", "data", allow_duplicate=True),
         Input({"type": "g-category", "index": ALL}, "value"),
         Input({"type": "g-config", "index": ALL}, "value"),
         Input({"type": "g-positive", "index": ALL}, "value"),
         Input({"type": "g-negative", "index": ALL}, "value"),
         Input({"type": "remove-g-limit", "index": ALL}, "n_clicks"),
-        State("stored-g-limits", "data"),
+        State("em-stored-g-limits", "data"),
         prevent_initial_call=True
     )
     def update_or_remove_g_limits(categories, configs, positives, negatives, remove_clicks, current_data):
@@ -790,9 +790,9 @@ def register(app):
     # === STALL SPEEDS ===
 
     @app.callback(
-        Output("stored-stall-speeds", "data", allow_duplicate=True),
-        Input("add-stall-speed", "n_clicks"),
-        State("stored-stall-speeds", "data"),
+        Output("em-stored-stall-speeds", "data", allow_duplicate=True),
+        Input("em-add-stall-speed", "n_clicks"),
+        State("em-stored-stall-speeds", "data"),
         prevent_initial_call=True
     )
     def add_stall_speed(n_clicks, current_data):
@@ -808,8 +808,8 @@ def register(app):
         return updated
 
     @app.callback(
-        Output("stall-speeds-container", "children", allow_duplicate=True),
-        Input("stored-stall-speeds", "data"),
+        Output("em-stall-speeds-container", "children", allow_duplicate=True),
+        Input("em-stored-stall-speeds", "data"),
         prevent_initial_call=True
     )
     def render_stall_speeds(data):
@@ -876,13 +876,13 @@ def register(app):
         ]
 
     @app.callback(
-        Output("stored-stall-speeds", "data", allow_duplicate=True),
+        Output("em-stored-stall-speeds", "data", allow_duplicate=True),
         Input({"type": "stall-config", "index": ALL}, "value"),
         Input({"type": "stall-gear", "index": ALL}, "value"),
         Input({"type": "stall-weight", "index": ALL}, "value"),
         Input({"type": "stall-speed", "index": ALL}, "value"),
         Input({"type": "remove-stall-speed", "index": ALL}, "n_clicks"),
-        State("stored-stall-speeds", "data"),
+        State("em-stored-stall-speeds", "data"),
         prevent_initial_call=True
     )
     def update_or_remove_stall(configs, gears, weights, speeds, remove_clicks, current_data):
@@ -906,9 +906,9 @@ def register(app):
     # === SINGLE ENGINE LIMITS ===
 
     @app.callback(
-        Output("stored-single-engine-limits", "data", allow_duplicate=True),
-        Input("add-single-engine-limit", "n_clicks"),
-        State("stored-single-engine-limits", "data"),
+        Output("em-stored-single-engine-limits", "data", allow_duplicate=True),
+        Input("em-add-single-engine-limit", "n_clicks"),
+        State("em-stored-single-engine-limits", "data"),
         prevent_initial_call=True
     )
     def add_single_engine_limit(n_clicks, current_data):
@@ -924,8 +924,8 @@ def register(app):
         return new_data
 
     @app.callback(
-        Output("single-engine-limits-container", "children", allow_duplicate=True),
-        Input("stored-single-engine-limits", "data"),
+        Output("em-single-engine-limits-container", "children", allow_duplicate=True),
+        Input("em-stored-single-engine-limits", "data"),
         prevent_initial_call=True
     )
     def render_single_engine_limits(data):
@@ -980,13 +980,13 @@ def register(app):
             for idx, item in enumerate(data)
         ]
     @app.callback(
-        Output("stored-single-engine-limits", "data", allow_duplicate=True),
+        Output("em-stored-single-engine-limits", "data", allow_duplicate=True),
         Input({"type": "se-limit-type", "index": ALL}, "value"),
         Input({"type": "se-limit-value", "index": ALL}, "value"),
         Input({"type": "se-limit-flap", "index": ALL}, "value"),
         Input({"type": "se-limit-gear", "index": ALL}, "value"),
         Input({"type": "remove-se-limit", "index": ALL}, "n_clicks"),
-        State("stored-single-engine-limits", "data"),
+        State("em-stored-single-engine-limits", "data"),
         prevent_initial_call=True
     )
     def update_or_remove_se_limits(types, values, flaps, gears, remove_clicks, current_data):
@@ -1014,9 +1014,9 @@ def register(app):
     #----- OEI Performance----
 
     @app.callback(
-        Output("stored-oei-performance", "data", allow_duplicate=True),
-        Input("add-oei-performance", "n_clicks"),
-        State("stored-oei-performance", "data"),
+        Output("em-stored-oei-performance", "data", allow_duplicate=True),
+        Input("em-add-oei-performance", "n_clicks"),
+        State("em-stored-oei-performance", "data"),
         prevent_initial_call=True
     )
     def add_oei_entry(n_clicks, current_data):
@@ -1031,8 +1031,8 @@ def register(app):
         return new_data
 
     @app.callback(
-        Output("oei-performance-container", "children", allow_duplicate=True),
-        Input("stored-oei-performance", "data"),
+        Output("em-oei-performance-container", "children", allow_duplicate=True),
+        Input("em-stored-oei-performance", "data"),
         prevent_initial_call=True
     )
     def render_oei_entries(data):
@@ -1078,13 +1078,13 @@ def register(app):
         ]
 
     @app.callback(
-        Output("stored-oei-performance", "data", allow_duplicate=True),
+        Output("em-stored-oei-performance", "data", allow_duplicate=True),
         Input({"type": "oei-config", "index": ALL}, "value"),
         Input({"type": "oei-prop", "index": ALL}, "value"),
         Input({"type": "oei-power", "index": ALL}, "value"),
         Input({"type": "oei-efficiency", "index": ALL}, "value"),
         Input({"type": "remove-oei", "index": ALL}, "n_clicks"),
-        State("stored-oei-performance", "data"),
+        State("em-stored-oei-performance", "data"),
         prevent_initial_call=True
     )
     def update_oei_entries(configs, props, powers, effs, remove_clicks, current_data):
@@ -1114,9 +1114,9 @@ def register(app):
     # === ENGINE OPTIONS ===
 
     @app.callback(
-        Output("stored-engine-options", "data", allow_duplicate=True),
-        Input("add-engine-option", "n_clicks"),
-        State("stored-engine-options", "data"),
+        Output("em-stored-engine-options", "data", allow_duplicate=True),
+        Input("em-add-engine-option", "n_clicks"),
+        State("em-stored-engine-options", "data"),
         prevent_initial_call=True
     )
     def add_engine_option(n_clicks, current_engines):
@@ -1132,8 +1132,8 @@ def register(app):
         return new_data
 
     @app.callback(
-        Output("engine-options-container", "children", allow_duplicate=True),
-        Input("stored-engine-options", "data"),
+        Output("em-engine-options-container", "children", allow_duplicate=True),
+        Input("em-stored-engine-options", "data"),
         prevent_initial_call=True
     )
     def render_engine_options(engine_data):
@@ -1177,13 +1177,13 @@ def register(app):
         ]
 
     @app.callback(
-        Output("stored-engine-options", "data", allow_duplicate=True),
+        Output("em-stored-engine-options", "data", allow_duplicate=True),
         Input({"type": "engine-name", "index": ALL}, "value"),
         Input({"type": "engine-hp", "index": ALL}, "value"),
         Input({"type": "power-curve-sea-level", "index": ALL}, "value"),
         Input({"type": "power-curve-derate", "index": ALL}, "value"),
         Input({"type": "remove-engine", "index": ALL}, "n_clicks"),
-        State("stored-engine-options", "data"),
+        State("em-stored-engine-options", "data"),
         prevent_initial_call=True
     )
     def update_or_remove_engines(names, hps, sea_levels, derates, remove_clicks, current_data):
@@ -1212,52 +1212,52 @@ def register(app):
 
     @app.callback(
         [
-            Output("aircraft-name", "value", allow_duplicate=True),
-            Output("aircraft-type", "value", allow_duplicate=True),
+            Output("em-aircraft-name", "value", allow_duplicate=True),
+            Output("em-aircraft-type", "value", allow_duplicate=True),
             Output("gear-type", "value", allow_duplicate=True),
-            Output("engine-count", "value", allow_duplicate=True),
-            Output("wing-area", "value", allow_duplicate=True),
-            Output("aspect-ratio", "value", allow_duplicate=True),
-            Output("cd0", "value", allow_duplicate=True),
-            Output("oswald-efficiency", "value", allow_duplicate=True),
-            Output("stored-flap-configs", "data", allow_duplicate=True),
-            Output("stored-g-limits", "data", allow_duplicate=True),
-            Output("g-limits-container", "children", allow_duplicate=True),
-            Output("stored-stall-speeds", "data", allow_duplicate=True),
-            Output("stall-speeds-container", "children", allow_duplicate=True),
-            Output("stored-single-engine-limits", "data", allow_duplicate=True),
-            Output("stored-engine-options", "data", allow_duplicate=True),
-            Output("engine-options-container", "children", allow_duplicate=True),
-            Output("empty-weight", "value", allow_duplicate=True),
-            Output("max-weight", "value", allow_duplicate=True),
-            Output("best-glide", "value", allow_duplicate=True),
-            Output("best-glide-ratio", "value", allow_duplicate=True),
-            Output("seats", "value", allow_duplicate=True),
-            Output("cg-fwd", "value", allow_duplicate=True),
-            Output("cg-aft", "value", allow_duplicate=True),
+            Output("em-engine-count", "value", allow_duplicate=True),
+            Output("em-wing-area", "value", allow_duplicate=True),
+            Output("em-aspect-ratio", "value", allow_duplicate=True),
+            Output("em-cd0", "value", allow_duplicate=True),
+            Output("em-oswald-efficiency", "value", allow_duplicate=True),
+            Output("em-stored-flap-configs", "data", allow_duplicate=True),
+            Output("em-stored-g-limits", "data", allow_duplicate=True),
+            Output("em-g-limits-container", "children", allow_duplicate=True),
+            Output("em-stored-stall-speeds", "data", allow_duplicate=True),
+            Output("em-stall-speeds-container", "children", allow_duplicate=True),
+            Output("em-stored-single-engine-limits", "data", allow_duplicate=True),
+            Output("em-stored-engine-options", "data", allow_duplicate=True),
+            Output("em-engine-options-container", "children", allow_duplicate=True),
+            Output("em-empty-weight", "value", allow_duplicate=True),
+            Output("em-max-weight", "value", allow_duplicate=True),
+            Output("em-best-glide", "value", allow_duplicate=True),
+            Output("em-best-glide-ratio", "value", allow_duplicate=True),
+            Output("em-seats", "value", allow_duplicate=True),
+            Output("em-cg-fwd", "value", allow_duplicate=True),
+            Output("em-cg-aft", "value", allow_duplicate=True),
             Output({"type": "vfe-input", "config": "takeoff"}, "value", allow_duplicate=True),
             Output({"type": "vfe-input", "config": "landing"}, "value", allow_duplicate=True),
             Output({"type": "clmax-input", "config": "clean"}, "value", allow_duplicate=True),
             Output({"type": "clmax-input", "config": "takeoff"}, "value", allow_duplicate=True),
             Output({"type": "clmax-input", "config": "landing"}, "value", allow_duplicate=True),
-            Output("fuel-capacity-gal", "value", allow_duplicate=True),
-            Output("fuel-weight-per-gal", "value", allow_duplicate=True),
-            Output("arc-white-bottom", "value", allow_duplicate=True),
-            Output("arc-white-top", "value", allow_duplicate=True),
-            Output("arc-green-bottom", "value", allow_duplicate=True),
-            Output("arc-green-top", "value", allow_duplicate=True),
-            Output("arc-yellow-bottom", "value", allow_duplicate=True),
-            Output("arc-yellow-top", "value", allow_duplicate=True),
-            Output("arc-red", "value", allow_duplicate=True),
-            Output("prop-static-factor", "value", allow_duplicate=True),
-            Output("prop-vmax-kts", "value", allow_duplicate=True),
-            Output("stored-oei-performance", "data", allow_duplicate=True),
-            Output("max-altitude", "value", allow_duplicate=True),
-            Output("vne", "value", allow_duplicate=True),
-            Output("vno", "value", allow_duplicate=True),
-            Output("search-result", "children", allow_duplicate=True),
+            Output("em-fuel-capacity-gal", "value", allow_duplicate=True),
+            Output("em-fuel-weight-per-gal", "value", allow_duplicate=True),
+            Output("em-arc-white-bottom", "value", allow_duplicate=True),
+            Output("em-arc-white-top", "value", allow_duplicate=True),
+            Output("em-arc-green-bottom", "value", allow_duplicate=True),
+            Output("em-arc-green-top", "value", allow_duplicate=True),
+            Output("em-arc-yellow-bottom", "value", allow_duplicate=True),
+            Output("em-arc-yellow-top", "value", allow_duplicate=True),
+            Output("em-arc-red", "value", allow_duplicate=True),
+            Output("em-prop-static-factor", "value", allow_duplicate=True),
+            Output("em-prop-vmax-kts", "value", allow_duplicate=True),
+            Output("em-stored-oei-performance", "data", allow_duplicate=True),
+            Output("em-max-altitude", "value", allow_duplicate=True),
+            Output("em-vne", "value", allow_duplicate=True),
+            Output("em-vno", "value", allow_duplicate=True),
+            Output("em-search-result", "children", allow_duplicate=True),
         ],
-        Input("new-aircraft-button", "n_clicks"),
+        Input("em-new-aircraft-button", "n_clicks"),
         prevent_initial_call=True
     )
     def clear_all_fields(n_clicks):
@@ -1310,33 +1310,33 @@ def register(app):
 
 
     @app.callback(
-        Output("vne", "value", allow_duplicate=True),
-        Output("vno", "value", allow_duplicate=True),
+        Output("em-vne", "value", allow_duplicate=True),
+        Output("em-vno", "value", allow_duplicate=True),
         Output({"type": "vfe-input", "config": "takeoff"}, "value", allow_duplicate=True),
         Output({"type": "vfe-input", "config": "landing"}, "value", allow_duplicate=True),
-        Output("arc-white-bottom", "value", allow_duplicate=True),
-        Output("arc-white-top", "value", allow_duplicate=True),
-        Output("arc-green-bottom", "value", allow_duplicate=True),
-        Output("arc-green-top", "value", allow_duplicate=True),
-        Output("arc-yellow-bottom", "value", allow_duplicate=True),
-        Output("arc-yellow-top", "value", allow_duplicate=True),
-        Output("arc-red", "value", allow_duplicate=True),
-        Output("stored-stall-speeds", "data", allow_duplicate=True),
-        Output("stored-single-engine-limits", "data", allow_duplicate=True),
-        Input("units-toggle", "value"),
-        State("vne", "value"),
-        State("vno", "value"),
+        Output("em-arc-white-bottom", "value", allow_duplicate=True),
+        Output("em-arc-white-top", "value", allow_duplicate=True),
+        Output("em-arc-green-bottom", "value", allow_duplicate=True),
+        Output("em-arc-green-top", "value", allow_duplicate=True),
+        Output("em-arc-yellow-bottom", "value", allow_duplicate=True),
+        Output("em-arc-yellow-top", "value", allow_duplicate=True),
+        Output("em-arc-red", "value", allow_duplicate=True),
+        Output("em-stored-stall-speeds", "data", allow_duplicate=True),
+        Output("em-stored-single-engine-limits", "data", allow_duplicate=True),
+        Input("em-units-toggle", "value"),
+        State("em-vne", "value"),
+        State("em-vno", "value"),
         State({"type": "vfe-input", "config": "takeoff"}, "value"),
         State({"type": "vfe-input", "config": "landing"}, "value"),
-        State("arc-white-bottom", "value"),
-        State("arc-white-top", "value"),
-        State("arc-green-bottom", "value"),
-        State("arc-green-top", "value"),
-        State("arc-yellow-bottom", "value"),
-        State("arc-yellow-top", "value"),
-        State("arc-red", "value"),
-        State("stored-stall-speeds", "data"),
-        State("stored-single-engine-limits", "data"),
+        State("em-arc-white-bottom", "value"),
+        State("em-arc-white-top", "value"),
+        State("em-arc-green-bottom", "value"),
+        State("em-arc-green-top", "value"),
+        State("em-arc-yellow-bottom", "value"),
+        State("em-arc-yellow-top", "value"),
+        State("em-arc-red", "value"),
+        State("em-stored-stall-speeds", "data"),
+        State("em-stored-single-engine-limits", "data"),
         prevent_initial_call=True
     )
     def convert_units_toggle(units,
@@ -1445,54 +1445,54 @@ def register(app):
 
     @app.callback(
         [
-            Output("save-status", "children", allow_duplicate=True),
+            Output("em-save-status", "children", allow_duplicate=True),
             Output("aircraft-data-store", "data", allow_duplicate=True),
             Output("last-saved-aircraft", "data", allow_duplicate=True),
             Output("download-aircraft", "data", allow_duplicate=True),
         ],
-        Input("save-aircraft-button", "n_clicks"),
+        Input("em-save-aircraft-button", "n_clicks"),
         State("aircraft-data-store", "data"),
-        State("aircraft-name", "value"),
-        State("wing-area", "value"),
-        State("aspect-ratio", "value"),
-        State("cd0", "value"),
-        State("oswald-efficiency", "value"),
-        State("stored-flap-configs", "data"),
-        State("stored-g-limits", "data"),
-        State("stored-stall-speeds", "data"),
-        State("stored-single-engine-limits", "data"),
-        State("stored-engine-options", "data"),
-        State("units-toggle", "value"),
-        State("empty-weight", "value"),
-        State("max-weight", "value"),
-        State("seats", "value"),
-        State("cg-fwd", "value"),
-        State("cg-aft", "value"),
-        State("fuel-capacity-gal", "value"),
-        State("fuel-weight-per-gal", "value"),
-        State("arc-white-bottom", "value"),
-        State("arc-white-top", "value"),
-        State("arc-green-bottom", "value"),
-        State("arc-green-top", "value"),
-        State("arc-yellow-bottom", "value"),
-        State("arc-yellow-top", "value"),
-        State("arc-red", "value"),
-        State("prop-static-factor", "value"),
-        State("prop-vmax-kts", "value"),
-        State("best-glide", "value"),
-        State("best-glide-ratio", "value"),
-        State("aircraft-type", "value"),
-        State("engine-count", "value"),
-        State("vne", "value"),
-        State("vno", "value"),
+        State("em-aircraft-name", "value"),
+        State("em-wing-area", "value"),
+        State("em-aspect-ratio", "value"),
+        State("em-cd0", "value"),
+        State("em-oswald-efficiency", "value"),
+        State("em-stored-flap-configs", "data"),
+        State("em-stored-g-limits", "data"),
+        State("em-stored-stall-speeds", "data"),
+        State("em-stored-single-engine-limits", "data"),
+        State("em-stored-engine-options", "data"),
+        State("em-units-toggle", "value"),
+        State("em-empty-weight", "value"),
+        State("em-max-weight", "value"),
+        State("em-seats", "value"),
+        State("em-cg-fwd", "value"),
+        State("em-cg-aft", "value"),
+        State("em-fuel-capacity-gal", "value"),
+        State("em-fuel-weight-per-gal", "value"),
+        State("em-arc-white-bottom", "value"),
+        State("em-arc-white-top", "value"),
+        State("em-arc-green-bottom", "value"),
+        State("em-arc-green-top", "value"),
+        State("em-arc-yellow-bottom", "value"),
+        State("em-arc-yellow-top", "value"),
+        State("em-arc-red", "value"),
+        State("em-prop-static-factor", "value"),
+        State("em-prop-vmax-kts", "value"),
+        State("em-best-glide", "value"),
+        State("em-best-glide-ratio", "value"),
+        State("em-aircraft-type", "value"),
+        State("em-engine-count", "value"),
+        State("em-vne", "value"),
+        State("em-vno", "value"),
         State({"type": "vfe-input", "config": "takeoff"}, "value"),
         State({"type": "vfe-input", "config": "landing"}, "value"),
         State({"type": "clmax-input", "config": "clean"}, "value"),
         State({"type": "clmax-input", "config": "takeoff"}, "value"),
         State({"type": "clmax-input", "config": "landing"}, "value"),
-        State("max-altitude", "value"),
+        State("em-max-altitude", "value"),
         State("gear-type", "value"),
-        State("stored-oei-performance", "data"),
+        State("em-stored-oei-performance", "data"),
         prevent_initial_call=True
     )
     def save_aircraft_to_file(
@@ -1748,11 +1748,11 @@ def register(app):
     @app.callback(
         [
             Output("aircraft-data-store", "data", allow_duplicate=True),
-            Output("aircraft-select", "value", allow_duplicate=True),  # correct dropdown
+            Output("em-aircraft-select", "value", allow_duplicate=True),  # correct dropdown
             Output("last-saved-aircraft", "data", allow_duplicate=True)
         ],
-        Input("upload-aircraft", "contents"),
-        State("upload-aircraft", "filename"),
+        Input("em-upload-aircraft", "contents"),
+        State("em-upload-aircraft", "filename"),
         State("aircraft-data-store", "data"),
         prevent_initial_call=True
     )

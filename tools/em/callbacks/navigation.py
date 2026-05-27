@@ -21,10 +21,10 @@ def register(app):
     # Phase 5T: also write the currently-selected aircraft into the
     # `editing-aircraft` Store so the edit page can auto-load that aircraft.
     @app.callback(
-        Output("url", "pathname"),
+        Output("em-url", "pathname"),
         Output("editing-aircraft", "data"),
         Input("edit-aircraft-button", "n_clicks"),
-        State("aircraft-select", "value"),
+        State("em-aircraft-select", "value"),
         prevent_initial_call=True,
     )
     def go_to_edit_page(n_clicks, current_aircraft):
@@ -34,8 +34,8 @@ def register(app):
 
     # --- Edit-page "Back" button → / ---------------------------------
     @app.callback(
-        Output("url", "pathname", allow_duplicate=True),
-        Input("back-button", "n_clicks"),
+        Output("em-url", "pathname", allow_duplicate=True),
+        Input("em-back-button", "n_clicks"),
         prevent_initial_call=True,
     )
     def go_to_main_page(n_clicks):
@@ -45,8 +45,8 @@ def register(app):
 
     # --- On return to "/", restore the most-recently-saved aircraft --
     @app.callback(
-        Output("aircraft-select", "value", allow_duplicate=True),
-        Input("url", "pathname"),
+        Output("em-aircraft-select", "value", allow_duplicate=True),
+        Input("em-url", "pathname"),
         State("last-saved-aircraft", "data"),
         prevent_initial_call=True,
     )
@@ -58,7 +58,7 @@ def register(app):
     # --- Browser width sniffer (fires on initial load) ----------------
     @app.callback(
         Output("browser-width", "data"),
-        Input("url", "pathname"),
+        Input("em-url", "pathname"),
     )
     def get_browser_width(_pathname):
         """Best-effort UA-string detection; client-side JS fills the real
@@ -70,9 +70,9 @@ def register(app):
             return None
     # ─── Phase 1g additions ────────────────────────────────────────────
     @app.callback(
-        Output("page-content", "children"),
-        Input("url", "pathname"),
-        Input("screen-width", "data")
+        Output("em-page-content", "children"),
+        Input("em-url", "pathname"),
+        Input("em-screen-width", "data")
     )
     def display_page(pathname, screen_width):
         # Gracefully handle undefined screen width
@@ -90,7 +90,7 @@ def register(app):
 
     @app.callback(
         Output("aircraft-data-store", "data"),
-        Input("url", "pathname"),
+        Input("em-url", "pathname"),
         prevent_initial_call=True
     )
     def reload_aircraft_on_return(pathname):
@@ -99,7 +99,7 @@ def register(app):
         raise PreventUpdate
 
     @app.callback(
-        Output("aircraft-select", "value", allow_duplicate=True),
+        Output("em-aircraft-select", "value", allow_duplicate=True),
         Input("aircraft-data-store", "data"),
         State("last-saved-aircraft", "data"),
         prevent_initial_call=True

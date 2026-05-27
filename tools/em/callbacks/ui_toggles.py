@@ -79,7 +79,7 @@ def register(app):
 
     # --- Edit page: units switch syncs to the hidden Store ------------
     @app.callback(
-        Output("units-toggle", "value"),
+        Output("em-units-toggle", "value"),
         Input("units-toggle-switch", "value"),
         prevent_initial_call=True,
     )

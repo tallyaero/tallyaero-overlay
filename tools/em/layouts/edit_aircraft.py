@@ -32,13 +32,13 @@ def create_inline_fields(fields):
 def edit_aircraft_layout():
     return html.Div([
         # Stores
-        dcc.Store(id="stored-flap-configs", data=[]),
-        dcc.Store(id="stored-g-limits", data=[]),
-        dcc.Store(id="stored-stall-speeds", data=[]),
-        dcc.Store(id="stored-single-engine-limits", data=[]),
-        dcc.Store(id="stored-engine-options", data=[]),
-        dcc.Store(id="stored-other-limits", data={}),
-        dcc.Store(id="stored-oei-performance", data=[]),
+        dcc.Store(id="em-stored-flap-configs", data=[]),
+        dcc.Store(id="em-stored-g-limits", data=[]),
+        dcc.Store(id="em-stored-stall-speeds", data=[]),
+        dcc.Store(id="em-stored-single-engine-limits", data=[]),
+        dcc.Store(id="em-stored-engine-options", data=[]),
+        dcc.Store(id="em-stored-other-limits", data={}),
+        dcc.Store(id="em-stored-oei-performance", data=[]),
 
         # Phase 5T: top strip — chip-style actions consistent with the main
         # page shell. Banner-header + disclaimer-banner-small removed (the
@@ -50,7 +50,7 @@ def edit_aircraft_layout():
                 html.Button(
                     [html.Span("BACK", className="chip-prefix"),
                      html.Span("EM Diagram", className="chip-label")],
-                    id="back-button", n_clicks=0,
+                    id="em-back-button", n_clicks=0,
                     className="env-chip", type="button",
                     title="Return to the EM Diagram (shortcut: Esc)",
                     **{"aria-label": "Return to main EM Diagram page"},
@@ -63,7 +63,7 @@ def edit_aircraft_layout():
                 html.Button(
                     [html.Span("SAVE", className="chip-prefix"),
                      html.Span("Aircraft", className="chip-label")],
-                    id="save-aircraft-button", n_clicks=0,
+                    id="em-save-aircraft-button", n_clicks=0,
                     className="env-chip rail-drawer-trigger", type="button",
                     title="Validate + download the aircraft JSON",
                     **{"aria-label": "Save the aircraft profile to a JSON file"},
@@ -79,7 +79,7 @@ def edit_aircraft_layout():
                 html.Button(
                     [html.Span("CLEAR", className="chip-prefix"),
                      html.Span("Reset Form", className="chip-label")],
-                    id="new-aircraft-button", n_clicks=0,
+                    id="em-new-aircraft-button", n_clicks=0,
                     className="env-chip", type="button",
                     title="Clear all fields and start a blank profile",
                     **{"aria-label": "Clear all form fields"},
@@ -98,7 +98,7 @@ def edit_aircraft_layout():
                              children="Pick any of the 110 aircraft to load its profile into the form."),
                 ], className="edit-section-header"),
                 dcc.Dropdown(
-                    id="aircraft-search",
+                    id="em-aircraft-search",
                     options=[],  # populated by callback below
                     placeholder="Search aircraft to edit…",
                     searchable=True,
@@ -109,8 +109,8 @@ def edit_aircraft_layout():
 
             # Status messages (search result + save status)
             html.Div([
-                html.Div(id="search-result", className="edit-status-msg"),
-                html.Div(id="save-status", className="edit-status-msg"),
+                html.Div(id="em-search-result", className="edit-status-msg"),
+                html.Div(id="em-save-status", className="edit-status-msg"),
             ], className="edit-action-bar"),
 
             # Quick Start with help buttons
@@ -120,7 +120,7 @@ def edit_aircraft_layout():
                 html.Div([
                     # Basic Trainer
                     html.Div([
-                        html.Button("Basic Trainer", id="default-trainer", n_clicks=0, className="btn-quickstart"),
+                        html.Button("Basic Trainer", id="em-default-trainer", n_clicks=0, className="btn-quickstart"),
                         html.Button("?", id="help-trainer", n_clicks=0, className="btn-help-sm"),
                         dbc.Popover([
                             dbc.PopoverHeader("Basic Trainer"),
@@ -140,7 +140,7 @@ def edit_aircraft_layout():
 
                     # Standard Single
                     html.Div([
-                        html.Button("Standard Single", id="default-single", n_clicks=0, className="btn-quickstart"),
+                        html.Button("Standard Single", id="em-default-single", n_clicks=0, className="btn-quickstart"),
                         html.Button("?", id="help-single", n_clicks=0, className="btn-help-sm"),
                         dbc.Popover([
                             dbc.PopoverHeader("Standard Single Engine"),
@@ -180,7 +180,7 @@ def edit_aircraft_layout():
 
                     # Light Twin
                     html.Div([
-                        html.Button("Light Twin", id="default-multi", n_clicks=0, className="btn-quickstart"),
+                        html.Button("Light Twin", id="em-default-multi", n_clicks=0, className="btn-quickstart"),
                         html.Button("?", id="help-multi", n_clicks=0, className="btn-help-sm"),
                         dbc.Popover([
                             dbc.PopoverHeader("Light Twin Engine"),
@@ -200,7 +200,7 @@ def edit_aircraft_layout():
 
                     # Aerobatic
                     html.Div([
-                        html.Button("Aerobatic", id="default-aerobatic", n_clicks=0, className="btn-quickstart"),
+                        html.Button("Aerobatic", id="em-default-aerobatic", n_clicks=0, className="btn-quickstart"),
                         html.Button("?", id="help-aerobatic", n_clicks=0, className="btn-help-sm"),
                         dbc.Popover([
                             dbc.PopoverHeader("Aerobatic"),
@@ -220,7 +220,7 @@ def edit_aircraft_layout():
 
                     # LSA/Experimental
                     html.Div([
-                        html.Button("LSA / Experimental", id="default-experimental", n_clicks=0, className="btn-quickstart"),
+                        html.Button("LSA / Experimental", id="em-default-experimental", n_clicks=0, className="btn-quickstart"),
                         html.Button("?", id="help-experimental", n_clicks=0, className="btn-help-sm"),
                         dbc.Popover([
                             dbc.PopoverHeader("Light Sport / Experimental"),
@@ -248,7 +248,7 @@ def edit_aircraft_layout():
                     dbc.Switch(id="units-toggle-switch", value=False, className="edit-units-switch"),
                     html.Span("MPH", className="edit-toggle-label-right"),
                     # Hidden input to maintain compatibility with existing callbacks
-                    dcc.Input(id="units-toggle", type="hidden", value="KIAS"),
+                    dcc.Input(id="em-units-toggle", type="hidden", value="KIAS"),
                 ], className="units-bar-left"),
                 html.Div([
                     html.Button("Expand All", id="expand-all-btn", n_clicks=0, className="btn-expand-all"),
@@ -262,14 +262,14 @@ def edit_aircraft_layout():
                 dbc.AccordionItem([
                     html.Div([
                         create_field_row("Aircraft Name",
-                            dcc.Input(id="aircraft-name", type="text", placeholder="e.g. Cessna 172S", className="edit-input-text"),
+                            dcc.Input(id="em-aircraft-name", type="text", placeholder="e.g. Cessna 172S", className="edit-input-text"),
                             width="100%"),
 
                         html.Div([
                             html.Div([
                                 html.Label("Aircraft Type", className="edit-field-label"),
                                 dcc.Dropdown(
-                                    id="aircraft-type",
+                                    id="em-aircraft-type",
                                     options=[
                                         {"label": "Single Engine", "value": "single_engine"},
                                         {"label": "Multi Engine", "value": "multi_engine"}
@@ -293,7 +293,7 @@ def edit_aircraft_layout():
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("Engine Count", className="edit-field-label"),
-                                dcc.Input(id="engine-count", type="number", min=1, step=1, value=1, className="edit-input-num")
+                                dcc.Input(id="em-engine-count", type="number", min=1, step=1, value=1, className="edit-input-num")
                             ], style={"width": "100px"}),
                         ], className="edit-row-flex"),
                     ], className="edit-section-content"),
@@ -305,30 +305,30 @@ def edit_aircraft_layout():
                         html.Div([
                             html.Div([
                                 html.Label("Wing Area (ft²)", className="edit-field-label"),
-                                dcc.Input(id="wing-area", type="number", placeholder="174", className="edit-input-num")
+                                dcc.Input(id="em-wing-area", type="number", placeholder="174", className="edit-input-num")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("Aspect Ratio", className="edit-field-label"),
-                                dcc.Input(id="aspect-ratio", type="number", placeholder="7.32", step=0.01, className="edit-input-num")
+                                dcc.Input(id="em-aspect-ratio", type="number", placeholder="7.32", step=0.01, className="edit-input-num")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("CD₀", className="edit-field-label"),
-                                dcc.Input(id="cd0", type="number", placeholder="0.027", step=0.001, className="edit-input-num")
+                                dcc.Input(id="em-cd0", type="number", placeholder="0.027", step=0.001, className="edit-input-num")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("Oswald (e)", className="edit-field-label"),
-                                dcc.Input(id="oswald-efficiency", type="number", placeholder="0.8", step=0.01, className="edit-input-num")
+                                dcc.Input(id="em-oswald-efficiency", type="number", placeholder="0.8", step=0.01, className="edit-input-num")
                             ], style={"flex": "1"}),
                         ], className="edit-row-flex"),
 
                         html.Div([
                             html.Div([
                                 html.Label("T_static Factor", className="edit-field-label"),
-                                dcc.Input(id="prop-static-factor", type="number", placeholder="2.6", step=0.1, className="edit-input-num")
+                                dcc.Input(id="em-prop-static-factor", type="number", placeholder="2.6", step=0.1, className="edit-input-num")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("V_max (kts)", className="edit-field-label"),
-                                dcc.Input(id="prop-vmax-kts", type="number", placeholder="160", className="edit-input-num")
+                                dcc.Input(id="em-prop-vmax-kts", type="number", placeholder="160", className="edit-input-num")
                             ], style={"flex": "1"}),
                         ], className="edit-row-flex", style={"marginTop": "12px"}),
                     ], className="edit-section-content"),
@@ -340,34 +340,34 @@ def edit_aircraft_layout():
                         html.Div([
                             html.Div([
                                 html.Label("Empty Weight (lbs)", className="edit-field-label"),
-                                dcc.Input(id="empty-weight", type="number", placeholder="1660", className="edit-input-num")
+                                dcc.Input(id="em-empty-weight", type="number", placeholder="1660", className="edit-input-num")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("Max Gross (lbs)", className="edit-field-label"),
-                                dcc.Input(id="max-weight", type="number", placeholder="2550", className="edit-input-num")
+                                dcc.Input(id="em-max-weight", type="number", placeholder="2550", className="edit-input-num")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("Seats", className="edit-field-label"),
-                                dcc.Input(id="seats", type="number", placeholder="4", className="edit-input-num")
+                                dcc.Input(id="em-seats", type="number", placeholder="4", className="edit-input-num")
                             ], style={"width": "80px"}),
                         ], className="edit-row-flex"),
 
                         html.Div([
                             html.Div([
                                 html.Label("CG FWD (in)", className="edit-field-label"),
-                                dcc.Input(id="cg-fwd", type="number", placeholder="35.0", className="edit-input-num")
+                                dcc.Input(id="em-cg-fwd", type="number", placeholder="35.0", className="edit-input-num")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("CG AFT (in)", className="edit-field-label"),
-                                dcc.Input(id="cg-aft", type="number", placeholder="47.3", className="edit-input-num")
+                                dcc.Input(id="em-cg-aft", type="number", placeholder="47.3", className="edit-input-num")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("Fuel Cap (gal)", className="edit-field-label"),
-                                dcc.Input(id="fuel-capacity-gal", type="number", placeholder="56", className="edit-input-num")
+                                dcc.Input(id="em-fuel-capacity-gal", type="number", placeholder="56", className="edit-input-num")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("Fuel lbs/gal", className="edit-field-label"),
-                                dcc.Input(id="fuel-weight-per-gal", type="number", placeholder="6.0", step=0.1, className="edit-input-num")
+                                dcc.Input(id="em-fuel-weight-per-gal", type="number", placeholder="6.0", step=0.1, className="edit-input-num")
                             ], style={"flex": "1"}),
                         ], className="edit-row-flex", style={"marginTop": "12px"}),
                     ], className="edit-section-content"),
@@ -379,23 +379,23 @@ def edit_aircraft_layout():
                         html.Div([
                             html.Div([
                                 html.Label("Vne", className="edit-field-label"),
-                                dcc.Input(id="vne", type="number", placeholder="163", className="edit-input-num")
+                                dcc.Input(id="em-vne", type="number", placeholder="163", className="edit-input-num")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("Vno", className="edit-field-label"),
-                                dcc.Input(id="vno", type="number", placeholder="129", className="edit-input-num")
+                                dcc.Input(id="em-vno", type="number", placeholder="129", className="edit-input-num")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("Best Glide", className="edit-field-label"),
-                                dcc.Input(id="best-glide", type="number", placeholder="68", className="edit-input-num")
+                                dcc.Input(id="em-best-glide", type="number", placeholder="68", className="edit-input-num")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("Glide Ratio", className="edit-field-label"),
-                                dcc.Input(id="best-glide-ratio", type="number", placeholder="9.0", step=0.1, className="edit-input-num")
+                                dcc.Input(id="em-best-glide-ratio", type="number", placeholder="9.0", step=0.1, className="edit-input-num")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("Ceiling (ft)", className="edit-field-label"),
-                                dcc.Input(id="max-altitude", type="number", placeholder="14000", className="edit-input-num")
+                                dcc.Input(id="em-max-altitude", type="number", placeholder="14000", className="edit-input-num")
                             ], style={"flex": "1"}),
                         ], className="edit-row-flex"),
 
@@ -406,30 +406,30 @@ def edit_aircraft_layout():
                             html.Div([
                                 html.Label("White (Vs0-Vfe)", className="edit-field-label"),
                                 html.Div([
-                                    dcc.Input(id="arc-white-bottom", type="number", placeholder="41", className="edit-input-num-sm"),
+                                    dcc.Input(id="em-arc-white-bottom", type="number", placeholder="41", className="edit-input-num-sm"),
                                     html.Span("-", className="edit-arc-dash"),
-                                    dcc.Input(id="arc-white-top", type="number", placeholder="85", className="edit-input-num-sm"),
+                                    dcc.Input(id="em-arc-white-top", type="number", placeholder="85", className="edit-input-num-sm"),
                                 ], className="edit-arc-inputs")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("Green (Vs1-Vno)", className="edit-field-label"),
                                 html.Div([
-                                    dcc.Input(id="arc-green-bottom", type="number", placeholder="47", className="edit-input-num-sm"),
+                                    dcc.Input(id="em-arc-green-bottom", type="number", placeholder="47", className="edit-input-num-sm"),
                                     html.Span("-", className="edit-arc-dash"),
-                                    dcc.Input(id="arc-green-top", type="number", placeholder="129", className="edit-input-num-sm"),
+                                    dcc.Input(id="em-arc-green-top", type="number", placeholder="129", className="edit-input-num-sm"),
                                 ], className="edit-arc-inputs")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("Yellow (Vno-Vne)", className="edit-field-label"),
                                 html.Div([
-                                    dcc.Input(id="arc-yellow-bottom", type="number", placeholder="129", className="edit-input-num-sm"),
+                                    dcc.Input(id="em-arc-yellow-bottom", type="number", placeholder="129", className="edit-input-num-sm"),
                                     html.Span("-", className="edit-arc-dash"),
-                                    dcc.Input(id="arc-yellow-top", type="number", placeholder="163", className="edit-input-num-sm"),
+                                    dcc.Input(id="em-arc-yellow-top", type="number", placeholder="163", className="edit-input-num-sm"),
                                 ], className="edit-arc-inputs")
                             ], style={"flex": "1", "marginRight": "12px"}),
                             html.Div([
                                 html.Label("Red Line", className="edit-field-label"),
-                                dcc.Input(id="arc-red", type="number", placeholder="163", className="edit-input-num-sm"),
+                                dcc.Input(id="em-arc-red", type="number", placeholder="163", className="edit-input-num-sm"),
                             ], style={"width": "90px"}),
                         ], className="edit-row-flex"),
                     ], className="edit-section-content"),
@@ -438,7 +438,7 @@ def edit_aircraft_layout():
                 # 5. Flap Configurations
                 dbc.AccordionItem([
                     html.Div([
-                        html.Div(id="flap-configs-container", children=[
+                        html.Div(id="em-flap-configs-container", children=[
                             html.Div([
                                 html.Div([
                                     html.Label("Clean / Up", className="edit-field-label"),
@@ -468,24 +468,24 @@ def edit_aircraft_layout():
                 # 6. G Limits
                 dbc.AccordionItem([
                     html.Div([
-                        html.Div(id="g-limits-container"),
-                        html.Button("+ Add G Limit", id="add-g-limit", n_clicks=0, className="btn-add-sm"),
+                        html.Div(id="em-g-limits-container"),
+                        html.Button("+ Add G Limit", id="em-add-g-limit", n_clicks=0, className="btn-add-sm"),
                     ], className="edit-section-content"),
                 ], title="G Limits", item_id="glimits"),
 
                 # 7. Stall Speeds
                 dbc.AccordionItem([
                     html.Div([
-                        html.Div(id="stall-speeds-container"),
-                        html.Button("+ Add Stall Speed", id="add-stall-speed", n_clicks=0, className="btn-add-sm"),
+                        html.Div(id="em-stall-speeds-container"),
+                        html.Button("+ Add Stall Speed", id="em-add-stall-speed", n_clicks=0, className="btn-add-sm"),
                     ], className="edit-section-content"),
                 ], title="Stall Speeds", item_id="stall"),
 
                 # 8. Engine Options
                 dbc.AccordionItem([
                     html.Div([
-                        html.Div(id="engine-options-container"),
-                        html.Button("+ Add Engine", id="add-engine-option", n_clicks=0, className="btn-add-sm"),
+                        html.Div(id="em-engine-options-container"),
+                        html.Button("+ Add Engine", id="em-add-engine-option", n_clicks=0, className="btn-add-sm"),
                     ], className="edit-section-content"),
                 ], title="Engine Options", item_id="engines"),
 
@@ -496,15 +496,15 @@ def edit_aircraft_layout():
                 dbc.Accordion([
                     dbc.AccordionItem([
                         html.Div([
-                            html.Div(id="single-engine-limits-container"),
-                            html.Button("+ Add Limit", id="add-single-engine-limit", n_clicks=0, className="btn-add-sm"),
+                            html.Div(id="em-single-engine-limits-container"),
+                            html.Button("+ Add Limit", id="em-add-single-engine-limit", n_clicks=0, className="btn-add-sm"),
                         ], className="edit-section-content"),
                     ], title="Multi-Engine Limits (Vmca/Vyse/Vxse)", item_id="melimits"),
 
                     dbc.AccordionItem([
                         html.Div([
-                            html.Div(id="oei-performance-container"),
-                            html.Button("+ Add OEI Entry", id="add-oei-performance", n_clicks=0, className="btn-add-sm"),
+                            html.Div(id="em-oei-performance-container"),
+                            html.Button("+ Add OEI Entry", id="em-add-oei-performance", n_clicks=0, className="btn-add-sm"),
                         ], className="edit-section-content"),
                     ], title="OEI Performance", item_id="oei"),
                 ], always_open=True, active_item=[]),

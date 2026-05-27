@@ -41,7 +41,7 @@ def register(app):
     # backdrop / close-button on close.
     @app.callback(
         Output("mobile-settings-drawer", "is_open"),
-        Input("mobile-settings-toggle", "n_clicks"),
+        Input("em-mobile-settings-toggle", "n_clicks"),
         State("mobile-settings-drawer", "is_open"),
         prevent_initial_call=True,
     )

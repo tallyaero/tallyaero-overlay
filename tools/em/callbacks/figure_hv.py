@@ -47,25 +47,25 @@ def register(app):
 
     @app.callback(
         Output("em-graph-hv", "figure"),
-        Input("aircraft-select",      "value"),
+        Input("em-aircraft-select",      "value"),
         Input("config-select",        "value"),
         Input("category-select",      "value"),
         Input("stored-total-weight",  "data"),
         Input("altitude-slider",      "value"),
         Input("unit-select",          "data"),
-        Input("theme-pref",           "data"),
+        Input("em-theme-pref",           "data"),
         Input("hv-target-point",      "data"),
         # Phase 5AB-3: user's chosen reference IAS — drives the current-state
         # dot's X position. None = fall back to Vy.
         Input("ref-ias-kt",           "data"),
         # Phase 5Z-3: physics inputs so the h-V chart honors the same
         # power / atmosphere / engine state as the doghouse.
-        Input("power-setting",        "value"),
+        Input("em-power-setting",        "value"),
         Input("prop-condition",       "data"),
         Input("oei-toggle",           "value"),
         Input("oat-input",            "value"),
         Input("altimeter-input",      "value"),
-        Input("engine-select",        "value"),
+        Input("em-engine-select",        "value"),
         # Phase 5AB-7: flight path angle for the γ-sustainable contour
         Input("pitch-angle",          "value"),
         # Phase 5W: time horizon for the reachable-set overlay
@@ -101,7 +101,7 @@ def register(app):
         Output("hv-target-point", "data"),
         Input("em-graph-hv",    "clickData"),
         Input("clear-hv-target","n_clicks"),
-        Input("aircraft-select","value"),
+        Input("em-aircraft-select","value"),
         State("hv-target-mode", "data"),
         prevent_initial_call=True,
     )
@@ -161,7 +161,7 @@ def register(app):
     # that may be outside the new aircraft's stall/Vne band.
     @app.callback(
         Output("ref-ias-kt", "data", allow_duplicate=True),
-        Input("aircraft-select", "value"),
+        Input("em-aircraft-select", "value"),
         prevent_initial_call=True,
     )
     def _reset_ref_ias_on_aircraft_change(_ac):

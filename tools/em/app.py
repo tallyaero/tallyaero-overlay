@@ -94,17 +94,17 @@ app.index_string = """
 # Page layout: top-level Stores + global Modals
 # =============================================================================
 app.layout = html.Div([
-    dcc.Location(id="url"),
+    dcc.Location(id="em-url"),
     dcc.Store(id="aircraft-data-store", data=AIRCRAFT_DATA),
     dcc.Store(id="last-saved-aircraft"),
     dcc.Store(id="stored-total-weight"),
-    dcc.Store(id="screen-width"),
+    dcc.Store(id="em-screen-width"),
     # Phase 5AB-13: sidebar-collapsed store retired alongside the collapse btn.
     # Phase 5e: theme preference store. The early-paint <script> in
     # index_string seeds data-theme from localStorage; the clientside
     # callback below mirrors any toggle clicks back into both the
     # DOM and the persistent store.
-    dcc.Store(id="theme-pref", storage_type="local", data=None),
+    dcc.Store(id="em-theme-pref", storage_type="local", data=None),
     # Phase 4: parsed METAR observation for the selected airport, or None.
     # Populated by environment.update_environment_on_airport, consumed by
     # the weather-panel display callback.
@@ -166,7 +166,7 @@ app.layout = html.Div([
                              className="update-banner-close",
                              **{"aria-label": "Dismiss update banner"}),
              ]),
-    html.Div(id="page-content"),
+    html.Div(id="em-page-content"),
     dcc.Download(id="download-aircraft"),
 
     # Global Modals (shared between desktop and mobile)
@@ -182,9 +182,9 @@ app.layout = html.Div([
             html.P("TallyAero disclaims all liability for errors, omissions, injuries, or damages resulting from the use of this application or website. Use of this tool constitutes acceptance of these terms.", style={"marginBottom": "8px"})
         ]),
         dbc.ModalFooter(
-            dbc.Button("Close", id="close-disclaimer", className="ms-auto", color="secondary")
+            dbc.Button("Close", id="em-close-disclaimer", className="ms-auto", color="secondary")
         )
-    ], id="disclaimer-modal", is_open=False, centered=True, size="lg"),
+    ], id="em-disclaimer-modal", is_open=False, centered=True, size="lg"),
 
     dbc.Modal([
         dbc.ModalHeader(dbc.ModalTitle("Terms of Use & Privacy Policy"), close_button=True),
@@ -198,9 +198,9 @@ app.layout = html.Div([
             html.P("By using this application, you acknowledge and accept these terms.")
         ]),
         dbc.ModalFooter(
-            dbc.Button("Close", id="close-terms-policy", className="ms-auto", color="secondary")
+            dbc.Button("Close", id="em-close-terms-policy", className="ms-auto", color="secondary")
         )
-    ], id="terms-policy-modal", is_open=False, centered=True, size="lg"),
+    ], id="em-terms-policy-modal", is_open=False, centered=True, size="lg"),
 
     # Quick Start Modal
     dbc.Modal([
@@ -380,8 +380,8 @@ app.layout = html.Div([
 # =============================================================================
 app.clientside_callback(
     ClientsideFunction(namespace="tallyaero", function_name="screenWidth"),
-    Output("screen-width", "data"),
-    Input("url", "pathname"),
+    Output("em-screen-width", "data"),
+    Input("em-url", "pathname"),
 )
 
 
@@ -392,13 +392,13 @@ app.clientside_callback(
 # =============================================================================
 app.clientside_callback(
     ClientsideFunction(namespace="tallyaero", function_name="cycleTheme"),
-    Output("theme-pref",       "data"),
-    Output("theme-btn-auto",   "className"),
-    Output("theme-btn-light",  "className"),
-    Output("theme-btn-dark",   "className"),
-    Input("theme-btn-auto",    "n_clicks"),
-    Input("theme-btn-light",   "n_clicks"),
-    Input("theme-btn-dark",    "n_clicks"),
+    Output("em-theme-pref",       "data"),
+    Output("em-theme-btn-auto",   "className"),
+    Output("em-theme-btn-light",  "className"),
+    Output("em-theme-btn-dark",   "className"),
+    Input("em-theme-btn-auto",    "n_clicks"),
+    Input("em-theme-btn-light",   "n_clicks"),
+    Input("em-theme-btn-dark",    "n_clicks"),
 )
 
 # On page load, mirror the localStorage theme into the dcc.Store so the
@@ -407,8 +407,8 @@ app.clientside_callback(
 # rehydrated.
 app.clientside_callback(
     ClientsideFunction(namespace="tallyaero", function_name="syncThemeFromStorage"),
-    Output("theme-pref", "data", allow_duplicate=True),
-    Input("url", "pathname"),
+    Output("em-theme-pref", "data", allow_duplicate=True),
+    Input("em-url", "pathname"),
     prevent_initial_call="initial_duplicate",
 )
 
@@ -418,8 +418,8 @@ app.clientside_callback(
 # Output is the screen-width Store as a no-op target.
 app.clientside_callback(
     ClientsideFunction(namespace="tallyaero", function_name="bindKeyboardShortcuts"),
-    Output("screen-width", "data", allow_duplicate=True),
-    Input("url", "pathname"),
+    Output("em-screen-width", "data", allow_duplicate=True),
+    Input("em-url", "pathname"),
     prevent_initial_call="initial_duplicate",
 )
 
