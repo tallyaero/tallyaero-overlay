@@ -12,3 +12,13 @@ venv/
 *.egg-info/
 dist/
 build/
+
+# Self-hosted FAA chart tile pyramids (D3-3, big binary blobs)
+tiles/
+raw_charts/
+
+# Pipeline transient artifacts (D3-3 build log)
+scripts/build_all_conus.log
+
+# Local AI tooling state (claude-flow)
+.claude-flow/

@@ -465,3 +465,63 @@ def register(app):
     )
     def clear_wind_speed_live_tint(_blur, _submit):
         return "input-small"
+
+    # === Wind source chip ===
+    # Looks at the live indicators (className field-live on the two wind
+    # inputs + presence of wind-profile-store data) and surfaces a single
+    # always-visible badge on the Environment row so the pilot doesn't
+    # have to read the route's bottom strip to know the source.
+    #
+    #   LIVE   — both wind inputs are field-live AND winds-aloft column staged
+    #   LIVE   — both wind inputs are field-live (METAR only, no column yet)
+    #   MIXED  — one input field-live, the other edited
+    #   MANUAL — neither input field-live (typed by hand or stale)
+    @app.callback(
+        Output("wind-source-chip", "children"),
+        Output("wind-source-chip", "className"),
+        Output("wind-source-chip", "title"),
+        Input("env-wind-dir", "className"),
+        Input("env-wind-speed", "className"),
+        Input("wind-profile-store", "data"),
+        Input("active-metar-store", "data"),
+        prevent_initial_call=False,
+    )
+    def update_wind_source_chip(wd_cls, ws_cls, profile, metar):
+        wd_live = "field-live" in (wd_cls or "")
+        ws_live = "field-live" in (ws_cls or "")
+        has_column = bool(profile)
+        has_metar = bool(metar)
+
+        if wd_live and ws_live:
+            if has_column:
+                return (
+                    "LIVE · METAR + WINDS ALOFT",
+                    "wind-source-chip wind-source-chip-live",
+                    "Surface wind from METAR + per-altitude winds-aloft "
+                    "column from Open-Meteo. Re-fetched when you pick "
+                    "a different airport. Type into either input to "
+                    "switch to manual.",
+                )
+            return (
+                "LIVE · METAR",
+                "wind-source-chip wind-source-chip-live",
+                "Surface wind from the airport's METAR. No winds-aloft "
+                "column staged — altitude-changing sims will use surface "
+                "wind for all altitudes. Pick an airport to fetch the "
+                "column.",
+            )
+        if wd_live or ws_live:
+            return (
+                "MIXED · 1 LIVE, 1 MANUAL",
+                "wind-source-chip wind-source-chip-mixed",
+                "One wind input is from METAR, the other has been "
+                "edited. Sims will use whatever's typed in. Clear both "
+                "to a single source for a clean reading.",
+            )
+        return (
+            "MANUAL" if not (has_column or has_metar) else "MANUAL · stale METAR",
+            "wind-source-chip wind-source-chip-manual",
+            "Both wind values are user-entered. Live data is NOT being "
+            "used. Pick an airport in the top bar to auto-fill from "
+            "its METAR and stage the winds-aloft column.",
+        )

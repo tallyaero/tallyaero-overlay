@@ -18,8 +18,10 @@ from .s_turn import s_turn_layout
 from .turns_around_point import turns_point_layout
 from .rectangular_course import rect_course_layout
 from .eights_on_pylons import pylons_layout
+from .pattern import pattern_layout
 
-# All 11 maneuver layouts now extracted. Phase 1b complete.
+# 11 maneuver layouts + VFR pattern overlay. Phase 1b complete +
+# Phase B-A (pattern overlay).
 __all__: list[str] = [
     "impossible_turn_layout",
     "poweroff180_layout",
@@ -32,4 +34,5 @@ __all__: list[str] = [
     "turns_point_layout",
     "rect_course_layout",
     "pylons_layout",
+    "pattern_layout",
 ]

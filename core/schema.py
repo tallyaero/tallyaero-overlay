@@ -522,6 +522,13 @@ class RunwayEnd(BaseModel):
     elevation_ft: Optional[float] = None
     heading: Optional[float] = Field(None, ge=0, le=360)
     ils: Optional[str] = None
+    # FAA published traffic-pattern direction for this end (from the
+    # chart supplement — "Rgt tfc." annotation → "right", absence
+    # defaults to "left" per AC 90-66B). Populated by
+    # scripts/add_pattern_direction.py. None = data not yet
+    # populated; renderer falls back to LEFT with a "verify
+    # supplement" advisory.
+    pattern_direction: Optional[Literal["left", "right"]] = None
 
 
 class Runway(BaseModel):

@@ -21,6 +21,7 @@ from layouts.maneuvers.steep_spiral import steep_spiral_layout, steep_spiral_act
 from layouts.maneuvers.s_turn import s_turn_layout, s_turn_actions
 from layouts.maneuvers.turns_around_point import turns_point_layout, turns_point_actions
 from layouts.maneuvers.rectangular_course import rect_course_layout, rect_course_actions
+from layouts.maneuvers.pattern import pattern_layout, pattern_actions
 from layouts.maneuvers.eights_on_pylons import pylons_layout, pylons_actions
 from layouts.maneuvers.route import route_layout
 
@@ -164,6 +165,7 @@ def register(app):
         "turns_point": turns_point_actions,
         "rect_course": rect_course_actions,
         "pylons": pylons_actions,
+        "pattern": pattern_actions,
     }
 
     @app.callback(
@@ -231,6 +233,8 @@ def register(app):
             fields = rect_course_layout()
         elif maneuver == "pylons":
             fields = pylons_layout()
+        elif maneuver == "pattern":
+            fields = pattern_layout(default_elev=elev_ft)
 
         actions_builder = _ACTIONS_BY_MANEUVER.get(maneuver)
         if actions_builder is not None:

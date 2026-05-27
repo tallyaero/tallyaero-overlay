@@ -167,12 +167,50 @@ def route_layout(default_glide_ratio: float | None = None,
                   tooltip=("Use Open-Meteo per-sample winds aloft "
                            "instead of the manual wind in the sidebar.")),
             _pill("route-show-landable", "Landable",
+                  default_on=True,
                   tooltip=("Green raster where slope ≤ Max slope AND "
                            "OSM-tagged suitable land AND inside the "
                            "glide corridor. Blue polygons = AFH §18-7 "
                            "water/ditching option inside the corridor. "
-                           "Single combined signal — replaces the old "
-                           "Slope map / Suitable land toggles.")),
+                           "Default ON so the Engine-out drill always "
+                           "has a tier-2/3 forced-landing target to "
+                           "fall back to when no airport is in glide.")),
+            _pill("route-engineout-drill-pill", "Engine-out drill",
+                  tooltip=("Scrub along the route to see where you'd "
+                           "land if the engine failed at that point. "
+                           "Shows the wind-stretched glide ring at "
+                           "the route's cruise altitude and highlights "
+                           "airports inside it.")),
+            _pill("route-show-destination-pattern-pill", "Dest pattern",
+                  default_on=True,
+                  tooltip=("Auto-draw the VFR traffic pattern at the "
+                           "destination airport using the wind-favored "
+                           "runway and the published pattern direction "
+                           "(left default if data not in supplement).")),
+            _pill("route-show-checkpoints-pill", "Checkpoints",
+                  default_on=True,
+                  tooltip=("Auto-populate FAA-style VFR checkpoints "
+                           "along the route (FAA-H-8083-25B Ch. 16). "
+                           "Spacing scales with cruise TAS (~6 min "
+                           "of flight per checkpoint). Selection is "
+                           "biased toward airports + landmarks that "
+                           "keep you within glide reach of a divert "
+                           "field at cruise altitude.")),
+            # Runway picker — auto-selects the wind-favored end when a
+            # route is computed; user can override. Mirrored to an
+            # always-present store so the compute callback can read it
+            # even when the shelf has been unmounted (consistent with
+            # `rectcourse-downwind-edge` pattern).
+            _field("Runway", dcc.Dropdown(
+                id="route-runway-select-ui",
+                options=[],
+                placeholder="Auto (wind)",
+                clearable=True,
+                searchable=False,
+                style={"minWidth": "150px"},
+            ), tooltip="Override the runway-in-use at the destination. "
+                       "Default = the wind-favored end. Changing this "
+                       "re-renders the destination pattern."),
             # Max slope numeric — only matters when Landable is on,
             # so it lives next to that pill.
             _field("Max slope °", html.Span(
@@ -187,6 +225,33 @@ def route_layout(default_glide_ratio: float | None = None,
                        "3-7° = 'land upslope only'; >7° = too steep."),
             )),
         ]),
+
+        # Engine-out drill scrubber — initially hidden. Becomes
+        # visible only when the "Engine-out drill" pill is on AND a
+        # route has been computed (so total-distance > 0). The
+        # callback in callbacks/route.py wires it into a glide-ring
+        # polygon at the active sample point.
+        html.Div(
+            id="route-engineout-drill-container",
+            style={"display": "none", "width": "320px", "marginLeft": "16px"},
+            children=[
+                html.Div(
+                    "Engine fails at: drag to set NM along route",
+                    style={"fontSize": "10px", "color": "#94a3b8",
+                           "marginBottom": "2px"},
+                ),
+                dcc.Slider(
+                    # `-ui` suffix → this is the user-facing shelf
+                    # widget; canonical value lives in the
+                    # always-present `route-engineout-slider` Store
+                    # in desktop.py, mirrored via a callback.
+                    id="route-engineout-slider-ui",
+                    min=0, max=100, step=1, value=0,
+                    marks={0: "0", 100: "End"},
+                    tooltip={"placement": "bottom", "always_visible": False},
+                ),
+            ],
+        ),
 
         html.Button("Compute Route", id="compute-route-btn",
                     className="shelf-action shelf-action-draw",

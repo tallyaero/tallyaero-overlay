@@ -85,116 +85,371 @@ def register(app):
         return is_open, "▼"
 
     # === Maneuver info modal — populated from MANEUVER_INFO dict ===
-
+    #
+    # Each entry is (title, {description: [...], controls: [(control, effect), ...]}).
+    # The `controls` list documents which inputs actually move this
+    # maneuver's result so students iterate intelligently instead of
+    # blindly twiddling sliders. The lists were curated during the
+    # 2026-05-21 audit — they reflect what the sim ACTUALLY consumes,
+    # not the full sidebar's set of widgets. If a control is hidden by
+    # `callbacks/sidebar.py` for this maneuver, it's deliberately
+    # omitted here too (e.g. power slider for the angular-step ground-
+    # reference sims).
     MANEUVER_INFO = {
         "route": (
             "Route Planner",
-            [
-                "Great-circle leg between two airports.",
-                "Computes distance, true / magnetic course, true / magnetic "
-                "heading (wind-corrected), groundspeed, and ETE.",
-                "Magnetic variation pulled from the WMM at the origin "
-                "coordinates; wind reads from the sidebar Environment row.",
-            ],
+            {
+                "description": [
+                    "Multi-leg cross-country planning at the level of detail "
+                    "a real flight needs — wind-corrected headings, glide "
+                    "corridor, divert coverage, weather, airspace, and a "
+                    "live engine-out drill you can scrub along the route.",
+                    "It is a TRAINING + PRE-FLIGHT tool, not a substitute for "
+                    "filing an actual plan or briefing with a real source.",
+                ],
+                "capabilities": [
+                    ("Routing", [
+                        "Great-circle legs between airports, VORs, fixes, or "
+                        "GPS-typed points. Type / search / click to add.",
+                        "Wind-triangle math per leg — TH, MH, GS, drift, "
+                        "headwind/tailwind component, crosswind.",
+                        "Magnetic variation pulled from the WMM at the leg "
+                        "origin coordinates.",
+                        "Density-altitude-aware TAS from your IAS at cruise.",
+                    ]),
+                    ("Weather", [
+                        "METAR + winds-aloft column auto-fetched when you "
+                        "pick an airport in the top bar. The 'LIVE' chip on "
+                        "the Environment row confirms the source.",
+                        "Per-sample live winds along the route (Open-Meteo "
+                        "forecast) when the Live winds pill is on — so the "
+                        "corridor and engine-out drill use the wind that "
+                        "would actually exist at each point.",
+                        "Density-altitude chip flags hot/high performance "
+                        "degradation at the departure airport.",
+                    ]),
+                    ("Survivability", [
+                        "Engine-out glide corridor along the entire route — "
+                        "every point you could reach if the engine quit, "
+                        "terrain-clipped against ridges. Shaded green.",
+                        "Divert coverage — count of airports in glide + the "
+                        "longest 'no-divert stretch' in NM.",
+                        "Survivability score (0-100) blending corridor "
+                        "coverage, terrain margin, landable terrain, and "
+                        "divert availability.",
+                        "Landable raster — slope ≤ threshold AND OSM-suitable "
+                        "land cover AND inside the corridor. Forced-landing "
+                        "options when no airport's available.",
+                        "Water polygons inside the corridor (per AFH §18-7 "
+                        "ditching guidance) — yes, even water counts.",
+                    ]),
+                    ("Engine-out drill", [
+                        "Scrub a slider anywhere along the route to ask "
+                        "\"what if the engine quit HERE?\"",
+                        "Wind-stretched, terrain-clipped glide ring at the "
+                        "route altitude at that point — identical math to "
+                        "the corridor.",
+                        "Airports in the ring are color-coded by margin "
+                        "(green > 500 ft, amber ≤ 500 ft, gray outside).",
+                        "The actual engine-out planner runs from the "
+                        "scrubber position → best landing target. The same "
+                        "high-key + low-key + pattern math the standalone "
+                        "engine-out tool uses.",
+                        "Always gives you a landing target — FAA AFH Ch. 18 "
+                        "precedence: runway in glide → field in glide → "
+                        "water (ditch) in glide → nearest-of-anything "
+                        "outside the ring (red). Even with no good options, "
+                        "the line tells you what your best is. Use this to "
+                        "think through options BEFORE you fly — where am I "
+                        "exposed? where's my out?",
+                        "Glide-path color codes the outcome — green = "
+                        "runway with margin, yellow = makes it but barely / "
+                        "field or water with energy, red = below minimums "
+                        "or committed to something you can't reach.",
+                    ]),
+                    ("Airspace + NOTAMs", [
+                        "Class B/C/D, SUA, and TFR polygons clipped to the "
+                        "current viewport with one-glance under/over/pierce "
+                        "tagging.",
+                        "NOTAM filter applied to the corridor strip + your "
+                        "cruise altitude band + ETE window — only the "
+                        "NOTAMs that actually matter to this flight.",
+                    ]),
+                    ("Nav log", [
+                        "FAA Jeppesen-style checkpoint table with TAS, GS, "
+                        "ETE, ATE, fuel burn, frequencies, ATIS, and the "
+                        "departure/destination airport panels.",
+                        "Altitude profile chart inside the modal.",
+                        "Engine-out analysis appended (best target per leg, "
+                        "min AGL in corridor, divert summary).",
+                        "Printable via the Print button — designed to fit "
+                        "two sides of letter paper.",
+                    ]),
+                    ("Save / open", [
+                        "Save the route + perf inputs as JSON; reopen later "
+                        "to skip retyping the whole setup.",
+                    ]),
+                ],
+                "limits": [
+                    "NOT a substitute for filing an actual VFR/IFR flight "
+                    "plan or getting a real preflight briefing. Use 1800wxbrief "
+                    "or your dispatcher for the real thing.",
+                    "No IFR clearances, no instrument approach plates, no "
+                    "missed-approach geometry.",
+                    "METAR is one-shot at airport pick — not auto-refreshed. "
+                    "Re-pick the airport to refresh.",
+                    "Live winds aloft are FORECAST (Open-Meteo), not the "
+                    "ACARS observation. Forecast skill degrades > 12 hours "
+                    "out.",
+                    "Off-field landing centroids come from OpenStreetMap "
+                    "land-cover tagging — data quality varies regionally. "
+                    "ALWAYS verify visually before committing in flight.",
+                    "Glide ratio assumes CLEAN configuration with the prop "
+                    "windmilling. Feathered or flap-extended performance is "
+                    "different.",
+                    "Doesn't model partial-power scenarios — sim is either "
+                    "cruise (engine running) or engine-out (zero thrust).",
+                    "Engine-out drill is geometric — assumes the pilot "
+                    "actually flies the plan (reaches high-key on time, "
+                    "rolls out within a few degrees). Real-world margins "
+                    "are smaller. FAA-P-8740-44 commit altitude (400 ft "
+                    "AGL) is the floor below which no turn-back is safe.",
+                    "No real-time traffic or ADS-B integration.",
+                    "Terrain DEM samples on a grid — narrow ridges or "
+                    "towers between samples can be missed. Cross-check "
+                    "against a sectional.",
+                ],
+                "controls": [
+                    ("Waypoints (Route field)", "Type ICAO/IATA/name to add. Click 'Click to add' pill then click the map to drop intermediate waypoints. Endpoints must be airports."),
+                    ("Cruise Alt", "MSL feet. Drives density-altitude TAS, glide corridor reach, and which airports fall inside the corridor."),
+                    ("Cruise TAS / IAS", "TAS auto-fills from the aircraft's published cruise; override if practicing slow flight. IAS optional — derives from TAS if blank."),
+                    ("Glide Ratio + Glide IAS", "From the aircraft's POH (best-glide IAS, glide ratio at MGW). Drives corridor width and engine-out reach."),
+                    ("Climb IAS", "Vy (or Vx for terrain). Determines climb time-to-cruise leg of the profile."),
+                    ("Engine-out mode (multi-engine only)", "SE / Glide / Both. Single-engine performance corridor vs glide corridor vs both layered."),
+                    ("Corridor pill", "Master toggle for the glide corridor + landable + slope overlays. Off = clean route map."),
+                    ("Live winds pill", "Use Open-Meteo per-sample winds aloft instead of the sidebar's scalar wind. Default ON."),
+                    ("Landable pill", "Renders the green landable raster + blue water polygons. Also feeds the engine-out drill's off-field forced-landing options. Default ON."),
+                    ("Max slope °", "Threshold for landable raster. 3° = land upslope only is fine; > 7° = too steep."),
+                    ("Engine-out drill pill", "Reveals the route-scrubber slider. Drag to ask 'what if it failed here?' — terrain-clipped glide ring + planner output."),
+                    ("Wind (dir / speed)", "Manual fallback when no airport is picked. Auto-overridden by METAR when you pick an airport."),
+                    ("OAT + altimeter", "Density altitude → TAS conversion for the whole route."),
+                    ("Aircraft", "Picks published Vy / Vx / cruise TAS / glide ratio / glide IAS for the planner."),
+                    ("Map toggles", "Airports / Class B/C/D / SUA / TFR / VORs / Fixes — independent on/off. Declutter when the map gets busy."),
+                ],
+            },
         ),
         "impossible_turn": (
             "Impossible Turn",
-            [
-                "Engine failure on takeoff: can you turn back to the runway?",
-                "Simulates the trade between altitude and turn radius at "
-                "bank-angle limits, with reaction time and descent rate.",
-                "If the rollout heading is too far off the runway, the turn "
-                "is flagged as unsuccessful regardless of altitude lost.",
-            ],
+            {
+                "description": [
+                    "Engine failure on takeoff: can you turn back to the runway?",
+                    "Simulates the trade between altitude and turn radius at "
+                    "bank-angle limits, with reaction time and descent rate.",
+                    "If the rollout heading is too far off the runway, the turn "
+                    "is flagged as unsuccessful regardless of altitude lost.",
+                ],
+                "controls": [
+                    ("Reaction time", "Seconds of straight-ahead flight after failure before the turn begins — every extra second is altitude lost."),
+                    ("Bank angle (turn-back)", "Steeper bank → tighter radius and faster heading change, but higher Vs in the turn."),
+                    ("Runway / climb profile", "Sets the starting geometry (where the engine fails, distance to the threshold)."),
+                    ("Weight (occupants + fuel)", "Heavier → higher Vs and worse glide ratio."),
+                    ("Wind", "Crosswind drift through the turn; tailwind on the return leg shortens or lengthens the glide."),
+                    ("Engine option", "Selects the variant — drives best-glide IAS and ratio on multi-engine airframes."),
+                ],
+            },
         ),
         "poweroff180": (
             "Power-Off 180",
-            [
-                "Accuracy approach from downwind abeam the touchdown point.",
-                "Energy-based glide path with automatic slip if high.",
-                "ACS standard: -0 / +200 ft of the aim point.",
-            ],
+            {
+                "description": [
+                    "Accuracy approach from downwind abeam the touchdown point.",
+                    "Energy-based glide path with automatic slip if high.",
+                    "ACS standard: -0 / +200 ft of the aim point.",
+                ],
+                "controls": [
+                    ("Abeam distance", "Distance from the runway when the engine fails — wider = harder to make the field."),
+                    ("Pattern altitude", "Starting energy. Below ~700 AGL the turn-radius math no longer fits a standard pattern."),
+                    ("Touchdown point", "Where you're aiming; the simulator plans the glide to it."),
+                    ("Wind", "Tailwind on base shortens the geometry; headwind on final extends the float."),
+                    ("Weight", "Drives Vs and the load-factor-adjusted Vs-in-turn used for the safety gate."),
+                ],
+            },
         ),
         "engineout": (
             "Engine-Out Glide",
-            [
-                "Best-glide reach to a chosen touchdown spot from a chosen "
-                "starting altitude and heading.",
-                "Wind-aware: wind-correction angle + drift is included.",
-                "Use to evaluate field-selection and approach options.",
-            ],
+            {
+                "description": [
+                    "Best-glide reach to a chosen touchdown spot from a chosen "
+                    "starting altitude and heading.",
+                    "Wind-aware: wind-correction angle + drift is included.",
+                    "Use to evaluate field-selection and approach options.",
+                ],
+                "controls": [
+                    ("Starting altitude (AGL)", "Total energy available for the glide."),
+                    ("Starting heading", "Initial direction — drives whether L or R is the shorter first turn to the field."),
+                    ("Touchdown spot", "The chosen ground point. The simulator plans tangent entry to the high-key spiral."),
+                    ("Flap / prop setting", "Clean vs flaps; windmilling vs feathered prop — both change glide ratio."),
+                    ("Wind", "Bias toward upwind fields; tailwind on the final approach lengthens float."),
+                    ("Weight", "Heavier → higher Vs but glide ratio approximately preserved (drag dominated)."),
+                ],
+            },
         ),
         "steep_turn": (
             "Steep Turns (45° / 50°)",
-            [
-                "Constant-altitude turns at a fixed bank.",
-                "Load factor = 1 / cos(bank); stall speed scales as sqrt(n).",
-                "ACS: ±100 ft alt, ±10 kt IAS, ±10° rollout heading.",
-            ],
+            {
+                "description": [
+                    "Constant-altitude turns at a fixed bank.",
+                    "Load factor = 1 / cos(bank); stall speed scales as sqrt(n).",
+                    "ACS: ±100 ft alt, ±10 kt IAS, ±10° rollout heading.",
+                ],
+                "controls": [
+                    ("Bank angle (45° / 50°)", "Drives load factor and Vs in the turn directly."),
+                    ("IAS (entry)", "Determines stall margin at the chosen bank."),
+                    ("Power", "At design power (cruise) you maintain altitude; off-design drifts the sim."),
+                    ("Sequence (L / R / L-R)", "Whether to do one direction or reverse direction mid-maneuver."),
+                    ("Weight", "Higher weight → higher Vs and lower margin."),
+                    ("Wind", "Crab through the turn; affects groundspeed but not the maneuver outcome."),
+                ],
+            },
         ),
         "chandelle": (
             "Chandelle",
-            [
-                "Maximum-performance 180° climbing turn.",
-                "Constant bank in the first 90°, then constant pitch as bank "
-                "reduces to wings-level at the 180° point.",
-                "Completion near power-on stall, within ±10° of target.",
-                "Design power: 100%. Reduced power lowers altitude gained "
-                "and can fail to reach the 180° exit at target IAS.",
-            ],
+            {
+                "description": [
+                    "Maximum-performance 180° climbing turn.",
+                    "Constant bank in the first 90°, then constant pitch as bank "
+                    "reduces to wings-level at the 180° point.",
+                    "Completion near power-on stall, within ±10° of target.",
+                ],
+                "controls": [
+                    ("Power", "Design power is 100%. Reduced power lowers altitude gained and can fail to reach the 180° exit at target IAS."),
+                    ("Entry IAS", "Starts the energy budget — sets the target rollout IAS (just above Vs)."),
+                    ("Engine option", "Multi-engine variants — total HP changes climb performance."),
+                    ("Weight (occupants + fuel)", "Heavier → less excess thrust → less altitude gained."),
+                    ("Density altitude (OAT + altimeter)", "Hot/high reduces engine output and TAS — alters ROC."),
+                    ("Wind", "Drift through the climbing turn; doesn't affect the energy result, only ground track."),
+                ],
+            },
         ),
         "lazy8": (
             "Lazy Eight",
-            [
-                "Symmetrical climbing/descending S — coordination at varying "
-                "airspeeds.",
-                "Max bank ~30° at the 90° point, max pitch ~10° at 45°.",
-                "Mirror entry and exit altitudes within ±100 ft.",
-            ],
+            {
+                "description": [
+                    "Symmetrical climbing/descending S — coordination at varying "
+                    "airspeeds.",
+                    "Max bank ~30° at the 90° point, max pitch ~10° at 45°.",
+                    "Mirror entry and exit altitudes within ±100 ft.",
+                ],
+                "controls": [
+                    ("Entry IAS", "Sets the energy budget — too low risks stall at the apex."),
+                    ("Power", "Design power for level mirror; off-design causes altitude drift between cycles."),
+                    ("Number of eights", "How many cycles to fly."),
+                    ("Bank target", "The apex bank — POH dynamics determine roll-rate ramp."),
+                    ("Weight", "Higher weight → higher Vs at the apex."),
+                    ("Wind", "Drift through the figure-8; ground track distorts but altitude profile is preserved."),
+                ],
+            },
         ),
         "steep_spiral": (
             "Steep Spiral",
-            [
-                "Gliding turn around a surface point, constant ground-track "
-                "radius, three full 360° turns minimum.",
-                "Constant best-glide IAS; bank varies with wind.",
-                "Finish no lower than 1500 ft AGL.",
-            ],
+            {
+                "description": [
+                    "Gliding turn around a surface point, constant ground-track "
+                    "radius, three full 360° turns minimum.",
+                    "Constant best-glide IAS; bank varies with wind.",
+                    "Finish no lower than 1500 ft AGL.",
+                ],
+                "controls": [
+                    ("Reference point", "Click the ground point to orbit. Determines geometric center."),
+                    ("Entry altitude (AGL)", "Total energy. Below ~5000 ft you may not complete 3 turns above the 1500-ft floor."),
+                    ("Bank angle", "Base bank — sim modulates with wind. Steeper = tighter radius but shorter time per turn."),
+                    ("Number of turns", "Minimum 3 per FAA. More turns lose more altitude."),
+                    ("Power (residual)", "Stock ACS is idle. Above 5% residual is off-design and flagged."),
+                    ("Wind", "Sets bank variation around the orbit — steeper downwind, shallower upwind."),
+                    ("Weight", "Affects Vs and stall margin in the descending turn."),
+                ],
+            },
         ),
         "s_turn": (
             "S-Turns Across a Road",
-            [
-                "Two equal semicircles on opposite sides of a road, ground-"
-                "speed compensation via varying bank.",
-                "Wings level momentarily as you cross.",
-                "Standard ground-reference maneuver from FAA AFH Ch. 7.",
-            ],
+            {
+                "description": [
+                    "Two equal semicircles on opposite sides of a road, ground-"
+                    "speed compensation via varying bank.",
+                    "Wings level momentarily as you cross.",
+                    "Standard ground-reference maneuver from FAA AFH Ch. 7.",
+                ],
+                "controls": [
+                    ("Reference line (2 clicks)", "Defines the line to cross. Bearing matters — perpendicular to wind is the ACS expectation."),
+                    ("Number of S-turns", "Each S = 2 semicircles."),
+                    ("Entry side + first turn", "Which side of the line to start on and which way to bank first."),
+                    ("Base bank angle", "Reference value; sim caps actual bank at 45° (FAA ACS standard)."),
+                    ("IAS", "Held constant. Drives Vs and the wind-corrected groundspeed range."),
+                    ("Power", "Sets altitude maintenance during the turns (65% ≈ level; less = lose altitude)."),
+                    ("Wind", "The whole point — drives bank variation. Stronger wind → larger bank swings."),
+                    ("Weight", "Affects Vs and margin."),
+                ],
+            },
         ),
         "turns_point": (
             "Turns Around a Point",
-            [
-                "Constant-radius ground turns around a chosen point.",
-                "Bank varies inversely with groundspeed — steepest downwind, "
-                "shallowest upwind.",
-                "Standard ground-reference maneuver from FAA AFH Ch. 7.",
-            ],
+            {
+                "description": [
+                    "Constant-radius ground turns around a chosen point.",
+                    "Bank varies inversely with groundspeed — steepest downwind, "
+                    "shallowest upwind.",
+                    "Standard ground-reference maneuver from FAA AFH Ch. 7.",
+                ],
+                "controls": [
+                    ("Center point", "Click the ground point to orbit."),
+                    ("Orbit radius", "Tighter radius needs steeper bank — sim flags when geometry would demand > 45°."),
+                    ("Direction (L / R)", "Pattern direction around the point."),
+                    ("Entry heading", "Defaults to downwind entry; override for non-standard entries."),
+                    ("Number of turns", "How many complete 360°."),
+                    ("IAS", "Held constant. With wind, GS varies → bank varies."),
+                    ("Wind", "The whole point — bank variation directly reflects wind triangle."),
+                    ("Weight", "Affects Vs in the steepest (downwind) part of the orbit."),
+                ],
+            },
         ),
         "rect_course": (
             "Rectangular Course",
-            [
-                "Wind-aware pattern around a rectangle on the ground.",
-                "Crab angles change leg by leg; pace via groundspeed.",
-                "Foundation for traffic-pattern flight.",
-            ],
+            {
+                "description": [
+                    "Wind-aware pattern around a rectangle on the ground.",
+                    "Crab angles change leg by leg; pace via groundspeed.",
+                    "Foundation for traffic-pattern flight.",
+                ],
+                "controls": [
+                    ("4 corner clicks", "Defines the rectangle. Sim snaps to perfect right angles."),
+                    ("Downwind edge", "Auto-picked from wind direction; override to fly a specific orientation."),
+                    ("Direction (L / R)", "Standard left pattern or right."),
+                    ("Number of circuits", "How many full loops."),
+                    ("IAS", "Held constant. Drives groundspeed on each leg via the wind triangle."),
+                    ("Wind", "Drives the per-leg crab and groundspeed (see the per-leg WCA table in results)."),
+                    ("Weight", "Affects Vs and the load-factor-adjusted margin in the corner turns."),
+                ],
+            },
         ),
         "pylons": (
             "Eights on Pylons",
-            [
-                "Two pylons with a pivotal-altitude geometry — wingtip stays "
-                "on each pylon through the turn.",
-                "Altitude = (groundspeed_kt)^2 / 11.3 (pivotal).",
-                "Commercial pilot ACS.",
-            ],
+            {
+                "description": [
+                    "Two pylons with a pivotal-altitude geometry — wingtip stays "
+                    "on each pylon through the turn.",
+                    "Altitude = (groundspeed_kt)^2 / 11.3 (pivotal).",
+                    "Commercial pilot ACS.",
+                ],
+                "controls": [
+                    ("Pylon positions (2 clicks)", "Pylon spacing must be 3-6× turn radius for a clean figure-8. Sim errors below 2.5×."),
+                    ("IAS", "Indirectly sets pivotal altitude via the GS chain (IAS → TAS at density alt → ±wind = GS). PA = GS² / 11.3. Choose IAS to land the resulting PA in the 600-1000 ft AGL band."),
+                    ("Wind", "PA = GS² / 11.3 — so PA varies every degree around the orbit as GS changes (max downwind, min upwind). Stronger wind = wider PA range."),
+                    ("Density altitude (OAT + altimeter)", "Hot/high → higher TAS for the same IAS → higher GS → higher PA."),
+                    ("Bank angle", "Sets turn radius; combined with pylon spacing determines the figure-8 geometry. Doesn't affect PA."),
+                    ("Number of eights", "How many figure-8 cycles."),
+                    ("Weight", "Affects Vs but not PA (PA depends only on GS)."),
+                ],
+            },
         ),
     }
 
@@ -213,11 +468,148 @@ def register(app):
         if trigger == "close-maneuver-info":
             return False, no_update, no_update
         if trigger == "open-maneuver-info":
-            title, bullets = MANEUVER_INFO.get(
-                maneuver,
-                ("Maneuver Info", ["Pick a maneuver from the dropdown to see its details."]),
+            DEFAULT = (
+                "Maneuver Info",
+                {
+                    "description": ["Pick a maneuver from the dropdown to see its details."],
+                    "controls": [],
+                },
             )
-            body = html.Ul([html.Li(b) for b in bullets], style={"fontSize": "13px", "lineHeight": "1.5"})
+            title, info = MANEUVER_INFO.get(maneuver, DEFAULT)
+            # Backwards-compat: old entries were `(title, [bullets])` tuples.
+            if isinstance(info, list):
+                info = {"description": info, "controls": []}
+
+            description = info.get("description", []) or []
+            capabilities = info.get("capabilities", []) or []
+            limits = info.get("limits", []) or []
+            controls = info.get("controls", []) or []
+
+            body_children = []
+            if description:
+                body_children.append(html.Ul(
+                    [html.Li(b) for b in description],
+                    style={"fontSize": "13px", "lineHeight": "1.55", "marginTop": "4px"},
+                ))
+
+            # Capabilities — what the tool actually does, grouped into
+            # named sub-sections so the pilot can scan by category.
+            # Schema: list of (section_title, [bullet, ...]) pairs.
+            if capabilities:
+                body_children.append(html.Div(
+                    "What it does",
+                    style={
+                        "fontSize": "11px",
+                        "fontWeight": "600",
+                        "textTransform": "uppercase",
+                        "letterSpacing": "0.06em",
+                        "color": "var(--ta-text-muted, #6b7280)",
+                        "marginTop": "14px",
+                        "marginBottom": "6px",
+                        "borderTop": "1px solid var(--ta-border, #e5e7eb)",
+                        "paddingTop": "10px",
+                    },
+                ))
+                cap_children = []
+                for section_title, bullets in capabilities:
+                    cap_children.append(html.Div(
+                        section_title,
+                        style={
+                            "fontSize": "12px",
+                            "fontWeight": "600",
+                            "color": "var(--ta-text, #1e293b)",
+                            "marginTop": "8px",
+                            "marginBottom": "2px",
+                        },
+                    ))
+                    cap_children.append(html.Ul(
+                        [html.Li(b) for b in (bullets or [])],
+                        style={
+                            "fontSize": "12px",
+                            "lineHeight": "1.5",
+                            "marginTop": "2px",
+                            "marginBottom": "4px",
+                            "paddingLeft": "20px",
+                        },
+                    ))
+                body_children.append(html.Div(cap_children))
+
+            # Limits — what the tool DOESN'T do. As important as the
+            # capabilities list; explicitly framed so the pilot doesn't
+            # mistake this for a substitute for real briefing tools.
+            if limits:
+                body_children.append(html.Div(
+                    "What it doesn't do",
+                    style={
+                        "fontSize": "11px",
+                        "fontWeight": "600",
+                        "textTransform": "uppercase",
+                        "letterSpacing": "0.06em",
+                        "color": "var(--acs-marginal, #b45309)",
+                        "marginTop": "14px",
+                        "marginBottom": "6px",
+                        "borderTop": "1px solid var(--ta-border, #e5e7eb)",
+                        "paddingTop": "10px",
+                    },
+                ))
+                body_children.append(html.Ul(
+                    [html.Li(b) for b in limits],
+                    style={
+                        "fontSize": "12px",
+                        "lineHeight": "1.5",
+                        "marginTop": "2px",
+                        "color": "var(--ta-text, #1e293b)",
+                        "paddingLeft": "20px",
+                    },
+                ))
+
+            if controls:
+                # Heading for the controls section.
+                body_children.append(html.Div(
+                    "Controls that affect outcome",
+                    style={
+                        "fontSize": "11px",
+                        "fontWeight": "600",
+                        "textTransform": "uppercase",
+                        "letterSpacing": "0.06em",
+                        "color": "var(--ta-text-muted, #6b7280)",
+                        "marginTop": "12px",
+                        "marginBottom": "6px",
+                        "borderTop": "1px solid var(--ta-border, #e5e7eb)",
+                        "paddingTop": "10px",
+                    },
+                ))
+                # Two-column control + effect grid for scanability.
+                body_children.append(html.Div(
+                    [
+                        html.Div(
+                            [
+                                html.Div(name, style={
+                                    "fontSize": "12px",
+                                    "fontWeight": "600",
+                                    "color": "var(--ta-text, #1e293b)",
+                                    "minWidth": "150px",
+                                    "paddingRight": "10px",
+                                }),
+                                html.Div(effect, style={
+                                    "fontSize": "12px",
+                                    "color": "var(--ta-text, #1e293b)",
+                                    "lineHeight": "1.4",
+                                    "flex": "1",
+                                }),
+                            ],
+                            style={
+                                "display": "flex",
+                                "padding": "5px 0",
+                                "borderBottom": "1px solid var(--ta-border-soft, #f1f5f9)",
+                            },
+                        )
+                        for name, effect in controls
+                    ],
+                    style={"display": "block"},
+                ))
+
+            body = html.Div(body_children)
             return True, title, body
         return is_open, no_update, no_update
 

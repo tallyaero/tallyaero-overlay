@@ -202,6 +202,7 @@ def compute_route_corridor(
     terrain_step_nm: float = 0.25,
     sample_alts_msl_ft: Optional[list[float]] = None,
     sample_winds: Optional[list[tuple[float, float]]] = None,
+    path_samples: Optional[list[tuple[float, float]]] = None,
 ) -> tuple[list[list[list[float]]], dict]:
     """Compute the union of glide envelopes along a route.
 
@@ -220,8 +221,16 @@ def compute_route_corridor(
     derived per-sample from the DEM and the per-direction reach is
     ridge-clipped by ray-march.
     """
-    samples = sample_route_points(origin_lat, origin_lon,
-                                  dest_lat, dest_lon, spacing_nm)
+    # When the caller has already computed the path samples (e.g.,
+    # because the route bends through VFR checkpoints — D2-5g), use
+    # those instead of regenerating a straight-line path between
+    # origin and destination. This keeps the corridor envelope
+    # following the actual flown route.
+    if path_samples is not None and len(path_samples) >= 2:
+        samples = list(path_samples)
+    else:
+        samples = sample_route_points(origin_lat, origin_lon,
+                                      dest_lat, dest_lon, spacing_nm)
     have_terrain = elevation_fn is not None
 
     # Per-sample altitude: either explicit from caller (flight profile)

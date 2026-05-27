@@ -35,6 +35,64 @@ app = dash.Dash(
 )
 server = app.server
 
+
+# ===========================================================================
+# D3-3 — Self-hosted FAA chart tile server
+# ===========================================================================
+# Serves local tiles from `tiles/{layer}/{z}/{x}/{y}.png`. To populate:
+#   1. brew install gdal
+#   2. Download FAA GeoTIFFs from aeronav.faa.gov (28-day cycle, free)
+#   3. Reproject to Web Mercator:
+#        gdalwarp -t_srs EPSG:3857 src.tif sec_3857.tif
+#   4. Generate tile pyramid:
+#        gdal2tiles.py -z 6-12 sec_3857.tif tiles/sectional/
+#   5. Restart the app — picker auto-shows the option.
+#
+# gdal2tiles writes a TMS y-axis pyramid by default; we serve it as
+# standard XYZ by inverting y (Leaflet expects XYZ). The chart-layer
+# picker in desktop.py auto-detects whether `tiles/sectional/` exists
+# at startup and shows/hides the option accordingly.
+import base64 as _base64
+from pathlib import Path as _Path
+from flask import send_from_directory as _send_from_directory, Response as _Response
+
+_TILES_ROOT = _Path(__file__).parent / "tiles"
+
+# 1×1 transparent PNG. Returned for any tile coordinate that's
+# outside the loaded chart's geographic coverage (e.g. Leaflet
+# panning past the Charlotte sectional's eastern edge). Returning
+# a real PNG with 200 instead of a 404 keeps Leaflet's tile loader
+# quiet — no broken-image icons, no debug-mode 500s, no console spam.
+_BLANK_TILE_PNG = _base64.b64decode(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAA"
+    "AAYAAjCB0C8AAAAASUVORK5CYII="
+)
+
+@server.route("/tiles/<layer>/<int:z>/<int:x>/<int:y>.png")
+def _serve_chart_tile(layer: str, z: int, x: int, y: int):
+    # Whitelist allowed layers to prevent path traversal.
+    if layer not in ("sectional", "tac", "ifrlow", "ifrhigh"):
+        return _Response(_BLANK_TILE_PNG, mimetype="image/png")
+    layer_dir = _TILES_ROOT / layer
+    if not layer_dir.is_dir():
+        return _Response(_BLANK_TILE_PNG, mimetype="image/png")
+    # gdal2tiles outputs TMS by default → y is flipped vs XYZ. Try
+    # both: XYZ first (modern), fall back to TMS (gdal2tiles default).
+    candidates = [
+        layer_dir / str(z) / str(x) / f"{y}.png",
+        layer_dir / str(z) / str(x) / f"{(1 << z) - 1 - y}.png",  # TMS flip
+    ]
+    for path in candidates:
+        if path.is_file():
+            return _send_from_directory(path.parent, path.name,
+                                          mimetype="image/png",
+                                          max_age=86400)
+    # Outside the chart's coverage area → return blank tile so
+    # Leaflet renders nothing there silently.
+    return _Response(_BLANK_TILE_PNG, mimetype="image/png",
+                       headers={"Cache-Control": "public, max-age=86400"})
+
+
 # Wire every callback decomposed out of this file during Phase 1.
 # Order is for readability only — Dash fires callbacks by input graph.
 from callbacks import register_all

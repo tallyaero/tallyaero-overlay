@@ -16,11 +16,64 @@ to point at this module instead.
 
 from __future__ import annotations
 
+import os
+
 from dash import dcc, html
 import dash_bootstrap_components as dbc
 import dash_leaflet as dl
 
 from core.data_loader import available_aircraft
+
+
+# OpenAIP aeronautical-overlay tile API key. Read from env at module
+# load. When absent, the OpenAIP overlay TileLayer is mounted with
+# opacity 0 + a no-op URL, and the chart-layer picker hides the
+# OpenAIP option so users don't see broken tiles.
+_OPENAIP_KEY = (os.environ.get("TALLYAERO_OPENAIP_KEY") or "").strip()
+_OPENAIP_TILE_URL = (
+    f"https://api.tiles.openaip.net/api/data/openaip/"
+    "{z}/{x}/{y}.png" + (f"?apiKey={_OPENAIP_KEY}" if _OPENAIP_KEY else "")
+)
+_HAVE_OPENAIP = bool(_OPENAIP_KEY)
+
+
+# D3-3: Auto-detect self-hosted FAA chart tile pyramids. The app.py
+# Flask route serves /tiles/<layer>/<z>/<x>/<y>.png from the repo's
+# `tiles/<layer>/` directory. We check at module load whether each
+# layer's directory exists + has any tile files, and only expose
+# picker options for layers the user has actually generated.
+_TILES_BASE = (os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                 + "/tiles")
+def _have_layer(layer: str) -> bool:
+    layer_dir = os.path.join(_TILES_BASE, layer)
+    if not os.path.isdir(layer_dir):
+        return False
+    # Cheap check: any zoom-level subdir present.
+    try:
+        for entry in os.listdir(layer_dir):
+            if entry.isdigit():
+                return True
+    except OSError:
+        return False
+    return False
+
+_HAVE_SECTIONAL = _have_layer("sectional")
+_HAVE_TAC = _have_layer("tac")
+_HAVE_IFR_LOW = _have_layer("ifrlow")
+
+# 1×1 transparent PNG data URI. Used as the TileLayer URL for chart
+# layers the user HASN'T generated yet — Leaflet still creates tile
+# DOM elements for mounted TileLayers (opacity is purely cosmetic;
+# tiles get fetched regardless), so we point at this no-op to avoid
+# 404/500 spam on every pan/zoom for layers with no source data.
+_BLANK_TILE_DATA_URI = (
+    "data:image/png;base64,"
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0"
+    "C8AAAAASUVORK5CYII="
+)
+
+def _layer_url(layer: str, available: bool) -> str:
+    return (f"/tiles/{layer}/" + "{z}/{x}/{y}.png") if available else _BLANK_TILE_DATA_URI
 
 
 def _top_strip():
@@ -79,6 +132,7 @@ def _top_strip():
                             placeholder="Select maneuver",
                             options=[
                                 {"label": "Route Planner", "value": "route"},
+                                {"label": "Pattern", "value": "pattern"},
                                 {"label": "Impossible Turn", "value": "impossible_turn"},
                                 {"label": "Power-Off 180", "value": "poweroff180"},
                                 {"label": "Engine-Out Glide", "value": "engineout"},
@@ -417,7 +471,19 @@ def desktop_layout():
 
                 # === Environment section (airport moved to top bar) ===
                 html.Div(className="sidebar-section", children=[
-                    html.Div("Environment", className="sidebar-section-title"),
+                    html.Div([
+                        html.Span("Environment", className="sidebar-section-title"),
+                        # Live/manual wind-source badge — written by the
+                        # `update_wind_source_chip` callback when the
+                        # METAR / wind-profile stores change OR the user
+                        # edits the wind inputs. Always visible right
+                        # next to the section title so the pilot can see
+                        # at a glance whether the figures came from a
+                        # live METAR pull or were typed by hand.
+                        html.Span("MANUAL", id="wind-source-chip",
+                                  className="wind-source-chip wind-source-chip-manual"),
+                    ], style={"display": "flex", "alignItems": "center",
+                              "justifyContent": "space-between", "gap": "6px"}),
                     html.Div(style={"display": "flex", "gap": "8px"}, children=[
                         html.Div([
                             html.Label("Wind °", className="input-label-sm"),
@@ -638,6 +704,79 @@ def desktop_layout():
                                    "dot in Click-to-add mode to drop a "
                                    "waypoint there."),
                         ),
+                        # Chart layer picker. Picker shows whichever
+                        # combinations of (a) OpenAIP key + (b) self-
+                        # hosted tile pyramids are available at
+                        # startup. Hidden entirely when neither.
+                        # "Sat" = imagery only. "+ OpenAIP" = aero
+                        # data overlay on top. "Sectional"/"TAC"/
+                        # "IFR Lo" = self-hosted FAA chart base
+                        # (replaces imagery underneath).
+                        html.Div(
+                            dcc.RadioItems(
+                                id="map-chart-layer",
+                                options=[
+                                    {"label": "Sat", "value": "imagery"},
+                                    *([{"label": "+ OpenAIP",
+                                         "value": "openaip"}]
+                                      if _HAVE_OPENAIP else []),
+                                    *([{"label": "Sectional",
+                                         "value": "sectional"}]
+                                      if _HAVE_SECTIONAL else []),
+                                    *([{"label": "TAC",
+                                         "value": "tac"}]
+                                      if _HAVE_TAC else []),
+                                    *([{"label": "IFR Lo",
+                                         "value": "ifrlow"}]
+                                      if _HAVE_IFR_LOW else []),
+                                ],
+                                value="imagery",
+                                className="chart-layer-list shelf-toggle-chip-checklist",
+                                inline=True,
+                            ),
+                            id="chart-layer-wrap",
+                            className="shelf-toggle-chip chart-layer-chip",
+                            style={
+                                "display": "inline-flex" if (
+                                    _HAVE_OPENAIP or _HAVE_SECTIONAL
+                                    or _HAVE_TAC or _HAVE_IFR_LOW
+                                ) else "none"
+                            },
+                            title=("Switch map base. Sat = satellite "
+                                   "imagery. + OpenAIP overlays "
+                                   "airspaces/airports/navaids. "
+                                   "Sectional/TAC/IFR Lo = self-hosted "
+                                   "FAA charts (gdal2tiles pyramids "
+                                   "under ./tiles/)."),
+                        ),
+                        # Airports overlay toggle — gives the pilot a
+                        # way to declutter when other layers (airspace,
+                        # waypoints, glide ring) make the map noisy.
+                        # Default ON. Sub-options let the pilot keep
+                        # only their preferred airport categories.
+                        html.Div(
+                            dcc.Checklist(
+                                id="map-show-airports",
+                                options=[
+                                    {"label": "Large", "value": "large"},
+                                    {"label": "Med", "value": "medium"},
+                                    {"label": "Small", "value": "small"},
+                                    {"label": "Seaplane", "value": "seaplane"},
+                                ],
+                                # Default: only large + medium on at
+                                # the global view — small airports
+                                # carpet the map until zoomed in.
+                                value=["large", "medium", "small"],
+                                className="airports-toggle-list shelf-toggle-chip-checklist",
+                                inline=True,
+                            ),
+                            id="airports-toggle-wrap",
+                            className="shelf-toggle-chip airports-toggle-chip",
+                            title=("Show airport markers on the map by "
+                                   "category. Uncheck any category to "
+                                   "declutter. Small airports only "
+                                   "render at zoom 8+ for performance."),
+                        ),
                         html.Div(id="maneuver-actions-container",
                                  className="map-overlay-actions"),
                         html.Div(className="map-overlay-divider"),
@@ -645,6 +784,21 @@ def desktop_layout():
                         html.Button("Reset Clicks", id="reset-clicks", className="map-overlay-btn"),
                         html.Button("Undo", id="undo-last-click", className="map-overlay-btn map-overlay-btn-undo"),
                     ]),
+
+                    # Bottom-right corner toggle for the below-strip
+                    # (View Nav Log button + wind + profile chart).
+                    # Sits OUTSIDE the strip so the strip can fully
+                    # hide when collapsed — no floating chevron, no
+                    # peeking-through artifacts. Always visible
+                    # regardless of the strip's state so the pilot
+                    # can bring the strip back when they want it.
+                    html.Button(
+                        "▼ Info",
+                        id="route-below-collapse-btn",
+                        className="route-below-collapse-corner-btn",
+                        title="Collapse / expand the info bar at the bottom of the screen",
+                        n_clicks=0,
+                    ),
 
                     dl.Map(
                         id="map",
@@ -664,9 +818,60 @@ def desktop_layout():
                             # children below). When OpenAIP key + sectional tiles
                             # land, the LayersControl wrapper returns with the
                             # known-good child shape.
+                            # Base imagery — Esri World Imagery.
+                            # Always-on, opacity stays at 1.
                             dl.TileLayer(
+                                id="map-tile-imagery",
                                 url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
                                 attribution="Tiles &copy; Esri",
+                            ),
+                            # OpenAIP aeronautical overlay — TRANSPARENT
+                            # PNG with airspaces / airports / navaids /
+                            # nav fixes / restricted areas drawn over a
+                            # null background. Sits on top of imagery
+                            # when the user picks "OpenAIP" in the
+                            # chart picker; opacity flipped 0/1 by the
+                            # switch_chart_layer callback. URL carries
+                            # the API key from $TALLYAERO_OPENAIP_KEY;
+                            # if the key is missing, the URL still
+                            # mounts (just won't return tiles).
+                            dl.TileLayer(
+                                id="map-tile-openaip",
+                                url=_OPENAIP_TILE_URL,
+                                attribution=("Aeronautical data &copy; "
+                                             "OpenAIP"),
+                                opacity=0,
+                                maxZoom=14,
+                            ),
+                            # Self-hosted FAA chart layers (D3-3).
+                            # URL points at the Flask tile route in
+                            # app.py when tiles exist; otherwise at a
+                            # no-op data URI so Leaflet's tile fetcher
+                            # doesn't generate 404 spam for layers the
+                            # user hasn't generated yet.
+                            dl.TileLayer(
+                                id="map-tile-vfrsec",
+                                url=_layer_url("sectional", _HAVE_SECTIONAL),
+                                attribution=("Sectional &copy; FAA — "
+                                             "self-hosted"),
+                                opacity=0,
+                                maxZoom=12,
+                            ),
+                            dl.TileLayer(
+                                id="map-tile-tac",
+                                url=_layer_url("tac", _HAVE_TAC),
+                                attribution=("TAC &copy; FAA — "
+                                             "self-hosted"),
+                                opacity=0,
+                                maxZoom=13,
+                            ),
+                            dl.TileLayer(
+                                id="map-tile-ifrlow",
+                                url=_layer_url("ifrlow", _HAVE_IFR_LOW),
+                                attribution=("IFR Low &copy; FAA — "
+                                             "self-hosted"),
+                                opacity=0,
+                                maxZoom=11,
                             ),
                             # Engine-out glide ring lives in its own
                             # layer so the toggle can auto-draw it
@@ -684,10 +889,32 @@ def desktop_layout():
                             # VOR symbol doesn't get hidden under a
                             # Class B fill.
                             dl.LayerGroup(id="waypoints-layer"),
+                            # Airports overlay (always-mounted) — driven
+                            # by `map-show-airports` checklist + map
+                            # bounds + zoom. Categories: large / medium
+                            # / small / heliport / seaplane.
+                            dl.LayerGroup(id="airports-layer"),
                             dl.LayerGroup(id="layer"),
                             dl.LayerGroup(id="scrubber-layer"),  # Dedicated layer for time scrubber marker
                             dl.LayerGroup(id="route-layer"),     # Phase 5 — great-circle route
                             dl.LayerGroup(id="route-pending-markers"),  # 7N — pre-Compute waypoint dots
+                            # Engine-out drill layer — rendered on top of
+                            # route-layer when the user scrubs along the
+                            # route in "Engine-out drill" mode. Cleared
+                            # when the drill is toggled off or the route
+                            # is recomputed.
+                            dl.LayerGroup(id="route-engineout-layer"),
+                            # Destination VFR pattern — auto-drawn at
+                            # the route's destination airport. Rendered
+                            # by its own callback (decoupled from the
+                            # main route-compute callback) so changing
+                            # the runway / pill / wind doesn't trigger
+                            # a full route rebuild and doesn't create a
+                            # dependency cycle.
+                            dl.LayerGroup(id="route-dest-pattern-layer"),
+                            # VFR checkpoint diamonds + labels —
+                            # rendered by the checkpoint callback.
+                            dl.LayerGroup(id="route-checkpoints-layer"),
                             dl.ScaleControl(position="bottomleft", imperial=True, metric=False),  # Scale bar - JS converts to NM
                             # Windsock indicator overlay - default 360@0kt (calm), updated by callback
                             html.Div(
@@ -744,12 +971,27 @@ def desktop_layout():
             # factor list, divert block, terrain block, wind, profile
             # chart. Populated by the route compute callback; empty
             # until a route is computed.
-            dcc.Loading(
-                children=html.Div(id="route-below-strip"),
-                type="default",
-                color="#0d59f2",
-                delay_show=200,
+            #
+            # Collapsible — the user wanted maximum map interactive
+            # area. Chevron button on the right edge flips
+            # `route-below-strip-wrap.className` between expanded and
+            # collapsed; CSS does the rest. State persists via the
+            # `route-below-collapsed-store` so the bar's state survives
+            # recomputes.
+            html.Div(
+                id="route-below-strip-wrap",
+                className="route-below-strip-wrap",
+                children=[
+                    dcc.Loading(
+                        children=html.Div(id="route-below-strip"),
+                        type="default",
+                        color="#0d59f2",
+                        delay_show=200,
+                    ),
+                ],
             ),
+            dcc.Store(id="route-below-collapsed-store", data=False,
+                       storage_type="local"),
 
             html.Div(id="click_debug", style={
                 "padding": "10px 12px",
@@ -849,6 +1091,35 @@ def desktop_layout():
             # the Output target must also live here to remain valid in
             # every maneuver context.
             dcc.Store(id="rectcourse-snapped-store", data={}),
+            # Engine-out drill stores — mirrored from the route shelf's
+            # pill + slider (only mounted when Route Planner is active).
+            # The drill rendering callback's Inputs are these stores so
+            # it stays valid in every maneuver context.
+            dcc.Store(id="route-engineout-drill", data=[]),
+            dcc.Store(id="route-engineout-slider", data=0),
+            # Destination runway override store — mirrored from
+            # `route-runway-select-ui` in the route shelf. Same trick
+            # as `rectcourse-downwind-edge`: the dropdown only exists
+            # when the route shelf is mounted, but the compute callback
+            # needs the value as an Input from any context.
+            dcc.Store(id="route-runway-select", data=None),
+            # Dest-pattern pill state mirror — same pattern. Default
+            # "on" matches the pill's default_on=True.
+            dcc.Store(id="route-show-destination-pattern", data=["on"]),
+            # Checkpoints pill state mirror.
+            dcc.Store(id="route-show-checkpoints", data=["on"]),
+            # User-drag overrides for individual VFR checkpoints.
+            # Shape: {"<original_ident>": {"lat": float, "lon": float}}.
+            # Populated by the click-to-place flow when the pilot
+            # clicks a checkpoint marker then clicks the map at a
+            # new position. compute_and_render reads this and
+            # overrides the auto-picked checkpoint position.
+            dcc.Store(id="route-checkpoint-edits", data={}, storage_type="memory"),
+            # Which checkpoint ident is currently in "click to place"
+            # edit mode. None = no edit mode. Set when a marker is
+            # clicked; cleared after the next map click writes the
+            # new position into route-checkpoint-edits.
+            dcc.Store(id="route-checkpoint-edit-active", data=None, storage_type="memory"),
 
             html.Div(
                 [
