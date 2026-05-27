@@ -1,0 +1,608 @@
+{
+  "tcds_number": "2A3",
+  "revision": "47",
+  "revision_date": null,
+  "tc_holder": null,
+  "source_pdf": "2A3.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 15,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "M20"
+      ],
+      "engine": "Textron-Lycoming O-320 (Carburetor MA4-SP-A, Flow Setting P/N 10-3678-11)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 150
+      },
+      "fuel_grade": "80 octane minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 183,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 150,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 130,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2450
+      },
+      "fuel_capacity": {
+        "total_gal": 49.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+47.0) to (+49.4) at 2450 lbs.\n(Landing gear extended)       (+40.7) to (+49.4) at 1920 lbs. or less\n(Straight line variation between points given).",
+      "control_surfaces": "Wing Flaps                                              Down          21½° ± 1°\nAileron                     Up       15° ± 1°           Down           9° ± ½°\nElevator                    Up       24° ± 1/2°         Down          10½° ± 1°\nRudder                     Left      18° ± ½°           Right         18° ± ½°\nStabilizer (L.E.)           Up       1½° + 0°/-½°       Down          3½° + 0°/-½°\n\nSerial Nos. Eligible            1001 through 1200. Under the delegation option provisions of Part 21 of the Federal\nAviation Regulations (FAR), Delegation Option Manufacturer No. SW-1 is authorized to\napprove design and production changes on airplane Serial Numbers 1001 through 1200.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "M20A"
+      ],
+      "engine": "Textron-Lycoming O-360-A1A or AID (Carburetor MA4-5, Flow Setting P/N 10-3878,",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 180
+      },
+      "fuel_grade": "100LL or 91/96 octane minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 183,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 150,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 130,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2450
+      },
+      "fuel_capacity": {
+        "total_gal": 49.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+47.0) to (+49.4) at 2450 lbs.\n(Landing gear extended)   (+40.7) to (+49.4) at 1920 lbs. or less\n(Straight line variation between points given).\nRetraction moment 536 in.-lbs.",
+      "control_surfaces": "Wing Flaps                                               Down         21½° ± 1°\nAileron                      Up       15° ± 2°           Down          9° ± ½°\nElevator                     Up       24° ± ½°           Down         10½° ± 1°\nRudder                      Left      18° ± ½°           Right        18° ± ½°\nStabilizer (L.E.)            Up       1½ + 0°/-½         Down         3½° + 0°/-½°\n\nSerial No’s. Eligible       1201 through 1700 and 1700A. Under the delegation option provisions of Part 21 of the\nFAR, Delegation Option Manufacturer No. SW-1 is authorized to approve design and\nproduction changes on airplane Serial Numbers 1201 through 1700A.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "M20B"
+      ],
+      "engine": "Textron-Lycoming O-360-A1 A or A1 D (Carburetor MA4-5, Flow Setting",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 180
+      },
+      "fuel_grade": "100LL or 91/96 octane min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 183,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 150,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 130,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2450
+      },
+      "fuel_capacity": {
+        "total_gal": 48.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+47.0) to (+50.1) at 2450 lbs.\n(Landing gear extended)       (+42.0) to (+50.1) at 2030 lbs. or less\n(Straight line variation between points given).\nRetraction moment 536 in.-lbs.",
+      "control_surfaces": "Wing Flaps                                            Down       21½° ± 1°\nAileron                        Up     12½° to 17°     Down        8° ± ½°\nAileron static position                               Down        0° to 2°\nElevator                    Up        24° ± 1°        Down       10½° ± 1°\nRudder                     Left       18° ± 1°        Right      18° ± 1°\nStabilizer (L.E.)           Up        1° to 2½°       Down       3½° to 4½°\n\nSerial No’s. Eligible           1701 through 1851, 1853 through 1939. Under the delegation option provisions of\nPart 21 of the Federal Aviation Regulations, Delegation Option Manufacturer No. SW-1\nis authorized to approve design and production changes on airplane Serial Numbers 1701\nthrough 1851, 1853 through 1939.\n\n2A3                                                  Page 8 of 53\n\nIII. Model M20B (cont’d)",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "M20C"
+      ],
+      "engine": "Textron-Lycoming O-360-A1D or O-360-A1A",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 180
+      },
+      "fuel_grade": "100LL or 100/130 min. grade aviation gasoline (See Note 9)",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 189,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 150,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 132,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2575
+      },
+      "fuel_capacity": {
+        "total_gal": 48.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+46.5) to (+49.0) at 2575 lbs.\n(Landing gear extended)       (+42.0) to (+49.0) at 2100 lbs. or less\n(Straight line variation between points given).\nRetraction moment 588 in. -lbs.",
+      "control_surfaces": "(Aircraft with serial numbers up to 690001)\nWing Flaps                         T.O. Position        Down          15° ± 1°\nLanding              Down          33° + 0°, -2°\nAileron                    Up      12½° to 17°          Down          8° ± 1°\nAileron static position                                 Down          0° to 2°\nElevator                   Up      24° ± 1°             Down          10½° ± 1°\nRudder                    Left     23° to 24°           Right         23° to 24°\nStabilizer (L.E.)          Up      1 to 2½°             Down          4½° + 5°\n\nElevator Trim Assist Unit   With stabilizer set at 3½° negative setting to the thrust line, adjust trim assist unit\n(740044) for elevator up angle of 19° ± ½° at the zero spring travel position.\n\n(Aircraft with serial numbers 690001-700091, 20-0001 and up)\nWing Flaps                        T.O. Position   Down       15° ± 1°\nLanding         Down       33° + 0°, -2°\nAileron                    Up     12½° to 17°     Down       8° ± 1°\nAileron static position                           Down       0° to 2°\nElevator                   Up     22° ± 2°        Down       22° ± 2°\nStabilizer (L.E.)          Up     ½° to 1°        Down       5¼° to 5¾°\nRudder                    Left    23° to 24°      Right      23° to 24°\n\nElevator Trim Assist Unit   With stabilizer set at 3½° negative setting to the thrust line,\nadjust trim assist bungees (740188) for elevator position of 10° ± 1° at the zero spring\ntravel position of the bungees.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "V",
+      "models": [
+        "M20D"
+      ],
+      "engine": "Textron-Lycoming O-360-A1D or 0-360-A2D (Carburetor MA4-5, Flow Setting P/N",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 180
+      },
+      "fuel_grade": "100LL or 91/96 octane min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 189,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 147,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 132,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2575
+      },
+      "fuel_capacity": {
+        "total_gal": 48.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+46.5) to (+49.0) at 2575 lbs.\n(Fixed gear)                     (+42.0) to (+49.0) at 2100 lbs. or less\n(See Note 4) (Straight line variation between points given).",
+      "control_surfaces": "Wing Flaps             Landing                   Down            33° + 0°, -2°\nAileron                Up      12½° to 17°       Down             8° ± 1°\nAileron                Static Position           Down             0° to 2°\nElevator               Up      24° ± 1°          Down            10½° ± 1°\nRudder                 Left 23° to 24°           Right           23° to 24°\nStabilizer (L.E.)      Up      1° to 2½°         Down            4½° to 5°\n\nElevator Trim Assist Unit        With stabilizer set at 3½° negative setting to the thrust line, adjust trim assist unit 740044\nfor elevator up angle of 12° ± ½° at the zero spring travel position. The elevator up angle\nchanges to 19° ± ½° when conversion to retractable gear in accordance with Mooney\nDrawing 950082 is accomplished.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VI",
+      "models": [
+        "M20E"
+      ],
+      "engine": "IO-360-A1A (fuel injector, Model RSA-5AD1, P/N 2524054-1) See Note 20.",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 200
+      },
+      "fuel_grade": "100LL or 100/130 octane minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 189,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 150,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 132,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2575
+      },
+      "fuel_capacity": {
+        "total_gal": 52.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+46.5) to (+49.0) at 2575 lbs.\n(Landing gear extended)   (+42.0) to (+49.0) at 2100 lbs. or less\n(Straight line variation between points given).\nRetraction moment 588 in. -lb.",
+      "control_surfaces": "(Aircraft with serial numbers up to 690001)\nWing Flaps                 T.O. Position                 Down       15° ± 1°\nLanding                       Down       33° + 0°, - 2°\nAileron                    Up 12½° to 17°                Down       8° ± 1°\nAileron static position                                  Down        0° to 2°\nElevator                   Up 24° ± 1°                   Down       10½° ± 1°\nRudder                     Left 23° to 24°               Right      23° to 24°\nStabilizer (L.E.)          Up 1° to 2½°                  Down       4½° to 5°\n\nElevator Trim Assist Unit   With stabilizer set at 3½° negative setting to the thrust line, adjust trim assist unit 740044\nfor elevator up angle of 19° ± ½° at the zero spring travel position.\n\n(Aircraft with serial numbers up to 690001-700061, 21-0001 thru 21-1180)\nWing Flaps                 T.O. Position             Down      15° ± 1°\nLanding            Down     33° + 0° / -2°\nAileron                    Up 12½° to 17°            Down     8° ± 1°\nAileron static position                              Down       0° to 2°\nElevator                   Up 22° ± 2°               Down     22° ± 2°\nStabilizer (L.E.)          Up ½° to 1°               Down     5¼° to 5¾°\nRudder                     Left 23° to 24°           Right    23° to 24°\n\nPage 19 of 53                                                             2A3\n\nVI. Model M20E        (cont’d)\n\nElevator Trim Assist Unit         With stabilizer set at 3½° negative setting to the thrust line, adjust trim assist bungees\n(740188) for elevator position of 10° ± 1° at the zero spring travel position of the\nbungees.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VII",
+      "models": [
+        "M20F"
+      ],
+      "engine": "Textron-Lycoming IO-360-A1A (Bendix fuel injector, Model RSA-5AD1,",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 200
+      },
+      "fuel_grade": "100LL or 100/130 octane min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 200,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 175,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 105,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 135,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2740
+      },
+      "fuel_capacity": {
+        "total_gal": 64.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+45.0) to (+50.1) at 2740 lbs.\n(Landing gear extended)   (+41.8) to (+50.1) at 2470 lbs.\n(+41.0) to (+50.1) at 2250 lbs. or less\n(Straight line variation between points given).\nRetraction moment 615 in. -lbs.",
+      "control_surfaces": "Wing Flaps                        T.O. Position        Down         15° ± 1°\nLanding              Down         33° + 0° / -2°\nAileron                     Up    12½° to 17°          Down         8° ± 1°\nAileron static position                                Down          0° to 2°\nElevator                    Up       22° ± 2°          Down         22° ± 2°\nRudder                     Left      23° to 24°        Right        23° to 24°\nStabilizer (L.E.)           Up       ½° + 1°           Down         5¼° to 5¾°\n\nElevator Trim Assist Unit   (for Aircraft with Serial Nos. to 680001): With stabilizer set at 3½° negative setting to\nthe thrust line, adjust trim assist unit 740128 for elevator up angle of 5° +⁄− 1° at the zero\nspring travel position.\n\nElevator Trim Assist Unit   (for Aircraft with Serial Nos. 680001 and up): With stabilizer set at 3° negative setting\nto the thrust line, adjust trim assist bungees 740188 for elevator position of 19° +⁄− 1° at\nthe zero spring travel position of the bungees. (This rigging to be obtained before\ninstallation of the 740171 extension springs).",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VIII",
+      "models": [
+        "M20G"
+      ],
+      "engine": "Textron-Lycoming O-360-A1D (Carburetor MA 4-5, Flow Setting P/N 10-3878-M, or",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 180
+      },
+      "fuel_grade": "100LL or 100/130 octane min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 200,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 175,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 125,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 135,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2525
+      },
+      "fuel_capacity": {
+        "total_gal": 52.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+42.5) to (+50.1) at 2525 lbs.\n(Landing gear extended)   (+41.8) to (+50.1) at 2470 lbs.\n(+40.5) to (+50.1) at 2113 lbs. or less\n(Straight line variation between points given).\nRetraction moment 615 in. -lb.",
+      "control_surfaces": "Wing Flaps                         T.O. Position       Down         15° ±1°\nLanding             Down         33° + 0°/ -2°\nAileron                      Up      12½° to 17°       Down          8° ± 1°\nAileron static position                                Down          0° to 2°\nElevator                    Up       22° + 0°, 2°      Down         22° + 0°, -2°\nRudder                     Left      23° to 24°        Right        23° to 24°\nStabilizer (L.E.)           Up       ½° to 1°          Down         5¼° to 5 ¾°\n\nElevator Trim Assist Unit   (for Aircraft with Serial Nos. to 680001): With stabilizer set at 3½° negative setting to\nthe thrust line, adjust trim assist unit 740128 for elevator up angle of 5° +/- 1° at the zero\nspring travel position.\n\nElevator Trim Assist Unit   (for Aircraft with Serial Nos. 680001 and up): With stabilizer set at 3° negative setting\nto the thrust line, adjust trim assist bungees 740188 for elevator position of 19° +/- 1° at\nthe zero spring travel position of the bungees. (This rigging to be obtained before\ninstallation of the 740171 extension springs).",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IX",
+      "models": [
+        "M20J"
+      ],
+      "engine": "Textron-Lycoming IO-360-A1B6D or IO-360-A3B6D or IO-360-A3B6. (Bendix fuel",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 200
+      },
+      "fuel_grade": "100LL or 100/130 octane minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 200,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 175,
+          "unit": "knots"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 136,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2740
+      },
+      "fuel_capacity": {
+        "total_gal": 64.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+45.0) to (+50.1) at 2740 lbs.\n(Landing gear extended)         (+41.8) to (+50.1) at 2470 lbs.\n(+41.0) to (+50.1) at 2250 lbs. or less\n(Straight line variation between points given).\nRetraction moment 615 in. -lbs.\nS/N 24-3201, 24-3218 thru 24-TBA, and 24-1686 thru 24-3200, 24-3202 thru 24-3217 when c/w MAC dwg. No. 940071\nand insertion of applicable AFM supplement - 2900 lbs. gross weight.\n\nPage 29 of 53                                                             2A3\n\nIX. Model M20J (cont’d)\n\n(+45.0) to (+50.1) at 2900 lbs.\n(Landing gear extended)           (+43.8) to (+50.1) at 2740 lbs.\n(+41.8) to (+50.1) at 2470 lbs.\n(+41.0) to (+50.1) at 2250 lbs. or less\n(Straight line variation between points given).\nRetraction moment 615 in. -lbs.",
+      "control_surfaces": "(Aircraft with Serial Numbers 24-0002 thru 24-1037)\nWing Flaps                     T.O. Position      Down               15° +/- 1°\nLanding            Down               33° + 0°/-2°\nAileron                   Up      12½° to 17°     Down                8° ± 1°\nAileron static position                           Down                0° to 2°\nElevator                  Up      22° ± 2°        Down               22° ± 2°\nRudder                   Left     23° to 24°      Right              23° to 24°\nStabilizer (L.E.)         Up      ½° to 1°        Down               5¼° to 5 ¾°\n\nElevator Trim Assist Unit           With stabilizer set at 3° negative setting to the thrust line, adjust trim assist bungees\n740188 for an elevator position of 19° +/- 1° at the zero spring position of the bungees. (This rigging to be obtained before\ninstallation of the 740171 extension springs).\n\n(Aircraft with serial numbers 24-1038 and up)\nWing Flaps                      T.O. Position          Down          15° +/- 1°\nLanding                Down          33° + 0°/-2°\nAileron                    Up     12½° to 14½°         Down           8° ± 1°\nAileron static position                                Down           0° to 2°\nElevator                   Up     22° ± 2°             Down          22° ± 2°\nRudder                    Left    23° to 24°           Right         23° to 24°\nStabilizer (L.E.)          Up     ½° to 1°             Down          5¼° to 5 ¾°\n\nElevator Trim Assist Unit           With stabilizer set at 3° negative setting to the thrust line, adjust trim assist bungees\n740188 for an elevator position of 9° ± 1° at the zero spring travel position of the\nbungees. (This rigging to be obtained before installation of the 740171 extension\nsprings).",
+      "serial_numbers": "Serial No. 24-0002 and up.\n\n2A3                                                  Page 30 of 53\n\nIX. Model M20J (cont’d)\n\nExport eligibility              See Note 14.\n\nRequired equipment              In addition to the pertinent required basic equipment specified in CAR 3, the following\nitems of equipment must be installed: 1(a)(1) or 1(a)(2), (b), (c), or 2(a)(1), 2(b)(1) and\n1(c), 101(a), (b), or (c), 102(a), 103(a), 104(a) or (b), 201(a), 202(a), 205(a), 206(a),\n301(a) and 303(a), 301(b) and 303(b), 302(a) or (b) or (c), 401(a) or (b) or (c) or (d) or\n(e) or (f) or (g) or (h) or (i) or (j) or (k) or (l) or (m), 601(a), (b) or (c), 602(a) or (b) or (c)\nor (d) or (e).\n\nSpecifications Pertinent to Model"
+    },
+    {
+      "section_roman": "X",
+      "models": [
+        "M20K"
+      ],
+      "engine": "Teledyne Continental Motors TSIO-360-GB1, -GB3, -GB4 (S/N 25-0001 thru 25-0780);",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100LL or 100/130 octane minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 200,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 125,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 135,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2900
+      },
+      "fuel_capacity": {
+        "total_gal": 72.0,
+        "usable_gal": 75.6
+      },
+      "seats": null,
+      "cg_range_raw": "Landing gear extended)       (+43.5) to (+49.3) at 2900 lbs.\n(+40.6) to (+49.3) at 2360 lbs. or less\n(Straight line variation between points given).\nRetraction moment + 615 in. -lb.",
+      "control_surfaces": "Wing Flaps                         T.O. Position      Down         10° ± 1°\nLanding            Down         33° + 0°/-2°\nAileron                      Up      12½° to 14½°     Down          8° ± 1°\n\nAileron static position                               Down          0° to 2°\nElevator                   Up         22° + 0°, -2°   Down         22° + 0°, -2°\nRudder                    Left        23° to 24°      Right        23° to 24°\nStabilizer (L.E.)          Up         3.8° to 4.2°    Down         6.5° to 7.0°\n\nElevator Trim Assist         With stabilizer set at maximum positive setting and elevators full down. Adjust\nturnbuckle for 14.0 to 16.0 lb. on tensionmeter, tensionmeter reading 20 lbs. maximum\npermissible. Check for positive clearance between cable end and pulley sheave.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XI",
+      "models": [
+        "M20L"
+      ],
+      "engine": "Porsche PFM 3200 N03",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100 LL min-grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 200,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 127,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 135,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2900
+      },
+      "fuel_capacity": {
+        "total_gal": 60.5,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+43.5) to (+49.3) at 2900 lbs.\n(Landing gear extended)          (+41.0) to (+49.3) at 2430 lbs. or less\n(Straight line variation between points given).\nRetraction moment 615 in. -lb.",
+      "control_surfaces": "Wing Flaps                       T.O. PositionDown               10° ± 1°\nLanding           Down          33° + 0°/-2°\nAileron                       Up 12½° to 14½°      Down\n8° ± 1°\nAileron static position                                Down       0° to 2°\nElevator                      Up      22° +0°, -2°     Down      22° +0°, -2°\nRudder                       Left     23° to 24°       Right     23° to 24°\nStabilizer (L.E.)             Up    3.8° to 4.2°       Down      6.5° to 7.0°\n\nElevator trim assist               With stabilizer set at maximum positive setting and elevators full Down, adjust\nturnbuckle for a 14.0 to 16.0 lbs. tensionmeter reading on cable, tensionmeter reading (20\nlb. max. permissible.) Check for positive clearance between cable end and pulley end\nand pulley sheave.\n\n2A3                                                 Page 38 of 53\n\nXI.      Model M20L (cont’d)",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XII",
+      "models": [
+        "M20M"
+      ],
+      "engine": "Textron-Lycoming TIO-540-AF1A",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100 LL or 100 octane min-grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 200,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 127,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 146,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3200
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "3200 lb. C.G. limits\n(Landing gear extended)      (+45.0) to (+51.0) at 3200 lbs.\nS/N 27-0001 thru 27-0052     (+43.0) to (+51.0) at 3000 lbs.\n(+41.0) to (+51.0) at 2430 lbs. or less\n(Straight line variation between points given).\nRetraction moment 615 in. -lbs.\n\n3368 lb. C.G. limits\n(Landing gear extended)      (+46.0) to (+51.0) at 3368 lbs.\nS/N 27-0053 and on, and      (+44.0) to (+51.0) at 3300 lbs.\naircraft S/N 27-0001         (+41.0) to (+51.0) at 2430 lbs. or less\nthru 27-0052 that            (Straight line variation between points given).\nhave complied with           Retraction moment 615 in. -lbs.\nMooney S/B M20-248.",
+      "control_surfaces": "Wing Flaps                       T.O. Position      Down      10° ± 1°\nLanding            Down      33° + 0°/-2°\nAileron                    Up      12½° to 14½°     Down       8° ± 1°\nAileron static position                             Down       0° to 2°\n\nPage 41 of 53                                                         2A3\n\nXII.     Model M20M (cont’d)\n\nElevator                   Up       22° +0°, -2°      Down        22° +0°, -2°\nRudder                    Left      23° to 24°        Right       23° to 24°\nStabilizer (L.E.)          Up       3.8° to 4.2°      Down        6.5° to 7.0°\n\nElevator trim assist            With stabilizer set at maximum positive setting and elevators Full down. Adjust turn\nbuckle for a 14.0 to 16.0 lb. tensionmeter reading on cable. Check for positive clearance\nbetween cable end and pulley sheave.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XII",
+      "models": [
+        "M20M (con’t)"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": null,
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {},
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XIII",
+      "models": [
+        "M20R"
+      ],
+      "engine": "Teledyne Continental Motors, IO-550-G(5); -G(6)*; or -G(7)",
+      "engine_limits": {
+        "rpm": 2500,
+        "hp": 280
+      },
+      "fuel_grade": "100LL or 100 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 200,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 127,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 146,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3200
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": "(+46.0) to (+51.0) at 3368 lbs.\n(L.G. extended)                  (+44.0) to (+51.0) at 3300 lbs.\nS/N 29-0001 and on               (+41.0) to (+51.0) at 2430 lbs. or less",
+      "control_surfaces": "Wing flaps                       T.O. position     Down       10° ± 1°\nLanding           Down       33° +0 / -2°\nAileron                       Up 12½° to 14½°      Down        8° ± 1°\nAileron static position                            Down        0° to 2°\nElevator                   Up 22° +0°, -2°         Down       22° +0°, -2°\nRudder                    Left 23° to 24°          Right      23° to 24°\nStabilizer (L.E.)          Up   3.8° to 4.2°       Down        6.5° to 7.0°\n\n2A3                                                  Page 44 of 53\n\nXIII. Model M20R (cont’d)\nElevator trim assist              With stabilizer set at maximum positive setting and elevators Full down. Adjust turn\nbuckle for a 14.0 to 16.0 lb. tensionmeter reading on cable, tensionmeter reading (20 lb.\nmaximum permissible). Check for positive clearance between cable end and pulley\nsheave.",
+      "serial_numbers": "Serial No. 29-0001 and up\n\nExport eligibility              See Note 14.\n\nRequired equipment              In addition to the pertinent required basic equipment specified in CAR 3, the following\nitems of equipment must be installed: 1(a) (b) or (c) (d), 101(a) (b), 102(a), 103(a) or\n(b), 104(a), 201(a), 202(a), 205(a), 206(a), 301(a), 302(a), 303(a), 401(a), 601(a), 602(a)\nor (d) and (b) or (c)."
+    },
+    {
+      "section_roman": "XIX",
+      "models": [
+        "M20S",
+        "February",
+        "7"
+      ],
+      "engine": "Teledyne Continental Motors, IO-550-G(6)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100 LL or 100 min-grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "mph"
+        },
+        "Vno": null,
+        "Vfe": {
+          "value": 127,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 143,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3200
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": "(+45.0) to (+51.0) at 3200 lbs.\n(L.G. Extended)                                                (+43.0) to (+51.0) at 3200 lbs.\nS/N 30-0001 and ON                                             (+41.0) to (+51.0) at 2430 lbs. or less\n\nEmpty Weight\nNone",
+      "control_surfaces": ":\nWing flaps                     T.O. position                  Down 10° ± 1°\nLanding                        Down 33° +0 / -2°\nAileron                        Up 12½° to 14½°                Down 8° ± 1°\nAileron static position                                       Down 0° to 2°\nElevator                       Up 22° +0°, -2°                Down 22° +0°, -2°\n\nRudder                         Left 23° to 24°                Right 23° to 24°\nStabilizer (L.E.)              Up 3.8° to 4.2°                Down 6.5° to 7.0°\n\nElevator trim assist           With stabilizer set at maximum positive setting and elevators Full down. Adjust turn\nbuckle for a 14.0 to 16.0 lb. tensionmeter reading on cable, tension=meter reading (20 lb.\nmaximum permissable). Check for positive clearance between cable end and pulley\nsheave.",
+      "serial_numbers": "Serial No. 30-0001 and up\n\nExport Eligibility             See Note 14.\n\nRequired Equipment             In addition to the pertinent required basic equipment specified in CAR 3, the following\nitems of equipment must be installed: 1(a), (b) or (c), (d), 101(a) and (b), 102(a) or (b),\n103(a) or (b), 104(a), 201(a), 202(a), 205(a), 206(a), 301(a), 302(a) or (b), 303(a) and (b),\n401(a), 601(a), 602(a) or (c) or (d) and (b) or (e).\n\nSpecifications Pertinent to Model"
+    }
+  ]
+}

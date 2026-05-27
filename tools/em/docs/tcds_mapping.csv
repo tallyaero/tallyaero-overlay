@@ -1,0 +1,111 @@
+filename,name,type,tcds_number,tcds_holder,publication,match_source,matched_model
+Aeronca_Champ.json,Aeronca Champ,single_engine,A-759,AERONCA AIRCRAFT CORP,FAA TCDS A-759 (Aeronca 7-series),manual,
+Aeronca_Chief.json,Aeronca Chief,single_engine,A-781,AERONCA AIRCRAFT CORP,FAA TCDS A-781 (Aeronca 11-series),manual,
+American_Champion_Citabria.json,American Champion Citabria,single_engine,A-759,AMERICAN CHAMPION AIRCRAFT CORP,FAA TCDS A-759 (Champion/Bellanca/ACA 7-series Citabria),manual,
+American_Champion_Decathlon.json,American Champion Decathlon,single_engine,A-759,AMERICAN CHAMPION AIRCRAFT CORP,FAA TCDS A-759 (ACA 8KCAB Decathlon),manual,
+American_Champion_Scout.json,American Champion Scout,single_engine,A-759,AMERICAN CHAMPION AIRCRAFT CORP,FAA TCDS A-759 (ACA 8GCBC Scout),manual,
+Aviat Husky A-1C.json,Aviat Husky A-1C,single_engine,A22NM,Aviat Aircraft Inc,FAA TCDS A22NM Rev 31 (12/07/2017),fuzzy,A-1
+Beechcraft_Baron_58.json,Beechcraft Baron 58,multi_engine,3A16,Beechcraft Corporation,FAA TCDS 3A16 Rev 91 (12/21/2015),fuzzy,58
+Beechcraft_Bonanza_A36.json,Beechcraft Bonanza A36,single_engine,3A15,TEXTRON AVIATION INC.,FAA TCDS 3A15 (Beechcraft A36/B36TC Bonanza),manual,
+Beechcraft_Bonanza_F33.json,Beechcraft Bonanza F33,single_engine,3A15,TEXTRON AVIATION INC.,FAA TCDS 3A15 (Beechcraft F33/F33A Bonanza),manual,
+Beechcraft_Musketeer.json,Beechcraft Musketeer,single_engine,A12CE,TEXTRON AVIATION INC.,FAA TCDS A12CE (Beechcraft 19/23/24 Sport/Musketeer),manual,
+Beechcraft_Sierra.json,Beechcraft Sierra,single_engine,A12CE,TEXTRON AVIATION INC.,FAA TCDS A12CE Rev (Beechcraft C24R Sierra),manual,
+Beechcraft_Sundowner.json,Beechcraft Sundowner,single_engine,A12CE,TEXTRON AVIATION INC.,FAA TCDS A12CE Rev (Beechcraft C23 Sundowner),manual,
+Bellanca_Super_Viking.json,Bellanca Super Viking,single_engine,A00003AK,ALEXANDRIA AIRCRAFT LLC (BELLANCA),FAA TCDS A00003AK (Bellanca 17-30 Super Viking),manual,
+CAP_232.json,CAP 232,single_engine,EASA.A.072,MUDRY AVIATION (CAP AVIATION),EASA TCDS A.072 (Mudry CAP 21/231/232),manual,
+Cessna_150.json,Cessna 150,single_engine,3A19,Cessna Aircraft Company,FAA TCDS 3A19 Rev 40 (11/15/1997),fuzzy,150
+Cessna_152.json,Cessna 152,single_engine,3A19,Cessna Aircraft Company,FAA TCDS 3A19 Rev 40 (11/15/1997),fuzzy,152
+Cessna_162.json,Cessna 162,single_engine,n/a,CESSNA / TEXTRON AVIATION,ASTM F2245 (LSA) + Cessna 162 POH (2010),manual,
+Cessna_172M.json,Cessna 172M,single_engine,3A12,Cessna Aircraft Company,FAA TCDS 3A12 Rev 75 (12/21/2007),fuzzy,172M
+Cessna_172N.json,Cessna 172N,single_engine,3A12,Cessna Aircraft Company,FAA TCDS 3A12 Rev 75 (12/21/2007),fuzzy,172N
+Cessna_172P.json,Cessna 172P,single_engine,3A12,Cessna Aircraft Company,FAA TCDS 3A12 Rev 75 (12/21/2007),fuzzy,172P
+Cessna_172R.json,Cessna 172R,single_engine,3A12,Cessna Aircraft Company,FAA TCDS 3A12 Rev 75 (12/21/2007),fuzzy,172R
+Cessna_172S.json,Cessna 172S,single_engine,3A12,Cessna Aircraft Company,FAA TCDS 3A12 Rev 75 (12/21/2007),fuzzy,172S
+Cessna_177.json,Cessna 177,single_engine,A13CE,Cessna Aircraft Company,FAA TCDS A13CE Rev 28 (11/16/2010),fuzzy,177
+Cessna_177RG.json,Cessna 177RG,single_engine,A20CE,Textron Aviation Inc.,FAA TCDS A20CE Rev 24 (10/31/2024),fuzzy,177RG
+Cessna_182P.json,Cessna 182P,single_engine,3A13,Cessna Aircraft Company,FAA TCDS 3A13 Rev 68 (12/28/2007),fuzzy,182P
+Cessna_182Q.json,Cessna 182Q,single_engine,3A13,Cessna Aircraft Company,FAA TCDS 3A13 Rev 68 (12/28/2007),fuzzy,182Q
+Cessna_182T.json,Cessna 182T,single_engine,3A13,Cessna Aircraft Company,FAA TCDS 3A13 Rev 68 (12/28/2007),fuzzy,182T
+Cessna_206.json,Cessna 206,single_engine,H2SW,Bell Helicopter Textron A Division of Textron Canada,FAA TCDS H2SW Rev 38 (11/22/1999),fuzzy,206
+Cessna_210.json,Cessna 210,single_engine,3A21,TEXTRON AVIATION INC.,FAA TCDS 3A21 (Cessna 205/206/207/210),manual,
+Cessna_310R.json,Cessna 310R,multi_engine,3A10,Cessna Aircraft Company,FAA TCDS 3A10 Rev 61 (11/15/1997),fuzzy,310R
+Champion_7EC.json,Champion 7EC,single_engine,A-759,American Champion Aircraft Corp.,FAA TCDS A-759 Rev 72 (10/19/2009),fuzzy,7EC
+Cirrus_SR20.json,Cirrus SR20,single_engine,A00009CH,Cirrus Design Corporation,FAA TCDS A00009CH Rev 18 (12/29/2011),fuzzy,SR20
+Cirrus_SR22.json,Cirrus SR22,single_engine,A00009CH,Cirrus Design Corporation,FAA TCDS A00009CH Rev 18 (12/29/2011),fuzzy,SR22
+Cirrus_SR22T.json,Cirrus SR22T,single_engine,A00009CH,Cirrus Design Corporation,FAA TCDS A00009CH Rev 18 (12/29/2011),fuzzy,SR22T
+Diamond_DA20-A1.json,Diamond DA20-A1,single_engine,TA4CH,Diamond Aircraft Industries,FAA TCDS TA4CH Rev 10 (10/24/2002),fuzzy,DA20-A1
+Diamond_DA20-C1.json,Diamond DA20-C1,single_engine,TA4CH,Diamond Aircraft Industries,FAA TCDS TA4CH Rev 10 (10/24/2002),fuzzy,DA20-C1
+Diamond_DA40-180.json,Diamond DA40-180,single_engine,A47CE,DIAMOND AIRCRAFT INDUSTRIES,FAA TCDS A47CE (Diamond DA-40 series),manual,
+Diamond_DA40-NG.json,Diamond DA40-NG,single_engine,A47CE,DIAMOND AIRCRAFT INDUSTRIES,"FAA TCDS A47CE Rev (Diamond DA40 NG, AE300 engine)",manual,
+Diamond_DA42-L360.json,Diamond DA42-L360,multi_engine,A56CE,DIAMOND AIRCRAFT INDUSTRIES,FAA TCDS A56CE (Diamond DA42 TwinStar),manual,
+Diamond_DA42-NG.json,Diamond DA42-NG,multi_engine,A56CE,DIAMOND AIRCRAFT INDUSTRIES,FAA TCDS A56CE Rev (Diamond DA42 NG),manual,
+Diamond_DA62.json,Diamond DA62,multi_engine,A00010NY,DIAMOND AIRCRAFT INDUSTRIES,FAA TCDS A00010NY (Diamond DA62),manual,
+Ercoupe_415C.json,Ercoupe 415C,single_engine,A-718,ERCO/UNIVAIR,FAA TCDS A-718 (Erco / Forney / Alon / Mooney M-10),manual,
+Evektor_SportStar.json,Evektor SportStar,single_engine,ASTM F2245,EVEKTOR-AEROTECHNIK A.S.,ASTM F2245 (Evektor SportStar SLSA),manual,
+Extra_300.json,Extra 300,single_engine,EASA.A.034,EXTRA FLUGZEUGPRODUKTIONS- UND VERTRIEBS-GmbH,EASA TCDS A.034 (Extra EA-300 series),manual,
+Extra_300L.json,Extra 300L,single_engine,EASA.A.034,EXTRA FLUGZEUGPRODUKTIONS- UND VERTRIEBS-GmbH,EASA TCDS A.034 (Extra EA-300/L),manual,
+Extra_330SC.json,Extra 330SC,single_engine,EASA.A.075,EXTRA FLUGZEUGPRODUKTIONS- UND VERTRIEBS-GmbH,EASA TCDS A.075 (Extra EA-330SC unlimited aerobatic),manual,
+Extra_NG.json,Extra NG,single_engine,EASA.A.595,EXTRA AIRCRAFT GmbH,EASA TCDS A.595 (Extra NG),manual,
+Flight_Design_CTLS.json,Flight Design CTLS,single_engine,ASTM F2245,FLIGHT DESIGN GmbH,ASTM F2245 (Flight Design CTLS SLSA),manual,
+Focke-Wulf_FW_190_A-8.json,Focke-Wulf Fw 190 A-8,single_engine,Military,FOCKE-WULF FLUGZEUGBAU GmbH,"Fw 190 A-8 Flugzeug Handbuch (Luftwaffe Pilot's Manual, 1944)",manual,
+GameBird_GB1.json,GameBird GB1,single_engine,Experimental,GAMECOMPOSITES LIMITED,"GameBird GB1 Pilot's Operating Handbook (UK-built, US-Experimental)",manual,
+Grumman_AA-5.json,Grumman AA-5,single_engine,A16EA,AMERICAN AIRCRAFT CORP,FAA TCDS A16EA (Grumman/American AA-5/AA-5A Cheetah),manual,
+Grumman_AA-5B.json,Grumman AA-5B,single_engine,A16EA,AMERICAN AIRCRAFT CORP,FAA TCDS A16EA Rev (Grumman AA-5B Tiger),manual,
+Grumman_F6F-5_Hellcat.json,Grumman F6F-5 Hellcat,single_engine,Military,GRUMMAN AIRCRAFT ENGINEERING CORP.,"NAVAIR 01-85FB-1 F6F-5 Pilot's Handbook (US Navy, 1945)",manual,
+Grumman_F8F-2_Bearcat.json,Grumman F8F-2 Bearcat,single_engine,LTC-23,Grumman American Aviation Corporation,FAA TCDS LTC-23 Rev 2 (08/29/1947),fuzzy,F8F-1 (Navy)
+Kawanishi_N1K2-J_Shiden-Kai.json,Kawanishi N1K2-J Shiden-Kai,single_engine,Military,KAWANISHI AIRCRAFT CO.,Jane's All The World's Aircraft 1945–46 (N1K2-J Shiden-kai),manual,
+Luscombe_8A.json,Luscombe 8A,single_engine,A-694,LUSCOMBE AIRPLANE CORP.,FAA TCDS A-694 (Luscombe 8 series Silvaire),manual,
+MX_Aircraft_MXS.json,MX Aircraft MXS,single_engine,Experimental,MX AIRCRAFT COMPANY LLC,MXS Pilot's Operating Handbook (FAA Experimental Exhibition),manual,
+Maule_M-7.json,Maule M-7,single_engine,A6SO,MAULE AEROSPACE TECHNOLOGY INC.,FAA TCDS A6SO (Maule M-4/M-5/M-6/M-7 series),manual,
+Messerschmitt Bf 109G-6.json,Messerschmitt Bf 109G-6,single_engine,Military,MESSERSCHMITT A.G.,"Bf 109 G-6 Flugzeug Handbuch (Luftwaffe Pilot's Manual, 1943)",manual,
+Mitsubishi_A6M5_Zero.json,Mitsubishi A6M5 Zero,single_engine,Military,MITSUBISHI HEAVY INDUSTRIES,Jane's All The World's Aircraft 1945–46 (A6M5 Reisen),manual,
+Mooney_M20C.json,Mooney M20C,single_engine,2A3,Mooney Aircraft Corporation,FAA TCDS 2A3 Rev 44 (12/19/1997),fuzzy,M20C
+Mooney_M20E.json,Mooney M20E,single_engine,2A3,Mooney Aircraft Corporation,FAA TCDS 2A3 Rev 44 (12/19/1997),fuzzy,M20E
+Mooney_M20J.json,Mooney M20J,single_engine,2A3,MOONEY INTERNATIONAL CORP.,FAA TCDS 2A3 (Mooney M20-series),manual,
+Mooney_M20R.json,Mooney M20R,single_engine,2A3,Mooney Aircraft Corporation,FAA TCDS 2A3 Rev 44 (12/19/1997),fuzzy,M20R
+North_American_P51-D_Mustang.json,North American P-51D Mustang,single_engine,Military,NORTH AMERICAN AVIATION INC.,AAF Manual 51-127-5 P-51D Pilot's Flight Operating Instructions (1945),manual,
+PT-17_Stearman.json,PT-17 Stearman,single_engine,A-743,BOEING/STEARMAN,FAA TCDS A-743 (Boeing E75/A75N1/PT-17/PT-13),manual,
+Piper_Aztec_F.json,Piper Aztec F,multi_engine,1A10,PIPER AIRCRAFT INC.,FAA TCDS 1A10 (Piper PA-23 Apache/Aztec),manual,
+Piper_PA-28-140.json,Piper PA-28-140,single_engine,2A13,Piper Aircraft Inc.,FAA TCDS 2A13 Rev 58 (12/22/2017),fuzzy,PA-28-140
+Piper_PA-28-151.json,Piper PA-28-151,single_engine,2A13,Piper Aircraft Inc.,FAA TCDS 2A13 Rev 58 (12/22/2017),fuzzy,PA-28-151
+Piper_PA-28-161.json,Piper PA-28-161,single_engine,2A13,Piper Aircraft Inc.,FAA TCDS 2A13 Rev 58 (12/22/2017),fuzzy,PA-28-161
+Piper_PA-28-181.json,Piper PA-28-181,single_engine,2A13,Piper Aircraft Inc.,FAA TCDS 2A13 Rev 58 (12/22/2017),fuzzy,PA-28-181
+Piper_PA-28R-200.json,Piper PA-28R-200,single_engine,2A13,Piper Aircraft Inc.,FAA TCDS 2A13 Rev 58 (12/22/2017),fuzzy,PA-28R-200
+Piper_PA-28R-201.json,Piper PA-28R-201,single_engine,2A13,Piper Aircraft Inc.,FAA TCDS 2A13 Rev 58 (12/22/2017),fuzzy,PA-28R-201
+Piper_PA-28R-201T.json,Piper PA-28R-201T,single_engine,2A13,Piper Aircraft Inc.,FAA TCDS 2A13 Rev 58 (12/22/2017),fuzzy,PA-28R-201T
+Piper_PA-28RT-201.json,Piper PA-28RT-201,single_engine,2A13,Piper Aircraft Inc.,FAA TCDS 2A13 Rev 58 (12/22/2017),fuzzy,PA-28RT-201
+Piper_PA-30_Twin_Comanche.json,Piper PA-30 Twin Comanche,multi_engine,A1EA,PIPER AIRCRAFT INC.,FAA TCDS A1EA (Piper PA-30/PA-39 Twin Comanche),manual,
+Piper_PA-32-260.json,Piper PA-32-260,single_engine,A3SO,PIPER AIRCRAFT INC.,FAA TCDS A3SO (Piper PA-32 Cherokee Six),manual,
+Piper_PA-32R-300.json,Piper PA-32R-300,single_engine,A3SO,The New Piper Aircraft Inc.,FAA TCDS A3SO Rev 27 (11/25/2003),fuzzy,PA-32R-300
+Piper_PA-34_Seneca.json,Piper PA-34 Seneca,multi_engine,A7SO,PIPER AIRCRAFT INC.,FAA TCDS A7SO (Piper PA-34 Seneca),manual,
+Piper_PA-44_Seminole.json,Piper PA-44 Seminole,multi_engine,A19SO,PIPER AIRCRAFT INC.,FAA TCDS A19SO (Piper PA-44 Seminole),manual,
+Pipistrel_Alpha_Trainer.json,Pipistrel Alpha Trainer,single_engine,ASTM F2245,PIPISTREL d.o.o. AJDOVSCINA,ASTM F2245 (Pipistrel Alpha Trainer SLSA),manual,
+Pipistrel_Virus.json,Pipistrel Virus,single_engine,ASTM F2245,PIPISTREL d.o.o. AJDOVSCINA,ASTM F2245 (Pipistrel Virus SW100 SLSA),manual,
+Pitts_S-1C-TB.json,Pitts S-1C-TB,single_engine,A18SO,AVIAT AIRCRAFT INC.,FAA TCDS A18SO (Pitts S-1 variant),manual,
+Pitts_S-1C.json,Pitts S-1C,single_engine,A18SO,AVIAT AIRCRAFT INC.,FAA TCDS A18SO (Pitts S-1S/S-1T),manual,
+Pitts_S-2C.json,Pitts S-2C,single_engine,A21SO,AVIAT AIRCRAFT INC.,FAA TCDS A21SO (Pitts S-2A/S-2B/S-2C),manual,
+Remos_GX.json,Remos GX,single_engine,ASTM F2245,REMOS AG,ASTM F2245 (Remos GX SLSA),manual,
+Robin_DR400.json,Robin DR400,single_engine,EASA.A.075,AVIONS PIERRE ROBIN,EASA TCDS A.075 (Robin DR400 series),manual,
+Robin_R3000.json,Robin R3000,single_engine,EASA.A.057,APEX AIRCRAFT (ROBIN),EASA TCDS A.057 (Robin R3000),manual,
+Socata_TB10.json,Socata TB10,single_engine,EASA.A.157,DAHER (SOCATA),EASA TCDS A.157 (Socata TB-10 Tobago),manual,
+Socata_TB20.json,Socata TB20,single_engine,EASA.A.157,DAHER (SOCATA),EASA TCDS A.157 (Socata TB-20 Trinidad),manual,
+Socata_TB9.json,Socata TB9,single_engine,EASA.A.157,DAHER (SOCATA),EASA TCDS A.157 (Socata TB-9/TB-10/TB-20/TB-21),manual,
+Stinson_108.json,Stinson 108,single_engine,A-767,CONSOLIDATED VULTEE AIRCRAFT (STINSON DIV),FAA TCDS A-767 (Stinson 108 series),manual,
+Sukhoi_Su-26.json,Sukhoi Su-26,single_engine,n/a,SUKHOI DESIGN BUREAU,Sukhoi OKB Type Specification (no FAA TCDS; sport-aerobatic),manual,
+Supermarine_Spitfire.json,Supermarine Spitfire Mk IX,single_engine,Military,SUPERMARINE AVIATION WORKS,"Air Publication 1565 Spitfire IX Pilot's Notes (Air Ministry, 1944)",manual,
+T-6A_Texan_II.json,T-6A Texan II,single_engine,T00012WI,TEXTRON AVIATION (RAYTHEON AIRCRAFT),FAA TCDS T00012WI (Beechcraft T-6 Texan II),manual,
+T-6B_Texan_II.json,T-6B Texan II,single_engine,T00012WI,TEXTRON AVIATION (RAYTHEON AIRCRAFT),FAA TCDS T00012WI Rev (T-6B Texan II),manual,
+Taylorcraft_BC-12D.json,Taylorcraft BC-12D,single_engine,A-696,TAYLORCRAFT AVIATION,FAA TCDS A-696 (Taylorcraft BC/BC-12),manual,
+Tecnam_P2002.json,Tecnam P2002,single_engine,ASTM F2245,COSTRUZIONI AERONAUTICHE TECNAM,ASTM F2245 (Tecnam P2002 Sierra LSA),manual,
+Tecnam_P2006T.json,Tecnam P2006T,multi_engine,EASA.A.185,COSTRUZIONI AERONAUTICHE TECNAM,EASA TCDS A.185 (Tecnam P2006T light twin),manual,
+Van's_RV-10.json,Van's RV-10,single_engine,Experimental,VAN'S AIRCRAFT INC.,Van's RV-10 Pilot's Operating Handbook,manual,
+Van's_RV-12.json,Van's RV-12,single_engine,Experimental,VAN'S AIRCRAFT INC.,Van's RV-12 Pilot's Operating Handbook (ELSA),manual,
+Van's_RV-14A.json,Van's RV-14A,single_engine,Experimental,VAN'S AIRCRAFT INC.,Van's RV-14/14A Pilot's Operating Handbook,manual,
+Van's_RV-6.json,Van's RV-6,single_engine,Experimental,VAN'S AIRCRAFT INC.,Van's RV-6 Pilot's Operating Handbook,manual,
+Van's_RV-8.json,Van's RV-8,single_engine,Experimental,VAN'S AIRCRAFT INC.,Van's RV-8 Pilot's Operating Handbook,manual,
+Van's_RV-9A.json,Van's RV-9A,single_engine,Experimental,VAN'S AIRCRAFT INC.,Van's RV-9A Pilot's Operating Handbook,manual,
+Vought_F4U-4_Corsair.json,Vought F4U-4 Corsair,single_engine,Military,VOUGHT-SIKORSKY AIRCRAFT,NAVAIR 01-45HC-1 F4U-4 Pilot's Handbook (US Navy),manual,
+Yakovlev_Yak-3.json,Yakovlev Yak-3,single_engine,Military,YAKOVLEV DESIGN BUREAU,Jane's All The World's Aircraft 1945–46 (Yak-3),manual,
+Zivko_Edge_540.json,Zivko Edge 540,single_engine,n/a,ZIVKO AERONAUTICS INC.,Zivko Edge 540 published spec (Experimental/Aerobatic),manual,
+Zlin_Savage.json,Zlin Savage,single_engine,n/a,ZLIN AVIATION s.r.o.,Zlin Savage SLSA Spec (LAA-CZ-certified),manual,
+Zlin_Z-242L.json,Zlin Z-242L,single_engine,EASA.A.030,MORAVAN ZLIN,EASA TCDS A.030 (Zlin Z-42/142/242 family),manual,

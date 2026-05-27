@@ -1,0 +1,47 @@
+{
+  "tcds_number": "A-797",
+  "revision": "11",
+  "revision_date": "March 30, 2001",
+  "tc_holder": "FS 2002 Corporation.",
+  "source_pdf": "A-797.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 1,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "PA-14: 4 PCLM (Normal Category)"
+      ],
+      "engine": "Lycoming O-235-C1",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 115
+      },
+      "fuel_grade": "80 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": {
+          "value": 85,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 97,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1850,
+        "utility_landplane": 1550
+      },
+      "fuel_capacity": {
+        "total_gal": 35.0,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": "14-1 and up\n\nRequired Equipment                In addition to the pertinent required basic equipment specified in CAR 3, the following\nitems of equipment must be installed:\nLandplane: Items 1, 201(a), 202, 204(a), and 401(a).\nSkiplane:       Items 1, 205, 401(a) and (b).\nAirplane is eligible for original certification with or without wing flaps.\n\nSpecifications Pertinent to All Models\nCertification Basis                Type Certificate No. 797 (CAR 3)\n\nProduction Basis                  None.\n\nExport Eligibility                 Deleted as of August 14, 1995.\n\nEquipment:         A plus (+) or minus (-) sign preceding the weight of an item indicates net weight change when that item is\ninstalled.\n\nApproval for the installation of all items of equipment listed herein has been obtained by the aircraft\nmanufacturer except those items preceded by an asterisk (*). The asterisk denotes that approval has been\nobtained by someone other than the aircraft manufacturer.\n\nPropellers and Propeller Accessories\n1. Propeller - Sensenich FP-76RM39, or any other fixed pitch wood propeller which is                     +11 lbs.   (-62)\neligible for the engine speed and power and which meets the following limits:\nStatic r.p.m. at max. permissible throttle settling:\nNot over 2500, not under 1970.\nNo additional tolerance permitted.\nDiameter: Not over 76 inches, not under 72.5 inches\n*2. Propeller - Koppers Aeromatic F200 with 00-74E blades                                                 +21 lbs.   (-62)\nParts List Assembly No 4292-A, dated April 9, 1948.\nLow pitch 11° at 24\" station.\nStatic r.p.m. at max. permissible throttle setting:\nNot over 2750, not under 2650.\nNo additional tolerance permitted.\nDiameter: Not over 74 inches, not under 72.5 inches\nThe following note must be inserted in the Airplane Flight Manual:\n\"Aeromatic Propeller F200/00-74E - Installation and Operation, must be\naccomplished in accordance with Koppers 'Installation Procedure and Operation\nLimitation' dated March 10, 1948.\"\nItem 401(c) required with this propeller.\n*3. Propeller - 2 position controllable, Sensenich Hub C-2FM-4, Blades PC-276A6                           +15 lbs.   (-62)\nPitch settings at 28.5\" sta.: Low 11.5°, high 14.5°\nDiameter: Not more than 74 inches, not less than 72.5 inches\nItem 401(c) required with this propeller.\n*4. Propeller - fixed pitch metal, McCauley 1C90-LM/7254                                                  +23 lbs.   (-62)\nor any other model 1C90-LM propeller which meets the following limits:\nStatic r.p.m. at max. permissible throttle setting:\nNo over 2310, not under 2180.\nNo additional tolerance permitted.\nDiameter: Not over 72 inches, not under 70.5 inches\nItem 401(c) required with this propeller.\n\n3                                                            A-797\n\n*5.   Propeller - fixed pitch metal, Sensenich model M76AM-2-47, M76AM-2-54 or any                       +24 lbs.   (-62)\nother M76AM propeller which meets the following limits:\nStatic r.p.m. at max. permissible throttle setting:\nNot over 2500, not under 2150.\nNo additional tolerance permitted.\nDiameter: Not over 74 inches, not under 72.5 inches\nItem 401(c) required with this propeller.\n\nEngines and Engine Accessories - Fuel and Oil Systems\n*101. Oil filter, Fram PB5, Kit No. K-520, Fram Dwg. 62704 and Instruction Sheet 62703                     +5 lbs.   (-28)\n(weight includes 1 quart oil)\n\nLanding Gear and Floats\n201. Two main wheel-brake assemblies, 8.00-4, Type III\n(a) Goodrich Model 841A                                                                           +10 lbs.   (+1)\nWheel Assembly #D-3-13-A-1\nBrake Assembly #D-2-113\n202. Two main wheel 4 ply-rating tires, 8.00-4, Type III with reg. tubes                                 +21 lbs.   (+1)\n204. Tail wheel assembly                                                                                  +5 lbs.   (+200)\n(a) Scott Model 3-24B, Steerable, full swiveling\n205. Two skis                                                                                            Use Actual Weight\n(a) Federal A-1850                                                                                           Change\n(b) Federal A-2000 or A-2000A per Federal Dwg. 11R262\n*(c) Wesco per Western Aircraft Equipment Company Dwg. Nos. 12 and 148:\n(1) AS-2, (2) AS-2A, (3) AS-2B, (4) A-20, (5) A-25\n*210. Consolidair Model 17 wheel fenders (installed in accordance with Consolidair                         +9 lbs.   (+1)\nDwg. No. 0039)\n*211. Tandem gear Model GW-100 installed in accordance with A. W. Whitaker,                               +46 lbs.   (+1)\n5001 N.E. Union Avenue, Portland, Oregon, Dwg. T-10 and Installation Instructions\ndated June 8, 1949.\n\nElectrical Equipment\n301. Battery (12 volt) and box                                                                           +25 lbs.   (+7)\n302. Position lights                                                                                      +3 lbs.   (+65)\n303. Landing lights in wing leading edge per Piper Dwg. 12534                                             +4 lbs.   (+5)\n\nInterior Equipment\n401. (a) CAA (FAA) Approved Airplane Flight Manual, Piper Model PA-14, dated\nMarch 10, 1948, for Serial Nos. 14-1 to 14-489 and dated December 16, 1948, for Serial\nNos. 14-490 and up.\n(b) Skiplane Supplement to Manual as follows:\nPerformance Information with Ski Installation.\nClimb: Skiplane climb performance is essentially equal to that of the landplane.\nTake-off and landing: Under the most favorable conditions of smooth packed\nsnow at temperature approximating 30°F, skiplane take-off distance is\nessentially equal to the landplane distance. Landing distance is\napproximately 20% greater than the landplane distance. In\napplying the performance data, caution should be exercised in that lower\ntemperatures or other snow conditions will increase the ski friction and\nhence increase the take-off run and decrease the landing run.\n(c) When the Item 2, 3, 4 or 5 propeller is installed, the Airplane Flight Manual\nshould be revised to reflect this installation under \"Limitations\" section and under\n\"Performance\" section, the following statement shall be added following Item 4 of\nthe section: \"5. Performance with the model _______ propeller has been\ndemonstrated to equal or exceed that presented herein over the altitude and\ntemperature range shown.\"\nMiscellaneous (not listed above)\n*601. Fuselage metal plating when installed in accordance with Met-Co-Aire's                        Use Actual Weight\nDwg. No. 12108, 13108, and Installation Instructions dated June 17, 1954, issued by        Change and Moment\nMet-Co-Aire Co., Municipal Airport, Fullerton, California.                                 Arm\n\nA-797                                             4\n\nNOTE 1.   Current weight and balance report including list of equipment included in certificated weight empty, and\nloading instructions when necessary, must be in each aircraft at the time of original certification and at all\ntimes thereafter (except in the case of air carrier operators having an approved weight control system).\n\nNOTE 2.   The following placards must be displayed on the instrument panel in full view of the pilot:\n\n(a) \"This airplane must be operated as a Normal or Utility Category airplane in accordance with the\nLimitations in the CAA Approved Airplane Flight Manual. Airplane marked and placarded for Normal\nCategory. No acrobatics including spins approved in Normal Category. No acrobatics approved for\nUtility Category except those listed in Airplane Flight Manual.\"\n\n(b) \"No Smoking.\"\n\n(c) \"Right tank should be used in level flight only.\"\n\n....END...."
+    }
+  ]
+}

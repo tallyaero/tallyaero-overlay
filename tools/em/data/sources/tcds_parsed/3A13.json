@@ -1,0 +1,589 @@
+{
+  "tcds_number": "3A13",
+  "revision": "72",
+  "revision_date": null,
+  "tc_holder": "Textron Aviation Inc.",
+  "source_pdf": "3A13.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 14,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "182",
+        "Skylane"
+      ],
+      "engine": "Continental O-470-L",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 184,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 122,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2550
+      },
+      "fuel_capacity": {
+        "total_gal": 60.0,
+        "usable_gal": 55.0
+      },
+      "seats": null,
+      "cg_range_raw": "(+39.5) to (+45.8) at 2550 lb.\n(+35.0) to (+45.8) at 2050 lb. or less\nStraight line variation between points given\n\nEmpty Wt. C.G. Range   None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "182A",
+        "Skylane"
+      ],
+      "engine": "Continental O-470-L",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 184,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 122,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2650
+      },
+      "fuel_capacity": {
+        "total_gal": 65.0,
+        "usable_gal": 55.0
+      },
+      "seats": null,
+      "cg_range_raw": "(+40.0) to (+45.8) at 2650 lb.\n(+33.5) to (+45.8) at 2100 lb. or less\nStraight line variation between points given\n\nEmpty Wt. C.G. Range              None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "182B",
+        "Skylane"
+      ],
+      "engine": "Continental O-470-L",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 184,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 122,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2650
+      },
+      "fuel_capacity": {
+        "total_gal": 65.0,
+        "usable_gal": 55.0
+      },
+      "seats": null,
+      "cg_range_raw": "(+40.0) to (+45.8) at 2650 lb.\n(+33.5) to (+45.8) at 2100 lb. or less\nStraight line variation between points given\n\nEmpty Wt. C.G. Range   None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "182C",
+        "Skylane"
+      ],
+      "engine": "Continental O-470-L",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 184,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 122,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2650
+      },
+      "fuel_capacity": {
+        "total_gal": 65.0,
+        "usable_gal": 55.0
+      },
+      "seats": null,
+      "cg_range_raw": "(+40.0) to (+45.8) at 2650 lb.\n(+33.5) to (+45.8) at 2100 lb. or less\nStraight line variation between points given\n\nEmpty Wt. C.G. Range          None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "V",
+      "models": [
+        "182E",
+        "Skylane"
+      ],
+      "engine": "Continental O-470-L or 0-470-R",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 193,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 110,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 128,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2800
+      },
+      "fuel_capacity": {
+        "total_gal": 65.0,
+        "usable_gal": 60.0
+      },
+      "seats": null,
+      "cg_range_raw": "(+38.4) to (+47.4) at 2800 lb.\n(+33.0) to (+47.4) at 2250 lb. or less\nStraight line variation between points given\n\nEmpty Wt. C.G. Range          None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VI",
+      "models": [
+        "182H",
+        "Skylane"
+      ],
+      "engine": "Continental O-470-R",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 193,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 110,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 128,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2800
+      },
+      "fuel_capacity": {
+        "total_gal": 65.0,
+        "usable_gal": 60.0
+      },
+      "seats": null,
+      "cg_range_raw": "(+38.4) to (+47.4) at 2800 lb.\n(+33.0) to (+47.4) at 2250 lb. or less\nStraight line variation between points given\n\nEmpty Wt. C.G. Range          None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VII",
+      "models": [
+        "182M",
+        "Skylane"
+      ],
+      "engine": "Continental O-470-R",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 193,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 110,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 128,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2800
+      },
+      "fuel_capacity": {
+        "total_gal": 65.0,
+        "usable_gal": 60.0
+      },
+      "seats": null,
+      "cg_range_raw": "(+38.4) to (+47.4) at 2800 lb.\n(+33.0) to (+47.4) at 2250 lb. or less\nStraight line variation between points given\n\nEmpty Wt. C.G. Range          None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VIII",
+      "models": [
+        "182N",
+        "Skylane"
+      ],
+      "engine": "Continental O-470-R",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 198,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 110,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 131,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2950
+      },
+      "fuel_capacity": {
+        "total_gal": 65.0,
+        "usable_gal": 60.0
+      },
+      "seats": null,
+      "cg_range_raw": "(+39.9) to (+47.4) at 2950 lb.\n(+38.4) to (+47.4) at 2800 lb.\n(+33.0) to (+47.4) at 2250 lb. or less\nStraight line variation between points given\n\nEmpty Wt. C.G. Range         None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IX",
+      "models": [
+        "182P",
+        "Skylane"
+      ],
+      "engine": "Continental O-470-R, Aircraft S/N 18260826 through 18263475",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 198,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 110,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 126,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2950
+      },
+      "fuel_capacity": {
+        "total_gal": 65.0,
+        "usable_gal": 60.0
+      },
+      "seats": null,
+      "cg_range_raw": "(+39.5) to (+48.5) at 2950 lb.\n(+33.0) to (+48.5) at 2250 lb. or less\nStraight line variation between points given\nEmpty Wt. C.G. Range          None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "X",
+      "models": [
+        "182Q",
+        "Skylane"
+      ],
+      "engine": "Continental O-470-U",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100/130 minimum aviation grade gasoline (S/N 18265176 through 18265965)",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 179,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 143,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 95,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 111,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2950
+      },
+      "fuel_capacity": {
+        "total_gal": 61.0,
+        "usable_gal": 56.0
+      },
+      "seats": null,
+      "cg_range_raw": "(+39.5) to (+48.5) at 2950 lb.\n(+33.0) to (+48.5) at 2250 lb. or less\nStraight line variation between points given\n\nEmpty Wt. C.G. Range          None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XI",
+      "models": [
+        "R182",
+        "Skylane",
+        "RG"
+      ],
+      "engine": "Lycoming O-540-J3C5D, rated at 235 hp.",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100LL/100 aviation grade gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 182,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 143,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 95,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 112,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3100
+      },
+      "fuel_capacity": {
+        "total_gal": 61.0,
+        "usable_gal": 56.0
+      },
+      "seats": null,
+      "cg_range_raw": "(a) S/N R18200001 through R18201628 except R18200975 & R18201315\n(+40.9) to (+47.0) at 3100 lb.\n(+35.5) to (+47.0) at 2700 lb.\n(+33.0) to (+47.0) at 2250 lb. or less\nStraight line variation between points given\nMoment change due to retracting gear (+3052 in.-lb.)\n(b) S/N R18200975, R18201315, R18201629 through R18202041\n(+40.9) to (+46.0) at 3100 lb.\n(+35.5) to (+46.0) at 2700 lb.\n(+33.0) to (+46.0) at 2250 lb. or less\nStraight line variation between points given\nMoment change due to retracting gear (+3052 in.-lb.)\n\nEmpty Wt. C.G. Range          None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XII",
+      "models": [
+        "182R"
+      ],
+      "engine": "Continental O-470-U",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100LL/100 aviation grade gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 179,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 143,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 95,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 111,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3100
+      },
+      "fuel_capacity": {
+        "total_gal": 92.0,
+        "usable_gal": 88.0
+      },
+      "seats": null,
+      "cg_range_raw": "Model 182R      (+40.9) to (+46.0) at 3100 lb.\n(+33.0) to (+46.0) at 2250 lb. or less\nStraight line variation between points given\nModel T182      (+40.9) to (+46.0) at 3100 lb.\n(+35.5) to (+46.0) at 2700 lb.\n(+33.0) to (+46.0) at 2250 lb. or less\nStraight line variation between points given\nEmpty Wt. C.G. Range          None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XIII",
+      "models": [
+        "182S",
+        "Skylane"
+      ],
+      "engine": "Lycoming IO-540-AB1A5. Rated 230 Horsepower",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 175,
+          "unit": "knots"
+        },
+        "Vno": null,
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 110,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {},
+      "fuel_capacity": {
+        "total_gal": 92.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(182S)              Normal Category\n(1) Aft Limits:               46.0 inches aft of datum at 3100 lbs. or less.\n(2) Forward Limits:           Linear variation from 40.9 inches aft of datum at 3100\npounds to 33.0 inches aft of datum at 2250 lbs.; 33.0\ninches aft of datum at 2250 lbs. or less.\n\n(182T)              Normal Category\n(1) Aft Limits                46.0 inches aft of datum at 3,100 pounds or less.\n(2) Forward Limits            Linear variation from 40.9 inches aft of datum at 3,100\npounds, to 35.5 inches aft of datum at 2,700 pounds, to\n33.0 inches aft of datum at 2,250 pounds; 33.0 inches aft\nof datum at 2,250 pounds or less.\n\nEmpty Wt. C.G. Range           None\n\nReference Datum                Lower portion of front face of firewall\n\nMAC                            58.8 inches; Leading edge of MAC 25.98 inches aft of datum",
+      "control_surfaces": "Wing flaps                                              Down       38° +0°, -1°\nElevator tab              Up 24° ± 2°                   Down       15° ± 1°\nAilerons                  Up 20° ± 2°                   Down       15° ± 2°\nElevator                  Up     28° ± 1°               Down       21° ± 1°\n(Relative to stabilizer)\nRudder: Right:               24° +0°, -1°      Left: 24° +0°,-1°\n(Parallel to 0.00 W.L.)\nRight:             27°13’ +0°, -1° Left: 27°13’ +0°,-1°\n(Perpendicular to hinge line)",
+      "serial_numbers": "182S: 18280001 through 18280944\n182T: 18280945 and On\n\n3A13                                                       Page 34 of 39                                                             Rev. 72\n\nData Pertinent to Models 182S and 182T\n\nCertification Basis:\n\nPart 23 of the Federal Aviation Regulations effective February 1, 1965, as amended by 23-1 through 23-6, except as follows:\n\nFAR 23.423; 23.611; 23.619; 23.623; 23.689; 23.775; 23.871; 23.1323; and 23.1563 as amended by Amendment 23-7. FAR 23.807\nand 23.1524 as amended by Amendment 23-10. FAR 23.507; 23.771; 23.853(a),(b) and (c); and 23.1365 as amended by Amendment\n23-14. FAR 23.951 as amended by Amendment 23-15. FAR 23.607; 23.675; 23.685; 23.733; 23.787; 23.1309 and 23.1322 as\namended by Amendment 23-17. FAR 23.1301 as amended by Amendment 23-20. FAR 23.1353; and 23.1559 as amended by\nAmendment 23-21. FAR 23.603; 23.605; 23.613; 23.1329 and 23.1545 as amended by Amendment 23-23. FAR 23.441 and 23.1549\nas amended by Amendment 23-28. FAR 23.779 and 23.781 as amended by Amendment 23-33. FAR 23.1; 23.51 and 23.561 as\namended by Amendment 23-34. FAR 23.301; 23.331; 23.351; 23.427; 23.677; 23.701; 23.735; and 23.831 as amended by\nAmendment 23-42. FAR 23.961; 23.1093; 23.1143(g); 23.1147(b); 23.1303; 23.1357; 23.1361 and 23.1385 as amended by\nAmendment 23-43. FAR 23.562(a), 23.562(b)2, 23.562(c)1, 23.562(c)2, 23.562(c)3, and 23.562(c)4 as amended by Amendment 23-\n44. FAR 23.33; 23.53; 23.305; 23.321; 23.485; 23.621; 23.655 and 23.731 as amended by Amendment 23-45.\n\nFAR 36 dated December 1, 1969, as amended by Amendments 36-1 through 36-21.\n\nEquivalent Safety Items, 182S:\n\n(1) Introduction System Icing Protection             FAR § 23.1093.\n(2) Throttle Control                                 FAR § 23.1143(g)\n(3) Mixture Control                   FAR § 23.1147(b)\n\nDate of Application for Amended Type Certificate was January 22, 1996.\nType Certificate No. 3A13 was amended October 3, 1996.\n\nEquivalent Safety Items, 182T:\n(1) Induction System Icing Protection                           FAR § 23.1093; Refer to FAA letter dated 12/19/00\n(2) Throttle Control                                            FAR § 23.1143(g); Refer to FAA letter dated 12/19/00\n(3) Mixture Control                                             FAR § 23.1147(b); Refer to FAA letter dated 12/19/00\n(4) Anti-collision Lights                                       FAR § 23.1401(d); Refer to FAA letter dated 2/20/01\n(5) Aviation White Color Reqmt                                  14CFR § 23.1397(c); Refer to ACE-07-11, FAA letter dated\n11/29/07\n\nAdditions for the Garmin G1000 Integrated Cockpit System (ICS) Only:\n\n14 CFR 23.303; 23.307; 23.601; 23.1163(a)(1)(2); 23.1367 and 23.1381 as amended by Amendment 23-N/C. 14 CFR 23.1589\nas amended by Amendment 23-13. 14 CFR 23.771(a) as amended by Amendment 23-14. 14 CFR 23.607 and (Electrical\nSystem) 23.1309(a)(1)(2), (c) as amended by Amendment 23-17. 14 CFR 23.1301; 23.1327 and 23.1547(e) as amended by\nAmendment 23-20. 14 CFR 23.1501 and 23.1541(a)(1), (a)(2), (b)(1), (b)(2) as amended by Amendment 23-21. 14 CFR 23.603\nand 23.605 as amended by Amendment 23-23. 14 CFR 23.1529 as amended by Amendment 23-26. 14 CFR 23.561(e); 23.1523;\n23.1581(a)(2); 23.1583(a)(1), (a)(2), (b)(h) and 23.1585(a)(b)(d) as amended by Amendment 23-34. 14 CFR 23.301 as amended\nby Amendment 23-42. 14 CFR 23.1322; 23.1331 and 23.1357(a)(b)(c)(d) as amended by Amendment 23-43. 14 CFR 23.305;\n23.773(a)(1), (a)(2); 23.1525 and 23.1549 as amended by Amendment 23-45. 14 CFR 23.1303(a)(b)(c)(f); 23.1309(a)(1)(i),\n(a)(1)(ii), (a)(2), (b)(1), (b)(2)(i), (b)(2)(ii), (b)(3), (b)(4)(i), (b)(4)(ii), (b)(4)(iii), (b)(4)(iv), (c)(1), (c)(2)(iii), (c)(3), (d), (e),\n(f)(1); 23.1311; 23.1321(a)(c)(d)(e); 23.1323(a), (b)(1), (b)(2), (c); 23.1329(g)(h); 23.1351(a)(1), (a)(2)(i), (b)(1)(iii), (b)(2)(3),\n(c)(4), (d)(1); 23.1353(a)(b)(c)(d)(e); 23.1359(c); 23.1361; 23.1365(a)(b)(d)(e)(f) and 23.1431(a)(b)(d)(e) as amended by\nAmendment 23-49. 14 CFR 23.1325(a), (b)(1), (b)(2)(i), (b)(3), (c)(d)(e); 23.1543(b)(c); 23.1545(a), (b)(1), (b)(2), (b)(3),\n(b)(4); 23.1553; 23.1555(a)(b); 23.1563(a) and 23.1567(a) as amended by Amendment 23-50. 14 CFR 23.777(a)(b);\n23.955(a)(2); 23.1337(a)(1), (a)(2), (b)(1), (c) as amended by Amendment 23-51. 14 CFR 23.1305(a)(1), (a)(2), (a)(3), (b)(2),\n(b)(3)(i), (b)(4)(i), (b)(5), (b)(6)(i) as amended by Amendment 23-52. 14 CFR 23.901(a)(b) as amended by Amendment 23-53.\n\nAdditions for the Garmin GFC-700 Automatic Flight Control System (AFCS) Only:\n\n14 CFR 23.1335 as amended by Amendment 23-20, 14 CFR 23.1329 (a)(c)(d)(e)(f) as amended by Amendment 23-49.\n\nRev. 72                                              Page 35 of 39                                                        3A13\n\nData Pertinent to Model 182S and 182T (cont’d)\n\nSpecial Conditions as follows:\nNo. 23-146-SC, “Special Conditions: Cessna Aircraft Company; Cessna Model 182T/T182T Airplane; Installation of Electronic\nFlight Instrument System and the Protection of the System From High Intensity Radiated Fields (HIRF).\n\nProduction Basis (Model 182S)\n\nProduction Certificate No. PC-4 issued June 30, 1997. Applies to airplane serial numbers 18280013, 18280016, 18280017,\n18280019 and on. Airplane serial numbers not listed were produced under Type Certificate only. Cessna is authorized to issue\nairworthiness certificates under the delegation provisions of Delegation Option Authorization No. CE-1 in accordance with Part\n21 of the Federal Aviation Regulations.\n\nProduction Basis (Model 182T)\n\nProduction Certificate No. 4 issued March 8, 2001. Applies to airplane serial numbers 18280945 and on. Cessna is authorized\nto issue airworthiness certificates under the delegation provisions of Delegation Option Authorization\nNo. DOA-100129-CE in accordance with Part 21 of the Federal Aviation Regulations.\n\nEquipment\n\nThe basic required equipment as prescribed in the applicable airworthiness regulations (see Certification Basis) must be installed\nin the airplane for certification.\n\nNOTE 1.             Weight and Balance:\n\nSerial Nos. 18280001 Through 18280944; (Model 182S)\nThe certificated basic empty weight and corresponding center of gravity location must include unusable fuel\nof 24 lbs. at 48 inches aft of datum, and full oil of 16.2 lb. at 14.8 inches forward of datum.\n\nSerial Nos. 18280945 and On; (Model 182T)\nThe certificated basic empty weight and corresponding center of gravity location must include unusable fuel\nof 30 lbs. at 48 inches aft of datum, and full oil of 16.2 lb. at 14.8 inches forward of datum.\n\nNOTE 2.             FAA Approved Airplane Flight Manual (AFM): Part Number 182SPHUS00 (or later FAA approved\nrevisions) are applicable to the Model 182S. The Airplane must be operated according to the appropriate\nAFM. Required placards are included in the AFM.\n\nFAA Approved Airplane Flight Manual (AFM): Part number 182TPHUS00 (or later FAA approved revision)\nis applicable to the Model 182T. The Airplane must be operated according to the appropriate AFM.\nRequired placards are included in the AFM.\n\nFAA Approved Airplane Flight Manual (AFM): Part Number 182TPHAUS-00 (or later FAA approved\nrevisions) are applicable to the Model 182T equipped with Garmin G1000 Integrated Cockpit System. The\nairplane must be operated according to the appropriate AFM. Required placards are included in the AFM.”\n\nFAA Approved Airplane Flight Manual (AFM): Part Number 182TPHBUS-00 (or later FAA approved\nrevisions) are applicable to the Model 182T equipped with Garmin G1000 Integrated Cockpit System and\nGarmin GFC-700 AFCS. The airplane must be operated according to the appropriate AFM. Required\nplacards are included in the AFM.\n\nNOTE 3.             The CHT probe must be installed on Head #1 (182S) or #3 (182T).\n\n3A13                                                  Page 36 of 39                                                        Rev. 72\n\nData Pertinent to Model 182S and 182T (cont’d)\n\nNOTE 4.             Special Ferry Flight Authorization. Flight Standards District Offices are authorized to issue Special\noverweight ferry flight authorizations. This airplane is structurally satisfactory for ferry flight if maintained\nwithin the following limits: (1) Takeoff weight must not exceed 130% of the maximum weight for Normal\nCategory; and (2) The Never Exceed Airspeed (VNE) and Maximum Structural Cruising Speed (VC) must\nbe reduced by 30%; and (3) Forward and aft center of gravity limits may not be exceeded; and (4) Structural\nload factors of +2.5 g. to -1.0 g. may not be exceeded. Requirements for any additional engine oil should be\nestablished in accordance with Advisory Circular AC23.1011-1. Increased stall speeds and reduced climb\nperformance should be expected for the increased weights. Flight characteristics and performance at the\nincreased weights have not been evaluated. Procedures for issuing a Flight Permit for operations of\noverweight aircraft may be found in Advisory Circular AC21-4B\n\nNOTE 5.             Model 182S airplane serial numbers 18280617 through 18280670 may differ structurally and are, therefore,\nnot eligible for any weight increases above the approved maximum takeoff weight limit of 3,100 pounds.\nAny exceptions must first be coordinated with the Wichita Aircraft Certification Office. Exceptions to this\nlimitation have been inspected and found to comply with type data for the Model 182S, and include the\nfollowing serial number aircraft: 18280620.\n\nNOTE 6.             The following serials are manufactured under the name Cessna Aircraft Company: 182S: 18280001 thru\n18280944, 182T: 18280945 thru 18282368.\n\nNOTE 7.             Company name change effective 7/29/15. The following serials are manufactured under the name Textron\nAviation Inc.: 182T: 18282369 and On."
+    },
+    {
+      "section_roman": "XIV",
+      "models": [
+        "T182T",
+        "Skylane"
+      ],
+      "engine": "Lycoming TIO-540-AK1A. Rated 235 Horsepower",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 175,
+          "unit": "knots"
+        },
+        "Vno": null,
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 110,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {},
+      "fuel_capacity": {
+        "total_gal": 92.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "Normal Category\n(1) Aft Limits                 46.0 inches aft of datum at 3,100 pounds or less.\n(2) Forward Limits             Linear variation from 40.9 inches aft of datum at 3,100\npounds, to 35.5 inches aft of datum at 2,700 pounds, to\n33.0 inches aft of datum at 2,250 pounds; 33.0 inches aft\nof datum at 2,250 pounds or less.\nEmpty Wt. C.G. Range                None\n\nReference Datum                     Lower portion of front face of firewall\n\nMAC                                 58.8 inches; Leading edge of MAC 25.98 inches aft of datum\n\nRev. 72                                             Page 37 of 39                                                          3A13\n\nXIV. Model T182T (cont’d)",
+      "control_surfaces": "Wing flaps                                             Down       38° +0°, -1°\nElevator tab              Up 24° ± 2°                  Down       15° ± 1°\nAilerons                  Up 20° ± 2°                  Down       15° ± 2°\nElevator                  Up 28° ± 1°                  Down       21° ± 1°\n(Relative to stabilizer)\nRudder:                Right:    24° +0°, -1°           Left:     24° +0°, -1°\n(Parallel to 0.00 W.L.)\nRight:    27°13’ +0°, -1°        Left:     27°13’ +0°, -1°\n(Perpendicular to hinge line)",
+      "serial_numbers": "T18208001 and On\n\nData Pertinent to Model T182T\n\nCertification Basis\n\nPart 23 of the Federal Aviation Regulations effective February 1, 1965, as amended by 23-1 through 23-6, except as follows:\n\nFAR 23.423; 23.611; 23.619; 23.623; 23.689; 23.775; 23.871; 23.1323; and 23.1563 as amended by Amendment 23-7. FAR 23.807\nand 23.1524 as amended by Amendment 23-10. FAR 23.507; 23.771; 23.853(a),(b) and (c); and 23.1365 as amended by Amendment\n23-14. FAR 23.951 as amended by Amendment 23-15. FAR 23.607; 23.675; 23.685; 23.733; 23.787; 23.1309 and 23.1322 as\namended by Amendment 23-17. FAR 23.1301 as amended by Amendment 23-20. FAR 23.1353; and 23.1559 as amended by\nAmendment 23-21. FAR 23.603; 23.605; 23.613; 23.1329 and 23.1545 as amended by Amendment 23-23. FAR 23.441 and 23.1549\nas amended by Amendment 23-28. FAR 23.779 and 23.781 as amended by Amendment 23-33. FAR 23.1; 23.51 and 23.561 as\namended by Amendment 23-34. FAR 23.301; 23.331; 23.351; 23.427; 23.677; 23.701; 23.735; and 23.831 as amended by\nAmendment 23-42. FAR 23.961; 23.1093; 23.1143(g); 23.1147(b); 23.1303; 23.1357; 23.1361 and 23.1385 as amended by\nAmendment 23-43. FAR 23.562(a), 23.562(b)2, 23.562(c)1, 23.562(c)2, 23.562(c)3, and 23.562(c)4 as amended by Amendment 23-\n44. FAR 23.33; 23.53; 23.305; 23.321; 23.485; 23.621; 23.655 and 23.731 as amended by Amendment 23-45.\n\nFAR 36 dated December 1, 1969, as amended by Amendments 36-1 through 36-22.\n\nEquivalent Level of Safety Items:\n\n(1)   Throttle Control                           FAR § 23.1143(g); Refer to FAA letter dated 12/19/00\n(2)   Mixture Control                            FAR § 23.1147(b); Refer to FAA letter dated 12/19/00\n(3)   Anti-collision Lights                      FAR § 23.1401(d); Refer to FAA letter dated 02/20/01\n(4)   Aviation White Color Reqmt                 14CFR § 23.1397(c); Refer to ACE-07-11, FAA letter dated 11/29/07\n\n3A13                                                       Page 38 of 39                                                             Rev. 72\n\nData Pertinent to Model T182T (cont’d)\n\nAdditions for the Garmin G1000 Integrated Cockpit System (ICS) Only:\n\n14 CFR 23.303; 23.307; 23.601; 23.1163(a)(1)(2); 23.1367 and 23.1381 as amended by Amendment 23-N/C. 14 CFR 23.1589\nas amended by Amendment 23-13. 14 CFR 23.771(a) as amended by Amendment 23-14. 14 CFR 23.607 and (Electrical\nSystem) 23.1309(a)(1)(2), (c) as amended by Amendment 23-17. 14 CFR 23.1301; 23.1327 and 23.1547(e) as amended by\nAmendment 23-20. 14 CFR 23.1501 and 23.1541(a)(1), (a)(2), (b)(1), (b)(2) as amended by Amendment 23-21. 14 CFR 23.603\nand 23.605 as amended by Amendment 23-23. 14 CFR 23.1529 as amended by Amendment 23-26. 14 CFR 23.561(e); 23.1523;\n23.1581(a)(2); 23.1583(a)(1), (a)(2), (b)(h) and 23.1585(a)(b)(d) as amended by Amendment 23-34. 14 CFR 23.301 as amended\nby Amendment 23-42. 14 CFR 23.1322; 23.1331 and 23.1357(a)(b)(c)(d) as amended by Amendment 23-43. 14 CFR 23.305;\n23.773(a)(1), (a)(2); 23.1525 and 23.1549 as amended by Amendment 23-45. 14 CFR 23.1303(a)(b)(c)(f); 23.1309(a)(1)(i),\n(a)(1)(ii), (a)(2), (b)(1), (b)(2)(i), (b)(2)(ii), (b)(3), (b)(4)(i), (b)(4)(ii), (b)(4)(iii), (b)(4)(iv), (c)(1), (c)(2)(iii), (c)(3), (d), (e),\n(f)(1); 23.1311; 23.1321(a)(c)(d)(e); 23.1323(a), (b)(1), (b)(2), (c); 23.1329(g)(h); 23.1351(a)(1), (a)(2)(i), (b)(1)(iii), (b)(2)(3),\n(c)(4), (d)(1); 23.1353(a)(b)(c)(d)(e); 23.1359(c); 23.1361; 23.1365(a)(b)(d)(e)(f) and 23.1431(a)(b)(d)(e) as amended by\nAmendment 23-49. 14 CFR 23.1325(a), (b)(1), (b)(2)(i), (b)(3), (c)(d)(e); 23.1543(b)(c); 23.1545(a), (b)(1), (b)(2), (b)(3),\n(b)(4); 23.1553; 23.1555(a)(b); 23.1563(a) and 23.1567(a) as amended by Amendment 23-50. 14 CFR 23.777(a)(b);\n23.955(a)(2); 23.1337(a)(1), (a)(2), (b)(1), (c) as amended by Amendment 23-51. 14 CFR 23.1305(a)(1), (a)(2), (a)(3), (b)(2),\n(b)(3)(i), (b)(4)(i), (b)(5), (b)(6)(i) as amended by Amendment 23-52. 14 CFR 23.901(a)(b) as amended by Amendment 23-53.\n\nAdditions for the Garmin GFC-700 Automatic Flight Control System (AFCS) Only:\n\n14 CFR 23.1335 as amended by Amendment 23-20, 14 CFR 23.1329 (a)(c)(d)(e)(f) as amended by Amendment 23-49.\n\nSpecial Conditions as follows:\nNo. 23-146-SC, “Special Conditions: Cessna Aircraft Company; Cessna Model 182T/T182T Airplane; Installation of Electronic\nFlight Instrument System and the Protection of the System From High Intensity Radiated Fields (HIRF).\n\nProduction Basis (Model T182T)\nProduction Certificate No. 4 issued March 8, 2001. Applies to airplane serial numbers T18208001 and on. Cessna is authorized\nto issue airworthiness certificates under the delegation provisions of Delegation Option Authorization No. DOA-100129-CE in\naccordance with Part 21 of the Federal Aviation Regulations.\n\nEquipment\nThe basic required equipment as prescribed in the applicable airworthiness regulations (see Certification Basis) must be installed\nin the airplane for certification.\n\nNOTE 1.               Weight and Balance:\n\nSerial Nos. T18208001 and On (Model T182T)\nThe certificated empty weight and corresponding center of gravity location must include unusable fuel of\n30 lbs. at 48 inches aft of datum, and full oil of 16.2 lb. at 14.8 inches forward of datum.\n\nNOTE 2.               Pilot’s Operating Handbook and FAA Approved Airplane Flight Manual (AFM): part number\nT182TPHUS00 (or later approved revision) is applicable to Model T182T. The airplane must be operated\naccording to the appropriate POH/AFM. Required placards are included in the AFM.\n\nFAA Approved Airplane Flight Manual (AFM): Part Number T182TPHAUS-00 (or later FAA approved\nrevisions) are applicable to the Model 182T equipped with Garmin G1000 Integrated Cockpit System. The\nairplane must be operated according to the appropriate AFM. Required placards are included in the AFM.\n\nFAA Approved Airplane Flight Manual (AFM): Part Number T182TPHBUS-00 (or later FAA approved\nrevisions) are applicable to the Model T182T equipped with Garmin G1000 Integrated Cockpit System and\nGarmin GFC-700 AFCS. The airplane must be operated according to the appropriate AFM. Required\nplacards are included in the AFM.\n\nNOTE 3.               The CHT probe must be installed on Head #4.\n\nRev. 72                                            Page 39 of 39                                                          3A13\n\nData Pertinent to Model T182T (cont’d)\n\nNOTE 4.          Special Ferry Flight Authorization. Flight Standards District Offices are authorized to issue Special\noverweight ferry flight authorizations. This airplane is structurally satisfactory for ferry flight if maintained\nwithin the following limits: (1) Takeoff weight must not exceed 130% of the maximum weight for Normal\nCategory; and (2) The Never Exceed Airspeed (VNE) and Maximum Structural Cruising Speed (VC) must\nbe reduced by 30%; and (3) Forward and aft center of gravity limits may not be exceeded; and (4) Structural\nload factors of +2.5 g. to -1.0 g. may not be exceeded. Requirements for any additional engine oil should be\nestablished in accordance with Advisory Circular AC23.1011-1. Increased stall speeds and reduced climb\nperformance should be expected for the increased weights. Flight characteristics and performance at the\nincreased weights have not been evaluated. Procedures for issuing a Flight Permit for operations of\noverweight aircraft may be found in Advisory Circular AC21-4B.\n\nNOTE 5.          The following serials are manufactured under the name Cessna Aircraft Company: T18208001 thru\nT18209100.\n\nNOTE 6.          Company name change effective 7/29/15. The following serials are manufactured under the name Textron\nAviation Inc.: T182T: T18209101 and On.\n\n……END……"
+    }
+  ]
+}

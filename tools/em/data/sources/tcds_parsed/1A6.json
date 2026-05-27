@@ -1,0 +1,298 @@
+{
+  "tcds_number": "1A6",
+  "revision": "34",
+  "revision_date": "August 7, 2006",
+  "tc_holder": "Piper Aircraft, Inc.",
+  "source_pdf": "1A6.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 7,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "PA-22"
+      ],
+      "engine": "Lycoming O-290-D",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 125
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 158,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 126,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 80,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 106,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1800
+      },
+      "fuel_capacity": {
+        "total_gal": 36.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Stabilizer                  1°    Up           6½°    Down\nElevator                   24°    Up           12°    Down\nAileron                    15°    Up           15°    Down\nRudder                     16°    Right         16°   Left\nFlap                       40°    Down",
+      "serial_numbers": "22-1 and up.\n\nRequired Equipment          In addition to the pertinent required basic equipment specified in CAR 3, the following\nitems of equipment must be installed:\nItems 1, 101, 201(a), 202, 205(a), 206, and 401(a)."
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "PA-22-135"
+      ],
+      "engine": "Lycoming O-290-D2",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 135
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 158,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 126,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 80,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 106,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1950
+      },
+      "fuel_capacity": {
+        "total_gal": 36.0,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": null,
+      "control_surfaces": "Stabilizer                       1°   Up           6½°    Down\nElevator                        24°   Up           12°    Down\nAileron                         15°   Up           15°    Down\nRudder                          16°   Right         16°   Left\nFlap                            40°   Down",
+      "serial_numbers": "22-534 and up.\n\nRequired Equipment             In addition to the pertinent required basic equipment specified in CAR 3, the following\nItems of equipment must be installed:\nItems 1, 103, 201(a), 202, 205(a), 206, and 401(b)."
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "PA-22S-135"
+      ],
+      "engine": "Lycoming O-290-D2",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 135
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 117,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 80,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 105,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1850
+      },
+      "fuel_capacity": {
+        "total_gal": 36.0,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": null,
+      "control_surfaces": "Stabilizer                    1°   Up             6½°     Down\nElevator                     24°   Up             12°     Down\nAileron                      15°   Up             15°     Down\nRudder                       16°   Right           16°    Left\nFlap                         40°   Down",
+      "serial_numbers": "22-534 and up.\n\nRequired Equipment           In addition to the pertinent required basic equipment specified in CAR 3, the following\nItems of equipment must be installed:\nItems 2, 103, 209, and 401(g)."
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "PA-22-150"
+      ],
+      "engine": "Lycoming O-320-A2A or O-320-A2B (Carburetor setting #10-3678-11,",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 150
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 170,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 135,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 95,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 112,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2000,
+        "utility_landplane": 1680
+      },
+      "fuel_capacity": {
+        "total_gal": 36.0,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": null,
+      "control_surfaces": "Stabilizer                       1°   Up               6½°    Down\nElevator                        24°   Up               12°    Down\nAileron                         15°   Up               15°    Down\nRudder                          16°   Right             16°   Left\nFlap                            40°   Down\n\nStabilizer                   1°   Up            6½°     Down\nElevator                    24°   Up            12°     Down\nAileron                     15°   Up            15°     Down\nRudder                      16°   Right          16°    Left\nFlap                        40°   Down",
+      "serial_numbers": "22-2378, 22-2425 and up (Normal Category). See NOTE 3 for Utility Category.\n\nRequired Equipment            In addition to the pertinent required basic equipment specified in CAR 3, the following\nItems of equipment must be installed:\nNormal Category:          Items 5, 103, 201(a), 202, 205(a), 206, and 401(h).\nNormal and Utility Category: Items 5, 103, 201(a), 202, 205(a), 206, 401(h),\n401(r), and 407.\n\nV. - Model PA-22S-150, 3 PCSM (Normal Category), Approved September 3, 1954\n\n22-2378, 22-2425 and up.\n\nRequired Equipment           In addition to the pertinent required basic equipment specified in CAR 3, the following\nItems of equipment must be installed:\nItems 5, 103, 209 and 401(i)."
+    },
+    {
+      "section_roman": "VI",
+      "models": [
+        "PA-22-160"
+      ],
+      "engine": "Lycoming O-320-B2A or O-320-B2B (Carburetor setting #10-3678-11, #10-3678-12 or",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 160
+      },
+      "fuel_grade": "91/96 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 170,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 135,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 95,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 112,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2000,
+        "utility_landplane": 1680
+      },
+      "fuel_capacity": {
+        "total_gal": 36.0,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": null,
+      "control_surfaces": "Stabilizer                       1°   Up               6½    Down\nElevator                        24°   Up               12°   Down\nAileron                         15°   Up               15°   Down\nRudder                          16°   Right            16°   Left\nFlap                            40°   Down",
+      "serial_numbers": "22-2378, 22-2425 and up (Normal Category). See NOTE 3 for Utility Category.\n\nRequired Equipment            In addition to the pertinent required basic equipment specified in CAR 3, the following\nItems of equipment must be installed:\nNormal Category:                     Items 7, 103, 201(a), 202, 205(a), 206, and 401(s).\nNormal and Utility Category:         Items 7, 103, 201(a), 202, 205(a), 206, 401(s),\n401(t), and 407."
+    },
+    {
+      "section_roman": "VII",
+      "models": [
+        "PA-22S-160"
+      ],
+      "engine": "Lycoming O-320-B2A (Carburetor setting #10-3678-11, #10-3678-12) or",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 160
+      },
+      "fuel_grade": "91/96 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 158,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 126,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 80,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 111,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1950
+      },
+      "fuel_capacity": {
+        "total_gal": 36.0,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": "22-2378, 22-2425 and up.\n\nRequired Equipment           In addition to the pertinent required basic equipment specified in CAR 3, the following\nItems of equipment must be installed:\nItems 7, 103, 209, and 401(v)."
+    },
+    {
+      "section_roman": "VIII",
+      "models": [
+        "PA-22-108"
+      ],
+      "engine": "Lycoming O-235-C1 or O-235-C1B (Carburetor setting #10-3103-1)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 108
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 138,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 110,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 104,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1650,
+        "utility_landplane": 1500
+      },
+      "fuel_capacity": {
+        "total_gal": 18.0,
+        "usable_gal": null
+      },
+      "seats": 2,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": "22-8000 and up.\n\nPage 9 of 15                                                             1A6\n\nRequired Equipment                 In addition to the pertinent required basic equipment specified in CAR 3, the following\nItems of equipment must be installed:\nItems 8, 201(a) or 211(a), 202, 205(a), 206, and 401(y).\n\nSpecifications Pertinent to All Models"
+    }
+  ]
+}

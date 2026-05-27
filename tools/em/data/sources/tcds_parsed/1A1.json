@@ -1,0 +1,79 @@
+{
+  "tcds_number": "1A1",
+  "revision": "13",
+  "revision_date": "August 7, 2006",
+  "tc_holder": "Piper Aircraft, Inc.",
+  "source_pdf": "1A1.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 2,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "PA-16; 4 PCLM (Normal Category)"
+      ],
+      "engine": "Lycoming O-235-C1",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 115
+      },
+      "fuel_grade": "80 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1650,
+        "utility_landplane": 1400
+      },
+      "fuel_capacity": {
+        "total_gal": 30.0,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": "16-1 and up\n\nRequired Equipment             In addition to the pertinent required basic equipment specified in CAR 3, the\nfollowing items of equipment must be installed:\nLandplane: Items 1, 201(a), 202(a), 204(a), and 401(a).\nSkiplane:       Items 1, 205, 401(a) and (b)."
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "PA-16S; 3 PCSM (Normal Category Only); Approved July 20"
+      ],
+      "engine": "Lycoming O-235-C1",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 108
+      },
+      "fuel_grade": "80 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vno": null,
+        "Vfe": null,
+        "Va": {
+          "value": 105,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1738
+      },
+      "fuel_capacity": {
+        "total_gal": 30.0,
+        "usable_gal": null
+      },
+      "seats": 3,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": "16-1 and up\n\nRequired Equipment                 In addition to the pertinent required basic equipment specified in CAR 3, the\nfollowing items of equipment must be installed:\nItems 4, 105, 209, and 401(d).\n\nSpecifications Pertinent to All Models"
+    }
+  ]
+}

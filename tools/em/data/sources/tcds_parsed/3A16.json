@@ -1,0 +1,426 @@
+{
+  "tcds_number": "3A16",
+  "revision": "82",
+  "revision_date": "January 31, 2007",
+  "tc_holder": "Raytheon Aircraft Company",
+  "source_pdf": "3A16.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 10,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "95"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "91/96 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 240,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 185,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 130,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 160,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 4000
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing                       (+79.4) to (+83.0) at 4000 lb.\nGear Extended)                            (+75.0) to (+83.0) at 3480 lb. or less\nStraight line variation between points given\nLanding gear retraction moment (+623 in.-lb.)\n\nEmpty Wt. C.G. Range                      None",
+      "control_surfaces": "Wing flaps                                            Down     33°\nMain surfaces\nAileron                     Up     20°            Down 20°\nElevator                    Up     30°            Down 15°\nRudder                   Right     30°             Left 30°\nTabs (main surface in neutral)\nAileron                     Up     10°            Down 10°\nElevator                    Up     10°            Down 20°\nRudder                   Right     25°             Left 25°\nElevator eligible           Up     10°            Down 23°\nTD-2, TD-103 and up\n(main surface in neutral)\n\nSerial Nos. Eligible              TD-2 through TD-302\n\nRequired Equipment                Items 1(a) and (b) or 4(a) and (b), 101(a) and (b), 102(a), 103(a), 201, 202, 205, 206,\n301, 302, 304, 401(a), (b), (c), (d) and (ee) and (gg or oo), 601",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "B95"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "91/96 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 240,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 185,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 130,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 160,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 4100
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing               (+80.5) to (+86.0) at 4100 lb.\nGear Extended)                   (+75.0) to (+86.0) at 3480 lb. or less\nStraight line variation between points given\nLanding gear retraction moment (+623 in.-lb.)\n\nRevision 82                                                 3                                                         3A16\n\nII - Model B95 (cont’d)\nEmpty Wt. C.G. Range               None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "95-55",
+        "4"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 257,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 210,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 130,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 180,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 4880
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing                      (+79.4) to (+86.0) at 4880 lb.\nGear Extended)                          (+74.0) to (+86.0) at 3800 lb. or less\nStraight line variation between points given\nLanding gear retraction moment (+623 in.-lb.)\n\nEmpty Wt. C.G. Range                     None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "B95A",
+        "4"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "91/96 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 240,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 185,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 130,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 160,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 4200
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing             (+80.5) to (+86.0) at 4200 lb.\nGear Extended)                 (+75.0) to (+86.0) at 3600 lb. or less\nStraight line variation between points given\nLanding gear retraction moment (+623 in.-lb.)\n\nEmpty Wt. C.G. Range            None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "V",
+      "models": [
+        "D95A",
+        "4"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "91/96 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 240,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 185,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 130,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 160,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 4200
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing                (+80.5) to (+86.0) at 4200 lb.\nGear Extended)                    (+75.0) to (+86.0) at 3600 lb. or less\nStraight line variation between points given\nLanding gear retraction moment (+623 in.-lb.)\n\nEmpty Wt. C.G. Range               None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VI",
+      "models": [
+        "95-B55",
+        "4"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 257,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 210,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 180,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 4990
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing                  (+81.0) to (+86.0) at 5100 lb. (See NOTE 3)\nGear Extended)                      (+80.0) to (+86.0) at 5000 lb.\n(+79.9) to (+86.0) at 4990 lb. (See NOTE 5)\n(+77.5) to (+86.0) at 4740 lb. (See NOTE 3)\n(+74.0) to (+86.0) at 3800 lb. or less\nStraight line variation between points given\nLanding gear retraction moment (+623 in.-lb.)\n\nEmpty Wt. C.G. Range                 None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VII",
+      "models": [
+        "95-B55B"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 257,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 210,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 140,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 180,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 5100
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing                    (+81.0) to (+83.5) at 5100 lb. (Utility category)\nGear Extended)                        (+81.0) to (+86.0) at 5100 lb. (Normal category)\n(+77.5) to (+83.5) at 4740 lb. (Utility category)\n(+77.5) to (+86.0) at 4740 lb. (Normal category)\n(+74.0) to (+83.5) at 3800 lb. or less (Utility category)\n(+74.0) to (+86.0) at 3800 lb. or less (Normal category)\nStraight line variation between points given\nLanding gear retraction moment (+623 in.-lb.)\n\nEmpty Wt. C.G. Range                   None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VIII",
+      "models": [
+        "95-C55",
+        "4"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 257,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 225,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 180,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 4990
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing                (+78.0) to (+86.0) at 5300 lb.\nGear Extended)                    (+76.9) to (+86.0) at 4990 lb. (See NOTE 5)\n(+74.0) to (+86.0) at 4200 lb. or less\nStraight line variation between points given\nLanding gear retraction moment (+623 in.-lb.)\n\nEmpty Wt. C.G. Range               None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IX",
+      "models": [
+        "56TC",
+        "Turbo",
+        "4"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 25,
+          "unit": "knots"
+        },
+        "Vno": null,
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 183,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 5990
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing               (+78.0) to (+84.2) at 5990 lb.\nGear Extended)                   (+71.0) to (+84.2) at 4880 lb. or less\nStraight line variation between points given\nLanding gear retraction moment (+623 in.-lb.)\n\nEmpty Wt. C.G. Range              None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "X",
+      "models": [
+        "58",
+        "4"
+      ],
+      "engine": "and Engine Accessories",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 257,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 225,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 180,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 5400
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing              Model 58:        S/N TH-1 through TH-1395 except TH-1389\nGear Extended)                                   (+78.0) to (+86.0) at 5400 lb.\nModel 58:        S/N TH-1389, TH-1396 through TH-2124 and after\n(+78.3) to (+86.0) at 5500 lb. for takeoff\n(+78.0) to (+86.0) at 5400 lb. for landing\nModel 58A: (+76.6) to (+86.0) at 4990 lb.\nModels 58 and 58A: (+74.0) to (+86.0) at 4200 lb. or less\nStraight line variation between points given\nLanding gear retraction moment (+623 in.-lb.)\n\nEmpty Wt. C.G. Range              None\n\n(Landing                (+78.3) to (+86.0) at 5500 lb. for takeoff\n(+78.0) to (+86.0) at 5400 lb. for landing\n(+74.0) to (+86.0) at 4200 lb. or less\nStraight line variation between points given\nLanding gear retraction moment (+623 in.-lb.)\n\nEmpty Wt. C.G. Range               None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    }
+  ]
+}

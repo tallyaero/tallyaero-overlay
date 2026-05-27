@@ -1,0 +1,249 @@
+{
+  "tcds_number": "A-691",
+  "revision": "34",
+  "revision_date": "March 8, 2011",
+  "tc_holder": "Piper Aircraft, Inc.",
+  "source_pdf": "A-691.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 8,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "J3C-40",
+        "2"
+      ],
+      "engine": "Continental A-40-4 (See Item 311A for optional engine)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 40
+      },
+      "fuel_grade": "73 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1025
+      },
+      "fuel_capacity": {
+        "total_gal": 12.0,
+        "usable_gal": null
+      },
+      "seats": 2,
+      "cg_range_raw": null,
+      "control_surfaces": "Elevator                   34°    Up           29°   Down\nRudder                     30°    Left         30°   Right\nAileron                    18°    Up           18°   Down\nStabilizer                2.5°    Up            4°   Down",
+      "serial_numbers": "2325, 2327, 2339, 2340, 2342, 2344, 2345, 2347, 2349, 2351 and up;\n2356-A and up; and 8277-1 through 8277-40.\n\nRequired Equipment               In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed:\nItems 101, 102, 103 and 104(b)."
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "J3C-50",
+        "2"
+      ],
+      "engine": "Continental A-50-1              (See Item 311B for optional engines)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 50
+      },
+      "fuel_grade": "73 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1100
+      },
+      "fuel_capacity": {
+        "total_gal": 12.0,
+        "usable_gal": null
+      },
+      "seats": 2,
+      "cg_range_raw": null,
+      "control_surfaces": "Elevator                   34°    Up           29°   Down\nRudder                     30°    Left         30°   Right\nAileron                    18°    Up           18°   Down\nStabilizer                2.5°    Up            4°   Down",
+      "serial_numbers": "2325, 2327, 2339, 2340, 2342, 2344, 2345, 2347, 2349, 2350, 2351, and up;\n2356-A and up; and 8277-1 through 8277-40.\n\nRequired Equipment               In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed:\nItems 101, 103 and 104(a).\n\nPage 3 of 21                                                         A-691"
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "J3C-50S",
+        "2",
+        "PCSM"
+      ],
+      "engine": "Continental A-50-1 (See Item 311B for optional engines)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 50
+      },
+      "fuel_grade": "73 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1160
+      },
+      "fuel_capacity": {
+        "total_gal": 12.0,
+        "usable_gal": null
+      },
+      "seats": 2,
+      "cg_range_raw": null,
+      "control_surfaces": "Elevator             34°       Up           29°     Down\nRudder               30°       Left         30°     Right\nAileron              18°       Up           18°     Down\nStabilizer           2.5°      Up            4°     Down\n\nElevator             34°       Up         29°   Down\nRudder               30°       Left       30°   Right\nAileron              18°       Up         18°   Down\nStabilizer           2.5°      Up          4°   Down",
+      "serial_numbers": "2325, 2327, 2339, 2340, 2342, 2344, 2345, 2347, 2349, 2351, 2355 and up;\n2356-A and up; and 8277-1 through 8277-40.\n\nRequired Equipment                 In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed:\nItems 101, 104(a) and 151.\n\nIV. - Model J3C-65 (Army L-4, L-4A, L-4B (Navy NE-1), L-4H, L-4J (Navy NE-2)), 2 POLM, Approved July 6, 1939.\nSee NOTE 7 regarding conversion to 2 PCLM.\nArmy L-4 (previously Army 0-59) is the same as Model J3C-65. Army L-4A (previously Army 0-59A) and Army L-4B\nare the same as Model J3C-65 except for transparent turtledeck enclosure, revised rear seat with seat back belts, addition of\nrear shelf and rear floorboard. Army L-4H is same as L-4A except for G. F. radio equipment and revised method of\ninstalling the transparent cockpit enclosure. Army L-4J (Navy NE-2) same as any L-4, L-4A, L-4B and L-4H except for\ninstallation of propeller, Item 1.\n\nA-691                                              Page 4 of 21\n\nIV. - Model J3C-65, L-4H, L-4J (cont'd)\n2325, 2327, 2339, 2340, 2342, 2344, 2345, 2347, 2349, 2351, 2355 and up;\n2356-A and up; and 8277-1 through 8277-40.\n\nRequired Equipment             In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed:\nItems 101, 102, 103 and 104(a).\n\nPage 5 of 21                                                          A-691"
+    },
+    {
+      "section_roman": "V",
+      "models": [
+        "J3C-65S",
+        "2",
+        "PCSM"
+      ],
+      "engine": "Continental A-65-1      (See Item 311C for optional engines)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 65
+      },
+      "fuel_grade": "73 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1160
+      },
+      "fuel_capacity": {
+        "total_gal": 12.0,
+        "usable_gal": null
+      },
+      "seats": 2,
+      "cg_range_raw": null,
+      "control_surfaces": "Elevator                  34°    Up           29°   Down\nRudder                    30°    Left         30°   Right\nAileron                   18°    Up           18°   Down\nStabilizer               2.5°    Up            4°   Down",
+      "serial_numbers": "2325, 2327, 2339, 2340, 2342, 2344, 2345, 2347, 2349, 2351, 2355 and up;\n2356-A, and up; and 8277-1 through 8277-40.\n\nRequired Equipment                 In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed:\nItems 101, 104(a) and 151."
+    },
+    {
+      "section_roman": "VI",
+      "models": [
+        "PA-11",
+        "2"
+      ],
+      "engine": "Continental A-65-8F            (See Item 311D for optional engines)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 65
+      },
+      "fuel_grade": "73 min. octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1220
+      },
+      "fuel_capacity": {
+        "total_gal": 17.0,
+        "usable_gal": null
+      },
+      "seats": 2,
+      "cg_range_raw": null,
+      "control_surfaces": "Elevator                  34°    Up            29°   Down\nRudder                    30°    Left          30°   Right\nAileron                   18°    Up            18°   Down\nStabilizer               2.5°    Up             4°   Down\n\nSerial Nos. Eligible               11-1 and up.\n\nRequired Equipment                 In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed:\nItem 101, 304(d), and 305(c).",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VII",
+      "models": [
+        "PA-11S",
+        "2",
+        "PCSM"
+      ],
+      "engine": "Continental A-56-8F            (See Item 311D for optional engines)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 65
+      },
+      "fuel_grade": "80 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1350
+      },
+      "fuel_capacity": {
+        "total_gal": 17.0,
+        "usable_gal": null
+      },
+      "seats": 2,
+      "cg_range_raw": null,
+      "control_surfaces": "Elevator             34°       Up        29°   Down\nRudder               30°       Left      30°   Right\nAileron              18°       Up        18°   Down\nStabilizer           2.5°      Up         4°   Down\n\nSerial Nos. Eligible              11-1 and up.\n\nRequired Equipment                In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed:\nItems 101, 206 or 209.\n\nSPECIFICATIONS PERTINENT TO ALL MODELS",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "C",
+      "models": [
+        "J3C-65",
+        "and"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": 65
+      },
+      "fuel_grade": ": 80 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {},
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "D",
+      "models": [
+        "PA-11:"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": 65
+      },
+      "fuel_grade": ": 80 minimum octane aviation gasoline.",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {},
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": null
+    }
+  ]
+}

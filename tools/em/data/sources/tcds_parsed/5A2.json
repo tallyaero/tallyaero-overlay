@@ -1,0 +1,54 @@
+{
+  "tcds_number": "5A2",
+  "revision": "22",
+  "revision_date": "July 29, 2015",
+  "tc_holder": "Textron Aviation Inc.",
+  "source_pdf": "5A2.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 1,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "140A",
+        "2",
+        "PCSM"
+      ],
+      "engine": "Continental C-90-12F (See Items 106 and 107 for optional engines)",
+      "engine_limits": {
+        "rpm": 2475,
+        "hp": 90
+      },
+      "fuel_grade": "80 min. octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 115,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 82,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 106,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1500
+      },
+      "fuel_capacity": {
+        "total_gal": 25.0,
+        "usable_gal": 10.5
+      },
+      "seats": null,
+      "cg_range_raw": "Landplane:   (+33.5) to (+37.0) at 1500 lbs.\n(+32.8) to (+37.0) at 1279 lbs. or less\nStraight line variation between points given.\n\nLBS.\n\n1600\n\n1400\nREAR\nLIMIT\n\nFRONT\nLIMIT\n\n1200\n32                   34                   36           38\nINCHES\n\nSeaplane :     (+33.5) to (+35.7) at 1556 lbs.\n(+32.3) to (+35.7) at 1195 lbs. or less.\nStraight line variation between points given.\n\nLBS.\n\n1600\n\n1500\n\n1400                      FRONT          REAR\nLIMIT          LIMIT\n\n1300\n\n1200\n\n32        33              34        35         36\nINCHES\n\nRev. 22                                                     3                                                        5A2\n\nI.   Model 140A (cont’d)",
+      "control_surfaces": "Elevator                         Up    20°           Down     20°\nElevator tab                     Up     6°           Down     33°\nRudder                          Left   16°           Right    16°\nAileron                          Up    20°           Down     14°\nFlaps                                                Down     43°\nStabilizer                     Fixed\n\nSerial Nos. Eligible        15200 through 15724\n\nRequired Equipment          In addition to the pertinent required basic equipment specified in the applicable\nregulations (CAR 3 or 4a) the following items of equipment must be installed:\nLandplane: Item 1, 102, 201(a), 202(a), 204(a), 401(a).\nSeaplane :      Items 2, 102, 209(a), 401(b).\nSkiplane :      Items 1, 102, 208, 210, 401(a).\n\n5A2                                                               4                                                       Rev. 22\n\nSpecifications Pertinent to all Models",
+      "serial_numbers": null
+    }
+  ]
+}

@@ -1,0 +1,285 @@
+aircraft,tcds,field,ours,tcds_value,status
+Aeronca Champ,A-759,(all),,,no-variant-match
+Aeronca Chief,A-781,(all),,,no-parsed-tcds
+American Champion Citabria,A-759,(all),,,no-variant-match
+American Champion Decathlon,A-759,(all),,,no-variant-match
+American Champion Scout,A-759,(all),,,no-variant-match
+Aviat Husky A-1C,A22NM,(all),,,no-parsed-tcds
+Beechcraft Baron 58,3A16,Vne,223,257.0,mismatch
+Beechcraft Baron 58,3A16,Vno,167,225.0,mismatch
+Beechcraft Baron 58,3A16,Vfe,112,15.0,mismatch
+Beechcraft Baron 58,3A16,max_weight,5500,5400,mismatch
+Beechcraft Baron 58,3A16,fuel_capacity_gal,194,,silent
+Beechcraft Baron 58,3A16,seats,6,,silent
+Beechcraft Baron 58,3A16,engine_hp,300,,silent
+Beechcraft Bonanza A36,3A15,Vne,205,203.34034307165575,match
+Beechcraft Bonanza A36,3A15,Vno,169,165.10540676758373,mismatch
+Beechcraft Bonanza A36,3A15,Vfe,122,15.0,mismatch
+Beechcraft Bonanza A36,3A15,max_weight,3650,3600,mismatch
+Beechcraft Bonanza A36,3A15,fuel_capacity_gal,74,,silent
+Beechcraft Bonanza A36,3A15,seats,6,1,mismatch
+Beechcraft Bonanza A36,3A15,engine_hp,300,285,mismatch
+Beechcraft Bonanza F33,3A15,Vne,202,195.51956064582285,mismatch
+Beechcraft Bonanza F33,3A15,Vno,165,165.10540676758373,match
+Beechcraft Bonanza F33,3A15,Vfe,122,15.0,mismatch
+Beechcraft Bonanza F33,3A15,max_weight,3400,3400,match
+Beechcraft Bonanza F33,3A15,fuel_capacity_gal,74,,silent
+Beechcraft Bonanza F33,3A15,seats,4,29,mismatch
+Beechcraft Bonanza F33,3A15,engine_hp,285,285,match
+Beechcraft Musketeer,A12CE,(all),,,no-parsed-tcds
+Beechcraft Sierra,A12CE,(all),,,no-parsed-tcds
+Beechcraft Sundowner,A12CE,(all),,,no-parsed-tcds
+Bellanca Super Viking,A00003AK,(all),,,no-parsed-tcds
+CAP 232,EASA.A.072,(all),,,no-parsed-tcds
+Cessna 150,3A19,Vne,162,157.0,mismatch
+Cessna 150,3A19,Vno,129,120.0,mismatch
+Cessna 150,3A19,Vfe,85,85.0,match
+Cessna 150,3A19,max_weight,1600,1500,mismatch
+Cessna 150,3A19,fuel_capacity_gal,26,26.0,match
+Cessna 150,3A19,seats,2,,silent
+Cessna 150,3A19,engine_hp,100,,silent
+Cessna 152,3A19,Vne,149,172.0,mismatch
+Cessna 152,3A19,Vno,111,125.0,mismatch
+Cessna 152,3A19,Vfe,85,85.0,match
+Cessna 152,3A19,max_weight,1670,1670,match
+Cessna 152,3A19,fuel_capacity_gal,26,26.0,match
+Cessna 152,3A19,seats,2,,silent
+Cessna 152,3A19,engine_hp,110,,silent
+Cessna 162,n/a,(all),,,no-parsed-tcds
+Cessna 172M,3A12,Vne,160,158.15360016684338,match
+Cessna 172M,3A12,Vno,128,126.00149463841917,match
+Cessna 172M,3A12,Vfe,85,86.8975825092546,match
+Cessna 172M,3A12,max_weight,2300,2300,match
+Cessna 172M,3A12,fuel_capacity_gal,43,42.0,match
+Cessna 172M,3A12,seats,4,4,match
+Cessna 172M,3A12,engine_hp,150,150,match
+Cessna 172N,3A12,Vne,163,160.0,match
+Cessna 172N,3A12,Vno,128,128.0,match
+Cessna 172N,3A12,Vfe,85,85.0,match
+Cessna 172N,3A12,max_weight,2300,2300,match
+Cessna 172N,3A12,fuel_capacity_gal,40,42.0,mismatch
+Cessna 172N,3A12,seats,4,4,match
+Cessna 172N,3A12,engine_hp,160,160,match
+Cessna 172P,3A12,Vne,160,158.0,match
+Cessna 172P,3A12,Vno,129,127.0,match
+Cessna 172P,3A12,Vfe,85,85.0,match
+Cessna 172P,3A12,max_weight,2400,2400,match
+Cessna 172P,3A12,fuel_capacity_gal,43,42.0,match
+Cessna 172P,3A12,seats,4,4,match
+Cessna 172P,3A12,engine_hp,160,160,match
+Cessna 172R,3A12,Vne,160,163.0,match
+Cessna 172R,3A12,Vno,129,,silent
+Cessna 172R,3A12,Vfe,85,85.0,match
+Cessna 172R,3A12,max_weight,2450,,silent
+Cessna 172R,3A12,fuel_capacity_gal,56,56.0,match
+Cessna 172R,3A12,seats,4,,silent
+Cessna 172R,3A12,engine_hp,160,,silent
+Cessna 172S,3A12,Vne,163,163.0,match
+Cessna 172S,3A12,Vno,129,,silent
+Cessna 172S,3A12,Vfe,85,85.0,match
+Cessna 172S,3A12,max_weight,2550,,silent
+Cessna 172S,3A12,fuel_capacity_gal,56,56.0,match
+Cessna 172S,3A12,seats,4,,silent
+Cessna 172S,3A12,engine_hp,180,,silent
+Cessna 177,A13CE,(all),,,no-parsed-tcds
+Cessna 177RG,A20CE,(all),,,no-parsed-tcds
+Cessna 182P,3A13,Vne,175,198.0,mismatch
+Cessna 182P,3A13,Vno,140,160.0,mismatch
+Cessna 182P,3A13,Vfe,85,110.0,mismatch
+Cessna 182P,3A13,max_weight,2950,2950,match
+Cessna 182P,3A13,fuel_capacity_gal,80,65.0,mismatch
+Cessna 182P,3A13,seats,4,,silent
+Cessna 182P,3A13,engine_hp,230,,silent
+Cessna 182Q,3A13,Vne,175,179.0,mismatch
+Cessna 182Q,3A13,Vno,140,143.0,match
+Cessna 182Q,3A13,Vfe,85,95.0,mismatch
+Cessna 182Q,3A13,max_weight,2950,2950,match
+Cessna 182Q,3A13,fuel_capacity_gal,80,61.0,mismatch
+Cessna 182Q,3A13,seats,4,,silent
+Cessna 182Q,3A13,engine_hp,230,,silent
+Cessna 182T,3A13,Vne,175,184.0,mismatch
+Cessna 182T,3A13,Vno,140,160.0,mismatch
+Cessna 182T,3A13,Vfe,85,100.0,mismatch
+Cessna 182T,3A13,max_weight,3100,2550,mismatch
+Cessna 182T,3A13,fuel_capacity_gal,92,60.0,mismatch
+Cessna 182T,3A13,seats,4,,silent
+Cessna 182T,3A13,engine_hp,230,,silent
+Cessna 206,H2SW,(all),,,no-parsed-tcds
+Cessna 210,3A21,(all),,,no-parsed-tcds
+Cessna 310R,3A10,(all),,,no-parsed-tcds
+Champion 7EC,A-759,Vne,138,,silent
+Champion 7EC,A-759,Vno,112,,silent
+Champion 7EC,A-759,Vfe,90,,silent
+Champion 7EC,A-759,max_weight,1450,1300,mismatch
+Champion 7EC,A-759,fuel_capacity_gal,18,18.5,match
+Champion 7EC,A-759,seats,2,,silent
+Champion 7EC,A-759,engine_hp,90,,silent
+Cirrus SR20,A00009CH,(all),,,no-parsed-tcds
+Cirrus SR22,A00009CH,(all),,,no-parsed-tcds
+Cirrus SR22T,A00009CH,(all),,,no-parsed-tcds
+Diamond DA20-A1,TA4CH,(all),,,no-parsed-tcds
+Diamond DA20-C1,TA4CH,(all),,,no-parsed-tcds
+Diamond DA40-180,A47CE,(all),,,no-parsed-tcds
+Diamond DA40-NG,A47CE,(all),,,no-parsed-tcds
+Diamond DA42-L360,A56CE,(all),,,no-parsed-tcds
+Diamond DA42-NG,A56CE,(all),,,no-parsed-tcds
+Diamond DA62,A00010NY,(all),,,no-parsed-tcds
+Ercoupe 415C,A-718,(all),,,no-parsed-tcds
+Evektor SportStar,ASTM F2245,(all),,,no-parsed-tcds
+Extra 300,EASA.A.034,(all),,,no-parsed-tcds
+Extra 300L,EASA.A.034,(all),,,no-parsed-tcds
+Extra 330SC,EASA.A.075,(all),,,no-parsed-tcds
+Extra NG,EASA.A.595,(all),,,no-parsed-tcds
+Flight Design CTLS,ASTM F2245,(all),,,no-parsed-tcds
+Focke-Wulf Fw 190 A-8,Military,(all),,,no-parsed-tcds
+GameBird GB1,Experimental,(all),,,no-parsed-tcds
+Grumman AA-5,A16EA,(all),,,no-variant-match
+Grumman AA-5B,A16EA,Vne,190,173.7951650185092,mismatch
+Grumman AA-5B,A16EA,Vno,143,143.3810111402701,match
+Grumman AA-5B,A16EA,Vfe,96,104.27709901110552,mismatch
+Grumman AA-5B,A16EA,max_weight,2400,2400,match
+Grumman AA-5B,A16EA,fuel_capacity_gal,52,51.0,match
+Grumman AA-5B,A16EA,seats,4,2,mismatch
+Grumman AA-5B,A16EA,engine_hp,180,180,match
+Grumman F6F-5 Hellcat,Military,(all),,,no-parsed-tcds
+Grumman F8F-2 Bearcat,LTC-23,(all),,,no-parsed-tcds
+Kawanishi N1K2-J Shiden-Kai,Military,(all),,,no-parsed-tcds
+Luscombe 8A,A-694,(all),,,no-parsed-tcds
+MX Aircraft MXS,Experimental,(all),,,no-parsed-tcds
+Maule M-7,A6SO,(all),,,no-parsed-tcds
+Messerschmitt Bf 109G-6,Military,(all),,,no-parsed-tcds
+Mitsubishi A6M5 Zero,Military,(all),,,no-parsed-tcds
+Mooney M20C,2A3,Vne,174,189.0,mismatch
+Mooney M20C,2A3,Vno,140,150.0,mismatch
+Mooney M20C,2A3,Vfe,103,100.0,match
+Mooney M20C,2A3,max_weight,2575,2575,match
+Mooney M20C,2A3,fuel_capacity_gal,52,48.0,mismatch
+Mooney M20C,2A3,seats,4,,silent
+Mooney M20C,2A3,engine_hp,180,180,match
+Mooney M20E,2A3,Vne,174,189.0,mismatch
+Mooney M20E,2A3,Vno,140,150.0,mismatch
+Mooney M20E,2A3,Vfe,115,100.0,mismatch
+Mooney M20E,2A3,max_weight,2575,2575,match
+Mooney M20E,2A3,fuel_capacity_gal,52,52.0,match
+Mooney M20E,2A3,seats,4,,silent
+Mooney M20E,2A3,engine_hp,200,200,match
+Mooney M20J,2A3,Vne,195,200.0,mismatch
+Mooney M20J,2A3,Vno,143,175.0,mismatch
+Mooney M20J,2A3,Vfe,105,,silent
+Mooney M20J,2A3,max_weight,2740,2740,match
+Mooney M20J,2A3,fuel_capacity_gal,64,64.0,match
+Mooney M20J,2A3,seats,4,,silent
+Mooney M20J,2A3,engine_hp,200,200,match
+Mooney M20R,2A3,Vne,200,195.51956064582285,mismatch
+Mooney M20R,2A3,Vno,165,173.7951650185092,mismatch
+Mooney M20R,2A3,Vfe,110,110.35992978675334,match
+Mooney M20R,2A3,max_weight,3368,3200,mismatch
+Mooney M20R,2A3,fuel_capacity_gal,100,,silent
+Mooney M20R,2A3,seats,4,4,match
+Mooney M20R,2A3,engine_hp,280,280,match
+North American P-51D Mustang,Military,(all),,,no-parsed-tcds
+PT-17 Stearman,A-743,(all),,,no-parsed-tcds
+Piper Aztec F,1A10,(all),,,no-parsed-tcds
+Piper PA-28-140,2A13,Vne,171,148.59486609082538,mismatch
+Piper PA-28-140,2A13,Vno,130,121.65661551295644,mismatch
+Piper PA-28-140,2A13,Vfe,89,99.9322198856428,mismatch
+Piper PA-28-140,2A13,max_weight,2150,2200,mismatch
+Piper PA-28-140,2A13,fuel_capacity_gal,36,50.0,mismatch
+Piper PA-28-140,2A13,seats,2,,silent
+Piper PA-28-140,2A13,engine_hp,150,160,mismatch
+Piper PA-28-151,2A13,Vne,160,148.59486609082538,mismatch
+Piper PA-28-151,2A13,Vno,125,121.65661551295644,mismatch
+Piper PA-28-151,2A13,Vfe,89,99.9322198856428,mismatch
+Piper PA-28-151,2A13,max_weight,2325,2200,mismatch
+Piper PA-28-151,2A13,fuel_capacity_gal,50,50.0,match
+Piper PA-28-151,2A13,seats,4,,silent
+Piper PA-28-151,2A13,engine_hp,150,160,mismatch
+Piper PA-28-161,2A13,Vne,158,148.59486609082538,mismatch
+Piper PA-28-161,2A13,Vno,126,121.65661551295644,mismatch
+Piper PA-28-161,2A13,Vfe,89,99.9322198856428,mismatch
+Piper PA-28-161,2A13,max_weight,2440,2200,mismatch
+Piper PA-28-161,2A13,fuel_capacity_gal,48,50.0,mismatch
+Piper PA-28-161,2A13,seats,4,,silent
+Piper PA-28-161,2A13,engine_hp,160,160,match
+Piper PA-28-181,2A13,Vne,160,148.59486609082538,mismatch
+Piper PA-28-181,2A13,Vno,126,121.65661551295644,mismatch
+Piper PA-28-181,2A13,Vfe,89,99.9322198856428,mismatch
+Piper PA-28-181,2A13,max_weight,2550,2200,mismatch
+Piper PA-28-181,2A13,fuel_capacity_gal,50,50.0,match
+Piper PA-28-181,2A13,seats,4,,silent
+Piper PA-28-181,2A13,engine_hp,180,160,mismatch
+Piper PA-28R-200,2A13,Vne,200,185.96082656980485,mismatch
+Piper PA-28R-200,2A13,Vno,150,147.72589026573283,match
+Piper PA-28R-200,2A13,Vfe,89,108.62197813656825,mismatch
+Piper PA-28R-200,2A13,max_weight,2650,2500,mismatch
+Piper PA-28R-200,2A13,fuel_capacity_gal,50,50.0,match
+Piper PA-28R-200,2A13,seats,4,,silent
+Piper PA-28R-200,2A13,engine_hp,200,180,mismatch
+Piper PA-28R-201,2A13,Vne,195,185.96082656980485,mismatch
+Piper PA-28R-201,2A13,Vno,146,147.72589026573283,match
+Piper PA-28R-201,2A13,Vfe,89,108.62197813656825,mismatch
+Piper PA-28R-201,2A13,max_weight,2750,2500,mismatch
+Piper PA-28R-201,2A13,fuel_capacity_gal,64,50.0,mismatch
+Piper PA-28R-201,2A13,seats,4,,silent
+Piper PA-28R-201,2A13,engine_hp,200,180,mismatch
+Piper PA-28R-201T,2A13,Vne,196,185.96082656980485,mismatch
+Piper PA-28R-201T,2A13,Vno,154,147.72589026573283,mismatch
+Piper PA-28R-201T,2A13,Vfe,89,108.62197813656825,mismatch
+Piper PA-28R-201T,2A13,max_weight,2900,2500,mismatch
+Piper PA-28R-201T,2A13,fuel_capacity_gal,72,50.0,mismatch
+Piper PA-28R-201T,2A13,seats,4,,silent
+Piper PA-28R-201T,2A13,engine_hp,200,180,mismatch
+Piper PA-28RT-201,2A13,Vne,198,148.59486609082538,mismatch
+Piper PA-28RT-201,2A13,Vno,154,121.65661551295644,mismatch
+Piper PA-28RT-201,2A13,Vfe,89,99.9322198856428,mismatch
+Piper PA-28RT-201,2A13,max_weight,2900,2150,mismatch
+Piper PA-28RT-201,2A13,fuel_capacity_gal,72,50.0,mismatch
+Piper PA-28RT-201,2A13,seats,4,,silent
+Piper PA-28RT-201,2A13,engine_hp,200,150,mismatch
+Piper PA-30 Twin Comanche,A1EA,(all),,,no-parsed-tcds
+Piper PA-32-260,A3SO,Vne,177,189.0,mismatch
+Piper PA-32-260,A3SO,Vno,139,,silent
+Piper PA-32-260,A3SO,Vfe,77,113.0,mismatch
+Piper PA-32-260,A3SO,max_weight,3400,3615,mismatch
+Piper PA-32-260,A3SO,fuel_capacity_gal,84,107.0,mismatch
+Piper PA-32-260,A3SO,seats,6,,silent
+Piper PA-32-260,A3SO,engine_hp,260,,silent
+Piper PA-32R-300,A3SO,Vne,175,189.0,mismatch
+Piper PA-32R-300,A3SO,Vno,137,,silent
+Piper PA-32R-300,A3SO,Vfe,90,113.0,mismatch
+Piper PA-32R-300,A3SO,max_weight,3600,3615,match
+Piper PA-32R-300,A3SO,fuel_capacity_gal,98,107.0,mismatch
+Piper PA-32R-300,A3SO,seats,6,,silent
+Piper PA-32R-300,A3SO,engine_hp,300,,silent
+Piper PA-34 Seneca,A7SO,(all),,,no-variant-match
+Piper PA-44 Seminole,A19SO,(all),,,no-parsed-tcds
+Pipistrel Alpha Trainer,ASTM F2245,(all),,,no-parsed-tcds
+Pipistrel Virus,ASTM F2245,(all),,,no-parsed-tcds
+Pitts S-1C-TB,A18SO,(all),,,no-parsed-tcds
+Pitts S-1C,A18SO,(all),,,no-parsed-tcds
+Pitts S-2C,A21SO,(all),,,no-parsed-tcds
+Remos GX,ASTM F2245,(all),,,no-parsed-tcds
+Robin DR400,EASA.A.075,(all),,,no-parsed-tcds
+Robin R3000,EASA.A.057,(all),,,no-parsed-tcds
+Socata TB10,EASA.A.157,(all),,,no-parsed-tcds
+Socata TB20,EASA.A.157,(all),,,no-parsed-tcds
+Socata TB9,EASA.A.157,(all),,,no-parsed-tcds
+Stinson 108,A-767,(all),,,no-parsed-tcds
+Sukhoi Su-26,n/a,(all),,,no-parsed-tcds
+Supermarine Spitfire Mk IX,Military,(all),,,no-parsed-tcds
+T-6A Texan II,T00012WI,(all),,,no-parsed-tcds
+T-6B Texan II,T00012WI,(all),,,no-parsed-tcds
+Taylorcraft BC-12D,A-696,(all),,,no-parsed-tcds
+Tecnam P2002,ASTM F2245,(all),,,no-parsed-tcds
+Tecnam P2006T,EASA.A.185,(all),,,no-parsed-tcds
+Van's RV-10,Experimental,(all),,,no-parsed-tcds
+Van's RV-12,Experimental,(all),,,no-parsed-tcds
+Van's RV-14A,Experimental,(all),,,no-parsed-tcds
+Van's RV-6,Experimental,(all),,,no-parsed-tcds
+Van's RV-8,Experimental,(all),,,no-parsed-tcds
+Van's RV-9A,Experimental,(all),,,no-parsed-tcds
+Vought F4U-4 Corsair,Military,(all),,,no-parsed-tcds
+Yakovlev Yak-3,Military,(all),,,no-parsed-tcds
+Zivko Edge 540,n/a,(all),,,no-parsed-tcds
+Zlin Savage,n/a,(all),,,no-parsed-tcds
+Zlin Z-242L,EASA.A.030,(all),,,no-parsed-tcds

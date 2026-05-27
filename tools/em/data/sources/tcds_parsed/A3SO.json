@@ -1,0 +1,49 @@
+{
+  "tcds_number": "A3SO",
+  "revision": "32",
+  "revision_date": "February 17, 2012",
+  "tc_holder": "Piper Aircraft, Inc.",
+  "source_pdf": "A3SO.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 1,
+  "variants": [
+    {
+      "section_roman": "XIII",
+      "models": [
+        "PA-32-301FT (Piper 6X)"
+      ],
+      "engine": "Lycoming IO-540-K1G5",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100 or 100LL aviation grade fuel",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 189,
+          "unit": "knots"
+        },
+        "Vno": null,
+        "Vfe": {
+          "value": 113,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 132,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3615
+      },
+      "fuel_capacity": {
+        "total_gal": 107.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+90.0) to (+95.0) at 3600 lb.\n(+83.5) to (+95.0) at 3200 lb.\n(+78.0) to (+95.0) at 2400 lb.\nStraight line variation between points given.\n\n90.0              95.0\nLBS.\n3600                                                                                   3600\n83.5\n\n3200                                                                                   3200\n\n78.0\n2400                                                                                   2400\n\nINCHES\n\n(+90.0) to (+95.0) at 3600 lb.\n(+83.5) to (+95.0) at 3200 lb.\n(+78.0) to (+95.0) at 2400 lb.\nStraight line variation between points given.\n\n90.0           95.0\nLBS.\n3600                                                                          3600\n83.5\n\n3200                                                                          3200\n\n78.0\n2400                                                                          2400\n\nINCHES",
+      "control_surfaces": "Wing Flaps                                       Up     0 (1)        Down     40 (2)\nAilerons                                         Up    28 (1)        Down     22 (1)\nRudder                                          Left   28 (1)        Right    28 (1)\nStabilator                                       Up    14.5 (0.5)    Down     5.5 (0.5)\nStabilator Tab                                   Up     5 (1)        Down     8 (1)\nNose Wheel Travel\nLeft   24° (2)         Right   24° (2)\n\nManufacturer's Serial Nos.              3232001 and up. The manufacturer is authorized to issue airworthiness certificates for\nserial numbers 3232001 and up under the delegation option provisions of FAR 21.\n\nA3SO                                                  Page 23 of 31\n\nXIV. - Model PA-32-301XTC (Piper 6XT), 6 PCLM (Normal Category), Approved August 28, 2003.\nSimilar to Model PA-32R-301T, Saratoga IITC, except for fixed landing gear and other minor changes.\n\nWing Flaps                          Up      0 (1)        Down     40 (2)\nAilerons                            Up     28 (1)        Down     22 (1)\nRudder                             Left    28 (1)        Right    28 (1)\nStabilator                          Up     14.5 (0.5)    Down     5.5 (0.5)\nStabilator Tab                      Up      5 (1)        Down     8 (1)\nNose Wheel Travel\nLeft    24° (2)         Right   24° (2)\n\nManufacturer's Serial Nos.       3255001 and up. The manufacturer is authorized to issue airworthiness certificates for\nserial numbers 3255001 and up under the delegation option provisions of FAR 21.\n\nData Pertinent to All Models",
+      "serial_numbers": null
+    }
+  ]
+}

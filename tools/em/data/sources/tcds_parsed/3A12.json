@@ -1,0 +1,506 @@
+{
+  "tcds_number": "3A12",
+  "revision": "84",
+  "revision_date": "July 29, 2015",
+  "tc_holder": "Textron Aviation Inc.",
+  "source_pdf": "3A12.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 12,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "172"
+      ],
+      "engine": "Continental O-300-A or O-300-B",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 145
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 160,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 115,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2200,
+        "utility_landplane": 1950
+      },
+      "fuel_capacity": {
+        "total_gal": 42.0,
+        "usable_gal": 37.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Normal                                   (+40.8) to (+46.4) at 2200 lbs.\n(+36.4) to (+46.4) at 1733 lbs.\nUtility category                         (+38.4) to (+40.3) at 1950 lbs.\n(+36.4) to (+40.3) at 1733 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps            Takeoff                 Retracted   0°\n1st notch 10°\nLanding                 2nd notch 20°\n3rd notch 30°\n4th notch 40°\n\n(cont’d)\nAilerons                      Up 20°              Down     14°\nElevator tab                  Up 28°              Down     13°\nElevator                      Up 28°              Down     26°\nRudder                      Right 16°              Left    16°",
+      "serial_numbers": "610, 612, 615, 28000 through 29999, 36000 through 36999 and 46001 through 46754\n\nRev. 84                                                  3                                                            3A12"
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "172A"
+      ],
+      "engine": "Continental O-300-C or O-300-D",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 145
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 160,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 115,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2200,
+        "utility_landplane": 1950
+      },
+      "fuel_capacity": {
+        "total_gal": 42.0,
+        "usable_gal": 37.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane (Model 172A):\nNormal category                       (+40.8) to (+46.4) at 2200 lbs.\n(+36.4) to (+46.4) at 1733 lbs. or less\nUtility category                     (+38.4) to (+40.3) at 1950 lbs.\n(+36.4) to (+40.3) at 1733 lbs. or less\nStraight line variation between points given.\nLandplane (Model 172B):\nNormal category                      (+40.4) to (+46.4) at 2200 lbs.\n(+36.4) to (+46.4) at 1850 lbs. or less\nUtility category                     (+37.4) to (+40.3) at 1950 lbs.\n(+36.4) to (+40.3) at 1850 lbs. or less\n\nSeaplane (Models 172A and 172B):\nNormal category                       (+39.8) to (+45.5) at 2220 lbs.\n(+36.4) to (+45.5) at 1825 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                  Takeoff           Retracted      0°\n1st notch    10°\nLanding              2nd notch     20°\n3rd notch     30°\n4th notch     40°\nAilerons                    Up        20°         Down      15°\nElevator tab                Up        28°         Down      13°\nElevator                    Up        28°         Down      26°\nRudder (landplane)        Right       16°           Left    16°\n(seaplane)         Right       19°           Left    15°\n(Measured parallel to W.L.)",
+      "serial_numbers": "Model 172A: 622, 625, 46755 through 47746\nModel 172B: 630, 17247747 through 17248734"
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "172C"
+      ],
+      "engine": "Continental O-300-C or O-300-D",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 145
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 160,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 115,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2250,
+        "utility_landplane": 1950
+      },
+      "fuel_capacity": {
+        "total_gal": 39.0,
+        "usable_gal": 36.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane\nNormal category                            (+40.5) to (+46.4) at 2250 lbs.\n(+36.4) to (+46.4) at 1850 lbs. or less\nUtility category                           (+37.4) to (+40.3) at 1950 lbs.\n(+36.4) to (+40.3) at 1850 lbs. or less\n\nSeaplane\nNormal category                       (+39.8) to (+45.5) at 2220 lbs.\n(+36.4) to (+45.5) at 1825 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                  Takeoff               Retracted     0°\n1st notch   10°\nLanding                  2nd notch    20°\n3rd notch    30°\n4th notch    40°\nAilerons                    Up          20°           Down     15°\nElevator tab                Up          28°           Down     13°\nElevator                    Up          28°           Down     26°\nRudder (Landplane)        Right         16°             Left   16°\n(Seaplane)         Right         19°             Left   15°\n(Measured parallel to W.L.)",
+      "serial_numbers": "17248735 through 17249544"
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "172D"
+      ],
+      "engine": "Continental O-300-C or O-300-D",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 145
+      },
+      "fuel_grade": "80/87 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 174,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 142,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 122,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2300,
+        "utility_landplane": 2000
+      },
+      "fuel_capacity": {
+        "total_gal": 39.0,
+        "usable_gal": 36.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane\nNormal category                       (+38.5) to (+47.3) at 2300 lbs.\n(+35.0) to (+47.3) at 1950 lbs. or less\nUtility category                    (+35.5) to (+40.5) at 2000 lbs.\n(+35.0) to (+40.5) at 1950 lbs. or less\n\nSeaplane\nNormal category                       (+39.8) to (+45.5) at 2220 lbs.\n(+36.4) to (+45.5) at 1825 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                  Takeoff           Retracted    0°\n1st notch 10°\nLanding                     0° 40°\nAilerons                      Up 20°             Down 15°\nElevator tab                  Up 28°             Down 13°\nElevator                      Up 28°             Down 23°\n(Neutral position is with bottom of balance area flush with bottom\nof stabilizer.)\nRudder (landplane)         Right 16°                Left 16°\n(seaplane)         Right 19°                Left 15°\n\nRev. 84                                                   7                                             3A12\n\nIV. Models 172D, 172E, 172F, 172G, 172H (cont’d)",
+      "serial_numbers": "Model 172D:      17249545 through 17250572\nModel 172E:      639, 17250573 through 17251822\nModel 172F:      17251823 through 17253392\nModel 172G:      17253393 through 17254892\nModel 172H:      638, 17254893 through 17256512 (except 17256493)"
+    },
+    {
+      "section_roman": "V",
+      "models": [
+        "172I"
+      ],
+      "engine": "Lycoming O-320-E2D",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 150
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 174,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 122,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2300,
+        "utility_landplane": 2000
+      },
+      "fuel_capacity": {
+        "total_gal": 42.0,
+        "usable_gal": 38.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane\nNormal category                       (+38.5) to (+47.3) at 2300 lbs.\n(+35.0) to (+47.3) at 1950 lbs. or less\nUtility category                     (+35.5) to (+40.5) at 2000 lbs.\n(+35.0) to (+40.5) at 1950 lbs. or less\n\nSeaplane (Edo 89-2000 or 89A2000 floats)\nNormal category                      (+39.8) to (+45.5) at 2220 lbs.\n(+36.4) to (+45.5) at 1825 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                       Takeoff         0° - 10°\nLanding 0° - 40° ±2°\nAilerons                    Up 20° ±1°              Down 15° ±1°\nElevator tab                Up 28° +1°, -0°         Down 13° +1°, -0°\nElevator                    Up 28° +1°, -0°         Down 23° +1°, -0°\n(Neutral position is with bottom of balance area flush with bottom\nof stabilizer.)\nRudder (landplane)       Right 16° ±1°                Left 16° ±1°\n(seaplane)      Right 19° ±1°                Left 15° ±1°\n(Measured parallel to W.L.)",
+      "serial_numbers": "Model 172I:       17256513 through 17257161\nModel 172K:       17257162 through 17258486 (1969 model)\n17258487 through 17259223 (1970 model)"
+    },
+    {
+      "section_roman": "VI",
+      "models": [
+        "172L"
+      ],
+      "engine": "Lycoming O-320-E2D",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 150
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 174,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 122,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2300,
+        "utility_landplane": 2000
+      },
+      "fuel_capacity": {
+        "total_gal": 42.0,
+        "usable_gal": 38.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane\nNormal category                       (+38.5) to (+47.3) at 2300 lbs.\n(+35.0) to (+47.3) at 1950 lbs. or less\nUtility category                     (+35.5) to (+40.5) at 2000 lbs.\n(+35.0) to (+40.5) at 1950 lbs. or less\nStraight line variation between points given.\n\nSeaplane (Edo 89-2000 or 89A2000 floats)\nNormal category                      (+39.8) to (+45.5) at 2220 lbs.\n(+36.4) to (+45.5) at 1825 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                       Takeoff         0° - 10°\nLanding 0° - 40° ±2°\nAilerons                    Up 20° ±1°              Down 15° ±1°\nElevator tab                Up 28° +1°, -0°         Down 13° +1°, -0°\nElevator                    Up 28° +1°, -0°         Down 23° +1°, -0°\n(Neutral position is with bottom of balance area flush with bottom\nof stabilizer.)\nRudder (landplane)       Right 16° ±1°                Left 16° ±1°\n(seaplane)      Right 19° ±1°                Left 15° ±1°\n(Measured parallel to W.L.)",
+      "serial_numbers": "Model 172L: 17259224 through 17259903 (1971 model)\nModel 172L: 17259904 through 17260758 (1972 model)"
+    },
+    {
+      "section_roman": "VII",
+      "models": [
+        "172M"
+      ],
+      "engine": "Lycoming O-320-E2D",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 150
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 182,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 145,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 112,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2300,
+        "normal_seaplane": 2220,
+        "utility_landplane": 2000
+      },
+      "fuel_capacity": {
+        "total_gal": 42.0,
+        "usable_gal": 38.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:\nNormal category                 (+38.5) to (+47.3) at 2300 lbs.\n(+35.0) to (+47.3) at 1950 lbs. or less\nUtility category               (+35.5) to (+40.5) at 2000 lbs.\n(+35.0) to (+40.5) at 1950 lbs. or less\n\nSeaplane: (Edo 89-2000 or 89A2000 floats)\nNormal category               (+39.8) to (+45.5) at 2220 lbs.\n(+36.4) to (+45.5) at 1825 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps              Takeoff   0° - 10°      (landplane) (seaplane)\nLanding   0° - 40° +0°, -2° (landplane)\n0° - 30° ±2° (seaplane)\nAilerons                    Up 20° ±1°              Down 15° ±1°\nElevator tab                Up 28° +1°, -0°         Down 13° +1°, -0°\nElevator                    Up 28° +1°, -0°         Down 23° +1°, -0°\n(Neutral position is with bottom of balance area flush with bottom\nof stabilizer.)\nRudder (landplane)       Right 16° ±1°                Left 16° ±1° (landplane)\n(seaplane)      Right 19° ±1°                Left 15° ±1° (seaplane)\n(Measured parallel to W.L.)",
+      "serial_numbers": "17256493, 17260759 through 17261898 (1973 model) (except 17261445 and 17261578)\n17261899 through 17263458 (1974 model)\n17263459 through 17265684 (1975 model)\n17265685 through 17267584 (1976 model)\n\n3A12                                                      12                                                      Rev. 84"
+    },
+    {
+      "section_roman": "VIII",
+      "models": [
+        "172N"
+      ],
+      "engine": "Lycoming O-320-H2AD",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 160
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 160,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 128,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 85,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 97,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2300,
+        "normal_seaplane": 2220,
+        "utility_landplane": 2000
+      },
+      "fuel_capacity": {
+        "total_gal": 42.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:\nNormal category               (+38.5) to (+47.3) at 2300 lbs.\n(+35.0) to (+47.3) at 1950 lbs. or less\nUtility category             (+35.5) to (+40.5) at 2000 lbs.\n(+35.0) to (+40.5) at 1950 lbs. or less\n\nSeaplane: (Edo 89-2000 or 89A2000 floats)\nNormal category               (+39.8) to (+45.5) at 2220 lbs.\n(+36.4) to (+45.5) at 1825 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps            Takeoff     0° - 10°      (landplane) (seaplane)\nLanding     0° - 40° +0°, -2° (landplane)\n0° - 30° ±2° (seaplane)\nAilerons                    Up 20° ±1°              Down 15° ±1°\nElevator tab                Up 28° +1°, -0°         Down 13° +1°, -0°\nElevator                    Up 28° +1°, -0°         Down 23° +1°, -0°\n(Neutral position is with bottom of balance area flush with bottom of stabilizer.)\nRudder (landplane)       Right 16° ±1°                Left 16° ±1° (landplane)\n(seaplane)       Right 19° ±1°                Left 15° ±1° (seaplane)\n(Measured parallel to W.L.)",
+      "serial_numbers": "17261445, 17267585 through 17269309 (1977 model)\n17261578, 17269310 through 17271034 (1978 model) (except 17270050)\n17271035 through 17272884 (1979 model)\n17270050, 17272885 through 17274009 (1980 model)"
+    },
+    {
+      "section_roman": "IX",
+      "models": [
+        "172P"
+      ],
+      "engine": "Lycoming O-320-D2J",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 160
+      },
+      "fuel_grade": "100LL/100 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 158,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 127,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 85,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 99,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2400,
+        "normal_seaplane": 2220,
+        "utility_landplane": 2100
+      },
+      "fuel_capacity": {
+        "total_gal": 42.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:\nNormal category                 (+39.5) to (+47.3) at 2400 lbs.\n(+35.0) to (+47.3) at 1950 lbs. or less\nUtility category               (+36.5) to (+40.5) at 2100 lbs.\n(+35.0) to (+40.5) at 1950 lbs. or less\n\nSeaplane: (Edo 89-2000 or 89A2000 floats)\nNormal category               (+39.8) to (+45.5) at 2220 lbs.\n(+36.4) to (+45.5) at 1825 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                       Takeoff         0° - 10°\nLanding 0° - 30° +0°, -2°\nAilerons                    Up 20° ±1°              Down 15° ±1°\nElevator tab                Up 28° +1°, -0°         Down 13° +1°, -0° (floatplane)\nUp 22° +1°, -0°         Down 19° +1°, -0° (landplane)\nElevator                    Up 28° +1°, -0°         Down 23° +1°, -0°\n(Neutral position is with bottom of balance area flush with bottom of stabilizer.)\nRudder (landplane)       Right 16° ±1°                Left 16° ±1° (landplane)\n(seaplane)       Right 19° ±1°                Left 15° ±1° (seaplane)\n(Measured parallel to W.L.)",
+      "serial_numbers": "17274010 through 17275034 (1981 model)\n17275035 through 17275759 (1982 model)\n17275760 through 17276079 (1983 model)\n17276080 through 17276259 (1984 model)\n17276260 through 17276516 (1985 model)\n17276517 through 17276654 (1986 model)"
+    },
+    {
+      "section_roman": "X",
+      "models": [
+        "172Q"
+      ],
+      "engine": "Lycoming O-360-A4N",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 180
+      },
+      "fuel_grade": "100LL/100 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 158,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 127,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 85,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 105,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2550
+      },
+      "fuel_capacity": {
+        "total_gal": 54.0,
+        "usable_gal": 50.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Normal category      (+41.0) to (+47.3) at 2550 lbs.\n(+35.0) to (+47.3) at 1950 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                       Takeoff         0° - 10°\nLanding 0° - 30° +0°, -2°\nAilerons                    Up 20° ±1°              Down 15° ±1°\nElevator tab                Up 22° +1°, -0°         Down 19° +1°, -0°\nElevator                    Up 28° +1°, -0°         Down 23° +1°, -0°\n(Neutral position is with bottom of balance area flush with bottom of stabilizer.)\nRudder                   Right 16° ±1°                Left 16° ±1°\n(Measured parallel to W.L.)",
+      "serial_numbers": "17275869 through 17276054 (1983 model)\n17276101 through 17276211 (1984 model)\n\nDATA PERTINENT TO ALL MODELS 172 THROUGH 172Q"
+    },
+    {
+      "section_roman": "XI",
+      "models": [
+        "172R"
+      ],
+      "engine": "Lycoming IO-360-L2A, Rated 160 Horsepower",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 163,
+          "unit": "knots"
+        },
+        "Vno": null,
+        "Vfe": {
+          "value": 85,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 99,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {},
+      "fuel_capacity": {
+        "total_gal": 56.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "When Using POH.AFM 172RPHUS-00 or later rev or 172RPHAUS-00 thru -03\nNormal Category\n(1) Aft Limits         47.3 inches aft of datum at 2,450 pounds or less.\n\n(2) Forward Limits            Linear variation from 40.0 inches aft of datum at 2,450\npounds to 35.0 inches aft of datum at 1,950 pounds; 35.0\ninches aft of datum at 1,950 pounds or less.\nUtility Category\n(1) Aft Limits                40.5 inches aft of datum at 2,100 pounds or less.\n(2) Forward Limits            Linear variation from 36.5 inches aft of datum at 2,100\npounds to 35.0 inches aft of datum at 1,950 pounds; 35.0\ninches aft of datum at 1,950 pounds or less.\n\nWhen Using POH.AFM 172RPHAUS-04 or later rev or 172RPHBUS-00 or later rev\nNormal Category\n(1) Aft Limits         47.3 inches aft of datum at 2,450 pounds or less.\n(2) Forward Limits     Linear variation from 40.0 inches aft of datum at 2,450\npounds to 35.0 inches aft of datum at 1,950 pounds; 35.0\ninches aft of datum at 1,950 pounds or less.\nUtility Category\n(1) Aft Limits         40.5 inches aft of datum at 2,200 pounds or less.\n(2) Forward Limits     Linear variation from 37.5 inches aft of datum at 2,200\npounds to 35.0 inches aft of datum at 1,950 pounds; 35.0\ninches aft of datum at 1,950 pounds or less.\n\nWhen Modified by Cessna Modification Kit MK172-72-01 (See NOTE 4)\nNormal Category\n(1) Aft Limits           47.3 inches aft of datum at 2,550 pounds or less.\n\n(2) Forward Limits            Linear variation from 41.0 inches aft of datum at 2,550\npounds to 35.0 inches aft of datum at 1,950 pounds; 35.0\ninches aft of datum at 1,950 pounds or less.\nUtility Category\n(1) Aft Limits                40.5 inches aft of datum at 2,200 pounds or less.\n(2) Forward Limits            Linear variation from 37.5 inches aft of datum at 2,200\npounds to 35.0 inches aft of datum at 1,950 pounds; 35.0\ninches aft of datum at 1,950 pounds or less.\n\nEmpty Wt. C.G. Range   None\n\nReference Datum        Lower portion of front face of firewall\n\nMAC                    58.8 inches; Leading edge of MAC 25.9 inches aft of datum",
+      "control_surfaces": "Wing flaps            Takeoff 0º - 10º\nLanding 0º - 30º + 0°/-2°\nAilerons                    Up 20° ± 1°             Down 15° ± 1°\nElevator tab                Up 22° + 1°/-0°         Down 19° + 1°/-0°\nElevator                    Up 28° + 1°/-0°         Down 23° + 1°/-0°\n(Neutral position is with bottom of balance area flush with bottom of stabilizer)\nRudder (Measured parallel to W.L.): Right 16° 10’± 1° Left 16° 10’ ± 1°\nRudder (Measured perpendicular to Hinge: Right 17° 44’ ± 1° Left 17° 44’ ± 1°\n\nRev. 84                                                              27                                                                3A12\n\nXI. Model 172R (cont’d)\n\nData Pertinent to Model 172R:\n\nCertification Basis:\nPart 23 of the Federal Aviation Regulations effective February 1, 1965, as amended by 23-1 through 23-6, except as follows:\nFAR 23.423; 23.611; 23.619; 23.623; 23.689; 23.775; 23.871; 23.1323; and 23.1563 as amended by Amendment 23-7. FAR\n23.807 and 23.1524 as amended by Amendment 23-10. FAR 23.507; 23.771; 23.853(a),(b) and (c); and 23.1365 as amended by\nAmendment 23-14. FAR 23.951 as amended by Amendment 23-15. FAR 23.607; 23.675; 23.685; 23.733; 23.787; 23.1309 and\n23.1322 as amended by Amendment 23-17. FAR 23.1301 as amended by\n\nAmendment 23-20. FAR 23.1353; and 23.1559 as amended by Amendment 23-21. FAR 23.603; 23.605; 23.613; 23.1329 and\n23.1545 as amended by Amendment 23-23. FAR 23.441 and 23.1549 as amended by Amendment\n23-28. FAR 23.779 and 23.781 as amended by Amendment 23-33. FAR 23.1; 23.51 and 23.561 as amended by Amendment 23-\n34. FAR 23.301; 23.331; 23.351; 23.427; 23.677; 23.701; 23.735; and 23.831 as amended by Amendment 23-42. FAR 23.961;\n23.1093; 23.1143(g); 23.1147(b); 23.1303; 23.1357; 23.1361 and 23.1385 as amended by Amendment 23-43. FAR 23.562(a),\n23.562(b)2, 23.562(c)1, 23.562(c)2, 23.562(c)3, and 23.562(c)4 as amended by Amendment 23-44. FAR 23.33; 23.53; 23.305;\n23.321; 23.485; 23.621; 23.655 and 23.731 as amended by Amendment 23-45.\n\nFAR 36 dated December 1, 1969, as amended by Amendments 36-1 through 36-21.\n\nAdditions for the Garmin G1000 Integrated Cockpit System (ICS) Only:\n\n14 CFR 23.303; 23.307; 23.601; 23.1163(a); 23.1367 and 23.1381 as amended by Amendment 23- N/C. 14 CFR 23.1589 as\namended by Amendment 23-13. 14 CFR 23.771(a) as amended by Amendment 23-14. 14 CFR 23.607 and (Electrical System)\n23.1309(a)(1)(2), (c) as amended by Amendment 23-17. 14 CFR 23.1301; 23.1327 and 23.1547(e) as amended by Amendment\n23-20. 14 CFR 23.1501 and 23.1541(a)(1), (a)(2), (b)(1), (b)(2) as amended by Amendment 23-21. 14 CFR 23.603 and 23.605\nas amended by Amendment 23-23. 14 CFR 23.1529 as amended by Amendment 23-26. 14 CFR 23.561(e); 23.1523;\n23.1581(a)(2); and 23.1583(a), (c), (d), (f); and 23.1585(a)(b)(d) as amended by Amendment 23-34. 14 CFR 23.301 as amended\nby Amendment 23-42. 14 CFR 23.1322; 23.1331 and 23.1357(a)(b)(c)(d) as amended by Amendment 23-43. 14 CFR 23.305;\n23.773(a)(1), (a)(2); 23.1525and 23.1549 as amended by Amendment 23-45. 14 CFR 23.1303(a)(b)(c)(f); 23.1309(a)(1)(i),\n(a)(1)(ii), (a)(2), (b)(1), (b)(2)(i), (b)(2)(ii), (b)(3),(b)(4)(i), (b)(4)(ii), (b)(4)(iii), (b)(4)(iv), (c)(1), (c)(2)(iii), (c)(3), (d), (e),\n(f)(1); 23.1311; 23.1321 (a)(c)(d)(e); 23.1323(a), (b)(1), (b)(2), (c); 23.1329 (g)(h); 23.1351(a)(1), (a)(2)(i), (b)(1)(iii), (b)(2)(3),\n(c)(4), (d)(1); 23.1353(a)(b)(c)(d)(e); 23.1359(c); 23.1361; 23.1365(a)(b)(d)(e)(f) and 23.1431(a)(b)(d)(e) as amended by\nAmendment 23-49. 14 CFR 23.1325(a), (b)(1), (b)(2)(i), (b)(3), (c)(d)(e); 23.1543(b)(c); 23.1545(a), (b)(1), (b)(2), (b)(3),\n(b)(4); 23.1553; 23.1555(a)(b); 23.1563(a) and 23.1567(a) as amended by Amendment 23-50. 14 CFR 23.777(a)(b);\n23.955(a)(2); 23.1337(a)(1), (a)(2), (b)(1), (c) as amended by Amendment 23-51. 14 CFR 23.1305(a)(1), (a)(2), (a)(3), (b)(2),\n(b)(3)(i), (b)(4)(i), (b)(5), (b)(6)(i) as amended by Amendment 23-52. 14 CFR 23.901(a)(b) as amended by Amendment 23-53.\n\nAdditions for the Garmin GFC-700 Automatic Flight Control System (AFCS) only:\n\n14 CFR 23.1335 as amended by Amendment 23-20, 14 CFR 23.1329 (a)(c)(d)(e)(f) as amended by Amendment 23-49.\n\nEquivalent Safety Items\n(1)      Induction System Icing Protection          FAR § 23.1093; Refer to FAA letter dated 5/3/96\n(2)      Throttle Control                           FAR § 23.1143(g); Refer to FAA letter dated 3/22/96\n(3)      Mixture Control                            FAR § 23.1147(b); Refer to FAA letter dated 3/22/96\n(4)      Anti-Collision Light System 14 CFR § 23.1401(d); Refer to ACE-07-09, FAA letter dated 10/12/07\n(5)      Aviation White Color Reqmt 14 CFR § 23.1397(c); Refer to ACE-07-10, FAA letter dated 11/29/07\n\nDate of Application for Amended Type Certificate was September 25, 1995.\nType Certificate No. 3A12 was amended June 21, 1996.",
+      "serial_numbers": "17280001 and On\n\nSpecial Conditions as follows:\nNo. 23-159-SC, “Special Conditions: Cessna Aircraft Company; Cessna Model 172R Airplane; Installation of Electronic Flight\nInstrument System and and the Protection of the System From High Intensity Radiated Fields (HIRF).\n\nProduction Basis\nProduction Certificate No. PC-4 issued March 28, 1997. Applies to airplane serial numbers 17280014, 17280015, 17280017,\n17280021 through 17280029, and 17280031 and on. Airplane serial numbers not listed were produced under Type Certificate\nonly. Cessna is authorized to issue airworthiness certificates under the delegation provisions of Delegation Option\nAuthorization No. CE-1 in accordance with Part 21 of the Federal Aviation Regulations.\n\n3A12                                                           28                                                         Rev. 84\n\nXI. Model 172R (cont’d)\n\nData Pertinent to Model 172R (cont'd)\n\nEquipment\nThe basic required equipment as prescribed in the applicable airworthiness regulations (see Certification Basis) must be installed\nin the airplane for certification.\n\nNOTE 1:             Weight and Balance:\n\nSerial Nos. 17280001 and On\nThe certificated empty weight and corresponding center of gravity location must include unusable fuel of 18\npounds at 46.0 inches aft of datum, and full oil of 15.0 pounds at 13.1 inches forward of datum.\n\nNOTE 2:             The airplane must be operated according to the appropriate Pilot’s Operating Handbook and FAA Approved\nAirplane Flight Manual (POH/AFM). POH/AFM part number 172RPHUS00 (or later approved revision) is\napplicable to Production Model 172R. POH/AFM part number 172R180PH00 (or later approved revision) is\napplicable to Production Model 172R airplanes when modified by Cessna Modification Kit MK172-72-01.\nAll POH/AFM Supplements approved for part number 172RPHUS00, are also applicable to part number\n172R180PH00, unless specifically noted otherwise in the Supplement. All FAA required placards are\nincluded in Section 2 of the applicable POH/AFM. Placards may also be found in the Maintenance Manual,\npart number 172RMM00 (or later revision) , Chapter Eleven (11), “Placards and Markings.”\n\nFAA Approved Airplane Flight Manual (AFM): Part Number 172RPHAUS-00 (or later FAA approved\nrevisions) is applicable to the Model 172R equipped with Garmin G1000 Integrated Cockpit System. The\nairplane must be operated according to the appropriate AFM. Required placards are included in the AFM.\n\nFAA Approved Airplane Flight Manual (AFM): Part Number 172RPHBUS-00 (or later FAA approved\nrevisions) are applicable to the Model 172R equipped with Garmin G1000 Integrated Cockpit System and\nGarmin GFC-700 AFCS. The airplane must be operated according to the appropriate AFM. Required\nplacards are included in the AFM.\n\nNOTE 3:             Special Ferry Flight Authorization. Flight Standards District Offices are authorized to issue Special\noverweight ferry flight authorizations. This airplane is structurally satisfactory for ferry flight if maintained\nwithin the following limits: (1) Takeoff weight must not exceed 130% of the maximum weight for Normal\nCategory; and (2) The Never Exceed Airspeed (VNE) and Maximum Structural Cruising Speed (VC) must be\nreduced by 30%; and (3) Forward and aft center of gravity limits may not be exceeded; and (4) Structural\nload factors of +2.5 g. to -1.0 g. may not be exceeded. Requirements for any additional oil should be\nestablished in accordance with Advisory Circular AC23.1011-1. Increased stall speeds and reduced climb\nperformance should be expected for the increased weights. Flight characteristics and performance at the\nincreased weights have not been evaluated. Flight Permit for operations of overweight aircraft may be found\nin Advisory Circular AC21-4B.\n\nNOTE 4:             Only certain Model 172R airplane serial numbers are eligible for modification by Cessna Modification Kit\nMK172-72-01. Applicable serial numbers are as follows:\n\n17280159            17280242            17280251           17280253          17280257\n17280262            17280281            17280292           17280301          17280305\n17280426            17280488            17280606           17280607          17280608\n17280609            17280610            17280613           17280614          17280616\n17280621            17280622            17280623           17280624          17280631\n17280632            17280633            17280634           17280638          17280639\n17280640            17280646            17280647           17280648          17280652\n17280653            17280659            17280660           17280661          17280662\n17280664            17280667            17280668           17280669          17280670\n17280672            17280673            17280674           17280675          17280701\n17280707\n\nNOTE 5:             The following serials are manufactured under the name Cessna Aircraft Company: 17280001 thru 17281622.\n\nNOTE 6:             Company name change effective 7/29/15. The following serial numbers are manufactured under the name\nTextron Aviation Inc.: 17281623 and On.\n\nRev. 84                                                    29                                                        3A12"
+    },
+    {
+      "section_roman": "XII",
+      "models": [
+        "172S",
+        "SP"
+      ],
+      "engine": "Lycoming IO-360-L2A, Rated 180 Horsepower",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 163,
+          "unit": "knots"
+        },
+        "Vno": null,
+        "Vfe": {
+          "value": 85,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 105,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {},
+      "fuel_capacity": {
+        "total_gal": 56.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "Normal Category\n(1) Aft Limits                47.3 inches aft of datum at 2,550 pounds or less.\n(2) Forward Limits            Linear variation from 41.0 inches aft of datum at 2,550\npounds to 35.0 inches aft of datum at 1,950 pounds; 35.0\ninches aft of datum at 1,950 pounds\nor less.\n\nUtility Category\n(1) Aft Limits                40.5 inches aft of datum at 2,200 pounds or less.\n(2) Forward Limits            Linear variation from 37.5 inches aft of datum at 2,200\npounds to 35.0 inches aft of datum at 1,950 pounds; 35.0\ninches aft of datum at 1,950 pounds\nor less.\n\nEmpty Wt. C.G. Range         None\n\nReference Datum              Lower portion of front face of firewall\n\nMAC                          58.8 inches; Leading edge of MAC 25.9 inches aft of datum",
+      "control_surfaces": "Wing flaps            Takeoff 0º - 10º\nLanding 0º - 30º + 0°/-2°\nAilerons                    Up 20° ± 1°             Down 15° ± 1°\nElevator tab                Up 22° + 1°/-0°         Down 19° + 1°/-0°\nElevator                    Up 28° + 1°/-0°         Down 23° + 1°/-0°\n(Neutral position is with bottom of balance area flush with bottom of stabilizer)\nRudder (Measured parallel to W.L.): Right 16° 10’± 1° Left 16° 10’ ± 1°\nRudder (Measured perpendicular to Hinge: Right 17° 44’ ± 1° Left 17° 44’ ± 1°\n\nData Pertinent to Model 172S:\n\nCertification Basis:\nPart 23 of the Federal Aviation Regulations effective February 1, 1965, as amended by 23-1 through 23-6, except as follows:\nFAR 23.423; 23.611; 23.619; 23.623; 23.689; 23.775; 23.871; 23.1323; and 23.1563 as amended by Amendment 23-7. FAR\n23.807 and 23.1524 as amended by Amendment 23-10. FAR 23.507; 23.771; 23.853(a),(b) and (c); and 23.1365 as amended by\nAmendment 23-14. FAR 23.951 as amended by Amendment 23-15. FAR 23.607; 23.675; 23.685; 23.733; 23.787; 23.1309 and\n23.1322 as amended by Amendment 23-17. FAR 23.1301 as amended by Amendment 23-20. FAR 23.1353; and 23.1559 as\namended by Amendment 23-21. FAR 23.603; 23.605; 23.613; 23.1329 and 23.1545 as amended by Amendment 23-23. FAR\n23.441 and 23.1549 as amended by Amendment 23-28. FAR 23.779 and 23.781 as amended by Amendment 23-33. FAR 23.1;\n23.51 and 23.561 as amended by Amendment 23-34. FAR 23.301; 23.331; 23.351; 23.427; 23.677; 23.701; 23.735; and 23.831\nas amended by Amendment 23-42. FAR 23.961; 23.1093; 23.1143(g); 23.1147(b); 23.1303; 23.1357; 23.1361 and 23.1385 as\namended by Amendment 23-43. FAR 23.562(a), 23.562(b)2, 23.562(c)1, 23.562(c)2, 23.562(c)3, and 23.562(c)4 as amended by\nAmendment 23-44. FAR 23.33; 23.53; 23.305; 23.321; 23.485; 23.621; 23.655 and 23.731 as amended by Amendment 23-45.\n\nFAR 36 dated December 1, 1969, as amended by Amendments 36-1 through 36-21.\n\nAdditions for the Garmin G1000 Integrated Cockpit System (ICS) Only: Additions for the Garmin G1000 Integrated Cockpit\nSystem (ICS) Only:\n\n14 CFR 23.303; 23.307; 23.601; 23.1163(a); 23.1367 and 23.1381 as amended by Amendment 23- N/C. 14 CFR 23.1589 as\namended by Amendment 23-13. 14 CFR 23.771(a) as amended by Amendment 23-14. 14 CFR 23.607 and (Electrical System)\n23.1309(a)(1)(2), (c) as amended by Amendment 23-17. 14 CFR 23.1301; 23.1327 and 23.1547(e) as amended by Amendment\n23-20. 14 CFR 23.1501 and 23.1541(a)(1), (a)(2), (b)(1), (b)(2) as amended by Amendment 23-21. 14 CFR 23.603 and 23.605\nas amended by Amendment 23-23. 14 CFR 23.1529 as amended by Amendment 23-26. 14 CFR 23.561(e); 23.1523;\n23.1581(a)(2); and 23.1583(a), (c), (d), (f) and 23.1585(a)(b)(d) as amended by Amendment 23-34. 14 CFR 23.301 as amended\nby Amendment 23-42. 14 CFR 23.1322; 23.1331 and 23.1357(a)(b)(c)(d) as amended by Amendment 23-43. 14 CFR 23.305;\n23.773(a)(1), (a)(2); 23.1525 and 23.1549 as amended by Amendment 23-45. 14 CFR 23.1303(a)(b)(c)(f); 23.1309(a)(1)(i),\n(a)(1)(ii), (a)(2), (b)(1), (b)(2)(i), (b)(2)(ii), (b)(3),(b)(4)(i), (b)(4)(ii), (b)(4)(iii), (b)(4)(iv), (c)(1), (c)(2)(iii), (c)(3), (d), (e),\n(f)(1); 23.1311; 23.1321 (a)(c)(d)(e); 23.1323(a), (b)(1), (b)(2), (c); 23.1329 (g)(h); 23.1351(a)(1), (a)(2)(i), (b)(1)(iii), (b)(2)(3),\n(c)(4), (d)(1); 23.1353(a)(b)(c)(d)(e); 23.1359(c); 23.1361; 23.1365(a)(b)(d)(e)(f) and 23.1431(a)(b)(d)(e) as amended by\nAmendment 23-49. 14 CFR 23.1325(a), (b)(1), (b)(2)(i), (b)(3), (c)(d)(e); 23.1543(b)(c); 23.1545(a), (b)(1), (b)(2), (b)(3),\n(b)(4); 23.1553; 23.1555(a)(b); 23.1563(a) and 23.1567(a) as amended by Amendment 23-50. 14 CFR 23.777(a)(b);\n23.955(a)(2); 23.1337(a)(1), (a)(2), (b)(1), (c) as amended by Amendment 23-51. 14 CFR 23.1305(a)(1), (a)(2), (a)(3), (b)(2),\n(b)(3)(i), (b)(4)(i), (b)(5), (b)(6)(i) as amended by Amendment 23-52. 14 CFR 23.901(a)(b) as amended by Amendment 23-53.\n\nAdditions for the Garmin GFC-700 Automatic Flight Control System (AFCS) only:\n\n14 CFR 23.1335 as amended by Amendment 23-20, 14 CFR 23.1329 (a)(c)(d)(e)(f) as amended by Amendment 23-49.\n\nEquivalent Safety Items\n(1)      Induction System Icing Protection          FAR § 23.1093; Refer to FAA letter dated 5/1/98\n(2)      Throttle Control                           FAR § 23.1143(g); Refer to FAA letter dated 5/1/98\n(3)      Mixture Control                            FAR § 23.1147(b); Refer to FAA letter dated 5/1/98\n(4)      Anti-Collision Light System 14 CFR § 23.1401(d); Refer to ACE-07-09, FAA letter dated 10/12/07\n(5)      Aviation White Color Reqmt 14 CFR § 23.1397(c); Refer to ACE-07-10, FAA letter dated 11/29/07\n\nDate of Application for Amended Type Certificate for the 172S was November 13, 1997.\nType Certificate No. 3A12 was amended May 1, 1998 for the Model 172S.\n\nRev. 84                                                         31                                                           3A12\n\nXII.   Model 172S (cont’d)\n\nData Pertinent to Model 172S:",
+      "serial_numbers": "172S8001 and On\n\nSpecial Conditions as follows:\nNo. 23-159-SC, “Special Conditions: Cessna Aircraft Company; Cessna Model 172S Airplane; Installation of Electronic Flight\nInstrument System and the Protection of the System From High Intensity Radiated Fields (HIRF).\"\n\nProduction Basis\nProduction Certificate No. PC-4 issued August 27, 1998. Applies to airplane serial numbers 172S8003 and on. Airplane serial\nnumbers not listed were produced under Type Certificate only. Cessna is authorized to issue airworthiness certificates under the\ndelegation provisions of Delegation Option Authorization No. CE-1 in accordance with Part 21 of the Federal Aviation\nRegulations.\n\nEquipment\nThe basic required equipment as prescribed in the applicable airworthiness regulations (see Certification Basis) must be installed\nin the airplane for certification.\n\nNOTE 1:             Weight and Balance:\nSerial Nos. 172S8001 and On\nThe certificated empty weight and corresponding center of gravity location must include unusable fuel of 18\npounds at 46.0 inches aft of datum, and full oil of 15.0 pounds at 13.1 inches forward of datum.\n\nNOTE 2:             Pilot’s Operating Handbook and FAA Approved Airplane Flight Manual (POH/AFM): part number\n172SPHUS-00 (or later approved revision) is applicable to the Model 172S. The airplane must be operated\naccording to the appropriate POH/AFM. All FAA required placards are included in Section 2 of the\nPOH/AFM. Placards may also be found in the Maintenance Manual, part number 172RMM02 (or later\nrevision) for the Model 172S, Chapter 11, Placards and Markings.”\n\nFAA Approved Airplane Flight Manual (AFM): Part Number 172SPHAUS-00 (or later FAA approved\nrevisions) is applicable to Model 172S equipped with Garmin G1000 Integrated Cockpit System. The\nairplane must be operated according to the appropriate AFM. Required placards are included in the AFM.\n\nFAA Approved Airplane Flight Manual (AFM): Part Number 172SPHBUS-00 (or later FAA approved\nrevisions) are applicable to the Model 172S equipped with Garmin G1000 Integrated Cockpit System and\nGarmin GFC-700 AFCS. The airplane must be operated according to the appropriate AFM. Required\nplacards are included in the AFM.\n\nNOTE 3:             Special Ferry Flight Authorization. Flight Standards District Offices are authorized to issue Special\noverweight ferry flight authorizations. This airplane is structurally satisfactory for ferry flight if maintained\nwithin the following limits: (1) Takeoff weight must not exceed 130% of the maximum weight for Normal\nCategory; and (2) The Never Exceed Airspeed (VNE) and Maximum Structural Cruising Speed (VC) must be\nreduced by 30%; and (3) Forward and aft center of gravity limits may not be exceeded; and (4) Structural\nload factors of +2.5 g. to -1.0 g. may not be exceeded. Requirements for any additional oil should be\nestablished in accordance with Advisory Circular AC23.1011-1. Increased stall speeds and reduced climb\nperformance should be expected for the increased weights. Flight characteristics and performance at the\nincreased weights have not been evaluated. Flight Permit for operations of overweight aircraft may be found\nin Advisory Circular AC21-4B\n\nNOTE 4:             The following serials are manufactured under the name Cessna Aircraft Company: 172S8001 thru\n172S11614.\n\nNOTE 5:             Company name change effective 7/29/15. The following serials are manufactured under the name Textron\nAviation Inc.: 172S11615 and On.\n\n..... END ...."
+    }
+  ]
+}

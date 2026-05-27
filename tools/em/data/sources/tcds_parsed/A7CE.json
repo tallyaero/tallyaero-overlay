@@ -1,0 +1,438 @@
+{
+  "tcds_number": "A7CE",
+  "revision": "47",
+  "revision_date": "March 27, 2007",
+  "tc_holder": "Cessna Aircraft Company",
+  "source_pdf": "A7CE.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 11,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "411 (Normal Category)"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "Grade 100 or 100LL aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 266,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 230,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 180,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 6500
+      },
+      "fuel_capacity": {
+        "total_gal": 175.0,
+        "usable_gal": 50.0
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing         (+150.6) to (+155.5) at 6500 lb.\nGear Extended)             (+155.7) at 6100 lb. or less\n(+144.3) at 5200 lb. or less\nStraight line variation between points given\nLanding gear retracted moment change: +837 in.-lb.\n\nEmpty Wt. C.G. Range        None",
+      "control_surfaces": "Wing flaps                                       Down     45°, +1°, -0°\nMain surfaces\nAileron                 Up 20°, +1°, -0°       Down     20°, +1°, -0°\nElevator                Up 25°, +1°, -0°       Down     15°, +1°, -0°\nRudder                Right 32°, +1°, -0°        Left   32°, +1°, -0°\n(Read degrees normal to rudder hinge line)\nTab (main surface in neutral)\nAileron                 Up 20°, +1°, -0°       Down     20°, +1°, -0°\nElevator                Up 10°, +1°, -0°       Down     26°, +1°, -0°\nRudder                Right 17°, +1°, -0°        Left   22°, +1°, -0°\n(Read degrees normal to rudder hinge line)\n\nSerial Nos. Eligible            Model 411:        411-0001 through 411-0250\nModel 411A:        411-0251 through 411-0300",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "401 (Normal Category)"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "Grade 100 or 100LL aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 266,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 230,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 180,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 6200
+      },
+      "fuel_capacity": {
+        "total_gal": 102.0,
+        "usable_gal": 50.0
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing            (+150.8) to (+158.1) at 6300 lb.\nGear Extended)                (+158.5) at 5900 lb. or less\n(+147.5) at 5000 lb. or less\nStraight line variation between points given\nLanding gear retracted moment change: +837 in.-lb.\n\nEmpty Wt. C.G. Range           None",
+      "control_surfaces": "Wing flaps                                       Down         45°, +1°, -0°\nMain surfaces\nAileron                 Up 20°, +1°, -0°       Down         20°, +1°, -0°\nElevator                Up 25°, +1°, -0°       Down         15°, +1°, -0°\nRudder                Right 32°, +1°, -0°        Left       32°, +1°, -0°\n(Read degrees normal to rudder hinge line)\nTab (main surface in neutral)\nAileron                 Up 20°, +1°, -0°       Down         20°, +1°, -0°\nElevator                Up    5°, +1°, -0°     Down         30°, +1°, -0°\nRudder                Right   7°, +1°, -0°       Left        9°, +1°, -0°\n(Read degrees normal to rudder hinge line)\n\nSerial Nos. Eligible               Model 401: 401-0001 through 401-0322\nModel 401A: 401A0001 through 401A0132\nModel 401B: 401B0001 through 401B0221",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "402 (Normal Category)"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "Grade 100 or 100LL aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 266,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 230,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 180,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 6200
+      },
+      "fuel_capacity": {
+        "total_gal": 102.0,
+        "usable_gal": 50.0
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing            (+150.8) to (+159.7) at 6300 lb.\nGear Extended)                (+160.2) at 5900 lb. or less\n(+147.5) at 5000 lb. or less\nStraight line variation between points given\nLanding gear retracted moment change: +837 in.-lb.\n\nEmpty Wt. C.G. Range           None",
+      "control_surfaces": "Wing flaps                                       Down         45°, +1°, -0°\nMain surfaces\nAileron                 Up 20°, +1°, -0°       Down         20°, +1°, -0°\nElevator                Up 25°, +1°, -0°       Down         15°, +1°, -0°\nRudder                Right 32°, +1°, -0°        Left       32°, +1°, -0°\n(Read degrees normal to rudder hinge line)\nTab (main surface in neutral)\nAileron                 Up 20°, +1°, -0°       Down         20°, +1°, -0°\nElevator                Up    5°, +1°, -0°     Down         30°, +1°, -0°\nRudder                Right   7°, +1°, -0°       Left        9°, +1°, -0°\n(Read degrees normal to rudder hinge line)\n\nSerial Nos. Eligible              Model 402:         402-0001 through 402-0322\nModel 402A:        402A0001 through 402A0129\nModel 402B:        402B0001 through 402B1384",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "421 (Normal Category)"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "Grade 100 or 100LL aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 272,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 230,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 184,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 6800
+      },
+      "fuel_capacity": {
+        "total_gal": 175.0,
+        "usable_gal": 50.0
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing                Model 421                                  Model 421A\nGear Extended)                (+151.9) to (+155.5) at 6800 lb.     (+152.1) to (+155.5) at 6840 lb.\n(+155.7) at 6400 lb. or less         (+155.7) at 6500 lb. or less\n(+144.3) at 5200 lb. or less         (+144.3) at 5200 lb. or less\n\nStraight line variation between points given\nLanding gear retracted moment change: +889 in.-lb.\n\nEmpty Wt. C.G. Range           None",
+      "control_surfaces": "Wing flaps                                       Down         45°, +1°, -0°\nMain surfaces\nAileron                 Up 20°, +1°, -0°       Down         20°, +1°, -0°\nElevator                Up 25°, +1°, -0°       Down         15°, +1°, -0°\nRudder                Right 25°, +1°, -0°        Left       25°, +1°, -0°\n(Read degrees normal to rudder hinge line)\nTab (main surface in neutral)\nAileron                 Up 20°, +1°, -0°       Down         20°, +1°, -0°\nElevator                Up 10°, +1°, -0°       Down         26°, +1°, -0°\nRudder                Right 11°, +1°, -0°        Left       16°, +1°, -0°\n(Read degrees normal to rudder hinge line)\n\nSerial Nos. Eligible            Model 421:      421-0001 through 421-0200\nModel 421A:      421A0001 through 421A0158",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "V",
+      "models": [
+        "414 (Normal Category)"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "Grade 100 or 100LL aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {},
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "V",
+      "models": [
+        "414 (Normal Category)"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": null,
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 266,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 230,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 180,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 6200
+      },
+      "fuel_capacity": {
+        "total_gal": 102.0,
+        "usable_gal": 50.0
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing           (+150.9) to (+159.7) at 6350 lb.\nGear Extended)               (+160.2) at 5950 lb. or less\n(+147.5) at 5000 lb. or less\nStraight line variation between points given\nLanding gear retracted moment change: +837 in.-lb.\n\nEmpty Wt. C.G. Range          None",
+      "control_surfaces": "Wing flaps                                       Down         45°, +1°, -0°\nMain surfaces\nAileron                 Up 20°, +1°, -0°       Down         20°, +1°, -0°\nElevator                Up 25°, +1°, -0°       Down         15°, +1°, -0°\nRudder                Right 32°, +1°, -0°        Left       32°, +1°, -0°\n(Read degrees normal to rudder hinge line)\nTab (main surface in neutral)\nAileron                 Up 20°, +1°, -0°       Down         20°, +1°, -0°\nElevator                Up    5°, +1°, -0°     Down         30°, +1°, -0°\nRudder                Right 11°, +1°, -0°        Left       16°, +1°, -0°\n(Read degrees normal to rudder hinge line)\n\nSerial Nos. Eligible           414-0001 through 414-0965",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VI",
+      "models": [
+        "421B",
+        "Golden",
+        "Eagle"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "Grade 100 or 100LL aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 274,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 230,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 175,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 7450
+      },
+      "fuel_capacity": {
+        "total_gal": 175.0,
+        "usable_gal": 50.0
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing    S/N 421B0001 through 421B0200\nGear Extended)        6, 7, or 8 Place                     10 Place\n(+151.8) to (+156.4) at 7250 lb.     (+151.8) to (+157.7) at 7250 lb.\n(+156.7) at 6850 lb. or less         (+158.0) at 6850 lb. or less\n(+147.1) at 6100 lb. or less         (+147.1) at 6100 lb. or less\n\nS/N 421B0201 and up\n(+152.6) to (+156.5) at 7450 lb.      (+152.6) to (+157.8) at 7450 lb.\n(+156.7) at 7050 lb. or less          (+158.0) at 7050 lb. or less\n(+147.1) at 6100 lb. or less          (+147.1) at 6100 lb. or less\nStraight line variation between points given\nLanding gear retracted moment change: +889 in.-lb.\n\nPage 13 of 24                                                A7CE, Rev. 47\n\nVI - Model 421B (cont'd)\nEmpty Wt. C.G. Range         None",
+      "control_surfaces": "Wing flaps                                           Down     45°, +1°, -0°\nMain surfaces\nAileron                   Up 20°, +1°, -0°      Down 20°, +1°, -0°\nElevator                  Up 25°, +1°, -0°      Down 15°, +1°, -0°\nRudder                  Right 25°, +1°, -0°       Left 25°, +1°, -0°\n(S/N 421B0001 through 421B0800)\nRight 32°, +1°, -0°         Left 32°, +1°, -0°\n(S/N 421B0801 and up)\n(Read degrees normal to rudder hinge line)\nTab (main surface in neutral)\nAileron                 Up 20°, +1°, -0°       Down 20°, +1°, -0°\nElevator                Up 12°, +1°, -0°       Down 20°, +1°, -0°\nRudder                Right 11°, +1°, -0°        Left 16°, +1°, -0°\n(Read degrees normal to rudder hinge line)\n\nSerial Nos. Eligible          421B0001 through 421B0970",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VII",
+      "models": [
+        "421C",
+        "Golden",
+        "Eagle"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "Grade 100 or 100LL aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 240,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 201,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 151,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 7200
+      },
+      "fuel_capacity": {
+        "total_gal": 213.4,
+        "usable_gal": 103.0
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing     6, 7, 8, 9 or 10 Place\nGear Extended)         (+152.6) to (+158.0) at 7450 lb.\n(+147.1) at 6100 lb. or less\nStraight line variation between points given\nLanding gear retracted moment change:\n+917 in.-lb. (S/N 421C0001 through 421C0800)\n+1318 in.-lb. (S/N 421C0801 and up)\n\nEmpty Wt. C.G. Range    None",
+      "control_surfaces": "Wing flaps                                       Down         45°, +1°, -0°\nMain surfaces\nAileron                 Up 20°, +1°, -0°       Down         20°, +1°, -0°\nElevator                Up 25°, +1°, -0°       Down         15°, +1°, -0°\nRudder                Right 32°, +1°, -0°        Left       32°, +1°, -0°\n(Read degrees normal to rudder hinge line)\nTab (main surface in neutral)\nAileron                 Up 20°, +1°, -0°       Down         20°, +1°, -0°\nElevator                Up 12°, +1°, -0°       Down         20°, +1°, -0°\nRudder                Right 11°, +1°, -0°        Left       16°, +1°, -0°\n(Read degrees normal to rudder hinge line)\n\nSerial Nos. Eligible             421C0001 through 421C1807",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VIII",
+      "models": [
+        "414A",
+        "Chancellor"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "Grade 100 or 100LL Aviation Gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 237,
+          "unit": "knots"
+        },
+        "Vno": null,
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 145,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 6785
+      },
+      "fuel_capacity": {
+        "total_gal": 213.4,
+        "usable_gal": 103.0
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing      (+151.3) to (+160.0) at 6750 lb.\nGear Extended)          (+147.8) at 5800 lb. or less\nStraight line variation between points given\nLanding gear retracted moment change: +917 in.-lb.\n\nEmpty Wt. C.G. Range     None",
+      "control_surfaces": "Wing flaps                                       Down     45°, +1°, -0°\nMain surfaces\nAileron                 Up 20°, +1°, -0°       Down     20°, +1°, -0°\nElevator                Up 25°, +1°, -0°       Down     15°, +1°, -0°\nRudder                Right 32°, +1°, -0°        Left   32°, +1°, -0°\n(Read degrees normal to rudder hinge line)\nTab (main surface in neutral)\nAileron                 Up 20°, +1°, -0°       Down     20°, +1°, -0°\nElevator                Up 12°, +1°, -0°       Down     20°, +1°, -0°\nRudder                Right 11°, +1°, -0°        Left   16°, +1°, -0°\n(Read degrees normal to rudder hinge line)\n\nSerial Nos. Eligible             414A0001 through 414A1212",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IX",
+      "models": [
+        "402C"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "Grade 100 or 100LL aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 235,
+          "unit": "knots"
+        },
+        "Vno": null,
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 150,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 6885
+      },
+      "fuel_capacity": {
+        "total_gal": 213.4,
+        "usable_gal": 102.0
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing         (+151.58) to (+160.67) at 6850 lb.\nGear Extended)             (+149.08) at 5800 lbs. or less\nStraight line variation between points given\nLanding gear retracted moment change: +917 in.-lb.\n\nEmpty Wt. C.G. Range        None",
+      "control_surfaces": "Wing flaps                                       Down         45°, +1°, -0°\nMain surfaces\nAileron                 Up 20°, +1°, -0°       Down         20°, +1°, -0°\nElevator                Up 25°, +1°, -0°       Down         15°, +1°, -0°\nRudder                Right 32°, +1°, -0°        Left       32°, +1°, -0°\n(Read degrees normal to rudder hinge line)\nTab (main surface in neutral)\nAileron                 Up 20°, +1°, -0°       Down         20°, +1°, -0°\nElevator                Up 12°, +1°, -0°       Down         20°, +1°, -0°\nRudder                Right 11°, +1°, -0°        Left       16°, +1°, -0°\n(Read degrees normal to rudder hinge line)\n\nSerial Nos. Eligible        689, 402C0001 through 402C1020\n\nPage 19 of 24                                               A7CE, Rev. 47",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "X",
+      "models": [
+        "425"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "Aviation turbine fuel Jet A, Jet A-1, or Jet B, JP-4, JP-5 or JP-8. For",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": {
+          "value": 45,
+          "unit": "knots"
+        },
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 8200
+      },
+      "fuel_capacity": {
+        "total_gal": 372.8,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing         S/N 425-0001 through 425-0176 (See NOTE 7)\nGear Extended)             (155.66) to (160.04) at 8200 lbs.\n(150.65) to (160.04) at 6478 lbs. or less\n\nS/N 425-0177 and up\n(156.81) to (160.04) at 8600 lbs.\n(150.65) to (160.04) at 6478 lbs. or less\n\nStraight line variation between points given\nMoment change due to retracting landing gear (+1448 in.-lb.)\n\nEmpty Wt. C.G. Range        None\n\n(Landing Gear Extended)             (+152.1) to (+155.5) at 6840 lb.\n(+155.7) at 6500 lb.\n(+144.3) to (+155.7) at 5500 lb.\nStraight line variation between points given\n\nNOTE 5.       McCauley propellers with 3AF32C87 and 3AF32C504 hubs may be interchanged in any combination. This\nalso applies to propellers with 3AF32C93 and 3AF32C505m hubs; 3AF34C92 and 3AF37C516 hubs; 3AF34C74\nand 3AF37C510 hubs.\n\nNOTE 6.       Model 425 aircraft in compliance with Cessna Drawing 5700018 are eligible for certification in The Netherlands.\n\nNOTE 7.       Model 425 S/N 425-0001 through 425-0176 (Corsair) are eligible for the maximum weights and C.G. range\napplicable to S/N 425-0177 and up (Conquest I), when modified in accordance with Cessna Service Kit\nSK425-17, and will be renamed Conquest I.\n\nNOTE 8.       Production Certificate No. 4 effective at Serials 402C1005 and on, 414A1208 and on, 421C1801 and on, and\n425-0228 and on.\n\n.....END.....",
+      "control_surfaces": "Wing flaps                                       Down        45°, +1°, -0°\nMain surfaces\nAileron                 Up 20°, +1°, -0°       Down        20°, +1°, -0°\nElevator                Up 19°, +1°, -0°       Down        15°, +1°, -0°\nRudder                Right 32°, +1°, -0°        Left      32°, +1°, -0°\n(Read degrees normal to rudder hinge line)\nTab (main surface in neutral)\nAileron                 Up 20°, +1°, -0°       Down        20°, +1°, -0°\nElevator                Up    6°, +1°, -0°     Down        15°, +1°, -0°\nRudder                Right 11°, +1°, -0°        Left      16°, +1°, -0°\n(Read degrees normal to rudder hinge line)\n\nSerial Nos. Eligible        425-0001 through 425-0236\n\nData Pertinent to All Models",
+      "serial_numbers": null
+    }
+  ]
+}

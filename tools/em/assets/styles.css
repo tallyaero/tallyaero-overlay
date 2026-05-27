@@ -1,0 +1,3155 @@
+:root {
+  /* Brand colors from logo */
+  --blue-primary: var(--ta-brand-blue);
+  --blue-dark: var(--ta-brand-blue-dark);
+  --orange-primary: var(--ta-brand-orange);
+  --orange-dark: var(--ta-brand-orange-dark);
+  --navy-bg: var(--ta-sidebar-bg);
+  /* UI colors */
+  --gray-bg: var(--ta-surface-primary);
+  --text-dark: var(--ta-text-primary);
+  --white: var(--ta-surface-secondary);
+  --gray-border: var(--ta-border-primary);
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  --sidebar-width: 300px;
+  /* Link colors */
+  --link-blue: var(--ta-brand-blue);
+  --link-danger: var(--ta-danger);
+  --link-success: var(--ta-success);
+}
+
+/* === Global Reset === */
+body, html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  background-color: var(--gray-bg);
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+/* === Typography === */
+h1, h2, h3 {
+  color: var(--blue-dark);
+  margin-bottom: 12px;
+}
+a {
+  color: var(--blue-primary);
+  text-decoration: none;
+}
+.input-label,
+label {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-dark);
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* === Header Banner === */
+.banner-header {
+  width: 100%;
+  background-color: var(--ta-sidebar-bg);
+  height: 110px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.banner-inner {
+  padding: 12px 0;
+}
+.banner-logo {
+  height: 100px;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+.disclaimer-banner {
+  background-color: var(--ta-warning-bg);
+  color: var(--ta-warning-text);
+  padding: 10px 15px;
+  border: 1px solid var(--ta-warning-border);
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* === Layout Containers === */
+.full-height-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+.main-row {
+  display: flex;
+  flex: 1 1 0;         /* fill remaining space under banner */
+  min-height: 0;       /* allow flex children to shrink */
+  height: 0;           /* force flex to calculate height */
+  overflow: hidden;    /* prevent main-row from scrolling, children handle it */
+}
+.resizable-sidebar {
+  width: 360px;
+  min-width: 260px;
+  max-width: 600px;
+  resize: horizontal;
+  overflow-y: auto;
+  padding: 10px;
+  background-color: var(--gray-bg);
+  border-right: 2px solid var(--gray-border);
+  box-sizing: border-box;
+}
+
+/* === Sidebar Accordion === */
+.sidebar-accordion {
+  --bs-accordion-btn-padding-y: 0.5rem;
+  --bs-accordion-btn-padding-x: 0.75rem;
+  --bs-accordion-body-padding-y: 0.5rem;
+  --bs-accordion-body-padding-x: 0.75rem;
+}
+.sidebar-accordion .accordion-button {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 10px;
+}
+.sidebar-accordion .accordion-body {
+  padding: 8px 10px;
+}
+.sidebar-accordion .accordion-item {
+  margin-bottom: 4px;
+}
+
+/* === Compact Labels === */
+.input-label-sm {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-dark);
+  margin-bottom: 2px;
+  display: block;
+}
+
+/* === Compact Checklist === */
+.checklist-sm label {
+  font-size: 12px;
+  margin: 3px 0;
+}
+
+/* === Switch Toggle List === */
+.switch-list .form-check {
+  padding-left: 0;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+}
+.switch-list .form-check-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-dark);
+  margin-left: 0;
+  flex-grow: 1;
+}
+.switch-list .form-check-input {
+  width: 32px;
+  height: 18px;
+  margin-left: 8px;
+  margin-right: 0;
+  cursor: pointer;
+}
+.switch-list .form-check-input:checked {
+  background-color: var(--blue-primary);
+  border-color: var(--blue-primary);
+}
+.switch-list .form-check-input:focus {
+  box-shadow: 0 0 0 2px rgba(41, 128, 185, 0.25);
+}
+.graph-column {
+  flex: 1 1 0;               /* fill remaining width */
+  min-width: 0;
+  min-height: 0;             /* critical for nested flex */
+  display: flex;
+  flex-direction: column;
+}
+
+.graph-wrapper {
+  flex: 1 1 0;               /* fill available height */
+  min-height: 0;             /* critical for nested flex */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;        /* for export toolbar positioning */
+  overflow: auto;
+}
+
+/* === Graph === */
+.graph-panel {
+  flex: 1 1 0;               /* fill available space */
+  min-height: 300px;         /* ensure minimum height */
+  width: 100%;
+}
+.graph-panel .dash-graph {
+  height: 100% !important;
+  width: 100% !important;
+}
+.graph-panel .js-plotly-plot {
+  height: 100% !important;
+  width: 100% !important;
+}
+.graph-panel .plot-container {
+  height: 100% !important;
+  width: 100% !important;
+}
+.graph-panel .svg-container {
+  height: 100% !important;
+  width: 100% !important;
+}
+.graph-panel .main-svg {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+/* === Form Elements === */
+.input-small,
+.input-small[type="number"] {
+  width: 100%;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  padding: 0 8px !important;
+  border: 1px solid hsl(0, 0%, 80%);
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 34px;
+  box-sizing: border-box;
+  -moz-appearance: textfield;
+}
+.dropdown,
+.dropdown-small {
+  width: 100%;
+}
+.dropdown {
+  min-width: 180px;
+  max-width: 280px;
+}
+
+/* Compact all sidebar dropdowns */
+.resizable-sidebar .dash-dropdown .Select-control,
+.resizable-sidebar .Select-control {
+  height: 28px !important;
+  min-height: 28px !important;
+  border-radius: 4px;
+}
+.resizable-sidebar .dash-dropdown .Select-value,
+.resizable-sidebar .dash-dropdown .Select-placeholder,
+.resizable-sidebar .Select-value,
+.resizable-sidebar .Select-placeholder {
+  line-height: 28px !important;
+  font-size: 12px !important;
+}
+.resizable-sidebar .dash-dropdown .Select-input,
+.resizable-sidebar .Select-input {
+  height: 28px !important;
+}
+.resizable-sidebar .dash-dropdown .Select-input > input,
+.resizable-sidebar .Select-input > input {
+  height: 28px !important;
+  padding: 0 !important;
+  font-size: 12px !important;
+}
+.resizable-sidebar .dash-dropdown .Select-arrow-zone,
+.resizable-sidebar .Select-arrow-zone {
+  padding: 5px !important;
+}
+
+/* Phase 5e: legacy dropdown rules now token-driven. Higher-specificity
+   selectors retained so they continue to win over react-select defaults
+   and beat anything in zz-em-app.css would-be-overridden by Bootstrap.
+   Dark-mode flips via the `--ta-*` token values automatically. */
+.resizable-sidebar .Select-menu-outer,
+.dash-dropdown .Select-menu-outer,
+.Select-menu-outer {
+  background-color: var(--ta-surface-elevated) !important;
+  border: 1px solid var(--ta-border-primary) !important;
+  box-shadow: var(--ta-shadow-md) !important;
+  z-index: 9999 !important;
+}
+.resizable-sidebar .Select-menu,
+.dash-dropdown .Select-menu,
+.Select-menu {
+  background-color: var(--ta-surface-elevated) !important;
+}
+.resizable-sidebar .Select-option,
+.dash-dropdown .Select-option,
+.Select-option {
+  background-color: var(--ta-surface-elevated) !important;
+  color: var(--ta-text-primary) !important;
+  font-size: 12px !important;
+  padding: 6px 10px !important;
+}
+.resizable-sidebar .Select-option.is-focused,
+.dash-dropdown .Select-option.is-focused,
+.Select-option.is-focused {
+  background-color: color-mix(in srgb, var(--ta-brand-blue) 12%, transparent) !important;
+}
+.resizable-sidebar .Select-option.is-selected,
+.dash-dropdown .Select-option.is-selected,
+.Select-option.is-selected {
+  background-color: var(--ta-brand-blue) !important;
+  color: #ffffff !important;
+}
+/* Virtualized variant for large lists (airports 16k+). Same treatment. */
+.resizable-sidebar .VirtualizedSelectOption,
+.dash-dropdown .VirtualizedSelectOption,
+.VirtualizedSelectOption {
+  background-color: var(--ta-surface-elevated) !important;
+  color: var(--ta-text-primary) !important;
+}
+.resizable-sidebar .VirtualizedSelectFocusedOption,
+.dash-dropdown .VirtualizedSelectFocusedOption,
+.VirtualizedSelectFocusedOption {
+  background-color: color-mix(in srgb, var(--ta-brand-blue) 12%, transparent) !important;
+  color: var(--ta-text-primary) !important;
+}
+.resizable-sidebar .VirtualizedSelectSelectedOption,
+.dash-dropdown .VirtualizedSelectSelectedOption,
+.VirtualizedSelectSelectedOption {
+  background-color: var(--ta-brand-blue) !important;
+  color: #ffffff !important;
+}
+.d-flex-align {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+.radio-inline-group .form-check {
+  display: inline-block;
+  margin-right: 15px;
+  align-items: center;
+}
+.radio-inline-group {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+.dash-checklist label,
+.dash-radio-items label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 6px 0;
+  gap: 8px;
+  color: var(--text-dark);
+}
+input[type="checkbox"],
+input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  margin-right: 8px;
+  accent-color: var(--blue-primary);
+}
+input,
+select {
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--text-dark);
+}
+
+/* === Buttons === */
+button,
+.green-button,
+.dash-bootstrap .btn,
+.dash-bootstrap .btn-primary {
+  background-color: var(--orange-primary);
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 10px;
+}
+button:hover,
+.green-button:hover,
+.dash-bootstrap .btn:hover {
+  background-color: var(--orange-dark);
+}
+
+/* === Utility === */
+.inline-block {
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 20px;
+}
+.weight-box {
+  padding: 8px 12px;
+  background-color: var(--ta-surface-secondary);
+  border: 1px solid var(--gray-border);
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  width: fit-content;
+}
+.graph-accent {
+  background: linear-gradient(90deg, var(--blue-primary), var(--orange-primary));
+  height: 4px;
+  border-radius: 2px;
+  margin: 16px 0;
+}
+.footer {
+  text-align: center;
+  color: var(--ta-text-tertiary);
+  font-size: 12px;
+  margin-top: 20px;
+  flex-shrink: 0;
+}
+
+/* === Warning Banner === */
+.warning-banner {
+  background-color: var(--ta-warning-bg);
+  border: 1px solid var(--ta-warning-border);
+  padding: 8px 14px;
+  font-size: 12px;
+  color: var(--ta-warning-text);
+  text-align: center;
+  font-weight: 500;
+}
+
+/* === Quick Links Bar (slim) === */
+.quick-links-bar-slim {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  font-size: 12px;
+  background-color: var(--gray-bg);
+}
+.quick-links-bar-slim .quick-link {
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+}
+.quick-links-bar-slim .separator {
+  color: var(--ta-text-tertiary);
+  margin: 0 2px;
+}
+
+/* === Quick Links Bar === */
+.quick-links-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.quick-links-bar a,
+.quick-links-bar .quick-link {
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+}
+.quick-links-bar .link-danger {
+  color: var(--link-danger);
+}
+.quick-links-bar .link-blue {
+  color: var(--link-blue);
+}
+.quick-links-bar .link-success {
+  color: var(--link-success);
+}
+.quick-links-bar .link-orange {
+  color: var(--orange-primary);
+}
+.quick-links-bar .separator {
+  color: var(--ta-text-tertiary);
+  margin: 0 4px;
+}
+
+/* === Legal Links === */
+.legal-links {
+  flex-shrink: 0;            /* don't shrink, fixed height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+.legal-links .legal-link {
+  text-decoration: underline;
+  color: var(--link-blue);
+  cursor: pointer;
+}
+.legal-links .separator {
+  margin: 0 8px;
+  color: var(--ta-text-tertiary);
+}
+
+/* === Segmented Control (Apple-style toggle) === */
+.segment-control {
+  display: inline-flex;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--ta-border-primary);
+  background-color: var(--ta-surface-tertiary);
+}
+.segment-btn {
+  padding: 4px 12px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  color: var(--ta-text-primary) !important;
+  margin: 0 !important;
+  transition: all 0.2s ease;
+}
+.segment-btn:hover {
+  background-color: var(--ta-border-primary) !important;
+}
+.segment-btn.active {
+  background-color: var(--ta-brand-blue) !important;
+  color: #ffffff !important;
+  box-shadow: inset 0 1px 2px color-mix(in srgb, var(--ta-brand-blue-dark) 30%, transparent);
+}
+
+/* === Standardized Buttons === */
+.btn-standard {
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.btn-primary-orange {
+  background-color: var(--orange-primary) !important;
+  color: white !important;
+  border: none !important;
+}
+.btn-primary-orange:hover {
+  background-color: var(--orange-dark) !important;
+}
+.btn-primary-blue {
+  background-color: var(--blue-primary) !important;
+  color: white !important;
+  border: none !important;
+}
+.btn-primary-blue:hover {
+  background-color: var(--blue-dark) !important;
+}
+
+/* === Export Toolbar (overlay on graph) === */
+.export-toolbar {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 100;
+  padding: 0;
+  margin: 0;
+}
+.btn-export {
+  background-color: var(--orange-primary) !important;
+  color: white !important;
+  border: none !important;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 !important;
+  opacity: 0.9;
+  min-width: 40px;
+  text-align: center;
+}
+.btn-export:hover {
+  background-color: var(--orange-dark) !important;
+  opacity: 1;
+}
+
+/* === Sidebar Toggle Button === */
+.btn-sidebar-toggle {
+  display: none;  /* Hidden on desktop */
+  background-color: var(--blue-primary) !important;
+  color: white !important;
+  border: none !important;
+  padding: 4px 10px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 0 !important;
+  min-width: 36px;
+}
+.btn-sidebar-toggle:hover {
+  background-color: var(--blue-dark) !important;
+}
+
+/* === Mobile Tip Banner === */
+.mobile-tip-banner {
+  display: none;  /* Hidden on desktop */
+  background-color: var(--ta-info-bg);
+  color: var(--ta-info-text);
+  padding: 6px 12px;
+  font-size: 12px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* === Sidebar Header & Collapse === */
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.sidebar-collapse-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--ta-border-primary);
+  border-radius: 4px;
+  background: var(--ta-surface-tertiary);
+  color: var(--ta-text-tertiary);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.sidebar-collapse-btn:hover {
+  background: var(--ta-surface-field);
+  color: var(--ta-text-primary);
+}
+
+/* Sidebar collapsed state - minimal strip with expand button */
+.resizable-sidebar.collapsed {
+  width: 36px !important;
+  min-width: 36px !important;
+  max-width: 36px !important;
+  padding: 8px 4px !important;
+  overflow: hidden !important;
+}
+.resizable-sidebar.collapsed > *:not(.sidebar-header) {
+  display: none !important;
+}
+.resizable-sidebar.collapsed .sidebar-header {
+  flex-direction: column;
+  align-items: center;
+}
+.resizable-sidebar.collapsed .sidebar-header > div:first-child {
+  display: none !important;
+}
+.resizable-sidebar.collapsed .sidebar-collapse-btn {
+  margin: 0;
+}
+
+/* === Mobile Layout Styles === */
+.mobile-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.mobile-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Mobile logo bar */
+.mobile-logo-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px 10px;
+  background: linear-gradient(135deg, var(--ta-brand-blue-dark) 0%, var(--ta-brand-blue) 100%);
+  flex-shrink: 0;
+}
+
+/* Mobile links bar - matches desktop quick-links styling */
+.mobile-links-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: var(--ta-surface-tertiary);
+  border-bottom: 1px solid var(--ta-border-secondary);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+/* Mobile header - minimal */
+.mobile-container .banner-header {
+  height: auto;
+  padding: 2px 0;
+  min-height: unset;
+}
+.mobile-container .banner-logo {
+  height: 32px !important;
+}
+
+/* Mobile configuration bar - full width */
+.mobile-config-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--ta-text-primary);
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.mobile-config-btn {
+  position: absolute;
+  right: 12px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 4px;
+  background: var(--orange-primary) !important;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.mobile-config-btn:hover,
+.mobile-config-btn:active,
+.mobile-config-btn:focus {
+  background: var(--orange-hover) !important;
+}
+
+.mobile-settings-content {
+  padding: 12px;
+  background: var(--ta-surface-tertiary);
+  max-height: 50vh;
+  overflow-y: auto;
+  border: 4px solid var(--orange-primary);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.mobile-action-btns {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.mobile-action-btns > * {
+  flex: 1 1 50%;
+  min-width: 0;
+}
+.mobile-action-btns .btn-sm,
+.mobile-action-btns .btn {
+  width: 100%;
+  font-size: 11px;
+  padding: 6px 8px;
+}
+
+.mobile-graph-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Portrait mode - lock aspect ratio, allow horizontal scroll */
+@media (max-width: 600px) and (orientation: portrait) {
+  .mobile-graph-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .mobile-graph-container .dash-graph {
+    min-width: 500px !important;
+    width: 500px !important;
+    height: 500px !important;
+    aspect-ratio: 1 / 1;
+  }
+}
+
+.export-toolbar-mobile {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  display: flex;
+  gap: 4px;
+}
+
+.btn-export-sm {
+  padding: 4px 10px;
+  font-size: 11px;
+  background: var(--orange-primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-export-sm:hover {
+  background: var(--orange-hover);
+}
+
+.mobile-legal {
+  padding: 6px 12px;
+  text-align: center;
+  font-size: 10px;
+  background: var(--ta-surface-tertiary);
+  border-top: 1px solid var(--ta-border-secondary);
+  flex-shrink: 0;
+}
+
+.legal-link-sm {
+  color: var(--blue-primary);
+  cursor: pointer;
+  font-size: 10px;
+}
+.legal-link-sm:hover {
+  text-decoration: underline;
+}
+
+.weight-box-sm {
+  padding: 4px 8px;
+  background: var(--ta-surface-field);
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.pa-da-box-sm {
+  padding: 4px 8px;
+  background: var(--ta-info-bg);
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.checklist-compact label {
+  font-size: 11px;
+  margin-right: 8px;
+}
+
+.radio-sm label {
+  font-size: 11px;
+  margin-right: 6px;
+}
+
+/* === Help Icon Styles === */
+.help-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--blue-primary);
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 6px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  flex-shrink: 0;
+}
+.help-icon:hover {
+  background-color: var(--blue-dark);
+  transform: scale(1.1);
+}
+.overlay-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  gap: 8px;
+}
+.overlay-row .label-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+.overlay-row .label-group .overlay-label {
+  font-size: 13px;
+  color: var(--ta-text-primary);
+  margin: 0;
+}
+.overlay-row .form-switch {
+  margin: 0;
+  padding-left: 2.5em;
+  min-height: auto;
+}
+.overlay-row .form-check-input {
+  margin-left: 0;
+  cursor: pointer;
+}
+.help-content h6 {
+  color: var(--blue-primary);
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+.help-content p {
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.help-content ul {
+  margin-bottom: 8px;
+  padding-left: 20px;
+}
+.help-content li {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+/* ============================================
+   EDIT AIRCRAFT PAGE STYLES
+   ============================================ */
+
+.edit-page-container {
+  background: var(--bg-dark);
+  min-height: 100vh;
+}
+
+.edit-page-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px 40px 20px;
+}
+
+.edit-top-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.edit-page-title {
+  color: var(--ta-text-primary);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.edit-action-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.edit-action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-status-msg {
+  color: var(--ta-success);
+  font-size: 13px;
+}
+
+/* Quick Start Section */
+.edit-quick-section {
+  background: var(--ta-text-secondary);
+  border: 1px solid var(--ta-text-secondary);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.edit-quick-title {
+  color: var(--ta-surface-primary);
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.edit-quick-subtitle {
+  color: var(--ta-text-tertiary);
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.quickstart-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .quickstart-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .quickstart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.quickstart-item {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-quickstart {
+  flex: 1;
+  background: var(--ta-text-secondary);
+  color: var(--ta-border-primary);
+  border: 1px solid var(--ta-text-secondary);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.btn-quickstart:hover {
+  background: var(--ta-text-secondary);
+  border-color: var(--orange-primary);
+  color: var(--ta-surface-primary);
+}
+
+.btn-help-sm {
+  background: transparent;
+  color: var(--ta-text-tertiary);
+  border: 1px solid var(--ta-text-secondary);
+  width: 28px;
+  height: 34px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-help-sm:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ta-surface-primary);
+  border-color: var(--ta-text-tertiary);
+}
+
+/* Popover styling */
+.popover {
+  --bs-popover-bg: var(--ta-text-primary);
+  --bs-popover-border-color: var(--ta-text-secondary);
+  --bs-popover-header-bg: var(--ta-text-secondary);
+  --bs-popover-header-color: var(--ta-surface-primary);
+  --bs-popover-body-color: var(--ta-border-primary);
+  max-width: 300px;
+}
+
+.popover-header {
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--ta-text-secondary);
+}
+
+.popover-body {
+  font-size: 12px;
+  padding: 12px;
+}
+
+.popover-body p {
+  margin-bottom: 8px;
+}
+
+.popover-divider {
+  border-color: var(--ta-text-secondary);
+  margin: 8px 0;
+}
+
+.popover-list {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.popover-list li {
+  margin-bottom: 4px;
+  color: var(--ta-text-quaternary);
+}
+
+/* Units & Expand All Bar */
+.units-expand-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--ta-text-secondary);
+  border: 1px solid var(--ta-text-tertiary);
+  border-radius: 6px;
+  padding: 10px 16px;
+  margin-bottom: 8px;
+}
+
+.units-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.units-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.units-bar-label {
+  color: var(--ta-border-primary);
+  font-size: 13px;
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+.edit-toggle-label-left,
+.edit-toggle-label-right {
+  color: var(--ta-text-tertiary);
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.edit-toggle-label-left {
+  color: var(--orange-primary);
+}
+
+.edit-units-switch {
+  margin: 0 4px;
+}
+
+.edit-units-switch .form-check-input {
+  width: 40px;
+  height: 20px;
+  background-color: var(--orange-primary);
+  border: none;
+  cursor: pointer;
+}
+
+.edit-units-switch .form-check-input:checked {
+  background-color: var(--orange-primary);
+}
+
+.edit-units-switch .form-check-input:focus {
+  box-shadow: 0 0 0 2px rgba(237, 137, 54, 0.25);
+}
+
+.btn-expand-all {
+  background: var(--ta-text-secondary);
+  color: var(--ta-border-primary);
+  border: 1px solid var(--ta-text-tertiary);
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-expand-all:hover {
+  background: var(--ta-text-secondary);
+  border-color: var(--orange-primary);
+  color: var(--ta-surface-primary);
+}
+
+/* Buttons */
+.btn-secondary-sm {
+  background: var(--ta-text-secondary);
+  color: var(--ta-border-primary);
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-secondary-sm:hover {
+  background: var(--ta-text-secondary);
+}
+
+.btn-primary-sm {
+  background: var(--orange-primary);
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-primary-sm:hover {
+  background: var(--orange-hover);
+}
+
+.btn-default-sm {
+  background: transparent;
+  color: var(--ta-text-tertiary);
+  border: 1px solid var(--ta-text-secondary);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-default-sm:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--ta-text-tertiary);
+  color: var(--ta-border-primary);
+}
+
+.btn-add-sm {
+  background: transparent;
+  color: var(--orange-primary);
+  border: 1px dashed var(--orange-primary);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: 8px;
+}
+
+.btn-add-sm:hover {
+  background: rgba(237, 137, 54, 0.1);
+}
+
+/* Disclaimer small */
+.disclaimer-banner-small {
+  background: var(--ta-warning-bg);
+  border: 1px solid var(--ta-brand-orange-light);
+  border-radius: 6px;
+  padding: 10px 16px;
+  color: var(--ta-warning-text);
+  font-size: 12px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Accordion styling */
+#edit-accordion,
+#multi-engine-sections .accordion {
+  --bs-accordion-bg: var(--ta-text-secondary);
+  --bs-accordion-border-color: var(--ta-text-tertiary);
+  --bs-accordion-btn-bg: var(--ta-text-secondary);
+  --bs-accordion-btn-color: var(--ta-surface-primary);
+  --bs-accordion-active-bg: var(--ta-text-tertiary);
+  --bs-accordion-active-color: var(--ta-surface-primary);
+  --bs-accordion-btn-focus-box-shadow: none;
+  margin-bottom: 8px;
+}
+
+#edit-accordion .accordion-item,
+#multi-engine-sections .accordion-item {
+  border: 1px solid var(--ta-text-tertiary);
+  border-radius: 6px !important;
+  margin-bottom: 8px;
+  overflow: visible !important;
+}
+
+#edit-accordion .accordion-button,
+#multi-engine-sections .accordion-button {
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--ta-text-secondary);
+  color: var(--ta-surface-primary);
+}
+
+#edit-accordion .accordion-button:not(.collapsed),
+#multi-engine-sections .accordion-button:not(.collapsed) {
+  background: var(--ta-text-tertiary);
+  color: var(--orange-primary);
+  box-shadow: none;
+}
+
+#edit-accordion .accordion-button::after,
+#multi-engine-sections .accordion-button::after {
+  filter: brightness(0) invert(1);
+}
+
+#edit-accordion .accordion-button:not(.collapsed)::after,
+#multi-engine-sections .accordion-button:not(.collapsed)::after {
+  filter: brightness(0) saturate(100%) invert(65%) sepia(66%) saturate(1000%) hue-rotate(347deg) brightness(100%) contrast(90%);
+}
+
+#edit-accordion .accordion-body,
+#multi-engine-sections .accordion-body {
+  padding: 16px;
+  background: var(--ta-text-secondary);
+  overflow: visible !important;
+}
+
+#edit-accordion .accordion-collapse,
+#multi-engine-sections .accordion-collapse {
+  overflow: visible !important;
+}
+
+/* Section content */
+.edit-section-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: visible !important;
+}
+
+.edit-row-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  overflow: visible !important;
+}
+
+/* Field styling */
+.edit-field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.edit-field-label {
+  color: var(--ta-text-tertiary);
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.edit-field-label-inline {
+  color: var(--ta-text-tertiary);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.edit-subsection-label {
+  color: var(--ta-text-tertiary);
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.edit-divider {
+  border-color: var(--ta-text-primary);
+  margin: 12px 0;
+}
+
+/* Input fields */
+.edit-input-text {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--ta-surface-primary);
+  border: 1px solid var(--ta-text-quaternary);
+  border-radius: 4px;
+  color: var(--ta-text-primary);
+  font-size: 14px;
+  transition: border-color 0.15s ease;
+}
+
+.edit-input-text:focus {
+  outline: none;
+  border-color: var(--orange-primary);
+}
+
+.edit-input-text::placeholder {
+  color: var(--ta-text-tertiary);
+}
+
+.edit-input-num {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--ta-surface-primary);
+  border: 1px solid var(--ta-text-quaternary);
+  border-radius: 4px;
+  color: var(--ta-text-primary);
+  font-size: 13px;
+  transition: border-color 0.15s ease;
+}
+
+.edit-input-num:focus {
+  outline: none;
+  border-color: var(--orange-primary);
+}
+
+.edit-input-num::placeholder {
+  color: var(--ta-text-tertiary);
+}
+
+.edit-input-num-sm {
+  width: 70px;
+  padding: 6px 8px;
+  background: var(--ta-surface-primary);
+  border: 1px solid var(--ta-text-quaternary);
+  border-radius: 4px;
+  color: var(--ta-text-primary);
+  font-size: 13px;
+  transition: border-color 0.15s ease;
+}
+
+.edit-input-num-sm:focus {
+  outline: none;
+  border-color: var(--orange-primary);
+}
+
+.edit-input-num-sm::placeholder {
+  color: var(--ta-text-tertiary);
+}
+
+/* Dropdown */
+.edit-dropdown {
+  background: var(--ta-surface-primary) !important;
+  border: 1px solid var(--ta-text-quaternary) !important;
+  border-radius: 4px !important;
+}
+
+.edit-dropdown .Select-control,
+.edit-dropdown > div {
+  background: var(--ta-surface-primary) !important;
+  border: none !important;
+}
+
+.edit-dropdown .Select-value-label,
+.edit-dropdown .Select-placeholder,
+.edit-dropdown input {
+  color: var(--ta-text-primary) !important;
+}
+
+.edit-dropdown .Select-menu-outer,
+.edit-dropdown [class*="menu"] {
+  background: var(--ta-surface-primary) !important;
+  border: 1px solid var(--ta-text-quaternary) !important;
+  z-index: 9999 !important;
+}
+
+.edit-dropdown [class*="option"] {
+  background: var(--ta-surface-primary) !important;
+  color: var(--ta-text-primary) !important;
+}
+
+.edit-dropdown [class*="option"]:hover,
+.edit-dropdown [class*="option--is-focused"] {
+  background: var(--ta-border-primary) !important;
+  color: var(--ta-text-primary) !important;
+}
+
+.edit-dropdown [class*="option--is-selected"] {
+  background: var(--orange-primary) !important;
+  color: white !important;
+}
+
+.edit-dropdown [class*="singleValue"],
+.edit-dropdown [class*="placeholder"] {
+  color: var(--ta-text-primary) !important;
+}
+
+.edit-dropdown [class*="indicatorSeparator"] {
+  background: var(--ta-text-quaternary) !important;
+}
+
+.edit-dropdown [class*="dropdownIndicator"] svg,
+.edit-dropdown [class*="clearIndicator"] svg {
+  fill: var(--ta-text-secondary) !important;
+}
+
+/* Arc inputs */
+.edit-arc-inputs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.edit-arc-dash {
+  color: var(--ta-text-tertiary);
+  font-size: 14px;
+}
+
+/* Remove button in dynamic rows */
+.edit-remove-btn {
+  background: transparent;
+  color: var(--ta-danger);
+  border: none;
+  padding: 4px 8px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.edit-remove-btn:hover {
+  background: rgba(229, 62, 62, 0.1);
+}
+
+/* Multi-engine sections */
+#multi-engine-sections {
+  margin-top: 8px;
+}
+
+/* Mobile responsiveness for edit page */
+@media (max-width: 768px) {
+  .edit-page-content {
+    padding: 0 12px 40px 12px;
+  }
+
+  .edit-top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .edit-page-title {
+    font-size: 1.25rem;
+  }
+
+  .edit-quick-defaults {
+    flex-wrap: wrap;
+  }
+
+  .edit-row-flex {
+    flex-direction: column;
+  }
+
+  .edit-row-flex > div {
+    width: 100% !important;
+    margin-right: 0 !important;
+  }
+
+  .edit-input-num-sm {
+    width: 100%;
+  }
+
+  .edit-arc-inputs {
+    flex-wrap: wrap;
+  }
+
+  #edit-accordion .accordion-button,
+  #multi-engine-sections .accordion-button {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  #edit-accordion .accordion-body,
+  #multi-engine-sections .accordion-body {
+    padding: 12px;
+  }
+}
+/* === Phase 4: Weather panel === */
+.weather-panel {
+  margin: 6px 0 10px;
+}
+.weather-panel-empty {
+  display: none;
+}
+.weather-panel-active,
+.weather-panel-fallback {
+  padding: 8px 10px;
+  background: var(--ta-surface-field);
+  border: 1px solid var(--ta-surface-elevated);
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--ta-text-primary);
+}
+.weather-panel-fallback {
+  color: var(--ta-text-secondary);
+  font-style: italic;
+}
+.weather-panel-mobile {
+  font-size: 10.5px;
+  padding: 6px 8px;
+}
+.weather-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.weather-tag {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--ta-text-secondary);
+}
+.weather-age {
+  font-size: 10px;
+  color: var(--ta-text-secondary);
+}
+.weather-cat {
+  margin-left: auto;
+  padding: 1px 6px;
+  border-radius: 3px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+}
+.weather-line {
+  margin: 2px 0;
+}
+.weather-temp { font-weight: 600; }
+.weather-dew, .weather-altim, .weather-wind, .weather-sky, .weather-vis {
+  color: var(--ta-text-secondary);
+}
+.weather-raw {
+  margin-top: 6px;
+  padding: 4px 6px;
+  background: var(--ta-surface-secondary);
+  border-radius: 3px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 10px;
+  color: var(--ta-text-secondary);
+  word-break: break-all;
+}
+.weather-attribution {
+  margin-top: 4px;
+  font-size: 9px;
+  color: var(--ta-text-tertiary, var(--ta-text-secondary));
+  text-align: right;
+  opacity: 0.7;
+}
+.weather-msg {
+  color: var(--ta-text-secondary);
+  font-size: 11px;
+}
+
+/* ============================================================
+   Phase 5L — Option A desktop layout (CSS-grid skeleton)
+   Replaces the legacy .main-row / .resizable-sidebar / .graph-column
+   chain. Keeps .full-height-container as the outer flex column.
+   ============================================================ */
+
+.desktop-shell {
+  overflow: hidden;
+}
+/* Phase 5AB-1: top-strip is now a vertical stack of rows. Row 1 keeps the
+   original 56px height; row 2 holds the inline state tiles at a tighter
+   ~40px. The outer .top-strip provides the elevated surface + border. */
+.desktop-shell .top-strip {
+  display: flex;
+  flex-direction: column;
+  background: var(--ta-surface-elevated);
+  border-bottom: 1px solid var(--ta-border, var(--ta-surface-tertiary));
+  z-index: 100;
+  flex: 0 0 auto;
+}
+.desktop-shell .top-strip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  gap: 12px;
+}
+.desktop-shell .top-strip-main-row {
+  height: 56px;
+}
+.desktop-shell .top-strip-tiles-row {
+  min-height: 40px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-top: 1px solid var(--ta-border-subtle, var(--ta-surface-tertiary));
+  justify-content: flex-start;
+}
+.desktop-shell .top-strip-left,
+.desktop-shell .top-strip-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.desktop-shell .top-strip-brand {
+  font-family: var(--ta-font-sans, "Space Grotesk", system-ui);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: var(--ta-text-primary);
+  margin-right: 8px;
+}
+.desktop-shell .top-strip .quick-link {
+  font-size: 12px;
+  color: var(--ta-text-secondary);
+}
+.desktop-shell .top-strip .quick-link:hover {
+  color: var(--ta-brand-blue);
+  cursor: pointer;
+}
+
+.desktop-shell .main-grid {
+  display: grid;
+  /* Phase 5AD: rail on the LEFT now. First column = rail (280px),
+     second column = chart (flexible). */
+  grid-template-columns: 280px minmax(0, 1fr);
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.desktop-shell .chart-area {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 12px 14px 8px;
+  overflow: hidden;
+  background: var(--ta-surface-primary);
+}
+.desktop-shell .chart-area .graph-panel {
+  flex: 1 1 0;
+  min-height: 300px;          /* never collapse to 0 in a flex chain */
+  background: transparent;    /* let chart paper_bgcolor own the look */
+  border: none;
+}
+.desktop-shell .chart-area .legal-links {
+  flex: 0 0 auto;
+  padding: 6px 4px 2px;
+  font-size: 10.5px;
+  color: var(--ta-text-secondary);
+}
+.desktop-shell .chart-area .legal-copyright {
+  color: var(--ta-text-tertiary, var(--ta-text-secondary));
+}
+
+.desktop-shell .right-rail {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 12px 12px 16px;
+  /* Phase 5AD: rail moved to the left side. Border is now on the right edge
+     (between rail and chart). Class name kept as `right-rail` for now since
+     several stylesheet rules reference it; can be renamed in a follow-up. */
+  border-right: 1px solid var(--ta-border, var(--ta-surface-tertiary));
+  background: var(--ta-surface-secondary);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.desktop-shell .rail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.desktop-shell .rail-section-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ta-text-primary);
+  letter-spacing: 0.01em;
+}
+.desktop-shell .state-panel-rail {
+  margin-bottom: 12px;
+}
+
+/* Make the rail-version of the accordion read tighter than the old sidebar. */
+.desktop-shell .rail-accordion .accordion-button {
+  font-size: 12px;
+  padding: 6px 10px;
+}
+.desktop-shell .rail-accordion .accordion-body {
+  padding: 8px 10px;
+}
+
+/* Hide legacy classes if they still exist anywhere — defensive. */
+.desktop-shell .main-row,
+.desktop-shell .resizable-sidebar,
+.desktop-shell .graph-column,
+.desktop-shell .graph-wrapper {
+  display: contents;   /* let children flow into the grid instead of stacking */
+}
+
+/* On narrower desktop widths, let the right rail collapse to a slim utility
+   column. Mobile/portrait layouts will be addressed in a later phase. */
+@media (max-width: 1100px) {
+  .desktop-shell .main-grid {
+    grid-template-columns: minmax(0, 1fr) 240px;
+  }
+}
+
+/* ============================================================
+   Phase 5M — top strip content
+   Aircraft picker · env chips · units toggle · theme · export
+   ============================================================ */
+
+/* Phase 5AB-1: padding moved to .top-strip-row; outer strip is column-flex */
+.desktop-shell .top-strip-row {
+  padding: 0 14px;
+}
+.desktop-shell .top-strip-left,
+.desktop-shell .top-strip-right {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.desktop-shell .top-strip-right {
+  justify-content: flex-end;
+}
+.desktop-shell .aircraft-picker-wrap {
+  width: 260px;
+  min-width: 220px;
+  margin: 0 6px 0 4px;
+}
+.desktop-shell .aircraft-picker-wrap .Select-control {
+  height: 32px !important;
+  min-height: 32px !important;
+  border-radius: 6px;
+}
+.desktop-shell .aircraft-picker-wrap .Select-input,
+.desktop-shell .aircraft-picker-wrap .Select-input > input {
+  height: 30px;
+}
+.desktop-shell .aircraft-picker-wrap .Select-placeholder,
+.desktop-shell .aircraft-picker-wrap .Select-value {
+  line-height: 32px !important;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.desktop-shell .env-chip-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+}
+.desktop-shell .env-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  background: var(--ta-surface-field);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--ta-text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+  white-space: nowrap;
+}
+.desktop-shell .env-chip:hover {
+  background: var(--ta-surface-tertiary);
+  border-color: var(--ta-surface-elevated);
+}
+.desktop-shell .env-chip:focus {
+  outline: none;
+  border-color: var(--ta-brand-blue);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ta-brand-blue) 18%, transparent);
+}
+.desktop-shell .chip-prefix {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ta-text-secondary);
+  text-transform: uppercase;
+}
+.desktop-shell .chip-label {
+  font-variant-numeric: tabular-nums;
+}
+
+.desktop-shell .units-control {
+  display: inline-flex;
+  height: 32px;
+  margin: 0 4px;
+}
+.desktop-shell .units-control .segment-btn {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 11px;
+}
+
+/* Popover sizing — give each input space to breathe */
+.env-popover {
+  min-width: 280px;
+  max-width: 360px;
+  z-index: 1100;
+}
+.env-popover.env-popover-airport {
+  min-width: 360px;
+  max-width: 420px;
+}
+.env-popover.env-popover-altitude {
+  min-width: 320px;
+}
+.env-popover.env-popover-altim {
+  min-width: 200px;
+}
+.env-popover .popover-header {
+  font-family: var(--ta-font-sans, system-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ta-text-secondary);
+  background: var(--ta-surface-elevated);
+  padding: 8px 12px;
+}
+.env-popover .popover-body {
+  padding: 12px;
+}
+.env-popover .pa-da-box {
+  margin: 4px 0 0;
+  padding: 6px 8px;
+  background: var(--ta-surface-tertiary);
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+/* Quicklinks subdued to the very right */
+.desktop-shell .top-strip-quicklinks {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 8px;
+  padding-left: 10px;
+  border-left: 1px solid var(--ta-surface-tertiary);
+}
+.desktop-shell .top-strip-quicklinks .quick-link {
+  font-size: 11px;
+}
+
+/* Rail action buttons (Edit / Load) styled identically to top-strip chips,
+   but full-width and centered for the rail context. */
+.desktop-shell .rail-action-chip {
+  width: 100%;
+  justify-content: center;
+  height: 34px;
+  font-weight: 500;
+}
+.desktop-shell .rail-action-chip .chip-label {
+  font-size: 12px;
+}
+.desktop-shell .rail-action-chip:focus-visible {
+  outline: none;
+  border-color: var(--ta-brand-blue);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ta-brand-blue) 18%, transparent);
+}
+
+/* ============================================================
+   Phase 5M fix — kill the blue pill / focus-highlight on every
+   selected dropdown value across the desktop shell. The legacy
+   rules were scoped to .resizable-sidebar which no longer exists.
+   ============================================================ */
+.desktop-shell .Select-control,
+.desktop-shell .dash-dropdown .Select-control {
+  background: var(--ta-surface-primary) !important;
+  border-color: var(--ta-surface-elevated) !important;
+}
+.desktop-shell .Select-control.is-focused,
+.desktop-shell .dash-dropdown .Select-control.is-focused {
+  border-color: var(--ta-brand-blue) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ta-brand-blue) 18%, transparent) !important;
+}
+.desktop-shell .Select-value,
+.desktop-shell .Select-value-label,
+.desktop-shell .Select--single .Select-value,
+.desktop-shell .Select--single .Select-value-label,
+.desktop-shell .Select.has-value .Select-value-label,
+.desktop-shell .Select.is-focused .Select-value-label,
+.desktop-shell .Select.is-pseudo-focused .Select-value-label,
+.desktop-shell .Select.is-open .Select-value-label {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  color: var(--ta-text-primary) !important;
+  font-weight: 500;
+}
+.desktop-shell .Select-input,
+.desktop-shell .Select-input > input {
+  background: transparent !important;
+  color: var(--ta-text-primary) !important;
+  box-shadow: none !important;
+}
+.desktop-shell .Select-value::selection,
+.desktop-shell .Select-value-label::selection,
+.desktop-shell .Select-input > input::selection {
+  background: transparent !important;
+  color: inherit !important;
+}
+/* Hide the clear "×" button next to single-select values — it adds visual
+   clutter inside the chip and the user can just pick another value. */
+.desktop-shell .Select-clear-zone,
+.desktop-shell .Select--single .Select-clear-zone {
+  display: none !important;
+}
+
+/* State Panel as a 3-column grid when it lives in the right rail.
+   Overrides the legacy horizontal flex layout for this context only. */
+.desktop-shell .state-panel-rail {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding: 10px;
+  background: var(--ta-surface-elevated);
+  border: 1px solid var(--ta-border-primary, var(--ta-surface-tertiary));
+  border-radius: 6px;
+  overflow: visible;
+}
+.desktop-shell .state-panel-rail .state-card {
+  min-width: 0;
+  padding: 6px 8px 7px;
+  background: var(--ta-surface-secondary);
+  border-radius: 5px;
+}
+.desktop-shell .state-panel-rail .state-card::before {
+  display: none;        /* drop the left accent rail at this scale */
+}
+.desktop-shell .state-panel-rail .state-card:hover {
+  transform: none;      /* no lift at this small scale, feels jittery */
+}
+.desktop-shell .state-panel-rail .state-label {
+  font-size: 8.5px;
+  margin-bottom: 2px;
+}
+.desktop-shell .state-panel-rail .state-value {
+  font-size: 15px;
+}
+
+/* ============================================================
+   Phase 5O — Settings drawer (right-edge slide-out Offcanvas)
+   ============================================================ */
+
+/* Drawer trigger in the rail — slightly accented vs Edit/Load chips */
+.desktop-shell .rail-drawer-trigger {
+  margin-top: 6px;
+  width: 100%;
+  background: var(--ta-surface-elevated);
+  border: 1px solid var(--ta-brand-blue);
+  color: var(--ta-text-primary);
+}
+.desktop-shell .rail-drawer-trigger:hover {
+  background: color-mix(in srgb, var(--ta-brand-blue) 12%, var(--ta-surface-elevated));
+  border-color: var(--ta-brand-blue);
+}
+.desktop-shell .rail-drawer-trigger .chip-prefix {
+  color: var(--ta-brand-blue);
+}
+
+/* Drawer body — theme-aware */
+.settings-drawer.offcanvas {
+  background: var(--ta-surface-primary);
+  color: var(--ta-text-primary);
+  border-left: 1px solid var(--ta-border-primary, var(--ta-surface-tertiary));
+  width: 420px !important;
+}
+.settings-drawer .offcanvas-header {
+  border-bottom: 1px solid var(--ta-border-primary, var(--ta-surface-tertiary));
+  padding: 14px 18px;
+}
+.settings-drawer .offcanvas-title {
+  font-family: var(--ta-font-sans, "Space Grotesk", system-ui);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ta-text-secondary);
+}
+.settings-drawer .btn-close {
+  filter: var(--ta-btn-close-filter, none);
+}
+[data-theme="dark"] .settings-drawer .btn-close {
+  filter: invert(1) grayscale(100%) brightness(180%);
+}
+.settings-drawer .offcanvas-body {
+  padding: 14px 18px 24px;
+}
+
+/* Accordion looks the same inside the drawer as it did in the rail —
+   just give it slightly more breathing room since we have width now */
+.settings-drawer .drawer-accordion .accordion-button {
+  font-size: 13px;
+  padding: 10px 12px;
+}
+.settings-drawer .drawer-accordion .accordion-body {
+  padding: 12px;
+}
+
+/* Backdrop matches the dark theme dimming */
+.offcanvas-backdrop.show {
+  opacity: 0.55;
+}
+
+/* ============================================================
+   Phase 5R-2 fix — kill the blue selected-value pill on dropdowns
+   inside the settings drawer (dbc.Offcanvas renders outside
+   .desktop-shell so the earlier scope didn't reach).
+   ============================================================ */
+.settings-drawer .Select-control {
+  background: var(--ta-surface-primary) !important;
+  border-color: var(--ta-surface-elevated) !important;
+}
+.settings-drawer .Select-control.is-focused {
+  border-color: var(--ta-brand-blue) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ta-brand-blue) 18%, transparent) !important;
+}
+.settings-drawer .Select-value,
+.settings-drawer .Select-value-label,
+.settings-drawer .Select--single .Select-value,
+.settings-drawer .Select--single .Select-value-label,
+.settings-drawer .Select.has-value .Select-value-label,
+.settings-drawer .Select.is-focused .Select-value-label,
+.settings-drawer .Select.is-pseudo-focused .Select-value-label,
+.settings-drawer .Select.is-open .Select-value-label {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  color: var(--ta-text-primary) !important;
+  font-weight: 500;
+}
+.settings-drawer .Select-input,
+.settings-drawer .Select-input > input {
+  background: transparent !important;
+  color: var(--ta-text-primary) !important;
+  box-shadow: none !important;
+}
+.settings-drawer .Select-value::selection,
+.settings-drawer .Select-value-label::selection,
+.settings-drawer .Select-input > input::selection {
+  background: transparent !important;
+  color: inherit !important;
+}
+.settings-drawer .Select-clear-zone,
+.settings-drawer .Select--single .Select-clear-zone {
+  display: none !important;
+}
+
+/* ============================================================
+   Phase 5P — prefers-reduced-motion
+   Honors OS-level "reduce motion" preference. Disables CSS
+   transitions and animations app-wide. Plotly transitions are
+   server-config so they'll still tween, but the chrome stays still.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   Phase 5T — Edit-aircraft page styled in the Phase 5 shell
+   The root html.Div carries `desktop-shell` so all the chip /
+   dropdown / popover CSS scopes flow naturally. This block adds
+   only the edit-specific extras.
+   ============================================================ */
+
+.edit-page-container.desktop-shell {
+  background: var(--ta-surface-primary);
+  min-height: 100vh;
+  color: var(--ta-text-primary);
+}
+
+/* Edit top strip — keeps the 56px height + flex; lays out brand + back
+   on the left, action chips on the right, page title centered between. */
+.edit-page-top-strip {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.edit-page-top-strip .top-strip-left {
+  gap: 14px;
+  flex: 1 1 auto;
+}
+.edit-page-top-strip .top-strip-right {
+  gap: 8px;
+}
+.edit-page-top-strip .edit-page-title {
+  font-family: var(--ta-font-sans, "Space Grotesk", system-ui);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  color: var(--ta-text-secondary);
+  margin-left: 12px;
+}
+
+.edit-page-content {
+  max-width: 1100px;
+  margin: 24px auto 0;
+  padding: 0 24px;
+}
+
+/* Primary aircraft picker — Phase 5T's "this is the way you edit existing" CTA */
+.edit-aircraft-search-section {
+  background: var(--ta-surface-elevated);
+  border: 1px solid var(--ta-border-primary, var(--ta-surface-tertiary));
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+.edit-section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.edit-section-label {
+  font-family: var(--ta-font-sans, system-ui);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ta-text-secondary);
+}
+.edit-section-helper {
+  font-size: 12px;
+  color: var(--ta-text-tertiary, var(--ta-text-secondary));
+}
+.edit-aircraft-search .Select-control {
+  height: 38px !important;
+  min-height: 38px !important;
+  border-radius: 6px;
+}
+.edit-aircraft-search .Select-placeholder,
+.edit-aircraft-search .Select-value {
+  line-height: 38px !important;
+  font-size: 13px;
+}
+
+/* Status messages aligned with the page padding */
+.edit-action-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  font-size: 12px;
+}
+.edit-status-msg {
+  color: var(--ta-text-secondary);
+}
+
+/* Quick Start now reads as a quieter secondary section, not the primary CTA */
+.edit-quick-section {
+  background: var(--ta-surface-elevated);
+  border: 1px solid var(--ta-border-primary, var(--ta-surface-tertiary));
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+}
+.edit-quick-title {
+  font-family: var(--ta-font-sans, system-ui);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ta-text-secondary);
+  margin-bottom: 4px;
+}
+.edit-quick-subtitle {
+  font-size: 12px;
+  color: var(--ta-text-tertiary, var(--ta-text-secondary));
+  margin-bottom: 12px;
+}
+.btn-quickstart {
+  background: var(--ta-surface-field);
+  border: 1px solid transparent;
+  color: var(--ta-text-primary);
+  border-radius: 6px;
+  height: 32px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.btn-quickstart:hover {
+  background: var(--ta-surface-tertiary);
+  border-color: var(--ta-surface-elevated);
+}
+.btn-help-sm {
+  height: 22px; width: 22px;
+  margin-left: 4px;
+  background: transparent;
+  border: 1px solid var(--ta-border-primary);
+  border-radius: 50%;
+  color: var(--ta-text-secondary);
+  cursor: pointer;
+  font-size: 11px;
+}
+.btn-help-sm:hover {
+  background: var(--ta-surface-tertiary);
+  color: var(--ta-text-primary);
+}
+
+/* Accordions inside edit page get the same drawer-accordion look */
+.edit-page-content .accordion {
+  background: transparent;
+}
+.edit-page-content .accordion-item {
+  background: var(--ta-surface-elevated);
+  border: 1px solid var(--ta-border-primary, var(--ta-surface-tertiary));
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+.edit-page-content .accordion-button {
+  font-family: var(--ta-font-sans, system-ui);
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--ta-surface-elevated);
+  color: var(--ta-text-primary);
+}
+.edit-page-content .accordion-body {
+  padding: 14px 16px;
+}
+
+/* Form labels + inputs inside the edit page */
+.edit-page-content .edit-field-label,
+.edit-page-content .edit-field-label-inline {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ta-text-secondary);
+  margin-bottom: 4px;
+}
+.edit-page-content input,
+.edit-page-content textarea,
+.edit-page-content select {
+  background: var(--ta-surface-primary);
+  color: var(--ta-text-primary);
+  border: 1px solid var(--ta-border-primary, var(--ta-surface-tertiary));
+  border-radius: 4px;
+}
+.edit-page-content input:focus {
+  outline: none;
+  border-color: var(--ta-brand-blue);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ta-brand-blue) 18%, transparent);
+}
+
+/* ============================================================
+   Phase 5V-2 — State Panel card click-to-define popovers
+   ============================================================ */
+.desktop-shell .state-panel-rail .state-card {
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.desktop-shell .state-panel-rail .state-card:hover {
+  border-color: var(--ta-brand-blue);
+  background: color-mix(in srgb, var(--ta-brand-blue) 6%, var(--ta-surface-secondary));
+}
+/* Popover root — override Bootstrap variables so internal styles pick up
+   our theme tokens (light or dark). Without this, --bs-popover-body-color
+   falls back to a default that renders dark-on-dark in our shell. */
+.state-card-popover.popover,
+.env-popover.popover {
+  --bs-popover-bg:           var(--ta-surface-elevated);
+  --bs-popover-body-color:   var(--ta-text-primary);
+  --bs-popover-header-bg:    var(--ta-surface-secondary);
+  --bs-popover-header-color: var(--ta-text-primary);
+  --bs-popover-border-color: var(--ta-border-primary, var(--ta-surface-tertiary));
+  --bs-popover-max-width:    320px;
+  font-size: 12px;
+}
+.state-card-popover .popover-header,
+.env-popover .popover-header {
+  font-family: var(--ta-font-sans, system-ui);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  border-bottom: 1px solid var(--ta-border-primary, var(--ta-surface-tertiary));
+}
+.state-card-popover .popover-body,
+.state-card-popover-body,
+.env-popover .popover-body {
+  background: var(--ta-surface-elevated);
+  color: var(--ta-text-primary);
+  line-height: 1.5;
+}
+
+/* ============================================================
+   Phase 5Z — Chart tab strip + h-V chart visibility
+   ============================================================ */
+.desktop-shell .chart-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ta-border-primary, var(--ta-surface-tertiary));
+}
+.desktop-shell .chart-tab {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 11px;
+  opacity: 0.65;
+}
+.desktop-shell .chart-tab:hover {
+  opacity: 1;
+}
+.desktop-shell .chart-tab.chart-tab-active {
+  opacity: 1;
+  background: color-mix(in srgb, var(--ta-brand-blue) 10%, var(--ta-surface-elevated));
+  border-color: var(--ta-brand-blue);
+}
+.desktop-shell .chart-tab.chart-tab-active .chip-prefix {
+  color: var(--ta-brand-blue);
+}
+
+/* The two graphs share a parent .graph-panel; hide whichever isn't active.
+   We use display:none rather than visibility so Plotly can re-layout the
+   active one to fill the panel cleanly. */
+.dash-graph-hidden {
+  display: none !important;
+}
+
+/* ============================================================
+   Phase 5AA — Live cockpit controls section in the right rail
+   ============================================================ */
+.desktop-shell .rail-live-controls {
+  margin: 12px 0 10px;
+  padding: 12px 8px 6px;
+  background: var(--ta-surface-elevated);
+  border: 1px solid var(--ta-border-primary, var(--ta-surface-tertiary));
+  border-radius: 6px;
+}
+.desktop-shell .rail-live-controls-title {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ta-text-secondary);
+  margin-bottom: 8px;
+}
+.desktop-shell .rail-control-row {
+  margin-bottom: 10px;
+}
+.desktop-shell .rail-control-row:last-child {
+  margin-bottom: 0;
+}
+.desktop-shell .rail-control-label {
+  font-size: 10.5px;
+  margin-bottom: 4px;
+}
+.desktop-shell .rail-control-row .rc-slider {
+  margin: 8px 4px 16px;
+}
+.desktop-shell .rail-control-row .rc-slider-mark-text {
+  font-size: 9px !important;
+  color: var(--ta-text-tertiary, var(--ta-text-secondary)) !important;
+}
+
+.drawer-crud-row {
+  margin-top: 4px;
+}
+
+/* ============================================================
+   Phase 5AB-1 — State tiles relocated to top-strip row 2.
+   Inline `LABEL value` chips, horizontal flow, wrap on overflow.
+   ============================================================ */
+.desktop-shell .state-panel-strip {
+  display: flex !important;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  align-items: center;
+  flex: 1 1 auto;
+}
+.desktop-shell .state-panel-strip .state-card {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 9px;
+  background: var(--ta-surface-secondary);
+  border: 1px solid var(--ta-border-subtle, var(--ta-surface-tertiary));
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+  min-width: 0;
+  white-space: nowrap;
+}
+.desktop-shell .state-panel-strip .state-card:hover {
+  background: var(--ta-surface-tertiary);
+  border-color: var(--ta-border, var(--ta-surface-tertiary));
+}
+.desktop-shell .state-panel-strip .state-card::before {
+  display: none;
+}
+.desktop-shell .state-panel-strip .state-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ta-text-tertiary, var(--ta-text-secondary));
+  margin: 0;
+}
+.desktop-shell .state-panel-strip .state-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ta-text-primary);
+  font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  margin: 0;
+}
+/* Flag variants — bleed through to the inline cards */
+.desktop-shell .state-panel-strip .state-card.flag-warn {
+  border-color: var(--ta-accent-warn, #f59e0b);
+}
+.desktop-shell .state-panel-strip .state-card.flag-danger {
+  border-color: var(--ta-accent-danger, #dc3545);
+}
+
+/* ============================================================
+   Phase 5AB-2b — rail tight density.
+   Goal: fit Atmosphere (Airport, Altitude, OAT, Altimeter) + Live
+   Controls (Power, CG, FPA) in a typical desktop viewport without
+   scrolling. Tooltip placement="bottom" needs ~14px clearance below
+   each slider; everything else is squeezed.
+   ============================================================ */
+
+.desktop-shell .rail-atmosphere,
+.desktop-shell .rail-live-controls {
+  padding: 8px 10px;
+  margin: 6px 0;
+}
+
+.desktop-shell .rail-atmosphere .rail-control-row,
+.desktop-shell .rail-live-controls .rail-control-row {
+  margin-bottom: 6px;
+}
+.desktop-shell .rail-atmosphere .rail-control-row:last-child,
+.desktop-shell .rail-live-controls .rail-control-row:last-child {
+  margin-bottom: 0;
+}
+
+/* Slider in a rail-control-row: minimal margins; the 18px bottom keeps
+   space for the always-visible tooltip badge in placement="bottom". */
+.desktop-shell .rail-atmosphere .rail-control-row .rc-slider,
+.desktop-shell .rail-live-controls .rail-control-row .rc-slider {
+  margin: 4px 6px 18px;
+}
+
+/* Compact section titles (Atmosphere, Live Controls, EM Diagram) */
+.desktop-shell .rail-section-title,
+.desktop-shell .rail-live-controls-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ta-text-secondary);
+  margin: 0 0 4px;
+  line-height: 1.2;
+}
+
+/* Compact per-control labels (AIRPORT, ALTITUDE, OAT, …) */
+.desktop-shell .rail-atmosphere .rail-control-label,
+.desktop-shell .rail-live-controls .rail-control-label {
+  font-size: 10px;
+  margin-bottom: 2px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  color: var(--ta-text-secondary);
+}
+
+/* OAT label row: heading on the left, live °F readout on the right */
+.rail-control-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.oat-f-readout {
+  font-size: 11px;
+  color: var(--ta-text-tertiary, var(--ta-text-secondary));
+  font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+.oat-f-suffix {
+  margin-left: 2px;
+  opacity: 0.7;
+}
+
+/* PA / DA line under the OAT slider — compact */
+.desktop-shell .rail-atmosphere .pa-da-box {
+  font-size: 10px;
+  padding: 0;
+  margin-top: 0;
+  line-height: 1.3;
+}
+
+/* Airport dropdown sits in a 240-260px wide rail */
+.desktop-shell .rail-atmosphere .dropdown {
+  font-size: 11.5px;
+}
+
+/* ============================================================
+   Drawer-scoped chip styles + compact accordion.
+   dbc.Offcanvas portals OUTSIDE `.desktop-shell` to document.body,
+   so `.desktop-shell .env-chip` selectors don't match the Edit/Load
+   buttons inside the drawer. Re-applied here under `.settings-drawer`.
+   ============================================================ */
+.settings-drawer .env-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 34px;
+  padding: 0 12px;
+  justify-content: center;
+  background: var(--ta-surface-field, #f3f4f6);
+  border: 1px solid var(--ta-surface-tertiary, #e5e7eb);
+  border-radius: 6px;
+  color: var(--ta-text-primary, #1f2937);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+  white-space: nowrap;
+}
+.settings-drawer .env-chip:hover {
+  background: var(--ta-surface-tertiary, #e5e7eb);
+  border-color: var(--ta-surface-elevated, #d1d5db);
+}
+.settings-drawer .env-chip:focus {
+  outline: none;
+  border-color: var(--ta-brand-blue, #0a47c9);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ta-brand-blue, #0a47c9) 18%, transparent);
+}
+.settings-drawer .chip-prefix {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ta-text-secondary, #6b7280);
+  text-transform: uppercase;
+}
+.settings-drawer .chip-label {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Compact aircraft-config accordion (drawer) */
+.settings-drawer .accordion-body {
+  padding: 8px 12px;
+}
+.settings-drawer .accordion-body .input-label-sm {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ta-text-secondary, #6b7280);
+  margin-bottom: 2px;
+  display: block;
+  line-height: 1.2;
+}
+.settings-drawer .accordion-body .mb-2 {
+  margin-bottom: 8px !important;
+}
+.settings-drawer .accordion-body .dropdown,
+.settings-drawer .accordion-body .dropdown-small {
+  font-size: 12px;
+}
+.settings-drawer .accordion-body .input-small {
+  height: 30px;
+  font-size: 12px;
+  padding: 4px 8px;
+}
+.settings-drawer .accordion-body .weight-box {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+.settings-drawer .accordion-body .rc-slider {
+  margin: 6px 4px 20px;
+}
+
+/* ============================================================
+   Phase 5AF — Mobile layout (chart-first, hamburger drawer)
+   ============================================================ */
+
+.mobile-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--ta-surface-primary, #fff);
+}
+
+/* Top bar: hamburger + aircraft picker on one row */
+.mobile-top-bar {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  background: var(--ta-surface-elevated);
+  border-bottom: 1px solid var(--ta-border, var(--ta-surface-tertiary));
+}
+.mobile-top-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mobile-hamburger {
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  line-height: 1;
+  border: 1px solid var(--ta-surface-tertiary, #e5e7eb);
+  background: var(--ta-surface-field, #f3f4f6);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--ta-text-primary);
+  flex: 0 0 auto;
+}
+.mobile-hamburger:active {
+  background: var(--ta-surface-tertiary, #e5e7eb);
+}
+.mobile-aircraft-picker {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* State tiles strip — horizontal scroll on narrow widths */
+.mobile-state-tiles-wrap {
+  flex: 0 0 auto;
+  padding: 6px 8px;
+  background: var(--ta-surface-elevated);
+  border-bottom: 1px solid var(--ta-border-subtle, var(--ta-surface-tertiary));
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.mobile-state-strip {
+  flex-wrap: nowrap !important;   /* horizontal scroll on mobile, no wrap */
+}
+
+/* Chart tabs (Doghouse / Energy) — fill row */
+.mobile-chart-tabs {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  background: var(--ta-surface-elevated);
+  border-bottom: 1px solid var(--ta-border-subtle, var(--ta-surface-tertiary));
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+}
+.mobile-chart-tabs .chart-tab {
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+/* Chart container — the hero. Takes all remaining vertical space. */
+.mobile-graph-container {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--ta-surface-primary);
+}
+.mobile-graph {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100% !important;        /* override inline 60vh from layout */
+}
+
+/* Bottom toolbar (PNG/PDF + quick links) */
+.mobile-bottom-bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--ta-surface-elevated);
+  border-top: 1px solid var(--ta-border-subtle, var(--ta-surface-tertiary));
+  font-size: 11px;
+}
+.mobile-bottom-bar .btn-export-sm {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 11px;
+  border: 1px solid var(--ta-surface-tertiary, #e5e7eb);
+  background: var(--ta-surface-field, #f3f4f6);
+  color: var(--ta-text-primary);
+  border-radius: 4px;
+  cursor: pointer;
+}
+.mobile-quick {
+  font-size: 11px;
+}
+
+.mobile-legal {
+  flex: 0 0 auto;
+  padding: 4px 12px 8px;
+  font-size: 10px;
+  text-align: center;
+  background: var(--ta-surface-primary);
+  color: var(--ta-text-secondary, #6b7280);
+}
+.mobile-legal .legal-link-sm {
+  color: var(--ta-text-secondary, #6b7280);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Settings drawer (offcanvas) — slides from the left, mobile-friendly width */
+.mobile-settings-drawer.offcanvas-start {
+  width: min(85vw, 360px) !important;
+}
+.mobile-settings-drawer .mobile-section-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ta-text-secondary, #6b7280);
+  margin: 12px 0 6px;
+}
+.mobile-settings-drawer .input-label-sm {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ta-text-secondary, #6b7280);
+  margin-bottom: 4px;
+  display: block;
+}
+.mobile-settings-drawer .rc-slider {
+  margin: 8px 4px 22px;            /* clearance for tooltip-bottom */
+}
+.mobile-settings-drawer .dropdown {
+  font-size: 13px;
+}
+.mobile-settings-drawer .input-small {
+  height: 34px;
+  font-size: 13px;
+  padding: 4px 10px;
+}
+
+/* Mobile-state tiles use the same inline chip pattern as desktop, just
+   without the .desktop-shell scope. Mirror the key rules here. */
+.state-panel-strip {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  align-items: center;
+}
+.state-panel-strip .state-card {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 9px;
+  background: var(--ta-surface-secondary, #f8fafc);
+  border: 1px solid var(--ta-border-subtle, var(--ta-surface-tertiary));
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.state-panel-strip .state-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ta-text-tertiary, var(--ta-text-secondary));
+}
+.state-panel-strip .state-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ta-text-primary);
+  font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/* ============================================================
+   Phase 5AF-2 — un-scope chip + dropdown styling so mobile gets it
+   ============================================================ */
+
+/* Base chip styling — works inside .desktop-shell, .mobile-container,
+   .settings-drawer, .mobile-settings-drawer. The .desktop-shell rule
+   above still adds desktop-only refinements; this is the common base. */
+.env-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  background: var(--ta-surface-field, #f3f4f6);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--ta-text-primary, #1f2937);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+  white-space: nowrap;
+  font-family: inherit;
+  text-decoration: none;
+}
+.env-chip:hover {
+  background: var(--ta-surface-tertiary, #e5e7eb);
+  border-color: var(--ta-surface-elevated, #d1d5db);
+}
+.env-chip:focus {
+  outline: none;
+  border-color: var(--ta-brand-blue, #0a47c9);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ta-brand-blue, #0a47c9) 18%, transparent);
+}
+.chip-prefix {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ta-text-secondary, #6b7280);
+  text-transform: uppercase;
+}
+.chip-label {
+  font-variant-numeric: tabular-nums;
+}
+.chart-tab-active {
+  background: color-mix(in srgb, var(--ta-brand-blue, #0a47c9) 14%, transparent);
+  border-color: color-mix(in srgb, var(--ta-brand-blue, #0a47c9) 50%, transparent);
+  color: var(--ta-brand-blue, #0a47c9);
+}
+
+/* Mobile chart-tabs: keep tabs slim — full-width inside tab row, but
+   limited height (matching desktop chip h=32). Override the
+   "flex: 1 1 auto" stretch but keep auto width if there's space. */
+.mobile-chart-tabs .chart-tab {
+  height: 32px;
+  padding: 0 12px;
+}
+
+/* Mobile / drawer dropdown selected-value pill: kill the blue */
+.mobile-settings-drawer .Select--single > .Select-control .Select-value,
+.mobile-settings-drawer .Select-value,
+.mobile-settings-drawer .Select-value-label,
+.mobile-container .Select-value,
+.mobile-container .Select-value-label,
+.mobile-aircraft-picker .Select-value,
+.mobile-aircraft-picker .Select-value-label {
+  background: transparent !important;
+  color: var(--ta-text-primary, #1f2937) !important;
+}
+.mobile-settings-drawer .Select-control,
+.mobile-container .Select-control {
+  background: var(--ta-surface-primary, #fff);
+  border-color: var(--ta-surface-tertiary, #e5e7eb);
+}
+
+/* Mobile drawer Edit/Create + Load buttons → use chip styling, not
+   Bootstrap primary/secondary. The dbc.Button color="primary" gives
+   the gigantic blue; we override to match the chip aesthetic. */
+.mobile-settings-drawer .btn.btn-primary,
+.mobile-settings-drawer .btn.btn-secondary {
+  background: var(--ta-surface-field, #f3f4f6) !important;
+  border: 1px solid var(--ta-surface-tertiary, #e5e7eb) !important;
+  color: var(--ta-text-primary, #1f2937) !important;
+  height: 36px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: none;
+}
+.mobile-settings-drawer .btn.btn-primary:hover,
+.mobile-settings-drawer .btn.btn-secondary:hover {
+  background: var(--ta-surface-tertiary, #e5e7eb) !important;
+}
+
+/* Drawer offcanvas needs the same Bootstrap-button override */
+.settings-drawer .btn.btn-primary,
+.settings-drawer .btn.btn-secondary {
+  background: var(--ta-surface-field, #f3f4f6) !important;
+  border: 1px solid var(--ta-surface-tertiary, #e5e7eb) !important;
+  color: var(--ta-text-primary, #1f2937) !important;
+}
+
+/* ============================================================
+   Phase 5AF-3 — Short-viewport / landscape mobile compactness
+   When viewport height is small (phone landscape, ~360px tall),
+   trim chrome aggressively so the chart can breathe.
+   ============================================================ */
+/* ============================================================
+   Phase 5AG — Narrow-desktop responsive (768-1024px)
+   This is the awkward range where mobile_layout doesn't trigger
+   (cutoff is 768) but desktop renders cramped. State tiles
+   overflow, slider marks collide, top-bar text wraps. Squeeze the
+   desktop layout to fit while keeping all functionality.
+   ============================================================ */
+@media (max-width: 1024px) and (min-width: 769px) {
+  /* Rail narrower — was 280px */
+  .desktop-shell .main-grid {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  /* Top bar: shrink brand + tighten gaps */
+  .desktop-shell .top-strip-row {
+    padding: 0 8px;
+  }
+  .desktop-shell .top-strip-brand {
+    font-size: 13px;
+    margin-right: 4px;
+  }
+  .desktop-shell .top-strip-quicklinks {
+    margin-left: 4px;
+    padding-left: 6px;
+    gap: 6px;
+  }
+  .desktop-shell .top-strip-quicklinks .quick-link {
+    font-size: 10px;
+  }
+  .desktop-shell .units-control {
+    margin: 0 2px;
+  }
+  .desktop-shell .aircraft-picker-wrap {
+    width: 200px;
+    min-width: 180px;
+  }
+  .desktop-shell .theme-toggle-group .theme-btn,
+  .desktop-shell .export-toggle-group .export-btn {
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  /* State tiles row: horizontal scroll, no wrap */
+  .desktop-shell .top-strip-tiles-row {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .desktop-shell .state-panel-strip {
+    flex-wrap: nowrap;
+  }
+
+  /* Rail control rows: tighter slider marks */
+  .desktop-shell .rail-atmosphere .rc-slider-mark-text,
+  .desktop-shell .rail-live-controls .rc-slider-mark-text {
+    font-size: 8.5px !important;
+  }
+  .desktop-shell .rail-control-label {
+    font-size: 9.5px;
+  }
+  .desktop-shell .rail-atmosphere,
+  .desktop-shell .rail-live-controls {
+    padding: 6px 8px;
+  }
+
+  /* Chart tabs row: keep slim */
+  .desktop-shell .chart-tabs {
+    padding: 4px 8px;
+    gap: 4px;
+  }
+  .desktop-shell .chart-tab {
+    height: 28px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+}
+
+/* ============================================================
+   Phase 6S — Update-check banner
+   Fires when clientside fetch from tallyaero.com reports a newer
+   version than the currently-installed build. Dismissable.
+   ============================================================ */
+.update-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: linear-gradient(90deg,
+    color-mix(in srgb, var(--ta-brand-blue, #0a47c9) 15%, transparent),
+    color-mix(in srgb, var(--ta-brand-orange, #f27b0d) 15%, transparent));
+  border-bottom: 1px solid var(--ta-border, var(--ta-surface-tertiary));
+  font-size: 13px;
+  color: var(--ta-text-primary, #1f2937);
+  position: relative;
+  z-index: 200;
+}
+.update-banner-msg { font-weight: 500; }
+.update-banner-link {
+  background: var(--ta-brand-blue, #0a47c9);
+  color: white !important;
+  padding: 4px 12px;
+  border-radius: 4px;
+  text-decoration: none !important;
+  font-weight: 600;
+  font-size: 12px;
+}
+.update-banner-link:hover {
+  background: color-mix(in srgb, var(--ta-brand-blue, #0a47c9) 85%, black);
+}
+.update-banner-close {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: 0;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--ta-text-secondary, #6b7280);
+  cursor: pointer;
+}
+.update-banner-close:hover {
+  color: var(--ta-text-primary, #1f2937);
+}
+
+/* Phase 5AF-3 — Short-viewport / landscape mobile compactness */
+@media (max-height: 500px) {
+  .mobile-top-bar {
+    padding: 4px 8px;
+  }
+  .mobile-hamburger {
+    width: 32px; height: 32px; font-size: 17px;
+  }
+  /* State tiles strip — keep but ultra-thin */
+  .mobile-state-tiles-wrap {
+    padding: 2px 6px;
+  }
+  .state-panel-strip .state-card {
+    padding: 2px 7px;
+  }
+  .state-panel-strip .state-label {
+    font-size: 8.5px;
+  }
+  .state-panel-strip .state-value {
+    font-size: 11px;
+  }
+  /* Chart tabs — minimal height */
+  .mobile-chart-tabs {
+    padding: 2px 6px;
+  }
+  .mobile-chart-tabs .chart-tab {
+    height: 26px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+  .mobile-chart-tabs .chip-prefix {
+    font-size: 8px;
+  }
+  /* Hide bottom legal in landscape — keep export buttons */
+  .mobile-legal {
+    display: none;
+  }
+  .mobile-bottom-bar {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+  .mobile-bottom-bar .btn-export-sm {
+    height: 24px;
+    padding: 0 8px;
+    font-size: 10px;
+  }
+}

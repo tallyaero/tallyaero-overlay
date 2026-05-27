@@ -1,0 +1,799 @@
+{
+  "tcds_number": "2A13",
+  "revision": "48",
+  "revision_date": "August 7, 2006",
+  "tc_holder": "Piper Aircraft, Inc.",
+  "source_pdf": "2A13.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 19,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "for",
+        "S/N",
+        "28-1"
+      ],
+      "engine": "Lycoming O-320-B2B or O-320-D2A with carburetor setting 10-3678-32",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 160
+      },
+      "fuel_grade": "91/96 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 171,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 115,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 129,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2200
+      },
+      "fuel_capacity": {
+        "total_gal": 50.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps          (± 2°)       Up     0°      Down        40°\nAilerons            (± 2°)       Up     30°     Down        15°\nRudder              (± 2°)       Left   27°     Right       27°\nStabilator          (± 2°)       Up     18°     Down         2°\nStabilator Tab      (± 1°)       Up     3°      Down        12°\n\nNose Wheel Travel                                     (±1°)        Left 30°       Right 30°\n(Effective on S/N 28-1 through 28-3377, and 28-1760A)\n(±1°)       Left 22°       Right 22°\n(Effective S/N 28-3378 through 28-4377)\n\nManufacturer's Serial Nos.       28-03; 28-1 through 28-4377; and 28-1760A.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "PA-28-150 (Cherokee)"
+      ],
+      "engine": "Lycoming O-320-A2B or O-320-E2A with carburetor setting 10-3678-32",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 150
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 171,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 115,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 129,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2150
+      },
+      "fuel_capacity": {
+        "total_gal": 50.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps            (± 2°)      Up        0°     Down    40°\nAilerons              (± 2°)      Up       30°     Down    15°\nRudder                (± 2°)      Left     27°     Right   27°\nStabilator            (± 1°)      Up       18°     Down     2°\nStabilator Tab        (± 1°)      Up       3°      Down    12°\n\nNose Wheel Travel                                     (± 2°)        Left     30°      Right 30°\n(Effective on S/N 28-03; 28-1 through 28-3377; and 28-1760A)\n(± 2°)         Left    22°      Right 22°\n(Effective on S/N 28-3378 through 28-4377)\n\nManufacturer's Serial Nos.       28-03; 28-1 through 28-4377; and 28-1760A.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "PA-28-180 (Cherokee)"
+      ],
+      "engine": "Lycoming O-360-A3A or 0-360-A4A with carburetor setting 10-3878 or 10-4164-1",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 180
+      },
+      "fuel_grade": "91/96 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 171,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 115,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 129,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2400,
+        "utility_landplane": 1950
+      },
+      "fuel_capacity": {
+        "total_gal": 50.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps        (± 2°)      Up       0°       Down    40°\nAilerons          (± 2°)      Up      30°       Down    15°\nRudder            (± 2°)      Left    27°       Right   27°\nStabilator        (± 1°)      Up      18°       Down    2°\nStabilator Tab    (± 1°)      Up      3°        Down    12°\n\nNose Wheel Travel                                  (± 2°)    Left    30°    Right    30°\n(Effective on S/N 28-671 through 28-3377)\n(± 2°)     Left 22°      Right    22°\n(Effective on S/N 28-3378 through 28-5859, and 28-7105001 through 28-7205318)\n\nManufacturer's Serial Nos.       28-03; 28-671 through 28-5859; and 28-7105001 through 28-7205318.\nThe manufacturer is authorized to issue airworthiness certificates for airplane serial\nnumbers:\n\n28-4704 28-4745        28-4754   28-4763    28-4776\n28-4791 28-4795        28-4826   28-4834    28-4859\n28-4875 28-4879        28-4891   28-4907    28-4919\n28-4922 28-4935        28-4945   28-4946    28-4947\n28-4955 28-4959        28-4961   27-4964    28-4967\n28-4968 28-4971        28-4975   28-4977    28-4985\n28-4995 28-4999        28-5004   28-5007    28-5015\n28-5017 28-5018        28-5019   28-5020    28-5023\n28-5026 28-5027        28-5028   28-5031    28-5039\n28-5041 28-5046        28-5051   28-5053    28-5057\n28-5060 28-5061        28-5062   28-5063    28-5064\n28-5066 through 28-5859, and 28-7105001 through 28-7205318 under the delegation\noption provisions of FAR 21. See NOTE 17 and 20.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "for",
+        "S/N",
+        "28-1",
+        "through"
+      ],
+      "engine": "Lycoming O-320-D2A with carburetor setting 10-3678-32 (See NOTE 18)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 160
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 153,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 115,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 129,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2140
+      },
+      "fuel_capacity": {
+        "total_gal": 50.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps            (±2°)      Up      0°    Down       40°\nAilerons              (±2°)      Up     30°    Down       15°\nRudder                (±2°)      Left   27°    Right      27°\nStabilator            (±1°)      Up     18°    Down        2°\nStabilator Tab        (±1°)      Up      3°    Down       12°\n\nManufacturer's Serial Nos.       28-03; 28-1 through 28-1760; and 28-1760A.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "V",
+      "models": [
+        "PA-28S-180 (Cherokee)"
+      ],
+      "engine": "Lycoming O-360-A3A or 0-360-A4A with carburetor setting 10-4164-1",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 180
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 153,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 115,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 129,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2222
+      },
+      "fuel_capacity": {
+        "total_gal": 50.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps       (±2°)       Up      0°    Down        40°\nAilerons         (±2°)       Up     30°    Down        15°\nRudder           (±2°)       Left   27°    Right       27°\nStabilator       (±1°)       Up     18°    Down         2°\nStabilator Tab   (±1°)       Up      3°    Down        12°\n\nManufacturer's Serial Nos.   28-671 through 28-5859, and 28-7105001 through 28-7105234. See NOTE 3. The\nmanufacturer is authorized to issue airworthiness certificates for airplane serial numbers:\n28-4704    28-4745       28-4754       28-4763       28-4776\n28-4791    28-4795       28-4826       28-4834       28-4859\n28-4875    28-4879       28-4891       28-4907       28-4919\n28-4922    28-4935       28-4945       28-4946       28-4947\n28-4955    28-4959       28-4961       27-4964       28-4967\n28-4968    28-4971       28-4975       28-4977       28-4985\n28-4995    28-4999       28-5004       28-5007       28-5015\n28-5017    28-5018       28-5019       28-5020       28-5023\n28-5026    28-5027       28-5028       28-5031       28-5039\n28-5041    28-5046       28-5051       28-5053       28-5057\n28-5060    28-5061       28-5062       28-5063       28-5064\n28-5066 through 28-5859, and 28-7105001 through 28-7105234 under the delegation\noption provisions of FAR 21. See NOTE 17 and 20.\n\n2A13                                              Page 8 of 43",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VI",
+      "models": [
+        "for",
+        "S/N",
+        "28-10001"
+      ],
+      "engine": "Lycoming O-540-B2B5, O-540-B1B5, or O-540-B4B5 with carburetor setting 10-4404,",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 235
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 197,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 156,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 115,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 138,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2900
+      },
+      "fuel_capacity": {
+        "total_gal": 84.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps          (±2°)        Up 0°           Down     40°\nAilerons            (±2°)        Up 30°          Down     15°\nRudder              (+2°)        Left 27°        Right    27°\nStabilator          (±1°)        Up 18°          Down     2°\nStabilator Tab      (±1°)        Up 3°           Down     12°\n\nNose Wheel Travel                                   (±2°)      Left    30°     Right     30°\n(Effective on S/N 28-10001 through 28-11039)\n(±2°)    Left 22°       Right     22°\n(Effective on S/N 28-11040 through 28-11378, and 28-7110001 through 28-7210023)\n\nManufacturer's Serial Nos.       28-10001 through 28-11378, and 28-7110001 through 28-7210023. The manufacturer is\nauthorized to issue airworthiness certificates for airplane serial numbers 28-11063,\n28-11064, 28-11070, 28-11072 through 28-11378, and 28-7110001 through 28-7210023 under\nthe delegation option provisions of FAR 21. See NOTE 17 and 20.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VII",
+      "models": [
+        "PA-28-140 (Cherokee Cruiser)"
+      ],
+      "engine": "Lycoming O-320-E2A with carburetor setting 10-3678-32 or O-320-E3D with",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 150
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 171,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 115,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 129,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1950,
+        "utility_landplane": 1950
+      },
+      "fuel_capacity": {
+        "total_gal": 50.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps          (±2°)         Up 0°          Down    40°\nAilerons            (±2°)         Up 30°         Down    15°\nRudder              (±2°)        Left 27°        Right   27°\nStabilator          (±1°)         Up 18°         Down     2°\nStabilator Tab      (±1°)         Up 3°          Down    12°\n\nNose Wheel Travel                               (±2°)       Left 30°       Right 30°\n(Effective on S/N 28-20001 through 28-21845; 28-21931 through 28-21934;\nand 28-7425001 through 28-7725290)\n(±2°)       Left 22°       Right 22°\n(Effective on S/N 28-21846 through 28-21930; 28-21935 through 28-26946;\nand 28-7125001 through 28-7325674)\n\nPage 11 of 43                                                      2A13\n\nManufacturer's Serial Nos.       28-20001 through 28-26946; and 28-7125001 through 28-7725290. The manufacturer is\nauthorized to issue airworthiness certificates for airplane serial numbers 28-24677,\n28-24682, 28-24697, 28-24698, 28-24700, 28-24703, 28-24704, 28-24705, 28-24706,\n28-24709, 28-24710, 28-24712, 28-24713, 28-24714, 28-24715 through 28-26946, and\n28-7125001 through 28-7725290 under the delegation option provisions of FAR 21.\nSee NOTE 17 and 20.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VIII",
+      "models": [
+        "PA-28-140 (Cherokee Cruiser)"
+      ],
+      "engine": "Lycoming O-320-E2A with carburetor setting 10-3678-32 or 10-5009 or O-320-E3D with",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 150
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 171,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 115,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 129,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2150,
+        "utility_landplane": 1950
+      },
+      "fuel_capacity": {
+        "total_gal": 50.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps       (±2°)            Up          0°    Down    40°\nAilerons         (±2°)            Up         30°    Down    15°\nRudder           (±2°)            Left       27°    Right   27°\nStabilator       (±1°)            Up         18°    Down     2°\nStabilator Tab   (±1°)            Up          3°    Down    12°\n\nNose Wheel Travel                                 (±2°)        Left    30°      Right     30°\n(Effective on S/N 28-20940 through 28-21845; 28-21931 through 28-21934; and\n28-7425001 through 28-7725290)\n(± 2°)       Left     22°     Right      22°\n(Effective on S/N 28-21846 through 28-21930; 28-21935 through 28-26946; and\n28-7125001 through 28-7325674)\n\nManufacturer's Serial Nos.       28-20001 through 28-26946, and 28-7125001 through 28-7725290. The manufacturer is\nauthorized to issue airworthiness certificates for airplane serial numbers 28-24677,\n28-24682, 28-24697, 28-24698, 28-24700, 28-24703, 28-24704, 28-24705, 28-24706,\n28-24709, 28-24710, 28-24712, 28-24713, 28-24714, 28-24715 through 28-26946, and\n28-7125001 through 28-7725290 under the delegation option provisions of FAR 21.\nSee NOTE 17 and 20.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IX",
+      "models": [
+        "PA-28R-180 (Arrow)"
+      ],
+      "engine": "Lycoming IO-360-B1E",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 180
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 214,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 170,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 125,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 134,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 50.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps            (±2°)        Up 0°              Down 40°\nAilerons              (±2°)        Up 30°             Down 15°\nRudder                (±2°)       Left 27°            Right 27°\nStabilator            (±1°)        Up 18°             Down 2°\nStabilator Tab        (±1°)        Up 3°              Down 12°\n\nNose Wheel Travel                                  (±2°)       Left 30°             Right 30°\n\nManufacturer's Serial Nos.   28R-30002 through 28R-31270, and 28R-7130001 through 28R-7130013. The\nmanufacturer is authorized to issue airworthiness certificates for airplane serial numbers:\n28R-30538         28R-30546        28R-30559        28R-30586           28R-30587\n28R-30602         28R-30603        28R-30605        28R-30624           28R-30627\n28R-30638         28R-30639        28R-30642        28R-30684           28R-30697\n28R-30708         28R-30726        28R-30739        28R-30740           28R-30747\n28R-30750         28R-30752        28R-30759        28R-30760           28R-30766\n28R-30776         28R-30779        28R-30785        28R-30787           28R-30795\n28R-30801         28R-30809        28R-30815        28R-30819           28R-30821\n28R-30824         28R-30827        28R-30832        28R-30835           28R-30838\n28R-30842         28R-30845        28R-30849        28R-30853           28R-30857\n28R-30860         28R-30865        28R-30866        28R-30867           28R-30868\n28R-30869         28R-30872        28R-30874        28R-30875           28R-30877\nthrough 28R-31270, and 28R-7130001 through 28R-7130013 under the delegation\noption provisions of FAR 21. See NOTE 17 and 20.\n\n2A13                                               Page 14 of 43",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "X",
+      "models": [
+        "PA-28R-200 (Arrow)"
+      ],
+      "engine": "Lycoming IO-360-C1C",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 200
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 214,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 170,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 125,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 134,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 200
+      },
+      "fuel_capacity": {
+        "total_gal": 50.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps        (±2°)       Up        0°      Down       40°\nAilerons          (±2°)       Up        30°     Down       15°\nRudder            (±2°)       Left      27°     Right      27°\nStabilator        (±1°)       Up        18°     Down        2°\nStabilator Tab    (±1°)       Up        3°      Down       12°\n\nNose Wheel Travel                                  (±2°)       Left      30°     Right     30°\n\nManufacturer's Serial Numbers    28R-35001 through 28R-35820, and 28R-7135001 through 28R-7135229. The\nmanufacturer is authorized to issue airworthiness certificates for airplanes serial numbers\n28R-35001 through 28R-35820, and 28R-7135001 through 28R-7135229 under the\ndelegation option provisions of FAR 21.\n\nPage 15 of 43                                                          2A13",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XI",
+      "models": [
+        "for",
+        "S/N",
+        "28R-7235001"
+      ],
+      "engine": "Lycoming IO-360-C1C (See NOTE 22)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 200
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 214,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 170,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 125,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 131,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 200
+      },
+      "fuel_capacity": {
+        "total_gal": 50.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps        (±2°)      Up         0°      Down       40°\nAilerons          (±2°)      Up        30°      Down       15°\nRudder            (±2°)      Left      27°      Right      27°\nStabilator        (±1°)      Up        16°      Down        2°\nStabilator Tab    (±1°)      Up         3°      Down       12°\n\nNose Wheel Travel                                    (±2°)      Left      30°       Right     30°\n\nManufacturer's Serial Numbers      28R-7235001 through 28R-7635545. The manufacturer is authorized to issue\nairworthiness certificates for airplane serial numbers 28R-7235001 through\n28R-7635545 under the delegation option provisions of FAR 21. See NOTE 20.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XII",
+      "models": [
+        "PA-28-180 (Archer)"
+      ],
+      "engine": "Lycoming O-360-A4A or O-360-A4M with carburetor settings 10-3878 or 10-5193",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 180
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 171,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 115,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 127,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2450,
+        "utility_landplane": 1950
+      },
+      "fuel_capacity": {
+        "total_gal": 50.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps            (±2°)         Up      0°           Down    40°\nAilerons              (±2°)         Up     30°           Down    15°\nRudder                (±2°)         Left   27°           Right   27°\nStabilator            (±1°)         Up     14°           Down     2°\nStabilator Tab        (±1°)         Up      3°           Down    12°\n\nNose Wheel Travel                                       (±2°)    Left    22°      Right      22°\n(S/N 28-E13, 28-7305001 through 28-7305601)\n(±2°) Left     30°        Right     30°\n(S/N 28-7405001 through 28-7505260)\n\nManufacturer's Serial Numbers      28-E13, and 28-7305001 through 28-7505260. The manufacturer is authorized to issue\nairworthiness certificates for airplanes serial numbers 28-7305001 through\n28-7505260 under the delegation option provisions of FAR 21. See NOTE 20.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XIII",
+      "models": [
+        "for",
+        "S/N",
+        "28E-11"
+      ],
+      "engine": "Lycoming O-540-B4B5 with carburetor setting 10-5404",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 235
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 197,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 156,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 115,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 138,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3000
+      },
+      "fuel_capacity": {
+        "total_gal": 84.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps         (±2°)     Up       0°      Down          40°\nAilerons           (±2°)     Up      30°      Down          15°\nRudder             (±2°)     Left    27°      Right         27°\nStabilator         (±2°)     Up      16°      Down          2°\nStabilator Tab     (±1°)     Up       3°      Down          12°\n\nNose Wheel Travel                                   (±2°)     Left    22°      Right     22°\n(S/N 28-E11, 28-7310001 through 28-7310176)\n(±2°)     Left    30°      Right     30°\n(S/N 28-7410001 through 28-7710089)\n\nManufacturer's Serial Numbers    28-E11, and 28-7310001 through 28-7710089. The manufacturer is authorized to issue\nairworthiness certificates for airplane serial numbers 28-E11, and 28-7310001 through\n28-7710089 under the delegation option provisions of FAR 21. See NOTE 20.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XIV",
+      "models": [
+        "PA-28-151 (Cherokee Warrior)"
+      ],
+      "engine": "Lycoming O-320-E3D with carburetor setting 10-5009, or 10-5009N, or 10-5135",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 150
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 176,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 125,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 111,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "utility_landplane": 2332,
+        "normal_landplane": 2325
+      },
+      "fuel_capacity": {
+        "total_gal": 50.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing Flaps          (±2°)      Up     0°           Down              40°\nAilerons            (±2°)      Up 23°              Down              17°\n(S/N 28-7415001 through 28-7515449)\nAilerons            (±2°)      Up     25°          Down              12.5°\n(S/N 28-7615001 through 28-7715314)\nRudder              (±2°)      Left 27°            Right             27°\nStabilator          (±1°)      Up 14°              Down               2°\nStabilator Tab      (±1°)      Up     3°           Down              12°\n\nNose Wheel Travel                                    (±1°)        Left   30°              Right       30°\n\n2A13                                              Page 20 of 43\n\nManufacturer's Serial Numbers    28-7415001 through 28-7715314. The manufacturer is authorized to issue\nairworthiness certificates for airplanes serial numbers 28-7415001 through 28-7715314\nunder the delegation option provisions of FAR 21.\n\nXV - A.- Model PA-28-181 (Archer II), 4 PCLM (Normal Category), 2 PCLM (Utility Category), Approved July 8, 1975,\nfor S/N 28-7690001 through 28-8690056; 28-8690061; 28-8690062; and 2890001 through 2890205.\n\nWing flaps       (±2°)       Up       0°      Down      40°\nAilerons         (±2°)       Up      25°      Down     12.5°\nRudder           (±2°)       Left    27°      Right     27°\nStabilator       (±1°)       Up      14°      Down       2°\nStabilator Tab   (±1°)       Up       3°      Down      12°\n\nNose Wheel Travel                                 (±2°)       Left    30°      Right     30°\n\nManufacturer's Serial Numbers    28-7690001 through 28-8690056; 28-8690061; 28-8690062; and 2890001 through\n2890205. The manufacturer is authorized to issue airworthiness certificates for airplane\nserial numbers 28-7690001 through 28-8690056; 28-8690061; 28-8690062; and\n2890001 through 2890205 under the delegation option provisions of FAR 21.\nSee NOTE 20.\n\nXV - B.- Model PA-28-181 (Archer III), 4 PCLM (Normal Category), 2 PCLM (Utility Category), Approved\nAugust 30, 1994, for S/N 2890206 through 2890231, and 2843001 and up.\n\nWing flaps                   Up     0° (±1°)     Down    10°, 25°, 40° (±2°)\nAilerons         (±2°)       Up       25°        Down           12.5°\nRudder           (±1°)       Left     28°        Right           28°\nStabilator       (±1°)       Up       14°        Down            2°\nStabilator Tab   (±1°)       Up        3°        Down            12°\n\nNose Wheel Travel                                  (±2°)      Left      30°     Right            30°\n(S/N 2890206 through 2890231)\n(±1°)      Left      20°     Right            20°\n(S/N 2843001 & up)\n\nManufacturer's Serial Numbers    2890206 through 2890231, and 2843001 and up. The manufacturer is authorized to issue\nairworthiness certificates for airplane serial numbers 2890206 through 2890231, and\n2843001 and up under the delegation option provisions of FAR 21.\n\nXVI - A. - Model PA-28-161 (Warrior II), 4 PCLM (Normal Category), 2 PCLM (Utility Category), Approved\nNovember 2, 1976, for S/N 28-7716001 through 28-8216300, and 2841001 through 2841365 (Cadet only)\n\nWing flaps       (±2°)        Up        0°     Down      40°\nAilerons         (±2°)        Up        25°    Down     12.5°\nRudder           (±2°)        Left      27°    Right     27°\nStabilator       (±1°)        Up        14°    Down       2°\nStabilator Tab   (±1°)        Up        3°     Down      12°\n\nNose Wheel Travel                                 (±1°)         Left     30°    Right      30°\n\nManufacturer's Serial Numbers    28-7716001 through 28-8216300, and 2841001 through 2841365 (Cadet only). The\nmanufacturer is authorized to issue airworthiness certificates for airplane serial numbers\n28-7716001 through 28-8216300, and 2841001 through 2841365 under the delegation\noption provisions of FAR 21. See NOTE 20.\n\n2A13                                              Page 24 of 43\n\nXVI - B. Model PA-28-161 (Warrior II), 4 PCLM (Normal Category), 2 PCLM (Utility Category), Approved\nJuly 1, 1982, for S/N 28-8316001 through 28-8616057, and 2816001 through 2816109.\n\nWing flaps           (±2°)        Up       0°        Down     40°\nAilerons             (±2°)        Up       25°       Down    12.5°\nRudder               (±2°)        Left     27°       Right    27°\nStabilator           (±1°)        Up       14°       Down     2°\nStabilator Tab       (±1°)        Up       3°        Down     12°\n\nNose Wheel Travel                                     (±1°)        Left     30°       Right    30°\n\nManufacturer's Serial Nos.       28-8316001 through 28-8616057, and 2816001 through 2816109. The manufacturer is\nauthorized to issue airworthiness certificates for airplane serial numbers 28-8316001\nthrough 28-8616057, and 2816001 through 2816109 under the delegation option\nprovisions of FAR 21. See NOTE 20.\n\nXVI - C. Model PA-28-161 (Warrior III), 4 PCLM (Normal Category), 2 PCLM (Utility Category), Approved\nJuly 1, 1994, for S/N 2816110 through 2816119, and 2842001 and up.\n\nWing flaps                        Up     0° (±1°)    Down    10°, 25°, 40° (±2°)\nAilerons              (±2°)       Up       25°       Down           12.5°\nRudder                (±1°)       Left     28°       Right           28°\nStabilator            (±1°)       Up       14°       Down             2°\nStabilator Tab        (±1°)       Up        3°       Down            12°\n\nNose Wheel Travel                                      (±1°)       Left      30°    Right            30°\n(S/N 2816110 through 2816119)\n(±1°)       Left      20°    Right            20°\n(S/N 2842001 & up)\n\nManufacturer's Serial Nos.       2816110 through 2816119, and 2842001 and up. The manufacturer is authorized to issue\nairworthiness certificates for airplane serial numbers 2816110 through 2816119, and\n2842001 and up under the delegation option provisions of FAR 21.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XVII",
+      "models": [
+        "for",
+        "S/N",
+        "28R-7737002"
+      ],
+      "engine": "Lycoming IO-360-C1C6",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 200
+      },
+      "fuel_grade": "100 or 100LL aviation grade gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 183,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 146,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 103,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 118,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2750
+      },
+      "fuel_capacity": {
+        "total_gal": 77.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps                       Up     0° (±1°)    Down       10°, 25°, 40° (±2°)\nAilerons              (±2°)      Up       25°       Down              12.5°\nRudder                (±1°)      Left     28°       Right              28°\nStabilator            (±1°)      Up       16°       Down               2°\nStabilator Tab        (±1°)      Up        3°       Down               12°\n\nNose Wheel Travel                                      (±2°)      Left     30°       Right             30°\n\nManufacturer's Serial Numbers    28R-7737002 through 28-7837317; 2837001 through 2837061; and 2844001 and up.\nThe manufacturer is authorized to issue airworthiness certificates for airplanes serial\nnumbers 28R-7737002 through 28-7837317; 2837001 through 2837061; and 2844001\nand up under the delegation option provisions of FAR 21. See NOTE 20.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XVIII",
+      "models": [
+        "for"
+      ],
+      "engine": "Continental TSIO-360-F or TSIO-360-FB",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 200
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 183,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 146,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 103,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 119,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2912
+      },
+      "fuel_capacity": {
+        "total_gal": 77.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps        (±2°)          Up         0°     Down     40°\nAilerons          (±2°)          Up        25°     Down    12.5°\nRudder            (±1°)          Left      28°     Right    28°\nStabilator        (±1°)          Up        16°     Down     2°\nStabilator Tab    (±1°)          Up         3°     Down     12°\n\nNose Wheel Travel                                  (±2°)          Left      30°     Right    30°\n\nManufacturer's Serial Numbers    28R-7703001 through 28R-7803374, and 2803001 through 2803012. The manufacturer\nis authorized to issue airworthiness certificates for airplanes serial numbers 28R-7703001\nthrough 28R-7803374, and 2803001 through 2803012 under the delegation option\nprovisions of FAR 21. See NOTE 20.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XIX",
+      "models": [
+        "PA-28-236 (Dakota)"
+      ],
+      "engine": "Lycoming O-540-J3A5D with carburetor setting 10-5054",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 235
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 197,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 156,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 115,
+          "unit": "mph"
+        },
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3000
+      },
+      "fuel_capacity": {
+        "total_gal": 77.0,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps       (±2°)       Up      0°        Down        40°\nAilerons         (±2°)       Up      25°       Down       12.5°\nRudder           (±1°)       Left    28°       Right       28°\nStabilator       (±1°)       Up      16°       Down        2°\nStabilator Tab   (±1°)       Up      3°        Down        12°\n\nNose Wheel Travel                                 (±1°)       Left    30°       Right       30°\n\nManufacturer's Serial Numbers    28-7911001 through 28-8611008; 2811001 through 2811050; and 2845001 and up. The\nmanufacturer is authorized to issue airworthiness certificates for airplane serial numbers\n28-7911001 through 28-8611008; 2811001 through 2811050; and 2845001 and up\nunder the delegation option provisions of FAR 21. See NOTE 20.\n\nXX - A. Model PA-28RT-201 (Arrow IV), 4 PCLM (Normal Category), Approved November 13, 1978, for\nS/N 28R-7918001 through 28R-7918267.\n\nWing flaps            (±2°)   Up          0°       Down       40°\nAilerons              (±2°)   Up         25°       Down      12.5°\nRudder                (±1°)   Left       33°       Right      33°\nStabilator            (±1°)   Up         14°       Down       10°\nStabilator Tab                Up      2.5° (±1°)   Down    10° (±.5°)\n\nNose Wheel Travel                                      (±2°)   Left       30°       Right      30°\n\nManufacturer's Serial Numbers    28R-7918001 through 28R-7918267. The manufacturer is authorized to issue\nairworthiness certificates for airplane serial numbers 28R-7918001 through\n28R-7918267 under the delegation option provisions of FAR 21.\n\nXX - B. Model PA-28RT-201 (Arrow IV), 4 PCLM (Normal Category), Approved November 13, 1978, for\nS/N 28R-8018001 through 28R-8218026.\n\nWing flaps            (±2°)     Up         0°        Down       40°\nAilerons              (±2°)     Up        25°        Down      12.5°\nRudder                (±1°)     Left      33°        Right      33°\nStabilator            (±1°)     Up        14°        Down       10°\nStabilator Tab                  Up     2.5° (±1°)    Down    10° (±.5°)\n\nNose Wheel Travel                                      (±2°)     Left       30°       Right      30°\n\nManufacturer's Serial Numbers    28R-8018001 through 28R-8218026. The manufacturer is authorized to issue\nairworthiness certificates for airplane serial numbers 28R-8018001 through\n28R-8218026 under the delegation option provisions of FAR 21. See NOTE 20.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XXI",
+      "models": [
+        "for"
+      ],
+      "engine": "Continental TSIO-360-FB",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 200
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 193,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 152,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 108,
+          "unit": "knots"
+        },
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2912
+      },
+      "fuel_capacity": {
+        "total_gal": 77.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps     (±2°)             Up         0°        Down        40°\nAilerons       (±2°)             Up        25°        Down       12.5°\nRudder         (±1°)             Left      33°        Right       33°\nStabilator     (±1°)             Up        14°        Down        10°\nStabilator Tab                   Up     2.5° (±1°)    Down     10° (±.5°)\n\nNose Wheel Travel                                 (±2°)           Left      30°         Right      30°\n\nPage 33 of 43                                                        2A13\n\nManufacturer's Serial Numbers    28R-7931001 through 28R-8631005, and 2831001 through 2831038. The manufacturer\nis authorized to issue airworthiness certificates for airplane serial numbers 28R-7931001\nthrough 28R-8631005, and 2831001 through 2831038 under the delegation option\nprovisions of FAR 21. See NOTE 20.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XXII",
+      "models": [
+        "for"
+      ],
+      "engine": "Continental TSIO-360-FB",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 200
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 169,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 102,
+          "unit": "knots"
+        },
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2900
+      },
+      "fuel_capacity": {
+        "total_gal": 77.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": "Wing flaps         (±2°)         Up        0°      Down     40°\nAilerons           (±2°)         Up       25°      Down    12.5°\nRudder             (±2°)         Left     27°      Right    27°\nStabilator         (±1°)         Up       16°      Down     2°\nStabilator Tab     (±1°)         Up        3°      Down     12°\n\nNose Wheel Travel                                   (±1°)         Left     30°      Right     30°\n\n2A13                                             Page 34 of 43\n\nManufacturer's Serial Numbers   28-7921001 through 28-7921095. The manufacturer is authorized to issue airworthiness\ncertificates for airplane serial numbers 28-7921001 through 28-7921095 under the\ndelegation option provisions of FAR 21. See NOTE 20.\n\nDATA PERTINENT TO ALL MODELS",
+      "serial_numbers": null
+    }
+  ]
+}

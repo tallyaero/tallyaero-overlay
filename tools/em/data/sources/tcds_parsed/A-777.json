@@ -1,0 +1,378 @@
+{
+  "tcds_number": "A-777",
+  "revision": "57",
+  "revision_date": "April 15, 1996",
+  "tc_holder": "Raytheon Aircraft Company",
+  "source_pdf": "A-777.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 9,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "35"
+      ],
+      "engine": "Continental E-185-1 (See Item 111 for optional engine.)",
+      "engine_limits": {
+        "rpm": 2300,
+        "hp": 185
+      },
+      "fuel_grade": "80 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 202,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 130,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2550,
+        "utility_landplane": 2100
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing               Normal Category:          (+82.4) to (+84.8) at 2550 lb.\ngear extended)                                             (+80.2) to (+85.4) at 2405 lb.\n(+76.2) to (+85.4) at 2140 lb. or less\nUtility Category:         (+76.8) to (+78.6) at 2100 lb.\n(+76.3) to (+78.8) at 1971 lb.\n(+76.3) to (+78.9) at 1938 lb. or less\nStraight line variation between points given.\n\n2600\n2500\n2400\n2300                                   NORMAL\nPOUNDS\nCATEGORY\n2200\n2100\n2000                          UTILITY\nCATEGORY\n1900\n76        78      80    82            84           86\nINCHES",
+      "control_surfaces": "Wing flaps                                                 Down    20°\nAileron tab                                                Fixed\nAileron                                 Up     20°         Down    20°\nElevator tab                            Up     10°         Down    30°\n\"V\" tail elevator action                Up     20°         Down    30°\n\"V\" tail rudder action                  Up     21°         Down    21°\n\"V\" tail maximm combination             Up     35°         Down    35°\nrudder elevator action",
+      "serial_numbers": "D1 through 1500\n\nRequired Equipment            Items 1, 101, 102, 103, 201, 202, 301, 302, 404(a) and (n) or 404(x), 601(a).\nAirplanes are eligible for certification with either fabric covered or magnesium\nflaps and ailerons provided they are installed in pairs, i.e., 2 fabric covered\nailerons or 2 magnesium ailerons, etc."
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "A35"
+      ],
+      "engine": "Continental E-185-1 (see Item 111 for optional engine)",
+      "engine_limits": {
+        "rpm": 2300,
+        "hp": 185
+      },
+      "fuel_grade": "80 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 202,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 105,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 130,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2650
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing gear      (+83.7) to (+84.4) at 2650 lb.\nextended)                    (+80.0) to (+85.4) at 2405 lb.\n(+75.9) to (+85.4) at 2140 lb. or less\nStraight line variation between points given.\nThe aft C.G. limit for all weights must be liited to (+84.4) unless\nthe elevator cambered tabs, P/N 35-660040-52 and -53 are installed.\n(Refer to AD-50-42-1.\n\n3                                                            A-777\n\nII. Model A35, Bonanza, 4 PCLM (Utility Category) (cont'd)\n\n2600\n2500\nAFT\n2400                                          LIMIT\nPOUNDS       2300\n2200\nFRONT\n2100                 LIMIT\n2000\n1900\n76       78        80         82          84         86\nINCHES",
+      "control_surfaces": "Wing flaps                                           Down        20°\nAileron tab                                          Fixed\nAileron                             Up    20°        Down        20°\nElevator tab                        Up    10°        Down        30°\n\"V\" tail elevator action            Up    20°        Down        20°\n\"V\" tail rudder action              Up    21°        Down        21°\n\"V\" tail maximum combination        Up    35°        Down        35°\nrudder elevator action\n\nSerial nos. eligible          D-1501 through D-2200 and D-15001\n\nRequired equipment            Items 1, 101, 102, 103, 201, 202, 301, 302, 404(b) and (n) or 404(v), 601(a)\n\nA-777                                                 4",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "B35"
+      ],
+      "engine": "Continental E-185-8 with S/N 5122D and above (see Engine Spec. E-246)",
+      "engine_limits": {
+        "rpm": 2450,
+        "hp": 196
+      },
+      "fuel_grade": "80 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 202,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 105,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 130,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2650
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing            (+83.7) to (+84.4) at 2650 lb.\ngear extended)                (+80.0) to (+85.4) at 2405 lb.\n(+75.9) to (+85.4) at 2140 lb. or less\nFor diagram see Section II.",
+      "control_surfaces": "Wing flaps                                         Down    30°\nAileron tab                                        Fixed\nAileron                                Up   20°    Down    20°\nElevator tab                           Up   10°    Down    31°\n\"V\" tail elevator action               Up   20°    Down    20°\n\"V\" tail rudder action                 Up   21°    Down    21°\n\"V\" tail maximum combination           Up   35°    Down    35°\nrudder elevator action\n\nSerial Nos. Eligible           D-2201 through D-2680\n\nRequired Equipment             Items 1, 101, 103, 113, 201, 202, 301, 302, 404(c) and (n) or 404(v).\n\n5                                                         A-777",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "C35"
+      ],
+      "engine": "Continental E-185-11 with S/N 5122D and above (see Engine Spec. E-246)",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 205
+      },
+      "fuel_grade": "80 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 202,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 105,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 130,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2700
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing           (+82.9) to (+84.4) at 2700 lb.\ngear extended)               (+80.1) to (+85.4) at 2500 lb.\n(+76.5) to (+85.4) at 2240 lb. or less\n\n2800\n2700\n2600\n\nPOUNDS         2500                                AFT\nLIMIT\n2400\n2300\n2200               FRONT\nLIMIT\n2100\n76       78      80        82       84    86\nINCHES",
+      "control_surfaces": "Wing flaps                                           Down    30°\nAileron tab                                          Fixed\nAileron                                Up   20°      Down    20°\nElevator tab                           Up    8°      Down    31°\n\"V\" tail elevator action               Up   22.5°    Down    17.5°\n\"V\" tail rudder action                 Up   21°      Down    21°\n\"V\" tail maximum combination           Up   35°      Down    30°\nrudder elevator action\n\nSerial Nos. Eligible          D-2681 through D-3400 (except D-3293)\nRequired Equipment            Items 1, 101, 103, 113, 201, 202, 301, 302, 404(u), 601(b), 608.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "V",
+      "models": [
+        "35R"
+      ],
+      "engine": "Continental E-185-8 with S/N 5122D and above (see Engine Spec. E-246).",
+      "engine_limits": {
+        "rpm": 2450,
+        "hp": 196
+      },
+      "fuel_grade": "80 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 202,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 105,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 130,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2650
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing           (+83.7) to (+84.4) at 2650 lb.\ngear extended)               (+80.0) to (+85.4) at 2405 lb.\n(+75.9) to (+85.4) at 2140 lb. or less\nFor diagram see Section II.",
+      "control_surfaces": "Wing flaps                                        Down    30°\nAileron tab                                       Fixed\nAileron                             Up   20°      Down    20°\nElevator tab                        Up   10°      Down    31°\n\"V\" tail elevator action            Up   20°      Down    20°\n\"V\" tail rudder action              Up   21°      Down    21°\n\"V\" tail maximum combination        Up   35°      Down    35°\nrudder elevator action\n\n7                                                               A-777\n\nV.   Model 35R, Bonanza, 4 PCLM (Utility Category) (cont'd)",
+      "serial_numbers": "D-25R1 and up (note that the \"D-25\" is the retained original Model 35\nS/N and the number following the \"R\" designation is the numerical order of\nmodification. All Model 35 (Section I) S/N's are eligible for modification by\nBeech Aircraft Corporation in accordance with Beech Dwg. 35-000009.\n\nRequired equipment              Items 1, 101, 103, 113, 201, 202, 301, 404(e) and (n) or 404(v) and (w), 601(b)."
+    },
+    {
+      "section_roman": "VI",
+      "models": [
+        "D35"
+      ],
+      "engine": "Continental E-185-11 with S/N 5122D and above (see Engine Spec. E-246)",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 205
+      },
+      "fuel_grade": "80 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 202,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 105,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 130,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2725
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing             (+83.2) to (+84.3) at 2725 lb.\ngear extended)                 (+80.1) to (+85.4) at 2500 lb.\n(+76.5) to (+85.4) at 2240 lbs. or less\n\n2800\n2700\n2600\n\nPOUNDS          2500                                 AFT\nLIMIT\n2400\n2300\nFRONT\n2200                 LIMIT\n2100\n76       78        80        82       84        86\nINCHES",
+      "control_surfaces": "Wing flaps                                        Down     30°\nAileron tab                                       Fixed\nAileron                             Up   20°      Down     20°\nElevator tab                        Up    8°      Down     31°\n\"V\" tail elevator action            Up   22.5°    Down     17.5°\n\"V\" tail rudder action              Up   21°      Down     21°\n\"V\" tail maximum combination        Up   35°      Down     30°\nrudder elevator action",
+      "serial_numbers": "D3401 through D3698\n\nRequired equipment             Items 1, 101, 103, 113, 201, 202, 301, 302, 404(t), 601(b), 608."
+    },
+    {
+      "section_roman": "VII",
+      "models": [
+        "E35"
+      ],
+      "engine": "Continental E-185-11 with S/N 5122D and above (see Engine Spec. E-246)",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 205
+      },
+      "fuel_grade": "80 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 202,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 175,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 105,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 130,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2725
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": "(landing            (+83.2) to (+84.9) at 2725 lb.\ngear extended)                (+80.1) to (+85.7) at 2500 lb.\n(+76.5) to (+85.7) at 2240 lb. or less\n\n2800\n2700\n2600\n\nPOUNDS      2500                               AFT\nLIMIT\n2400\n2300\nFRONT\n2200                LIMIT\n2100\n76         78      80      82       84       86\nINCHES",
+      "control_surfaces": "Wing flaps                                        Down     30°\nAileron tab                                       Fixed\nAileron                             Up    20°     Down     20°\nElevator tab                        Up     8°     Down     31°\n\"V\" tail elevator action            Up    22.5°   Down     17.5°\n\"V\" tail rudder action              Up    21°     Down     21°\n\"V\" tail maximum combination        Up    35°     Down     30°\nrudder elevator action",
+      "serial_numbers": "D-3293 and D-3699 through D-3998\n\nRequired equipment            Items 1, 101, 103, 113, 201, 202, 301, 302, 404(r), 601(b), 608."
+    },
+    {
+      "section_roman": "VIII",
+      "models": [
+        "F35"
+      ],
+      "engine": "Continental E-185-11 with S/N 5122D and above (see Engine Spec. E-246)",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 205
+      },
+      "fuel_grade": "80 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 202,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 175,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 130,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2750
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing gear      (+83.2) to (+85.1) at 2750 lbs.\nextended)                    (+80.1) to (+85.7) at 2525 lbs.\n(+76.5) to (+85.7) at 2265 lbs. or less\n\nA-777                                               10\n\nVIII. Model F35, Bonanza, 4 PCLM (Utility Category)      (cont'd)\n\n2800\n2700\n2600\n\nPOUNDS     2500                                    AFT\nLIMIT\n2400\n2300\nFRONT\n2200                  LIMIT\n2100\n76         78      80    82               84       86\nINCHES",
+      "control_surfaces": "Wing flaps                                          Down    30°\nAileron tab                                         Fixed\nAileron                                Up   20°     Down    20°\nElevator tab                           Up    8°     Down    31°\n\"V\" tail elevator action               Up   22.5°   Down    17.5°\n\"V\" tail rudder action                 Up   21°     Down    21°\n\"V\" tail maximum combination           Up   35°     Down    30°\nrudder elevator action",
+      "serial_numbers": "D-3999 through D-4391 (except D-4376)\n\nRequired equipment            Items 1, 101, 103, 113, 201, 202, 301, 302, 404(s), 601(b), 608.\n\n11                                                      A-777"
+    },
+    {
+      "section_roman": "IX",
+      "models": [
+        "G35"
+      ],
+      "engine": "Continental E-225-8 with S/N 30087 and above (see Engine Spec. E-246)",
+      "engine_limits": {
+        "rpm": 2650,
+        "hp": 225
+      },
+      "fuel_grade": "80 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 202,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 175,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 105,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 130,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2775
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing gear       (+83.2) to (+85.1) at 2775 lb.\nextended)                     (+79.9) to (+85.7) at 2525 lb.\n(+76.5) to (+85.7) at 2265 lb. or less\n\n2800\n2700\n2600\n\nPOUNDS     2500                               AFT\nLIMIT\n2400\n2300\nFRONT\n2200                LIMIT\n2100\n76       78      80    82            84       86\nINCHES\n(landing       (+82.8) to (+84.4) at 2850 lb.\ngear extended)           (+78.6) to (+85.4) at 2500 lb.\n(+76.5) to (+85.4) at 2325 lb.\n\n2900\n2800\n2700\n2600\n\nPOUNDS     2500\nAFT\n2400                            LIMIT\n\n2300                FRONT\nLIMIT\n2200\n2100\n76        78       80    82          84         86\nINCHES",
+      "control_surfaces": "Wing flaps                                               Down    30°\nAileron tab                                              Fixed\nAileron                                    Up   20°      Down    20°\nElevator tab                               Up    8°      Down    31°\n\"V\" tail elevator action                   Up   22.5°    Down    17.5°\n\"V\" tail rudder action                     Up   21°      Down    21°\n\"V\" tail maximum combination               Up   35°      Down    30°\nrudder elevator action",
+      "serial_numbers": "D-15002, D-4376 and D-4392 through D-4865\n\nRequired equipment                 Items 1, 101, 103, 113, 201, 202, 301, 302, 404(q), 601(b), 608.\n\nSpecifications Pertinent to All Models"
+    }
+  ]
+}

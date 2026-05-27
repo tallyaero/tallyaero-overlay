@@ -1,0 +1,273 @@
+{
+  "tcds_number": "5A6",
+  "revision": "68",
+  "revision_date": "July 29, 2015",
+  "tc_holder": "Textron Aviation Inc.",
+  "source_pdf": "5A6.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 7,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "180"
+      ],
+      "engine": "Continental O-470-A, O-470-J or O-470-K",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 225
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 184,
+          "unit": "mph"
+        },
+        "Vno": null,
+        "Vfe": {
+          "value": 100,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 122,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2550
+      },
+      "fuel_capacity": {
+        "total_gal": 60.0,
+        "usable_gal": 55.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane                          (+39.5) to (+45.8) at 2550 lbs.\n(+35.0) to (+45.8) at 2050 lbs. or less\nFloatplane with Edo 44-2425        (+39.3) to (+43.9) at 2700 lbs.\n(+35.0) to (+43.9) at 2040 lbs. or less\nFloatplane with Edo 249-2870       (+40.2) to (+43.9) at 2820 lbs.\n(+35.0) to (+43.9) at 2125 lbs. or less\nAmphibian with Edo 289-2700        (+38.3) to (+43.9) at 2850 lbs.\n(+36.0) to (+43.9) at 2400 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                 Takeoff                      0° & 20°\nLanding                     30° & 40°\nAilerons                       Up 20°                  Down 15°\nStabilizer                     Up   1° 30'             Down   8° 30'\nElevators (with stabilizer     Up 25°                  Down 23°\nfull down)\nRudder                       Right 24°                   Left   24°\n\n5A6                                                    4                                                       Rev. 68\n\nI.    Model 180 (cont’d)",
+      "serial_numbers": "604, 614, 30000 through 32661. Under delegation option provisions of Part 21 of\nthe Federal Aviation Regulations, Delegation Option Manufacturer No. CE-1 is\nauthorized to issue airworthiness certificates for airplanes S/N 30938 and up and\napprove repairs and alterations of airplanes S/N 604, 614, 30000 through 32661."
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "180A"
+      ],
+      "engine": "Continental O-470-K",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 230
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 184,
+          "unit": "mph"
+        },
+        "Vno": null,
+        "Vfe": {
+          "value": 100,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 122,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2650
+      },
+      "fuel_capacity": {
+        "total_gal": 60.0,
+        "usable_gal": 55.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane                          (+40.0) to (+45.8) at 2650 lbs.\n(+34.5) to (+45.8) at 2100 lbs. or less\nFloatplane with Edo 44-2425        (+39.3) to (+43.9) at 2700 lbs.\n(+35.0) to (+43.9) at 2050 lbs. or less\nFloatplane with Edo 249-2870       (+40.2) to (+43.9) at 2820 lbs.\n(+35.0) to (+43.9) at 2125 lbs. or less\nAmphibian with Edo 289-2700        (+38.3) to (+43.9) at 2850 lbs.\n(+36.0) to (+43.9) at 2400 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                 Takeoff                      0° &    20°\nLanding                     30° &    40°\nAilerons                       Up 20°                  Down     15°\nStabilizer                     Up   1° 30'             Down      8° 30'\nElevators (with stabilizer     Up 25°                  Down     23°\nfull down)\nRudder                       Right 24°                   Left   24°",
+      "serial_numbers": "Model 180A:       32662 through 32999, 50001 through 50355\nModel 180B:       50356 through 50661"
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "180C"
+      ],
+      "engine": "Continental O-470-L or O-470-R",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 230
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 184,
+          "unit": "mph"
+        },
+        "Vno": null,
+        "Vfe": {
+          "value": 100,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 122,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2650
+      },
+      "fuel_capacity": {
+        "total_gal": 65.0,
+        "usable_gal": 55.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane                          (+40.0) to (+45.8) at 2650 lbs.\n(+34.5) to (+45.8) at 2100 lbs. or less\nFloatplane with Edo 44-2425        (+39.3) to (+43.9) at 2700 lbs.\n(+35.0) to (+43.9) at 2050 lbs. or less\nFloatplane with Edo 249-2870       (+40.2) to (+43.9) at 2820 lbs.\n(+35.0) to (+43.9) at 2125 lbs. or less\nAmphibian with Edo 289-2700        (+38.3) to (+43.9) at 2850 lbs.\n(+36.0) to (+43.9) at 2400 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                 Takeoff                   0° &     20°\nLanding                  30° &     40°\nAilerons                       Up 20°               Down      15°\nStabilizer                     Up   1°              Down       8° 45'\nElevators (with stabilizer     Up 25°               Down      23°\nfull down)\nRudder                       Right 24°                 Left   24°",
+      "serial_numbers": "Model 180C:         624, 50662 through 50911\nModel 180D:         18050912 through 18051063\nModel 180E:         18051064 through 18051183\nModel 180F:         18051184 through 18051312"
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "180G"
+      ],
+      "engine": "Continental O-470-L or O-470-R",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 230
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 192,
+          "unit": "mph"
+        },
+        "Vno": null,
+        "Vfe": {
+          "value": 110,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 128,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2800
+      },
+      "fuel_capacity": {
+        "total_gal": 65.0,
+        "usable_gal": 60.0
+      },
+      "seats": 6,
+      "cg_range_raw": "Landplane                          (+38.5) to (+47.0) at 2800 lbs.\n(+33.5) to (+47.0) at 2100 lbs. or less\nFloatplane with Edo 249A-2870 (+40.2) to (+43.9) at 2820 lbs.\n(+35.0) to (+43.9) at 2125 lbs. or less\nFloatplane with Edo 628-2960       (+41.2) to (+43.9) at 2950 lbs.\n(+35.0) to (+43.9) at 2125 lbs. or less\nAmphibian with Edo 597-2790        (+38.8) to (+43.9) at 2950 lbs.\n(+36.0) to (+43.9) at 2400 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                                            Down 38° +2°, -1°\nAilerons                      Up 20° ±2°              Down 14° ±2°\nStabilizer                    Up   0° 45' ±15'        Down  8° 45' ±15'\nElevators (with stabilizer    Up 25° ±1°              Down 23° ±1°\nfull down)\nRudder (parallel to W.L. or\nperpendicular to hinge)    Right 24° ±1°               Left   24° ±1°",
+      "serial_numbers": "Model 180G:      18051313 through 18051445\nModel 180H:      645, 18051446 through 18052284"
+    },
+    {
+      "section_roman": "V",
+      "models": [
+        "180J",
+        "Skywagon"
+      ],
+      "engine": "Continental O-470-R, S/N 18052285 through 18052500",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 230
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 192,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 110,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 123,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2800
+      },
+      "fuel_capacity": {
+        "total_gal": 65.0,
+        "usable_gal": 60.0
+      },
+      "seats": 6,
+      "cg_range_raw": "Landplane                 (+38.5) to (+47.0) at 2800 lbs.\n(+33.5) to (+47.0) at 2100 lbs. or less\n628-2960 Floatplane       (+38.8) to (+43.9) at 2950 lbs.\nand   597-2790 Amphibian (+36.0) to (+43.9) at 2400 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                                             Down 40° +0°, -2°\nAilerons                      Up 20° ±2°               Down 14° ±2°\nStabilizer                    Up   0° 45' ±15'         Down  8° 45' ±15'\nElevators (with stabilizer    Up 25° ±1°               Down 23° ±1°\nfull down)\nRudder (parallel to W.L. or\nperpendicular to hinge)    Right 24° ±1°                Left   24° ±1°",
+      "serial_numbers": "Model 180J: 18052285 through 18052770, except 18052490"
+    },
+    {
+      "section_roman": "VI",
+      "models": [
+        "180K",
+        "Skywagon"
+      ],
+      "engine": "Continental O-470-U",
+      "engine_limits": {
+        "rpm": 2400,
+        "hp": 230
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline (S/N 18052771 through 18052905)",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 169,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 139,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 10,
+          "unit": "knots"
+        },
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2800
+      },
+      "fuel_capacity": {
+        "total_gal": 61.0,
+        "usable_gal": 56.0
+      },
+      "seats": 6,
+      "cg_range_raw": "Landplane                 (+38.5) to (+47.0) at 2800 lbs.\n(+33.5) to (+47.0) at 2100 lbs. or less\n628-2960 Floatplane       (+38.8) to (+43.9) at 2950 lbs.\nand   597-2790 Amphibian (+36.0) to (+43.9) at 2400 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                                             Down 40° +0°, -2°\nAilerons                      Up 20° ±2°               Down 14° ±2°\nStabilizer                    Up   0° 45' ±15'         Down  8° 45' ±15'\nElevators (with stabilizer    Up 25° ±1°               Down 23° ±1°\nfull down)\nRudder (parallel to W.L. or\nperpendicular to hinge)    Right 24° ±1°                Left   24° ±1°",
+      "serial_numbers": "Model 180K:       18052771 through 18052905                 (1977)\n18052906 through 18053000                 (1978)\n18052490, 18053001 thru 18053115          (1979)\n18053116 through 18053167                 (1980)\n18053168 through 18053203                 (1981)\n\n5A6                                                           16                                                        Rev. 68\n\nDATA PERTINENT TO ALL MODELS"
+    },
+    {
+      "section_roman": "C",
+      "models": [
+        "180H",
+        "S/N",
+        "and"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": null,
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {},
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": null
+    }
+  ]
+}

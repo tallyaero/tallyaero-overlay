@@ -1,0 +1,172 @@
+{
+  "tcds_number": "1A4",
+  "revision": "24",
+  "revision_date": "August 7, 2006",
+  "tc_holder": "Piper Aircraft, Inc.",
+  "source_pdf": "1A4.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 4,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "PA-20"
+      ],
+      "engine": "Lycoming O-290-D",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 125
+      },
+      "fuel_grade": "80 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 158,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 126,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 80,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 106,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1800
+      },
+      "fuel_capacity": {
+        "total_gal": 36.0,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": "20-1 and up.\n\nRequired Equipment                   In addition to the pertinent required basic equipment specified in CAR 3, the following\nitems of equipment must be installed:\nItems 1(a), 101, 201(a), 202, 204(a), and 401(a)."
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "PA-20"
+      ],
+      "engine": "Lycoming O-235-C1",
+      "engine_limits": {
+        "rpm": 2800,
+        "hp": 115
+      },
+      "fuel_grade": "80 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 117,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 105,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1750
+      },
+      "fuel_capacity": {
+        "total_gal": 36.0,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": "20-1 and up.\n\nRequired Equipment            In addition to the pertinent required basic equipment specified in CAR 3, the following\nitems of equipment must be installed:\nItems 2(a), 201(a), 202, 204(a), and 401(b)."
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "PA-20S and PA-20S \"115\""
+      ],
+      "engine": "Model PA-20S:            Lycoming O-290-D",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 125
+      },
+      "fuel_grade": "Lycoming O-290D & O-235-C1: 80 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 140,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 117,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 80,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 105,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1738
+      },
+      "fuel_capacity": {
+        "total_gal": 36.0,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": "20-1 and up.\n\nRequired Equipment         In addition to the pertinent required basic equipment specified in CAR 3, the following\nitems of equipment must be installed:\nModel PA-20S:                   Items 1(b), 105, 106, 209(a), and 401(c).\nModel PA-20S \"115\":             Items 2(d), 106, 209(a), and 401(c).\nModel PA-20S \"135\":             Items 3(b), 107, 108, 209(a), and 401(e)."
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "PA-20"
+      ],
+      "engine": "Lycoming O-290-D2",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 135
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 158,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 126,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 80,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 106,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1950
+      },
+      "fuel_capacity": {
+        "total_gal": 36.0,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": "20-877 and up.\n\nRequired Equipment                 In addition to the pertinent required basic equipment specified in CAR 3, the following\nitems of equipment must be installed:\nItems 3(a), 107, 201(a), 202, 204(a), and 401(d).\n\nSpecifications Pertinent to All Models"
+    }
+  ]
+}

@@ -1,0 +1,298 @@
+/* ══════════════════════════════════════════════════════════════
+   TALLYAERO DESIGN TOKENS — EM Diagram (mirror of monorepo)
+   Source of truth: tallyaero/packages/ui/src/web/tokens.css
+   Sync via Phase 7 cross-app reciprocity scripts (do not edit
+   in isolation — propagate changes to both apps + the monorepo).
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Web fonts ─────────────────────────────────────────────────
+   For Phase 5 we use Google Fonts CDN. Phase 6 will bundle the
+   .woff2 files locally so the desktop binary works offline.
+   ──────────────────────────────────────────────────────────────*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ══════════════════════════════════════════════════════════════
+   Brand colors (immutable across themes)
+   ══════════════════════════════════════════════════════════════ */
+:root {
+  --ta-brand-blue: #0d59f2;
+  --ta-brand-blue-light: #3B82F6;
+  --ta-brand-blue-dark: #0a47c9;
+  --ta-brand-orange: #f27b0d;
+  --ta-brand-orange-light: #f59e0b;
+  --ta-brand-orange-dark: #c2410c;
+  --ta-brand-purple: #7C3AED;
+
+  /* Sidebar (always dark, both themes) */
+  --ta-sidebar-bg: #0a0e17;
+  --ta-sidebar-hover: #161e2d;
+  --ta-sidebar-active: var(--ta-brand-blue);
+  --ta-sidebar-border: rgba(255, 255, 255, 0.1);
+  --ta-sidebar-width-collapsed: 64px;
+  --ta-sidebar-width-expanded: 240px;
+
+  /* Status colors (immutable) */
+  --ta-success: #22c55e;
+  --ta-warning: #f27b0d;
+  --ta-danger:  #ef4444;
+  --ta-info:    #0d59f2;
+
+  /* Fonts */
+  --ta-font-sans: 'Space Grotesk', 'Inter', system-ui, -apple-system, sans-serif;
+  --ta-font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --ta-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Flight categories (FAA standard) */
+  --ta-vfr:  #48bb78;
+  --ta-mvfr: #3182ce;
+  --ta-ifr:  #e53e3e;
+  --ta-lifr: #D946EF;
+
+  /* Motion */
+  --ta-motion-fast:        100ms;
+  --ta-motion-base:        200ms;
+  --ta-motion-deliberate:  400ms;
+  --ta-ease-standard:      cubic-bezier(0.4, 0, 0.2, 1);
+  --ta-ease-spring:        cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Phase 5: chart-specific Ps gradient stops (viridis, colorblind-safe).
+     Replaces the legacy red→green gradient in the EM diagram. */
+  --ta-ps-neg-strong: #440154;
+  --ta-ps-neg-mid:    #3b528b;
+  --ta-ps-zero:       #21918c;
+  --ta-ps-pos-mid:    #5ec962;
+  --ta-ps-pos-strong: #fde725;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Light mode (default)
+   ══════════════════════════════════════════════════════════════ */
+:root,
+[data-theme="light"] {
+  --ta-surface-primary:    #f8fafc;
+  --ta-surface-secondary:  #ffffff;
+  --ta-surface-tertiary:   #f1f5f9;
+  --ta-surface-elevated:   #ffffff;
+  --ta-surface-field:      #eef2f7;
+
+  --ta-text-primary:       #0f172a;
+  --ta-text-secondary:     #64748b;
+  --ta-text-tertiary:      #94a3b8;
+  --ta-text-quaternary:    #cbd5e1;
+
+  --ta-border-primary:     #e2e8f0;
+  --ta-border-secondary:   #f1f5f9;
+  --ta-border-focus:       var(--ta-brand-blue);
+
+  --ta-shadow-xs:  0 1px 2px  rgba(0, 0, 0, 0.04);
+  --ta-shadow-sm:  0 1px 3px  rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --ta-shadow-md:  0 4px 6px  -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+  --ta-shadow-lg:  0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -4px rgba(0, 0, 0, 0.02);
+
+  --ta-success-text:   #15803d;
+  --ta-success-bg:     #dcfce7;
+  --ta-success-border: #bbf7d0;
+  --ta-warning-text:   #b45309;
+  --ta-warning-bg:     #fef3c7;
+  --ta-warning-border: #fde68a;
+  --ta-danger-text:    #b91c1c;
+  --ta-danger-bg:      #fecaca;
+  --ta-danger-border:  #fca5a5;
+  --ta-info-text:      #1d4ed8;
+  --ta-info-bg:        #dbeafe;
+  --ta-info-border:    #bfdbfe;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Dark mode
+   ══════════════════════════════════════════════════════════════ */
+[data-theme="dark"],
+.dark {
+  --ta-surface-primary:    #0a0e17;
+  --ta-surface-secondary:  #161e2d;
+  --ta-surface-tertiary:   #1e293b;
+  --ta-surface-elevated:   #161e2d;
+  --ta-surface-field:      #111a2b;
+
+  --ta-text-primary:       #f1f5f9;
+  --ta-text-secondary:     #cbd5e1;
+  --ta-text-tertiary:      #94a3b8;
+  --ta-text-quaternary:    #64748b;
+
+  --ta-border-primary:     #222f49;
+  --ta-border-secondary:   #1e293b;
+
+  --ta-shadow-xs: none;
+  --ta-shadow-sm: none;
+  --ta-shadow-md: none;
+  --ta-shadow-lg: none;
+
+  --ta-success-text:   #4ade80;
+  --ta-success-bg:     rgba(34, 197, 94, 0.15);
+  --ta-success-border: rgba(34, 197, 94, 0.3);
+  --ta-warning-text:   #fbbf24;
+  --ta-warning-bg:     rgba(242, 123, 13, 0.15);
+  --ta-warning-border: rgba(242, 123, 13, 0.3);
+  --ta-danger-text:    #f87171;
+  --ta-danger-bg:      rgba(239, 68, 68, 0.15);
+  --ta-danger-border:  rgba(239, 68, 68, 0.3);
+  --ta-info-text:      #60a5fa;
+  --ta-info-bg:        rgba(13, 89, 242, 0.15);
+  --ta-info-border:    rgba(13, 89, 242, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    /* Apply the same dark-mode token values when the OS theme is dark
+       and no explicit data-theme is set. Copy from .dark block. */
+    --ta-surface-primary:    #0a0e17;
+    --ta-surface-secondary:  #161e2d;
+    --ta-surface-tertiary:   #1e293b;
+    --ta-surface-elevated:   #161e2d;
+    --ta-surface-field:      #111a2b;
+    --ta-text-primary:       #f1f5f9;
+    --ta-text-secondary:     #cbd5e1;
+    --ta-text-tertiary:      #94a3b8;
+    --ta-text-quaternary:    #64748b;
+    --ta-border-primary:     #222f49;
+    --ta-border-secondary:   #1e293b;
+    --ta-shadow-xs: none;
+    --ta-shadow-sm: none;
+    --ta-shadow-md: none;
+    --ta-shadow-lg: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Personality presets (radius + font + weight scale)
+   Default: standard. Set data-personality="sharp" or "soft" on
+   <html> or any ancestor to switch.
+   ══════════════════════════════════════════════════════════════ */
+:root,
+[data-personality="standard"] {
+  --ta-radius-xs:   4px;
+  --ta-radius-sm:   6px;
+  --ta-radius-md:   8px;
+  --ta-radius-lg:   10px;
+  --ta-radius-xl:   12px;
+  --ta-radius-2xl:  16px;
+  --ta-radius-full: 9999px;
+  --ta-border-width: 1px;
+  --ta-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --ta-font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --ta-font-weight-heading: 700;
+  --ta-font-weight-body:    400;
+  --ta-font-weight-label:   600;
+  --ta-letter-spacing-heading: -0.01em;
+  --ta-letter-spacing-display: -0.025em;
+}
+
+[data-personality="sharp"] {
+  --ta-radius-xs: 0px; --ta-radius-sm: 0px; --ta-radius-md: 0px;
+  --ta-radius-lg: 0px; --ta-radius-xl: 0px; --ta-radius-2xl: 0px;
+  --ta-radius-full: 9999px;
+  --ta-border-width: 1px;
+  --ta-font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --ta-font-display: 'Space Grotesk', system-ui, sans-serif;
+  --ta-font-weight-heading: 800;
+  --ta-font-weight-body:    500;
+  --ta-font-weight-label:   700;
+  --ta-letter-spacing-heading: -0.02em;
+  --ta-letter-spacing-display: -0.03em;
+}
+
+[data-personality="soft"] {
+  --ta-radius-xs:   8px;
+  --ta-radius-sm:  10px;
+  --ta-radius-md:  14px;
+  --ta-radius-lg:  18px;
+  --ta-radius-xl:  22px;
+  --ta-radius-2xl: 28px;
+  --ta-radius-full: 9999px;
+  --ta-border-width: 0.5px;
+  --ta-font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --ta-font-display: 'DM Sans', system-ui, sans-serif;
+  --ta-font-weight-heading: 600;
+  --ta-font-weight-body:    400;
+  --ta-font-weight-label:   500;
+  --ta-letter-spacing-heading: -0.005em;
+  --ta-letter-spacing-display: -0.01em;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LEGACY ALIASES — map our existing styles.css var names onto
+   the TallyAero tokens so every existing class instantly picks
+   up the new color/shadow values without rewriting markup.
+   Remove these aliases in Phase 5e once styles.css is rewritten
+   to consume --ta-* directly.
+   ══════════════════════════════════════════════════════════════ */
+:root {
+  --blue-primary:  var(--ta-brand-blue);
+  --blue-dark:     var(--ta-brand-blue-dark);
+  --orange-primary: var(--ta-brand-orange);
+  --orange-dark:    var(--ta-brand-orange-dark);
+  --navy-bg:       var(--ta-sidebar-bg);
+  --gray-bg:       var(--ta-surface-primary);
+  --text-dark:     var(--ta-text-primary);
+  --white:         var(--ta-surface-secondary);
+  --gray-border:   var(--ta-border-primary);
+  --card-shadow:   var(--ta-shadow-sm);
+  --link-blue:     var(--ta-brand-blue);
+  --link-danger:   var(--ta-danger);
+  --link-success:  var(--ta-success);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Apply the personality font globally.
+   Important: !important is intentional — overrides legacy
+   `font-family: 'Inter', 'Helvetica Neue', sans-serif` from
+   styles.css for the standard personality, and overrides
+   inline style props from Dash components.
+   ══════════════════════════════════════════════════════════════ */
+html, body,
+button, input, select, textarea,
+h4, h5, h6, p, span, div, a, li, td, th, label {
+  font-family: var(--ta-font-family, 'Inter', sans-serif) !important;
+}
+h1, h2, h3,
+.display, .ta-display, .hero-number {
+  font-family: var(--ta-font-display, 'Space Grotesk', sans-serif) !important;
+  font-weight: var(--ta-font-weight-heading);
+  letter-spacing: var(--ta-letter-spacing-display);
+}
+code, pre, kbd, samp,
+.font-mono, .ta-mono, .tabular-nums {
+  font-family: var(--ta-font-mono) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Universal radius pass.
+   Buttons, inputs, selects, textareas pick up the personality
+   radius unless they explicitly opt out with .ta-no-radius or
+   .rounded-full.
+   ══════════════════════════════════════════════════════════════ */
+button:not(.ta-no-radius):not(.rounded-full),
+[role="button"]:not(.ta-no-radius):not(.rounded-full),
+input:not([type="checkbox"]):not([type="radio"]):not(.ta-no-radius),
+select:not(.ta-no-radius),
+textarea:not(.ta-no-radius) {
+  border-radius: var(--ta-radius-sm, 6px);
+  transition:
+    background-color  var(--ta-motion-fast)  var(--ta-ease-standard),
+    border-color      var(--ta-motion-fast)  var(--ta-ease-standard),
+    box-shadow        var(--ta-motion-fast)  var(--ta-ease-standard),
+    color             var(--ta-motion-fast)  var(--ta-ease-standard);
+}
+dialog, .modal-content,
+[role="dialog"], [role="alertdialog"],
+[role="menu"], [role="listbox"] {
+  border-radius: var(--ta-radius-lg, 10px);
+}
+
+/* Focus ring — TallyAero blue, 2px ring, 20% alpha background */
+:where(button, input, select, textarea, [role="button"]):focus-visible {
+  outline: none;
+  border-color: var(--ta-brand-blue) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ta-brand-blue) 20%, transparent);
+}

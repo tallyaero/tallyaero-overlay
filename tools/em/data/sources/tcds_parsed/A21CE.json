@@ -1,0 +1,87 @@
+{
+  "tcds_number": "A21CE",
+  "revision": "16",
+  "revision_date": "January 8, 2013",
+  "tc_holder": "Record: Bellanca Aircraft Corporation transferred TC A21CE to",
+  "source_pdf": "A21CE.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 2,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "8KCAB"
+      ],
+      "engine": "Lycoming IO-320-E1A or IO-320-E1B or AEIO-320-E1B or AEIO-320-E2B",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 180,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 160,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1800
+      },
+      "fuel_capacity": {
+        "total_gal": 40.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "8GCBC"
+      ],
+      "engine": "Lycoming O-360-C2A, C2E, C1A, C1E, or C1G",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "91/96 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 162,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 130,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 115,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2150
+      },
+      "fuel_capacity": {
+        "total_gal": 36.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": null
+    }
+  ]
+}

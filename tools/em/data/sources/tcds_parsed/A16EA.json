@@ -1,0 +1,52 @@
+{
+  "tcds_number": "A16EA",
+  "revision": "11",
+  "revision_date": "August 25, 1993",
+  "tc_holder": null,
+  "source_pdf": "A16EA.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 1,
+  "variants": [
+    {
+      "section_roman": "IV",
+      "models": [
+        "AG-5B",
+        "Tiger",
+        "4"
+      ],
+      "engine": "Lycoming O-360-A4K (Carburetor HA-6 with setting 10-5092)",
+      "engine_limits": {
+        "rpm": 700,
+        "hp": 180
+      },
+      "fuel_grade": "100/100 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 200,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 165,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 120,
+          "unit": "mph"
+        },
+        "Va": null
+      },
+      "max_weight_lb": {
+        "utility_landplane": 2050,
+        "normal_landplane": 2400
+      },
+      "fuel_capacity": {
+        "total_gal": 51.0,
+        "usable_gal": null
+      },
+      "seats": 2,
+      "cg_range_raw": "Normal      (+89.0) to        (+92.50) at          2,400 lbs.\n(+81.0) to        (+92.50) at          1,920 lbs.\nUtility     (+83.17) to       (+85.32) at          2,050 lbs.\n(+81.0) to        (+85.32) at          1,520 lbs.\nStraight line variation between points given.\n\nEmpty Weight C. G. Range       None",
+      "control_surfaces": "Elevator                       23° ± 1° up              17° ± 2°   down\n(Nominal from neutral)       Rudder                         25° ± 2° left            25° ± 2°   right\nAilerons                     15° + 2-0° up         7.5° + 2½-0°    down\nFlaps                                                   45° ± 2°   down\nElevator Trim Tab                14° ± 3° up            30° ± 1°   down",
+      "serial_numbers": "10000 and up (Normal and Utility Category)\n\nService Life Limit             Information with respect to service life limited parts on this Model is contained in the\napplicable manufacturer's service manual, \"Model AA-5, AA-5A, AA-5B, AG-5B\nService Manual, \" Section 3-00, \"Service Life Limited Components.\" Service life limits\nappearing in this manual may not be changed without FAA Engineering approval.\n\nService life limited parts must be retired in accordance with the following schedule:\n\nComponent                          Part Number         Service Life (Hours)\nInboard Spar Assembly                        5102310-503             12,000\nWing Spar Assembly                           5201004-501             12,500\nWing Outboard Spar Assembly                  5201189-501             12,500\nShoulder Bolt                                901044-2                 7,250\n\nDATA PERTINENT TO ALL MODELS"
+    }
+  ]
+}

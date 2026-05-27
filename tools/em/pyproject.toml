@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tallyaero-em-diagram"
+version = "0.1.0-dev"
+description = "TallyAero Energy-Maneuverability Diagram Generator — interactive aircraft performance analysis."
+readme = "CLAUDE_CONTEXT.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+authors = [
+    { name = "Nicholas Len, TallyAero" }
+]
+keywords = [
+    "aviation",
+    "flight-training",
+    "energy-maneuverability",
+    "EM-diagram",
+    "aircraft-performance",
+    "dash",
+    "plotly",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Education",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Aerospace",
+]
+# Runtime deps live in requirements.txt to keep the PyInstaller spec single-source.
+# pyproject.toml is for editable installs and test discovery, not for distribution.
+dependencies = []
+
+[project.optional-dependencies]
+dev = []
+
+[tool.setuptools]
+# Source-tree layout — no src/ wrapper.
+package-dir = { "" = "." }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["core*", "callbacks*", "layouts*", "components*"]
+exclude = ["venv*", "tests*", "_ecosystem*", "build*", "dist*", "aircraft_data*", "airports*"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+]
+filterwarnings = [
+    # Plotly + Pydantic v2 occasionally raise DeprecationWarnings that aren't ours.
+    "ignore::DeprecationWarning:plotly.*",
+    "ignore::DeprecationWarning:pydantic.*",
+    "ignore::DeprecationWarning:jsonschema.*",
+]

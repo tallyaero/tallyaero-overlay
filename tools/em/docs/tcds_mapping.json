@@ -1,0 +1,1102 @@
+[
+  {
+    "filename": "Aeronca_Champ.json",
+    "name": "Aeronca Champ",
+    "type": "single_engine",
+    "tcds_number": "A-759",
+    "tcds_holder": "AERONCA AIRCRAFT CORP",
+    "publication": "FAA TCDS A-759 (Aeronca 7-series)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Aeronca_Chief.json",
+    "name": "Aeronca Chief",
+    "type": "single_engine",
+    "tcds_number": "A-781",
+    "tcds_holder": "AERONCA AIRCRAFT CORP",
+    "publication": "FAA TCDS A-781 (Aeronca 11-series)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "American_Champion_Citabria.json",
+    "name": "American Champion Citabria",
+    "type": "single_engine",
+    "tcds_number": "A-759",
+    "tcds_holder": "AMERICAN CHAMPION AIRCRAFT CORP",
+    "publication": "FAA TCDS A-759 (Champion/Bellanca/ACA 7-series Citabria)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "American_Champion_Decathlon.json",
+    "name": "American Champion Decathlon",
+    "type": "single_engine",
+    "tcds_number": "A-759",
+    "tcds_holder": "AMERICAN CHAMPION AIRCRAFT CORP",
+    "publication": "FAA TCDS A-759 (ACA 8KCAB Decathlon)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "American_Champion_Scout.json",
+    "name": "American Champion Scout",
+    "type": "single_engine",
+    "tcds_number": "A-759",
+    "tcds_holder": "AMERICAN CHAMPION AIRCRAFT CORP",
+    "publication": "FAA TCDS A-759 (ACA 8GCBC Scout)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Aviat Husky A-1C.json",
+    "name": "Aviat Husky A-1C",
+    "type": "single_engine",
+    "tcds_number": "A22NM",
+    "tcds_holder": "Aviat Aircraft Inc",
+    "publication": "FAA TCDS A22NM Rev 31 (12/07/2017)",
+    "match_source": "fuzzy",
+    "matched_model": "A-1"
+  },
+  {
+    "filename": "Beechcraft_Baron_58.json",
+    "name": "Beechcraft Baron 58",
+    "type": "multi_engine",
+    "tcds_number": "3A16",
+    "tcds_holder": "Beechcraft Corporation",
+    "publication": "FAA TCDS 3A16 Rev 91 (12/21/2015)",
+    "match_source": "fuzzy",
+    "matched_model": "58"
+  },
+  {
+    "filename": "Beechcraft_Bonanza_A36.json",
+    "name": "Beechcraft Bonanza A36",
+    "type": "single_engine",
+    "tcds_number": "3A15",
+    "tcds_holder": "TEXTRON AVIATION INC.",
+    "publication": "FAA TCDS 3A15 (Beechcraft A36/B36TC Bonanza)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Beechcraft_Bonanza_F33.json",
+    "name": "Beechcraft Bonanza F33",
+    "type": "single_engine",
+    "tcds_number": "3A15",
+    "tcds_holder": "TEXTRON AVIATION INC.",
+    "publication": "FAA TCDS 3A15 (Beechcraft F33/F33A Bonanza)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Beechcraft_Musketeer.json",
+    "name": "Beechcraft Musketeer",
+    "type": "single_engine",
+    "tcds_number": "A12CE",
+    "tcds_holder": "TEXTRON AVIATION INC.",
+    "publication": "FAA TCDS A12CE (Beechcraft 19/23/24 Sport/Musketeer)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Beechcraft_Sierra.json",
+    "name": "Beechcraft Sierra",
+    "type": "single_engine",
+    "tcds_number": "A12CE",
+    "tcds_holder": "TEXTRON AVIATION INC.",
+    "publication": "FAA TCDS A12CE Rev (Beechcraft C24R Sierra)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Beechcraft_Sundowner.json",
+    "name": "Beechcraft Sundowner",
+    "type": "single_engine",
+    "tcds_number": "A12CE",
+    "tcds_holder": "TEXTRON AVIATION INC.",
+    "publication": "FAA TCDS A12CE Rev (Beechcraft C23 Sundowner)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Bellanca_Super_Viking.json",
+    "name": "Bellanca Super Viking",
+    "type": "single_engine",
+    "tcds_number": "A00003AK",
+    "tcds_holder": "ALEXANDRIA AIRCRAFT LLC (BELLANCA)",
+    "publication": "FAA TCDS A00003AK (Bellanca 17-30 Super Viking)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "CAP_232.json",
+    "name": "CAP 232",
+    "type": "single_engine",
+    "tcds_number": "EASA.A.072",
+    "tcds_holder": "MUDRY AVIATION (CAP AVIATION)",
+    "publication": "EASA TCDS A.072 (Mudry CAP 21/231/232)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Cessna_150.json",
+    "name": "Cessna 150",
+    "type": "single_engine",
+    "tcds_number": "3A19",
+    "tcds_holder": "Cessna Aircraft Company",
+    "publication": "FAA TCDS 3A19 Rev 40 (11/15/1997)",
+    "match_source": "fuzzy",
+    "matched_model": "150"
+  },
+  {
+    "filename": "Cessna_152.json",
+    "name": "Cessna 152",
+    "type": "single_engine",
+    "tcds_number": "3A19",
+    "tcds_holder": "Cessna Aircraft Company",
+    "publication": "FAA TCDS 3A19 Rev 40 (11/15/1997)",
+    "match_source": "fuzzy",
+    "matched_model": "152"
+  },
+  {
+    "filename": "Cessna_162.json",
+    "name": "Cessna 162",
+    "type": "single_engine",
+    "tcds_number": "n/a",
+    "tcds_holder": "CESSNA / TEXTRON AVIATION",
+    "publication": "ASTM F2245 (LSA) + Cessna 162 POH (2010)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Cessna_172M.json",
+    "name": "Cessna 172M",
+    "type": "single_engine",
+    "tcds_number": "3A12",
+    "tcds_holder": "Cessna Aircraft Company",
+    "publication": "FAA TCDS 3A12 Rev 75 (12/21/2007)",
+    "match_source": "fuzzy",
+    "matched_model": "172M"
+  },
+  {
+    "filename": "Cessna_172N.json",
+    "name": "Cessna 172N",
+    "type": "single_engine",
+    "tcds_number": "3A12",
+    "tcds_holder": "Cessna Aircraft Company",
+    "publication": "FAA TCDS 3A12 Rev 75 (12/21/2007)",
+    "match_source": "fuzzy",
+    "matched_model": "172N"
+  },
+  {
+    "filename": "Cessna_172P.json",
+    "name": "Cessna 172P",
+    "type": "single_engine",
+    "tcds_number": "3A12",
+    "tcds_holder": "Cessna Aircraft Company",
+    "publication": "FAA TCDS 3A12 Rev 75 (12/21/2007)",
+    "match_source": "fuzzy",
+    "matched_model": "172P"
+  },
+  {
+    "filename": "Cessna_172R.json",
+    "name": "Cessna 172R",
+    "type": "single_engine",
+    "tcds_number": "3A12",
+    "tcds_holder": "Cessna Aircraft Company",
+    "publication": "FAA TCDS 3A12 Rev 75 (12/21/2007)",
+    "match_source": "fuzzy",
+    "matched_model": "172R"
+  },
+  {
+    "filename": "Cessna_172S.json",
+    "name": "Cessna 172S",
+    "type": "single_engine",
+    "tcds_number": "3A12",
+    "tcds_holder": "Cessna Aircraft Company",
+    "publication": "FAA TCDS 3A12 Rev 75 (12/21/2007)",
+    "match_source": "fuzzy",
+    "matched_model": "172S"
+  },
+  {
+    "filename": "Cessna_177.json",
+    "name": "Cessna 177",
+    "type": "single_engine",
+    "tcds_number": "A13CE",
+    "tcds_holder": "Cessna Aircraft Company",
+    "publication": "FAA TCDS A13CE Rev 28 (11/16/2010)",
+    "match_source": "fuzzy",
+    "matched_model": "177"
+  },
+  {
+    "filename": "Cessna_177RG.json",
+    "name": "Cessna 177RG",
+    "type": "single_engine",
+    "tcds_number": "A20CE",
+    "tcds_holder": "Textron Aviation Inc.",
+    "publication": "FAA TCDS A20CE Rev 24 (10/31/2024)",
+    "match_source": "fuzzy",
+    "matched_model": "177RG"
+  },
+  {
+    "filename": "Cessna_182P.json",
+    "name": "Cessna 182P",
+    "type": "single_engine",
+    "tcds_number": "3A13",
+    "tcds_holder": "Cessna Aircraft Company",
+    "publication": "FAA TCDS 3A13 Rev 68 (12/28/2007)",
+    "match_source": "fuzzy",
+    "matched_model": "182P"
+  },
+  {
+    "filename": "Cessna_182Q.json",
+    "name": "Cessna 182Q",
+    "type": "single_engine",
+    "tcds_number": "3A13",
+    "tcds_holder": "Cessna Aircraft Company",
+    "publication": "FAA TCDS 3A13 Rev 68 (12/28/2007)",
+    "match_source": "fuzzy",
+    "matched_model": "182Q"
+  },
+  {
+    "filename": "Cessna_182T.json",
+    "name": "Cessna 182T",
+    "type": "single_engine",
+    "tcds_number": "3A13",
+    "tcds_holder": "Cessna Aircraft Company",
+    "publication": "FAA TCDS 3A13 Rev 68 (12/28/2007)",
+    "match_source": "fuzzy",
+    "matched_model": "182T"
+  },
+  {
+    "filename": "Cessna_206.json",
+    "name": "Cessna 206",
+    "type": "single_engine",
+    "tcds_number": "H2SW",
+    "tcds_holder": "Bell Helicopter Textron A Division of Textron Canada",
+    "publication": "FAA TCDS H2SW Rev 38 (11/22/1999)",
+    "match_source": "fuzzy",
+    "matched_model": "206"
+  },
+  {
+    "filename": "Cessna_210.json",
+    "name": "Cessna 210",
+    "type": "single_engine",
+    "tcds_number": "3A21",
+    "tcds_holder": "TEXTRON AVIATION INC.",
+    "publication": "FAA TCDS 3A21 (Cessna 205/206/207/210)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Cessna_310R.json",
+    "name": "Cessna 310R",
+    "type": "multi_engine",
+    "tcds_number": "3A10",
+    "tcds_holder": "Cessna Aircraft Company",
+    "publication": "FAA TCDS 3A10 Rev 61 (11/15/1997)",
+    "match_source": "fuzzy",
+    "matched_model": "310R"
+  },
+  {
+    "filename": "Champion_7EC.json",
+    "name": "Champion 7EC",
+    "type": "single_engine",
+    "tcds_number": "A-759",
+    "tcds_holder": "American Champion Aircraft Corp.",
+    "publication": "FAA TCDS A-759 Rev 72 (10/19/2009)",
+    "match_source": "fuzzy",
+    "matched_model": "7EC"
+  },
+  {
+    "filename": "Cirrus_SR20.json",
+    "name": "Cirrus SR20",
+    "type": "single_engine",
+    "tcds_number": "A00009CH",
+    "tcds_holder": "Cirrus Design Corporation",
+    "publication": "FAA TCDS A00009CH Rev 18 (12/29/2011)",
+    "match_source": "fuzzy",
+    "matched_model": "SR20"
+  },
+  {
+    "filename": "Cirrus_SR22.json",
+    "name": "Cirrus SR22",
+    "type": "single_engine",
+    "tcds_number": "A00009CH",
+    "tcds_holder": "Cirrus Design Corporation",
+    "publication": "FAA TCDS A00009CH Rev 18 (12/29/2011)",
+    "match_source": "fuzzy",
+    "matched_model": "SR22"
+  },
+  {
+    "filename": "Cirrus_SR22T.json",
+    "name": "Cirrus SR22T",
+    "type": "single_engine",
+    "tcds_number": "A00009CH",
+    "tcds_holder": "Cirrus Design Corporation",
+    "publication": "FAA TCDS A00009CH Rev 18 (12/29/2011)",
+    "match_source": "fuzzy",
+    "matched_model": "SR22T"
+  },
+  {
+    "filename": "Diamond_DA20-A1.json",
+    "name": "Diamond DA20-A1",
+    "type": "single_engine",
+    "tcds_number": "TA4CH",
+    "tcds_holder": "Diamond Aircraft Industries",
+    "publication": "FAA TCDS TA4CH Rev 10 (10/24/2002)",
+    "match_source": "fuzzy",
+    "matched_model": "DA20-A1"
+  },
+  {
+    "filename": "Diamond_DA20-C1.json",
+    "name": "Diamond DA20-C1",
+    "type": "single_engine",
+    "tcds_number": "TA4CH",
+    "tcds_holder": "Diamond Aircraft Industries",
+    "publication": "FAA TCDS TA4CH Rev 10 (10/24/2002)",
+    "match_source": "fuzzy",
+    "matched_model": "DA20-C1"
+  },
+  {
+    "filename": "Diamond_DA40-180.json",
+    "name": "Diamond DA40-180",
+    "type": "single_engine",
+    "tcds_number": "A47CE",
+    "tcds_holder": "DIAMOND AIRCRAFT INDUSTRIES",
+    "publication": "FAA TCDS A47CE (Diamond DA-40 series)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Diamond_DA40-NG.json",
+    "name": "Diamond DA40-NG",
+    "type": "single_engine",
+    "tcds_number": "A47CE",
+    "tcds_holder": "DIAMOND AIRCRAFT INDUSTRIES",
+    "publication": "FAA TCDS A47CE Rev (Diamond DA40 NG, AE300 engine)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Diamond_DA42-L360.json",
+    "name": "Diamond DA42-L360",
+    "type": "multi_engine",
+    "tcds_number": "A56CE",
+    "tcds_holder": "DIAMOND AIRCRAFT INDUSTRIES",
+    "publication": "FAA TCDS A56CE (Diamond DA42 TwinStar)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Diamond_DA42-NG.json",
+    "name": "Diamond DA42-NG",
+    "type": "multi_engine",
+    "tcds_number": "A56CE",
+    "tcds_holder": "DIAMOND AIRCRAFT INDUSTRIES",
+    "publication": "FAA TCDS A56CE Rev (Diamond DA42 NG)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Diamond_DA62.json",
+    "name": "Diamond DA62",
+    "type": "multi_engine",
+    "tcds_number": "A00010NY",
+    "tcds_holder": "DIAMOND AIRCRAFT INDUSTRIES",
+    "publication": "FAA TCDS A00010NY (Diamond DA62)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Ercoupe_415C.json",
+    "name": "Ercoupe 415C",
+    "type": "single_engine",
+    "tcds_number": "A-718",
+    "tcds_holder": "ERCO/UNIVAIR",
+    "publication": "FAA TCDS A-718 (Erco / Forney / Alon / Mooney M-10)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Evektor_SportStar.json",
+    "name": "Evektor SportStar",
+    "type": "single_engine",
+    "tcds_number": "ASTM F2245",
+    "tcds_holder": "EVEKTOR-AEROTECHNIK A.S.",
+    "publication": "ASTM F2245 (Evektor SportStar SLSA)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Extra_300.json",
+    "name": "Extra 300",
+    "type": "single_engine",
+    "tcds_number": "EASA.A.034",
+    "tcds_holder": "EXTRA FLUGZEUGPRODUKTIONS- UND VERTRIEBS-GmbH",
+    "publication": "EASA TCDS A.034 (Extra EA-300 series)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Extra_300L.json",
+    "name": "Extra 300L",
+    "type": "single_engine",
+    "tcds_number": "EASA.A.034",
+    "tcds_holder": "EXTRA FLUGZEUGPRODUKTIONS- UND VERTRIEBS-GmbH",
+    "publication": "EASA TCDS A.034 (Extra EA-300/L)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Extra_330SC.json",
+    "name": "Extra 330SC",
+    "type": "single_engine",
+    "tcds_number": "EASA.A.075",
+    "tcds_holder": "EXTRA FLUGZEUGPRODUKTIONS- UND VERTRIEBS-GmbH",
+    "publication": "EASA TCDS A.075 (Extra EA-330SC unlimited aerobatic)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Extra_NG.json",
+    "name": "Extra NG",
+    "type": "single_engine",
+    "tcds_number": "EASA.A.595",
+    "tcds_holder": "EXTRA AIRCRAFT GmbH",
+    "publication": "EASA TCDS A.595 (Extra NG)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Flight_Design_CTLS.json",
+    "name": "Flight Design CTLS",
+    "type": "single_engine",
+    "tcds_number": "ASTM F2245",
+    "tcds_holder": "FLIGHT DESIGN GmbH",
+    "publication": "ASTM F2245 (Flight Design CTLS SLSA)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Focke-Wulf_FW_190_A-8.json",
+    "name": "Focke-Wulf Fw 190 A-8",
+    "type": "single_engine",
+    "tcds_number": "Military",
+    "tcds_holder": "FOCKE-WULF FLUGZEUGBAU GmbH",
+    "publication": "Fw 190 A-8 Flugzeug Handbuch (Luftwaffe Pilot's Manual, 1944)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "GameBird_GB1.json",
+    "name": "GameBird GB1",
+    "type": "single_engine",
+    "tcds_number": "Experimental",
+    "tcds_holder": "GAMECOMPOSITES LIMITED",
+    "publication": "GameBird GB1 Pilot's Operating Handbook (UK-built, US-Experimental)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Grumman_AA-5.json",
+    "name": "Grumman AA-5",
+    "type": "single_engine",
+    "tcds_number": "A16EA",
+    "tcds_holder": "AMERICAN AIRCRAFT CORP",
+    "publication": "FAA TCDS A16EA (Grumman/American AA-5/AA-5A Cheetah)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Grumman_AA-5B.json",
+    "name": "Grumman AA-5B",
+    "type": "single_engine",
+    "tcds_number": "A16EA",
+    "tcds_holder": "AMERICAN AIRCRAFT CORP",
+    "publication": "FAA TCDS A16EA Rev (Grumman AA-5B Tiger)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Grumman_F6F-5_Hellcat.json",
+    "name": "Grumman F6F-5 Hellcat",
+    "type": "single_engine",
+    "tcds_number": "Military",
+    "tcds_holder": "GRUMMAN AIRCRAFT ENGINEERING CORP.",
+    "publication": "NAVAIR 01-85FB-1 F6F-5 Pilot's Handbook (US Navy, 1945)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Grumman_F8F-2_Bearcat.json",
+    "name": "Grumman F8F-2 Bearcat",
+    "type": "single_engine",
+    "tcds_number": "LTC-23",
+    "tcds_holder": "Grumman American Aviation Corporation",
+    "publication": "FAA TCDS LTC-23 Rev 2 (08/29/1947)",
+    "match_source": "fuzzy",
+    "matched_model": "F8F-1 (Navy)"
+  },
+  {
+    "filename": "Kawanishi_N1K2-J_Shiden-Kai.json",
+    "name": "Kawanishi N1K2-J Shiden-Kai",
+    "type": "single_engine",
+    "tcds_number": "Military",
+    "tcds_holder": "KAWANISHI AIRCRAFT CO.",
+    "publication": "Jane's All The World's Aircraft 1945\u201346 (N1K2-J Shiden-kai)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Luscombe_8A.json",
+    "name": "Luscombe 8A",
+    "type": "single_engine",
+    "tcds_number": "A-694",
+    "tcds_holder": "LUSCOMBE AIRPLANE CORP.",
+    "publication": "FAA TCDS A-694 (Luscombe 8 series Silvaire)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "MX_Aircraft_MXS.json",
+    "name": "MX Aircraft MXS",
+    "type": "single_engine",
+    "tcds_number": "Experimental",
+    "tcds_holder": "MX AIRCRAFT COMPANY LLC",
+    "publication": "MXS Pilot's Operating Handbook (FAA Experimental Exhibition)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Maule_M-7.json",
+    "name": "Maule M-7",
+    "type": "single_engine",
+    "tcds_number": "A6SO",
+    "tcds_holder": "MAULE AEROSPACE TECHNOLOGY INC.",
+    "publication": "FAA TCDS A6SO (Maule M-4/M-5/M-6/M-7 series)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Messerschmitt Bf 109G-6.json",
+    "name": "Messerschmitt Bf 109G-6",
+    "type": "single_engine",
+    "tcds_number": "Military",
+    "tcds_holder": "MESSERSCHMITT A.G.",
+    "publication": "Bf 109 G-6 Flugzeug Handbuch (Luftwaffe Pilot's Manual, 1943)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Mitsubishi_A6M5_Zero.json",
+    "name": "Mitsubishi A6M5 Zero",
+    "type": "single_engine",
+    "tcds_number": "Military",
+    "tcds_holder": "MITSUBISHI HEAVY INDUSTRIES",
+    "publication": "Jane's All The World's Aircraft 1945\u201346 (A6M5 Reisen)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Mooney_M20C.json",
+    "name": "Mooney M20C",
+    "type": "single_engine",
+    "tcds_number": "2A3",
+    "tcds_holder": "Mooney Aircraft Corporation",
+    "publication": "FAA TCDS 2A3 Rev 44 (12/19/1997)",
+    "match_source": "fuzzy",
+    "matched_model": "M20C"
+  },
+  {
+    "filename": "Mooney_M20E.json",
+    "name": "Mooney M20E",
+    "type": "single_engine",
+    "tcds_number": "2A3",
+    "tcds_holder": "Mooney Aircraft Corporation",
+    "publication": "FAA TCDS 2A3 Rev 44 (12/19/1997)",
+    "match_source": "fuzzy",
+    "matched_model": "M20E"
+  },
+  {
+    "filename": "Mooney_M20J.json",
+    "name": "Mooney M20J",
+    "type": "single_engine",
+    "tcds_number": "2A3",
+    "tcds_holder": "MOONEY INTERNATIONAL CORP.",
+    "publication": "FAA TCDS 2A3 (Mooney M20-series)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Mooney_M20R.json",
+    "name": "Mooney M20R",
+    "type": "single_engine",
+    "tcds_number": "2A3",
+    "tcds_holder": "Mooney Aircraft Corporation",
+    "publication": "FAA TCDS 2A3 Rev 44 (12/19/1997)",
+    "match_source": "fuzzy",
+    "matched_model": "M20R"
+  },
+  {
+    "filename": "North_American_P51-D_Mustang.json",
+    "name": "North American P-51D Mustang",
+    "type": "single_engine",
+    "tcds_number": "Military",
+    "tcds_holder": "NORTH AMERICAN AVIATION INC.",
+    "publication": "AAF Manual 51-127-5 P-51D Pilot's Flight Operating Instructions (1945)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "PT-17_Stearman.json",
+    "name": "PT-17 Stearman",
+    "type": "single_engine",
+    "tcds_number": "A-743",
+    "tcds_holder": "BOEING/STEARMAN",
+    "publication": "FAA TCDS A-743 (Boeing E75/A75N1/PT-17/PT-13)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Piper_Aztec_F.json",
+    "name": "Piper Aztec F",
+    "type": "multi_engine",
+    "tcds_number": "1A10",
+    "tcds_holder": "PIPER AIRCRAFT INC.",
+    "publication": "FAA TCDS 1A10 (Piper PA-23 Apache/Aztec)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Piper_PA-28-140.json",
+    "name": "Piper PA-28-140",
+    "type": "single_engine",
+    "tcds_number": "2A13",
+    "tcds_holder": "Piper Aircraft Inc.",
+    "publication": "FAA TCDS 2A13 Rev 58 (12/22/2017)",
+    "match_source": "fuzzy",
+    "matched_model": "PA-28-140"
+  },
+  {
+    "filename": "Piper_PA-28-151.json",
+    "name": "Piper PA-28-151",
+    "type": "single_engine",
+    "tcds_number": "2A13",
+    "tcds_holder": "Piper Aircraft Inc.",
+    "publication": "FAA TCDS 2A13 Rev 58 (12/22/2017)",
+    "match_source": "fuzzy",
+    "matched_model": "PA-28-151"
+  },
+  {
+    "filename": "Piper_PA-28-161.json",
+    "name": "Piper PA-28-161",
+    "type": "single_engine",
+    "tcds_number": "2A13",
+    "tcds_holder": "Piper Aircraft Inc.",
+    "publication": "FAA TCDS 2A13 Rev 58 (12/22/2017)",
+    "match_source": "fuzzy",
+    "matched_model": "PA-28-161"
+  },
+  {
+    "filename": "Piper_PA-28-181.json",
+    "name": "Piper PA-28-181",
+    "type": "single_engine",
+    "tcds_number": "2A13",
+    "tcds_holder": "Piper Aircraft Inc.",
+    "publication": "FAA TCDS 2A13 Rev 58 (12/22/2017)",
+    "match_source": "fuzzy",
+    "matched_model": "PA-28-181"
+  },
+  {
+    "filename": "Piper_PA-28R-200.json",
+    "name": "Piper PA-28R-200",
+    "type": "single_engine",
+    "tcds_number": "2A13",
+    "tcds_holder": "Piper Aircraft Inc.",
+    "publication": "FAA TCDS 2A13 Rev 58 (12/22/2017)",
+    "match_source": "fuzzy",
+    "matched_model": "PA-28R-200"
+  },
+  {
+    "filename": "Piper_PA-28R-201.json",
+    "name": "Piper PA-28R-201",
+    "type": "single_engine",
+    "tcds_number": "2A13",
+    "tcds_holder": "Piper Aircraft Inc.",
+    "publication": "FAA TCDS 2A13 Rev 58 (12/22/2017)",
+    "match_source": "fuzzy",
+    "matched_model": "PA-28R-201"
+  },
+  {
+    "filename": "Piper_PA-28R-201T.json",
+    "name": "Piper PA-28R-201T",
+    "type": "single_engine",
+    "tcds_number": "2A13",
+    "tcds_holder": "Piper Aircraft Inc.",
+    "publication": "FAA TCDS 2A13 Rev 58 (12/22/2017)",
+    "match_source": "fuzzy",
+    "matched_model": "PA-28R-201T"
+  },
+  {
+    "filename": "Piper_PA-28RT-201.json",
+    "name": "Piper PA-28RT-201",
+    "type": "single_engine",
+    "tcds_number": "2A13",
+    "tcds_holder": "Piper Aircraft Inc.",
+    "publication": "FAA TCDS 2A13 Rev 58 (12/22/2017)",
+    "match_source": "fuzzy",
+    "matched_model": "PA-28RT-201"
+  },
+  {
+    "filename": "Piper_PA-30_Twin_Comanche.json",
+    "name": "Piper PA-30 Twin Comanche",
+    "type": "multi_engine",
+    "tcds_number": "A1EA",
+    "tcds_holder": "PIPER AIRCRAFT INC.",
+    "publication": "FAA TCDS A1EA (Piper PA-30/PA-39 Twin Comanche)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Piper_PA-32-260.json",
+    "name": "Piper PA-32-260",
+    "type": "single_engine",
+    "tcds_number": "A3SO",
+    "tcds_holder": "PIPER AIRCRAFT INC.",
+    "publication": "FAA TCDS A3SO (Piper PA-32 Cherokee Six)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Piper_PA-32R-300.json",
+    "name": "Piper PA-32R-300",
+    "type": "single_engine",
+    "tcds_number": "A3SO",
+    "tcds_holder": "The New Piper Aircraft Inc.",
+    "publication": "FAA TCDS A3SO Rev 27 (11/25/2003)",
+    "match_source": "fuzzy",
+    "matched_model": "PA-32R-300"
+  },
+  {
+    "filename": "Piper_PA-34_Seneca.json",
+    "name": "Piper PA-34 Seneca",
+    "type": "multi_engine",
+    "tcds_number": "A7SO",
+    "tcds_holder": "PIPER AIRCRAFT INC.",
+    "publication": "FAA TCDS A7SO (Piper PA-34 Seneca)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Piper_PA-44_Seminole.json",
+    "name": "Piper PA-44 Seminole",
+    "type": "multi_engine",
+    "tcds_number": "A19SO",
+    "tcds_holder": "PIPER AIRCRAFT INC.",
+    "publication": "FAA TCDS A19SO (Piper PA-44 Seminole)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Pipistrel_Alpha_Trainer.json",
+    "name": "Pipistrel Alpha Trainer",
+    "type": "single_engine",
+    "tcds_number": "ASTM F2245",
+    "tcds_holder": "PIPISTREL d.o.o. AJDOVSCINA",
+    "publication": "ASTM F2245 (Pipistrel Alpha Trainer SLSA)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Pipistrel_Virus.json",
+    "name": "Pipistrel Virus",
+    "type": "single_engine",
+    "tcds_number": "ASTM F2245",
+    "tcds_holder": "PIPISTREL d.o.o. AJDOVSCINA",
+    "publication": "ASTM F2245 (Pipistrel Virus SW100 SLSA)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Pitts_S-1C-TB.json",
+    "name": "Pitts S-1C-TB",
+    "type": "single_engine",
+    "tcds_number": "A18SO",
+    "tcds_holder": "AVIAT AIRCRAFT INC.",
+    "publication": "FAA TCDS A18SO (Pitts S-1 variant)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Pitts_S-1C.json",
+    "name": "Pitts S-1C",
+    "type": "single_engine",
+    "tcds_number": "A18SO",
+    "tcds_holder": "AVIAT AIRCRAFT INC.",
+    "publication": "FAA TCDS A18SO (Pitts S-1S/S-1T)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Pitts_S-2C.json",
+    "name": "Pitts S-2C",
+    "type": "single_engine",
+    "tcds_number": "A21SO",
+    "tcds_holder": "AVIAT AIRCRAFT INC.",
+    "publication": "FAA TCDS A21SO (Pitts S-2A/S-2B/S-2C)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Remos_GX.json",
+    "name": "Remos GX",
+    "type": "single_engine",
+    "tcds_number": "ASTM F2245",
+    "tcds_holder": "REMOS AG",
+    "publication": "ASTM F2245 (Remos GX SLSA)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Robin_DR400.json",
+    "name": "Robin DR400",
+    "type": "single_engine",
+    "tcds_number": "EASA.A.075",
+    "tcds_holder": "AVIONS PIERRE ROBIN",
+    "publication": "EASA TCDS A.075 (Robin DR400 series)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Robin_R3000.json",
+    "name": "Robin R3000",
+    "type": "single_engine",
+    "tcds_number": "EASA.A.057",
+    "tcds_holder": "APEX AIRCRAFT (ROBIN)",
+    "publication": "EASA TCDS A.057 (Robin R3000)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Socata_TB10.json",
+    "name": "Socata TB10",
+    "type": "single_engine",
+    "tcds_number": "EASA.A.157",
+    "tcds_holder": "DAHER (SOCATA)",
+    "publication": "EASA TCDS A.157 (Socata TB-10 Tobago)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Socata_TB20.json",
+    "name": "Socata TB20",
+    "type": "single_engine",
+    "tcds_number": "EASA.A.157",
+    "tcds_holder": "DAHER (SOCATA)",
+    "publication": "EASA TCDS A.157 (Socata TB-20 Trinidad)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Socata_TB9.json",
+    "name": "Socata TB9",
+    "type": "single_engine",
+    "tcds_number": "EASA.A.157",
+    "tcds_holder": "DAHER (SOCATA)",
+    "publication": "EASA TCDS A.157 (Socata TB-9/TB-10/TB-20/TB-21)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Stinson_108.json",
+    "name": "Stinson 108",
+    "type": "single_engine",
+    "tcds_number": "A-767",
+    "tcds_holder": "CONSOLIDATED VULTEE AIRCRAFT (STINSON DIV)",
+    "publication": "FAA TCDS A-767 (Stinson 108 series)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Sukhoi_Su-26.json",
+    "name": "Sukhoi Su-26",
+    "type": "single_engine",
+    "tcds_number": "n/a",
+    "tcds_holder": "SUKHOI DESIGN BUREAU",
+    "publication": "Sukhoi OKB Type Specification (no FAA TCDS; sport-aerobatic)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Supermarine_Spitfire.json",
+    "name": "Supermarine Spitfire Mk IX",
+    "type": "single_engine",
+    "tcds_number": "Military",
+    "tcds_holder": "SUPERMARINE AVIATION WORKS",
+    "publication": "Air Publication 1565 Spitfire IX Pilot's Notes (Air Ministry, 1944)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "T-6A_Texan_II.json",
+    "name": "T-6A Texan II",
+    "type": "single_engine",
+    "tcds_number": "T00012WI",
+    "tcds_holder": "TEXTRON AVIATION (RAYTHEON AIRCRAFT)",
+    "publication": "FAA TCDS T00012WI (Beechcraft T-6 Texan II)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "T-6B_Texan_II.json",
+    "name": "T-6B Texan II",
+    "type": "single_engine",
+    "tcds_number": "T00012WI",
+    "tcds_holder": "TEXTRON AVIATION (RAYTHEON AIRCRAFT)",
+    "publication": "FAA TCDS T00012WI Rev (T-6B Texan II)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Taylorcraft_BC-12D.json",
+    "name": "Taylorcraft BC-12D",
+    "type": "single_engine",
+    "tcds_number": "A-696",
+    "tcds_holder": "TAYLORCRAFT AVIATION",
+    "publication": "FAA TCDS A-696 (Taylorcraft BC/BC-12)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Tecnam_P2002.json",
+    "name": "Tecnam P2002",
+    "type": "single_engine",
+    "tcds_number": "ASTM F2245",
+    "tcds_holder": "COSTRUZIONI AERONAUTICHE TECNAM",
+    "publication": "ASTM F2245 (Tecnam P2002 Sierra LSA)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Tecnam_P2006T.json",
+    "name": "Tecnam P2006T",
+    "type": "multi_engine",
+    "tcds_number": "EASA.A.185",
+    "tcds_holder": "COSTRUZIONI AERONAUTICHE TECNAM",
+    "publication": "EASA TCDS A.185 (Tecnam P2006T light twin)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Van's_RV-10.json",
+    "name": "Van's RV-10",
+    "type": "single_engine",
+    "tcds_number": "Experimental",
+    "tcds_holder": "VAN'S AIRCRAFT INC.",
+    "publication": "Van's RV-10 Pilot's Operating Handbook",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Van's_RV-12.json",
+    "name": "Van's RV-12",
+    "type": "single_engine",
+    "tcds_number": "Experimental",
+    "tcds_holder": "VAN'S AIRCRAFT INC.",
+    "publication": "Van's RV-12 Pilot's Operating Handbook (ELSA)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Van's_RV-14A.json",
+    "name": "Van's RV-14A",
+    "type": "single_engine",
+    "tcds_number": "Experimental",
+    "tcds_holder": "VAN'S AIRCRAFT INC.",
+    "publication": "Van's RV-14/14A Pilot's Operating Handbook",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Van's_RV-6.json",
+    "name": "Van's RV-6",
+    "type": "single_engine",
+    "tcds_number": "Experimental",
+    "tcds_holder": "VAN'S AIRCRAFT INC.",
+    "publication": "Van's RV-6 Pilot's Operating Handbook",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Van's_RV-8.json",
+    "name": "Van's RV-8",
+    "type": "single_engine",
+    "tcds_number": "Experimental",
+    "tcds_holder": "VAN'S AIRCRAFT INC.",
+    "publication": "Van's RV-8 Pilot's Operating Handbook",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Van's_RV-9A.json",
+    "name": "Van's RV-9A",
+    "type": "single_engine",
+    "tcds_number": "Experimental",
+    "tcds_holder": "VAN'S AIRCRAFT INC.",
+    "publication": "Van's RV-9A Pilot's Operating Handbook",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Vought_F4U-4_Corsair.json",
+    "name": "Vought F4U-4 Corsair",
+    "type": "single_engine",
+    "tcds_number": "Military",
+    "tcds_holder": "VOUGHT-SIKORSKY AIRCRAFT",
+    "publication": "NAVAIR 01-45HC-1 F4U-4 Pilot's Handbook (US Navy)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Yakovlev_Yak-3.json",
+    "name": "Yakovlev Yak-3",
+    "type": "single_engine",
+    "tcds_number": "Military",
+    "tcds_holder": "YAKOVLEV DESIGN BUREAU",
+    "publication": "Jane's All The World's Aircraft 1945\u201346 (Yak-3)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Zivko_Edge_540.json",
+    "name": "Zivko Edge 540",
+    "type": "single_engine",
+    "tcds_number": "n/a",
+    "tcds_holder": "ZIVKO AERONAUTICS INC.",
+    "publication": "Zivko Edge 540 published spec (Experimental/Aerobatic)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Zlin_Savage.json",
+    "name": "Zlin Savage",
+    "type": "single_engine",
+    "tcds_number": "n/a",
+    "tcds_holder": "ZLIN AVIATION s.r.o.",
+    "publication": "Zlin Savage SLSA Spec (LAA-CZ-certified)",
+    "match_source": "manual",
+    "matched_model": ""
+  },
+  {
+    "filename": "Zlin_Z-242L.json",
+    "name": "Zlin Z-242L",
+    "type": "single_engine",
+    "tcds_number": "EASA.A.030",
+    "tcds_holder": "MORAVAN ZLIN",
+    "publication": "EASA TCDS A.030 (Zlin Z-42/142/242 family)",
+    "match_source": "manual",
+    "matched_model": ""
+  }
+]

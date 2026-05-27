@@ -1,0 +1,174 @@
+{
+  "tcds_number": "3A24",
+  "revision": "40",
+  "revision_date": "July 29, 2015",
+  "tc_holder": "Textron Aviation Inc.",
+  "source_pdf": "3A24.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 4,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "185",
+        "Skywagon"
+      ],
+      "engine": "Continental IO-470-F",
+      "engine_limits": {
+        "rpm": 2625,
+        "hp": 260
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 206,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 165,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 110,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 136,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3200
+      },
+      "fuel_capacity": {
+        "total_gal": 65.0,
+        "usable_gal": 62.0
+      },
+      "seats": 6,
+      "cg_range_raw": "Landplane:\n(+41.0) to (+46.5) at 3200 lbs.\n(+34.5) to (+46.5) at 2100 lbs. or less\n\nFloatplane:\nEDO 249A-2870\n(+41.0) to (+46.5) at 3190 lbs.\n(+34.8) to (+46.5) at 2150 lbs. or less\nEDO 628-2960\n(+41.6) to (+46.5) at 3290 lbs.\n(+34.8) to (+46.5) at 2150 lbs. or less\n\nAmphibian\n(+40.5) to (+46.5) at 3100 lbs.\n(+36.0) to (+46.5) at 2500 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                                                    Down 38° +2° -1°\nAilerons                            Up 20° ± 2°               Down 14° ±2°\nStabilizer                          Up  0° 45' +45° -15'      Down  8° 30' ±15'\nElevator (with stabilizer           Up 25° ± 1°               Down 23° ±1°\nfull down)\nRudder (parallel to W.L. or      Right    24° +0° -1°           Left   24° +0° -1°\nperpendicular to hinge line)",
+      "serial_numbers": "Model 185:        632, 185-0001 through 185-0237 (1961 model)\nModel 185A:       185-0238 through 185-0512 (1962 model)\nModel 185B:       185-0513 through 185-0653 (1963 model)\nModel 185C:       185-0654 through 185-0776 (1964 model)\nModel 185D:       185-0777 through 185-0967 (1965 model)"
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "185E",
+        "Skywagon"
+      ],
+      "engine": "Continental IO-470-F",
+      "engine_limits": {
+        "rpm": 2625,
+        "hp": 260
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 210,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 170,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 110,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 138,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3300
+      },
+      "fuel_capacity": {
+        "total_gal": 65.0,
+        "usable_gal": 62.0
+      },
+      "seats": 6,
+      "cg_range_raw": "Landplane:\n(+41.6) to (+46.5) at 3300 lbs.\n(+34.5) to (+46.5) at 2100 lbs. or less\n\nFloatplane:\nEDO 249A-2870\n(+41.0) to (+46.5) at 3190 lbs.\n(+34.8) to (+46.5) at 2160 lbs. or less\n\nEDO 628-2960\n(+41.6) to (+46.5) at 3290 lbs.\n(+34.8) to (+46.5) at 2150 lbs. or less\n\nAmphibian:\n(+40.5) to (+46.5) at 3100 lbs.\n(+36.0) to (+46.5) at 2500 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                                                      Down 38° + 2° -1°\nAilerons                             Up 20° ± 2°                Down 14° ± 2°\nStabilizer                           Up  0° 45' +45' -15'       Down  8° 30' ± 15'\nElevator (with stabilizer            Up 25° ± 1°                Down 23° ± 1°\nfull down)\nRudder (parallel to W.L. or       Right     24° +0° -1°          Left   24° +0° -1°\nperpendicular to hinge line)",
+      "serial_numbers": "185-0968 through 185-1149 (1966 model)\n\nRev. 40                                                 5                                                3A24"
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "A185E"
+      ],
+      "engine": "Continental IO-520-D",
+      "engine_limits": {
+        "rpm": 2850,
+        "hp": 300
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 210,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 170,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 110,
+          "unit": "mph"
+        },
+        "Va": {
+          "value": 136,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3100
+      },
+      "fuel_capacity": {
+        "total_gal": 65.0,
+        "usable_gal": 62.0
+      },
+      "seats": 6,
+      "cg_range_raw": "Landplane:\n(+41.9) to (+46.5) at 3350 lb. (S/N 185-1236 and up)\n(+41.6) to (+46.5) at 3300 lb. (S/N 185-0968 through 185-1235)\nEligible for 3350 lb., see NOTE 3.\n(+34.5) to (+46.5) at 2100 lbs. or less\n\nFloatplane:\nEDO 249A-2870 (S/N 185-0968 and up)\n(+41.0) to (+46.5) at 3190 lbs.\n(+34.8) to (+46.5) at 2150 lbs. or less\n\nEDO 628-2960 (S/N 185-0968 and up)\n(+41.7) to (+46.5) at 3320 lbs.\n(+34.8) to (+46.5) at 2150 lbs. or less\nS/N 185-0968 through 185-1235 are required to be modified in accordance with NOTE 3.\n\nAmphibian: (S/N 185-0968 and up)\n(+41.7) to (+46.5) at 3265 lb. (wheels, takeoff only)\n(+40.5) to (+46.5) at 3100 lbs.\n(+36.0) to (+46.5) at 2500 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                                                    Down 38° +2° -1°\nAilerons                            Up 20° ± 2°               Down 14° ±2°\nStabilizer                          Up  0° 45' +45' -15'      Down  8° 30' ±15'\nElevator (with stabilizer           Up 25° ± 1°               Down 23° ±1°\nfull down)\nRudder (parallel to W.L. or      Right   24° +0° -1°            Left      24° +0° -1°\nperpendicular to hinge line)",
+      "serial_numbers": "185-0968 through 185-1149 (1966 model)\n185-1150 through 185-1300 (1967 model)\n185-1301 through 185-1447 (1968 model)\n185-1448 through 185-1599 (1969 model)\n18501600 through 18501934 (1970 and 1971 models)\n18501935 through 18502090 (1972 model)"
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "A185F"
+      ],
+      "engine": "Continental IO-520-D",
+      "engine_limits": {
+        "rpm": 2850,
+        "hp": 300
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline (S/N 18502091 through 18503153)",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 210,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 170,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 110,
+          "unit": "mph"
+        },
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3265
+      },
+      "fuel_capacity": {
+        "total_gal": 65.0,
+        "usable_gal": 62.0
+      },
+      "seats": 6,
+      "cg_range_raw": "Landplane, Skiplane, Restricted Category:\n(+41.9) to (+46.5) at 3350 lbs.\n(+34.5) to (+46.5) at 2100 lbs. or less\n\nFloatplane with EDO 628-2960 (Normal Category Only)\n(+41.7) to (+46.5) at 3320 lbs.\n(+34.8) to (+46.5) at 2150 lbs. or less\n\nAmphibian with EDO 597-2790 (Normal Category Only)\n(+41.7) to (+46.5) at 3265 lbs. (wheels, takeoff only)\n(+40.5) to (+46.5) at 3100 lbs.\n(+36.0) to (+46.5) at 2500 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                                                     Down 40° +0° -2°\nAilerons                             Up 20° ± 2°               Down 14° ±2°\nStabilizer                           Up  0° 45' +45' -15'      Down  8° 30' ±15'\nElevator (with stabilizer            Up 25° ± 1°               Down 23° ±1°\nfull down)\nRudder (parallel to W.L. or       Right   24° +0° -1°            Left    24° +0° -1°\nperpendicular to hinge line)\n\n3A24                                                           10                                                 Rev. 40\n\nAdditional Limitations for Restricted Category when 0701062 installation is installed",
+      "serial_numbers": "652, 18502091 through 18502310\nexcept 18502300                  (1973) (Normal)\n18502311 through 18502565             (1974) (Normal and/or Restricted)\n18502566 through 18502838             (1975) (Normal and/or Restricted)\n18502839 through 18503153             (1976) (Normal and/or Restricted)\n18503154 through 18503458             (1977) (Normal and/or Restricted)\n18503459 through 18503683             (1978) (Normal and/or Restricted)\n18502300, 18503684 through\n18503938)                        (1979) (Normal and/or Restricted)\n18503939 through 18504138             (1980) (Normal and/or Restricted)\n18504139 through 18504328             (1981) (Normal and/or Restricted)\n18504329 through 18504394             (1982) (Normal and/or Restricted)\n18504395 through 18504415             (1983) (Normal and/or Restricted)\n18504416 through 18504424             (1984) (Normal and/or Restricted)\n18504425 through 18504448             (1985) (Normal and/or Restricted)\n\nData Pertinent to All Models"
+    }
+  ]
+}

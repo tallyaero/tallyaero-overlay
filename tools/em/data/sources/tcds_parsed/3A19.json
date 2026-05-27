@@ -1,0 +1,425 @@
+{
+  "tcds_number": "3A19",
+  "revision": "50",
+  "revision_date": "July 21, 2017",
+  "tc_holder": "Record:         Cessna Aircraft Company transferred to",
+  "source_pdf": "3A19.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 10,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "150"
+      ],
+      "engine": "Continental O-200-A",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 157,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 120,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 85,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 106,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1500
+      },
+      "fuel_capacity": {
+        "total_gal": 26.0,
+        "usable_gal": 22.5
+      },
+      "seats": null,
+      "cg_range_raw": "(+33.4) to (+36.0) at 1500 lb.\n(+32.2) to (+36.0) at 1250 lb. or less\nStraight line variation between points given",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "150D"
+      ],
+      "engine": "Continental O-200-A",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 162,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 120,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 109,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1600
+      },
+      "fuel_capacity": {
+        "total_gal": 26.0,
+        "usable_gal": 22.5
+      },
+      "seats": null,
+      "cg_range_raw": "(+32.9) to (+37.5) at 1600 lb.\n(+31.5) to (+37.5) at 1280 lb. or less\nStraight line variation between points given",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "150G"
+      ],
+      "engine": "Continental O-200-A",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 162,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 120,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 109,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1650
+      },
+      "fuel_capacity": {
+        "total_gal": 26.0,
+        "usable_gal": 22.5
+      },
+      "seats": null,
+      "cg_range_raw": "Landplane\n(+32.9) to (+37.5) at 1600 lb.\n(+31.5) to (+37.5) at 1280 lb. or less\nSeaplane\n(+33.8) to (+36.5) at 1650 lb.\n(+33.0) to (+36.5) at 1400 lb. or less\nStraight line variation between points given",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "A150K",
+        "Aerobat"
+      ],
+      "engine": "Continental O-200-A",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 193,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 118,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1600
+      },
+      "fuel_capacity": {
+        "total_gal": 26.0,
+        "usable_gal": 22.5
+      },
+      "seats": null,
+      "cg_range_raw": "(+32.9) to (+37.5) at 1600 lb.\n(+31.5) to (+37.5) at 1280 lb. or less",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "V",
+      "models": [
+        "150L"
+      ],
+      "engine": "Continental O-200-A",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 162,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 120,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 109,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1600
+      },
+      "fuel_capacity": {
+        "total_gal": 26.0,
+        "usable_gal": 22.5
+      },
+      "seats": null,
+      "cg_range_raw": "(+32.9) to (+37.5) at 1600 lb.\n(+31.5) to (+37.5) at 1280 lb. or less\nStraight line variation between points given",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VI",
+      "models": [
+        "A150L",
+        "Aerobat"
+      ],
+      "engine": "Continental O-200-A",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 193,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 118,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1600
+      },
+      "fuel_capacity": {
+        "total_gal": 26.0,
+        "usable_gal": 22.5
+      },
+      "seats": null,
+      "cg_range_raw": "(+32.9) to (+37.5) at 1600 lb.\n(+31.5) to (+37.5) at 1280 lb. or less",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VII",
+      "models": [
+        "150M"
+      ],
+      "engine": "Continental O-200-A",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 162,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 120,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 109,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1600
+      },
+      "fuel_capacity": {
+        "total_gal": 26.0,
+        "usable_gal": 22.5
+      },
+      "seats": null,
+      "cg_range_raw": "(+32.9) to (+37.5) at 1600 lb.\n(+31.5) to (+37.5) at 1280 lb. or less\nStraight line variation between points given",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VIII",
+      "models": [
+        "A150M",
+        "Aerobat"
+      ],
+      "engine": "Continental O-200-A",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 193,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 118,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1600
+      },
+      "fuel_capacity": {
+        "total_gal": 26.0,
+        "usable_gal": 22.5
+      },
+      "seats": null,
+      "cg_range_raw": "(+32.9) to (+37.5) at 1600 lb.\n(+31.5) to (+37.5) at 1280 lb. or less\nStraight line variation between points given",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IX",
+      "models": [
+        "152"
+      ],
+      "engine": "S/N 15279406 through 15285594",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100LL/100 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 149,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 111,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 85,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 104,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1670
+      },
+      "fuel_capacity": {
+        "total_gal": 26.0,
+        "usable_gal": 24.5
+      },
+      "seats": null,
+      "cg_range_raw": "(+32.65) to (+36.5) at 1670 lb.\n(+31.0) to (+36.5) at 1350 lb. or less\nStraight line variation between points given",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "X",
+      "models": [
+        "A152",
+        "Aerobat"
+      ],
+      "engine": "S/N A1500433, A1520735, 681 through A521014",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100LL/100 min. grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 172,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 125,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 85,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 108,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1670
+      },
+      "fuel_capacity": {
+        "total_gal": 26.0,
+        "usable_gal": 24.5
+      },
+      "seats": null,
+      "cg_range_raw": "(+32.65) to (+36.5) at 1670 lb.\n(+31.0) to (+36.5) at 1350 lb. or less",
+      "control_surfaces": null,
+      "serial_numbers": null
+    }
+  ]
+}

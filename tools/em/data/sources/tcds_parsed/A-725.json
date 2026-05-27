@@ -1,0 +1,73 @@
+{
+  "tcds_number": "A-725",
+  "revision": "4",
+  "revision_date": "March 30, 2001",
+  "tc_holder": "FS 2001 Corp",
+  "source_pdf": "A-725.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 2,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "3",
+        "J5A-80",
+        "3"
+      ],
+      "engine": "J5A:          Continental A-75-8",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": null
+      },
+      "fuel_grade": "J5A and J5B:          73 min. octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1450
+      },
+      "fuel_capacity": {
+        "total_gal": 19.0,
+        "usable_gal": null
+      },
+      "seats": 3,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": "5-2 and up\n\nRequired Equipment                J5A:    Items 101, 102, 103 and 104\nJ5A-80: Items 101, 102, 103, 104 and 106.\nJ5B:    Items 101, 102, 103, 104 and 105."
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "J5C",
+        "3",
+        "2"
+      ],
+      "engine": "Lycoming 0-235 (See Item 307 for optional engine.)",
+      "engine_limits": {
+        "rpm": 2550,
+        "hp": null
+      },
+      "fuel_grade": "73 min. octane grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1550
+      },
+      "fuel_capacity": {
+        "total_gal": 20.0,
+        "usable_gal": null
+      },
+      "seats": 5,
+      "cg_range_raw": "Landplane: J5C (+9.0) to (+18.6)\nAE-1, HE-1 (+10.9) to (+20.5)\nSeaplane: (+11.3) to (+18.2)\n\nLandplane: J5C (+10.2) to (+14.3)\nAE-1, HE-1 (+12.3) to (+17.7)\nSeaplane:      J5C (+13.1) to (+13.5)\nAE-1, HE-1 (+12.7) to (+14.4)\nRanges are not valid for non-standard arrangements except that they may be used when\nauxiliary fuel tank Item 316 is installed. When empty weight C. G. falls within the\npertinent range, computation of critical fore and aft C. G. positions is unnecessary.",
+      "control_surfaces": null,
+      "serial_numbers": "J5C:        5-1309, 5-1388 and up\nAE-1, HE-1: 5-1400 and up\n\nRequired Equipment                  In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed:\nItems 102, 103, 104 and 107\n\nData Pertinent to All Models\nCertification Basis                 Type Certificate No. 725 (CAR 4a)\n\nProduction Basis                    None.\n\nExport Eligibility                  Deleted as of July 31, 1995\n\nEquipment:      A plus (+) or minus (-) sign preceding the weight of an item of equipment indicates net weight change when\nthat item is installed.\n\nApproval for the installation of all items of equipment listed herein has been obtained by the aircraft manufacturer\nexcept those items preceded by an asterisk (*). The asterisk denotes that approval has been obtained by someone\nother than the aircraft manufacturer. An item marked with an asterisk may not have been manufactured under an\nFAA monitored or approved quality control system, and therefore conformity must be determined if the item is not\nidentified by a Form FAA-186, PMA or other evidence of FAA production approval.\n\nA-725                                                 4\n\nJ5A                                      AE-1\nPropellers and Propeller Accessories                           J5A-80    J5B                    J5C       HE-1\n101. Propeller - wood (fixed or adj pitch)         +12 lbs.    (-54)   (-56)       ----       ----       ----\n107. Propeller - wood (fixed pitch)                 ----       ----    ----       14 lbs.     (-54)      (-54)\n*1. Propeller - Beech, controllable, R002,       +18 lbs.    (-54)   ----        ----       ----       ----\nHub R002-101 or R-003-100, Blades\nR002-205-72 (including Beech\nmechanical propeller control)\nDiameter: 72 inches\nPitch at 27 in station:\nLow 14 ½°, High 19°\n(Eligible on J5A with A-75 series\nengines only.)\n*2. Propeller - McCauley 1A90\na. (Models J5A with Continental             +9 lbs.    (-54)    ----        - - - --   - - - --   ----\nA-75 series engine)\nStatic rpm at max. permissible\nthrottle setting:\nNot over 2440, not under 2340.\nNo additional tolerance permitted.\nDiameter: Not over 70 inches,\nnot under 68.5 inches.\nSee Items 307(d), (e) and (g) and\nNOTE 3 for other limits when those\nengines are installed.\nb. (Models J5A, J5A-80 and J5B              +9 lbs     (-54)    (-56)       ----       - - - --   ----\nwith Item 307(h) only)\nStatic rpm at full throttle:\nNot over 2200, not under 2100.\nNo additional tolerance permitted.\nDiameter: Not over 73 inches,\nnot under 71.5 inches.\n*3. Propeller - Koppers Aeromatic                 ----      ----     - - - --   +18 lbs.    (-54)      (-54)\nF200/00-74E\n(Eligible with Item 307(f) only)\nParts List Assembly No. 4330\nLow pitch setting at 24 in. sta: 11°\nStatic rpm at max. permissible throttle\nsetting: Not over 2600, not under 2500.\nNo additional tolerance permitted\nDiameter: Not over 74 inches,\nnot under 72.5 inches.\n(When this Item is installed,\ninstallation and flight check must be\ndone per Koppers \"Installation\nProcedure and Operating Limitations\"\ndated May 28, 1948.)\n\n5                                                   A-725\n\nJ5A                                   AE-1\nPropellers and Propeller Accessories (cont'd)                    J5A-80   J5B                 J5C        HE-1\n*4. Propeller - Beech, controllable                +18 lbs.    (-54)   ----    - - - --    ----       ----\nR002, with R002-205-72 blades\n(including Beech Mechanical Control)\nPitch settings at 27 in. station:\nLow 12.5°, High 19.25°\nDiameter: Not over 72 inches,\nnot under 70.5 inches.\nEligible on J5A with C-85-12 engine,\nItem 307(g).\nHarrison oil cooler HE-212 or\nequivalent must be installed.\n*5. Propeller - McCauley 1C90                       ----      ----     ----    23 lbs.     (-54)      (-54)\n(with Lycoming O-235-B engine only)\nStatic rpm at max. permissible throttle\nsetting:\nNot over 2300, not under 2150.\nNo additional tolerance permitted.\nDiameter: Not over 72 inches,\nnot under 70.5 inches.\n*6. Propeller - Sensenich M74CK-2, fixed           21 lbs.    (-54)    ----    ----       - - - ---   ----\npitch metal (Model J5A with A75 engine\nonly).\nStatic rpm at max. permissible throttle\nsetting:\nNot over 2440, not under 2340\nNo additional tolerance permitted\nDiameter: Not over 72 inches,\nnot under 70 inches\n*7. Propeller - Sensenich M76AK-2, fixed\npitch metal.\n(a) Model J5A with Continental C-75           24 lbs.    (-54)    ----    - - - --    ----       ----"
+    }
+  ]
+}

@@ -1,0 +1,302 @@
+{
+  "tcds_number": "A24CE",
+  "revision": "98",
+  "revision_date": null,
+  "tc_holder": "Record:           Beech Aircraft Corporation transferred to",
+  "source_pdf": "A24CE.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 10,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "200"
+      ],
+      "engine": "2 United Aircraft of Canada, Ltd., or Pratt & Whitney PT6A-41",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "JP-4, JP-5 (MIL-T-5624); JP-8 (MIL-T-83133); JET A, JET A-1, and",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 11000
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing          (+185.0) to (+196.4) at 12,500 lb.\nGear Extended)              (+181.0) to (+196.4) at 11,279 lb. or less\nStraight line variation between points given\nMoment change due to retracting landing gear - 5552 in.-lb. (Standard landing gear)\nMoment change due to retracting landing gear - 6040 in.-lb. (High-flotation landing gear)\n\nA24CE                                                 4                                                              Rev. 98\n\nI-   Model 200, Model A200C, Model 200C, Model B200, Model B200C (cont’d)\n\nEmpty Wt. C.G. Range         None",
+      "control_surfaces": "Wing flap           Maximum      35°\nAileron tabs             Up      15°         Down     15°\nAileron                  Up      25°         Down     15°\nElevator tabs            Up       3° 30'     Down     13°\nElevator                 Up      20°         Down     14°\nRudder tab             Right     15°          Left    15°\nRudder                 Right     25°          Left    25°\n\nRev. 98                                                         5                                                           A24CE\n\nI-   Model 200, Model A200C, Model 200C, Model B200, Model B200C (cont’d)\n\nSerial Nos. Eligible                 200:   BB-2, BB-6 through BB-733, BB-735 through BB-792, BB-794 through\nBB-828, BB-830 through BB-853, BB-871 through BB-873, BB-892, BB-893,\nBB-895, BB-912, BB-991\nA200C: BJ-1 and up\n200C:  BL-1 through BL-36\nB200:  BB-734, BB-793, BB-829, BB-854 through BB-870, BB-874 through\nBB-891, BB-894, BB-896 through BB-911, BB-913 through BB-990,\nBB-992 through BB-1313, BB-1315 through BB-1384, BB-1389 and up.\nSee notes 23 and 24.\nB200C: BL-37 and up, BP-64 and up, BU-1 through BU-10, BV-1 through BV-10,\nBW-1 & up.\nSee Note 23.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "A200",
+        "Super",
+        "King"
+      ],
+      "engine": "2 United Aircraft of Canada, Ltd., or Pratt & Whitney PT6A-38 (turboprop) per Beech",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "JP-4, JP-5 (MIL-T-5624); JP-8 (MIL-T-83133); JET A, JET A-1, and JET B conforming",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 10400
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing    (+185.0) to (+196.4) at 12,500 lb.\nGear Extended)        (+181.0) to (+196.4) at 11,279 lb. or less\nStraight line variation between points given\nMoment change due to retracting landing gear - 5552 in.-lb. (Standard ldg gear)\nMoment change due to retracting landing gear - 6040 in.-lb. (HI-Float ldg gear)\n\nEmpty Wt. C.G. Range   None",
+      "control_surfaces": "Wing flap          Maximum      35°\nAileron tabs            Up      15°         Down     15°\nAileron                 Up      25°         Down     15°\nElevator tabs           Up       3° 30'     Down     13°\nElevator                Up      20°         Down     14°\nRudder tab            Right     15°          Left    15°\nRudder                Right     25°          Left    25°\n\nSerial Nos. Eligible                 (C-12A) BC-1 through BC-61. (C-12C) BC-62 and up\n(C-12A) BD-1 and up\n(C-12C) BC-62 through BC-75 and BD-1 through BD-30 when modified\nper Beech Service Instructions C-12-0076",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "200T"
+      ],
+      "engine": "2 United Aircraft of Canada, Ltd., or Pratt & Whitney PT6A-41 (turboprop) per Beech",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "JP-4, JP-5 (MIL-T-5624); JP-8 (MIL-T-83133); JET A, JET A-1, and JET B",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 12590
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing          (+185.0) to (+196.4) at 12,500 lb.\nGear Extended)              (+181.0) to (+196.4) at 11,279 lb. or less\nStraight line variation between points given\nMoment change due to retracting landing gear (6.50 X 10 main wheels)\n- 6040 in.-lb. (High-flotation landing gear)\nMoment change due to retracting landing gear - 5552 in.-lb. (Standard ldg gear)\nSee Operator’s Manual for Restricted Category C.G. Range.\n\nEmpty Wt. C.G. Range         None",
+      "control_surfaces": "Wing flap           Maximum       35°\nAileron tabs             Up       15°        Down     15°\nAileron                  Up       25°        Down     15°\nElevator tabs            Up        3° 30'    Down     13°\nElevator                 Up       20°        Down     14°\nRudder tab             Right      15°         Left    15°\nRudder                 Right      25°         Left    25°\n\nA24CE                                                       10                                                               Rev. 98\n\nIII - Model 200T, Model 200CT, Model A200CT, Model B200T, Model B200CT (cont’d)\n\nSerial Nos. Eligible                 200T:             BT-1 through BT-22 & BT-28\n200CT:            BN-1 only\nB200CT:           BN-2 and up. See Note 23\nA200CT (C-12D):   BP-1, BP-19, BP-22, BP-24 through BP-51\nA200CT (C-12F):   BP-52 through BP-63\nB200T:            BB-1314, BT-23 through BT-27, BT-29 through BT-38, BT-44\nand up. See notes 23 and 24\nA200CT (FWC-12D): BP-7 through BP-11\nA200CT (RC-12D): GR-1 through GR-12\nA200CT (RC-12G): FC-1 through FC-3\nA200CT (RC-12H): GR-14 through GR-19",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "B200GT"
+      ],
+      "engine": "Pratt & Whitney PT6A-52 (turboprop) per Beech Specification BS 267046 (B200GT,",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "JP-4, JP-5 (MIL-T-5624); JP-8 (MIL-T-83133); JET A, JET A-1, and",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 11000
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing         (+185.0) to (+196.4) at 12,500 lb.\nGear Extended)             (+181.0) to (+196.4) at 11,279 lb. or less\nStraight line variation between points given\nMoment change due to retracting landing gear - 5552 in.-lb. (Standard landing gear)\nMoment change due to retracting landing gear - 6040 in.-lb. (High-flotation landing gear)\n\nEmpty Wt. C.G. Range        None",
+      "control_surfaces": "Wing flap          Maximum      35°\nAileron tabs            Up      15°        Down     15°\nAileron                 Up      25°        Down     15°\nElevator tabs           Up       3° 30'    Down     13°\nElevator                Up      20°        Down     14°\nRudder tab            Right     15°         Left    15°\nRudder                Right     25°         Left    25°\n\nSerial Nos. Eligible        B200GT: BY-1 and after\nB200CGT: BZ-1 and after and\nairplanes modified per Hawker Beechcraft Kit 101-9113\n\nA24CE                                                      12                                                              Rev. 98",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "V",
+      "models": [
+        "A100-1 (U-21J)"
+      ],
+      "engine": "2 United Aircraft of Canada, Ltd., or Pratt & Whitney PT6A-41",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "JP-4, JP-5 (MIL-T-5624); JP-8 (MIL-T-83133); JET A, JET A-1, and",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 10400
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing                  (+185.0) to (+196.4) at 12,500 lb.\nGear Extended)                      (+181.0) to (+196.4) at 11,279 lb. or less\nStraight line variation between points given\nMoment change due to retracting landing gear -6040 in.-lb.\n\nEmpty Wt. C.G. Range                 None",
+      "control_surfaces": "Wing flap           Maximum      35°\nAileron tabs             Up      15°         Down     15°\nAileron                  Up      25°         Down     15°\nElevator tabs            Up       3° 30'     Down     13°\nElevator                 Up      20°         Down     14°\nRudder tab             Right     15°          Left    15°\nRudder                 Right     25°          Left    25°",
+      "serial_numbers": "BB-3, BB-4, and BB-5"
+    },
+    {
+      "section_roman": "VI",
+      "models": [
+        "RC-12P"
+      ],
+      "engine": "2 Pratt & Whitney Canada PT6A-67 (Turboprop) per Beech Specification BS 24099",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "JP-4, JP-5 (MIL-T-5624); JP-8 (MIL-T-83133); JET A, JET A-1, and JET B conforming",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 16120
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing       S/N FE-1 through FE-9\nGear Extended)           (+187.5) to (+195.1) at 16,000 lbs.\n(+177.0) to (+195.1) at 11,800 lbs. or less\n\nS/N FE-10 through FE-24\n(+188.0) to (+195.1) at 16,200 lbs.\n(+179.0) to (+195.1) at 12,600 lbs. or less\n\nS/N FE-25 and after\n(+188.7) to (+195.1) at 16,500 lbs.\n(+179.0) to (+195.1) at 12,600 lbs. or less\nStraight line variation between points given.\nMoment change due to retracting landing gear\n(6.50 X 10 main wheels) - 6820 in-lb.\n\nEmpty Wt. C.G. Range      None",
+      "control_surfaces": "Wing flap           Maximum      35°\nAileron tabs             Up      15°         Down    15°\nAileron                  Up      25°         Down    15°\nElevator tabs            Up       3° 30'     Down    15°\nElevator                 Up      20°         Down    14°\nRudder tab             Right     15°          Left   15°\nRudder                 Right     25°          Left   25°\n\nSerial Nos. Eligible            A200CT (RC-12K): FE-1 through FE-9\nA200CT (RC-12P): FE-25 and after except FE-32, FE-34 and FE-36\nA200CT (RC-12Q): FE-32, FE-34 and FE-36\n\nData Pertinent to All Model 200 Series",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VII",
+      "models": [
+        "Airliner"
+      ],
+      "engine": "Two (2) Pratt & Whitney of Canada, Ltd. PT6A-65B (turboprop) per Beech",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "JP-4, JP-5 (MIL-T-5624); JP-8 (MIL-T-83133); JET A, JET A-1, and JET B conforming",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 15000
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing           (+282.2) to (+299.9) at 16,600 lb.\nGear Extended)               (+274.5) to (+299.9) at 11,600 lb. or less\nStraight line variation between points given\nMoment change due to retracting landing gear - 8271 in.-lb.\n\nwith Kit 114-0002-1 or -3 installed (See Note 12)\n(+283.7) to (+297.3) at 17,600 lb.\n(+282.2) to (+297.3) at 16,601 lb.\n(+282.2) to (+299.9) at 16,600 lb.\n(+274.5) to (+299.9) at 11,600 lb. or less\nStraight line variation between points given\nMoment change due to retracting landing gear - 8271 in.-lb.\n\nEmpty Wt. C.G. Range          None",
+      "control_surfaces": "Wing flap           Maximum      35°\nAileron tabs             Up      15°         Down    15°\nAileron                  Up      24°         Down    16° (UA-1 & up, UB-1 & up)\nUp      24°         Down    17° (UC-1 & up, UD-1 & up)\nElevator tabs            Up       5°         Down    15°\nElevator                 Up      20°         Down    14°\nRudder tab             Right     15°          Left   15°\nRudder                 Right     25°          Left   25°\n\nSerial Nos. Eligible          (1900)                                   UA-3 only\n(1900C Bladder Tank Fuel System)         UB-1 through UB-74\n(1900C Wet Wing Fuel System)             UC-1 through UC-174\n(1900C C-12J)                            UD-1 through UD-6\n\nData Pertinent to Models 1900 and 1900C",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VIII",
+      "models": [
+        "300"
+      ],
+      "engine": "Two (2) Pratt & Whitney of Canada, Ltd. PT6A-60A (turboprop) per Beech",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "JP-4, JP-5 (MIL-T-5624); JP-8 (MIL-T-83133); JET A, JET A-1, and JET B conforming",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 11500
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing                (+178.75) to (+192.1) at 12,500 lb. (Model 300LW)\nGear Extended)                    (+182.5) to (+192.1) at 14,000 lb. (Model 300)\n(+177.0) to (+192.1) at 11,800 lbs.\nStraight line variation between points given\nMoment change due to retracting landing gear - 5815 in.-lb.\n\nEmpty Wt. C.G. Range               None",
+      "control_surfaces": "Wing flap           Maximum      35°\nAileron tabs             Up      15°         Down     15°\nAileron                  Up      25°         Down     15°\nElevator tabs            Up       3° 30’     Down     15°\nElevator                 Up      20°         Down     14°\nRudder tab             Right     15°          Left    15°\nRudder                 Right     25°          Left    25°\n\nSerial Nos. Eligible         (300)      FA-1 through FA-125, FA-127, FA-128, FA-130 through FA-230\n(300)      FF-1 through FF-19\n(300LW) FA-1 and after\n(FA-126 and FA-129 converted to FF-1 and FF-2 respectively)\n\nData Pertinent to Model 300 and 300LW",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IX",
+      "models": [
+        "B300"
+      ],
+      "engine": "Two (2) Pratt & Whitney of Canada, Ltd. PT6A-60A (turboprop) per Beech",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "JP-4, JP-5 (MIL-T-5624); JP-8 (MIL-T-83133); JET A, JET A-1, and JET B",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 12500
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing                  (+199.4) to (+208.0) at 15,000 lb.\nGear Extended)                      (+191.4) to (+208.0) at 11,800 lb.\nStraight line variation between points given\nMoment change due to retracting landing gear - 5815 in.-lb.\n\nEmpty Wt. C.G. Range                 None\n\nRev. 98                                                33                                                            A24CE\n\nIX - Model B300, Model B300C (cont’d)\n\n(Landing Gear Extended)\n(+203.3) to (+208.0) at 16 500 lb\n(+191.4) to (+208.0) at 11 800 lb\nStraight line variation between points given\nMoment change due to retracting landing gear (-8 307 in.lb.)",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "X",
+      "models": [
+        "1900D",
+        "Airliner"
+      ],
+      "engine": "Two (2) Pratt & Whitney of Canada, Ltd. PT6A-67D (turboprop) per Beech",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "JP-4, JP-5 (MIL-T-5624); JP-8 (MIL-T-83133); Jet A, Jet A-1, and Jet B conforming to",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {},
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(Landing        F.S. 282.9 to F.S. 299.9 at 17,120 lbs.\nGear Extended)             F.S. 274.5 to F.S. 299.9 at 11,600 lbs. or less\nStraight line variation between points given\nMoment change due to retracting landing gear (-8966 in.-lb.)\nFor cruise and descent flight phases at weights 12,313 lbs. and above operation is\napproved to an aft limit of F.S. 303.0.\n\nEmpty Wt. C.G. Range       None\n\nRev. 98                                              39                                                       A24CE\n\nX - Model 1900D (cont’d)",
+      "control_surfaces": "Wing flap           Maximum      35°\nAileron tabs             Up      15°         Down    15°\nAileron                  Up      24°         Down    17°\nElevator tabs            Up       5.5°       Down    16.5°\nElevator                 Up      20°         Down    14°\nRudder tab             Right     15°          Left   15°\nRudder                 Right     25°          Left   25°\n\nSerial Nos. Eligible        UE-1 and after. See Note 9.\n\nData Pertinent to Model 1900D",
+      "serial_numbers": null
+    }
+  ]
+}

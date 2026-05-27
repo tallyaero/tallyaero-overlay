@@ -1,0 +1,79 @@
+{
+  "tcds_number": "A-780",
+  "revision": "13",
+  "revision_date": "March 30, 2001",
+  "tc_holder": "FS 2003 Corporation",
+  "source_pdf": "A-780.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 2,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "PA-12"
+      ],
+      "engine": "Lycoming O-235-C (See also Item 103 for optional engine)",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 100
+      },
+      "fuel_grade": "73 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": {
+          "value": 94,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1750,
+        "utility_landplane": 1500
+      },
+      "fuel_capacity": {
+        "total_gal": 38.0,
+        "usable_gal": null
+      },
+      "seats": 3,
+      "cg_range_raw": null,
+      "control_surfaces": "Elevator        27°      Up          32°     Down\nRudder          20°      Left        20°     Right\nAileron         31°      Up          25°     Down\nStabilizer      1°15'    Up          5°30'   Down\n\nSerial Nos. Eligible            12-1 and up.\nRequired Equipment              Landplane - Items 1(a), 101, 102, 201(a), 202(a) and 401(a).\nSkiplane - Items 1(a), 101, 102, 203, and 401(b).\n\nPage No.      1  2  3      4    5  6  7\nRev. No.     13 12 13      8    11 11 10\n\nA-780                                                                                                              Page 2 of 7",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "PA-12S"
+      ],
+      "engine": "Lycoming O-235-C (See also Item 103 for optional engine)",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 100
+      },
+      "fuel_grade": "80 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 138,
+          "unit": "mph"
+        },
+        "Vno": null,
+        "Vfe": null,
+        "Va": {
+          "value": 97,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1838
+      },
+      "fuel_capacity": {
+        "total_gal": 38.0,
+        "usable_gal": null
+      },
+      "seats": 3,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": null
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "tcds_number": "A-768",
+  "revision": "35",
+  "revision_date": "July 29, 2015",
+  "tc_holder": "Textron Aviation Inc.",
+  "source_pdf": "A-768.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 2,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "140",
+        "2"
+      ],
+      "engine": "Continental C-85-12 or C-85-12F (See Items 105, 107 and 109 for optional engines)",
+      "engine_limits": {
+        "rpm": 2575,
+        "hp": 85
+      },
+      "fuel_grade": "73 min. octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": {
+          "value": 82,
+          "unit": "mph"
+        },
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1450
+      },
+      "fuel_capacity": {
+        "total_gal": 25.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "Landplane:    (+13.5) to (+17.7)\nSeaplane :    (+13.7) to (+17.5)",
+      "control_surfaces": "Elevator                Up 20°         Down 20°\nElevator tab            Up 6°          Down 33°\nRudder                  Left 16°       Right 16°\nAileron                 Up 22°         Down 14°\nFlaps                                  Down 40°\nStabilizer              Fixed\n\nSerial Nos. Eligible           8001 and up\n\nRequired Equipment             In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed:\n(Landplane) : Items 1, 201(a), 202(a), 403, 601\n(Seaplane) : Items 2, 206(a), 403, 601\n(Skiplane) : Items 1, 202, 204, 403, 601",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "120",
+        "2"
+      ],
+      "engine": "Continental C-85-12 or C-85-12F (See Items 105, 107, and 109 for optional engines)",
+      "engine_limits": {
+        "rpm": 2575,
+        "hp": 85
+      },
+      "fuel_grade": "73 octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1450
+      },
+      "fuel_capacity": {
+        "total_gal": 25.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "Landplane:        (+13.5) to (+17.7)\nSeaplane :        (+13.7) to (+17.5)",
+      "control_surfaces": "Elevator                Up 20°     Down 20°\nElevator tab            Up 6°      Down 33°\nRudder                  Left 16°   Right 16°\nAileron                 Up 22°     Down 14°\nStabilizer              Fixed\n\nSerial Nos. Eligible                8003 and up\n\nRequired Equipment                  In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed:\n(Landplane) : Items 1, 201(a), 202(a), 403\n(Seaplane) : Items 2, 206(a), 403\n(Skiplane) : Items 1, 202, 204, 403\n\nSpecifications Pertinent to all Models",
+      "serial_numbers": null
+    }
+  ]
+}

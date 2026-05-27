@@ -1,0 +1,133 @@
+{
+  "tcds_number": "A-761",
+  "revision": "18",
+  "revision_date": "January 9, 2009",
+  "tc_holder": null,
+  "source_pdf": "A-761.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 4,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "11AC",
+        "2"
+      ],
+      "engine": "Continental A-65-8",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "73 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1250
+      },
+      "fuel_capacity": {
+        "total_gal": 15.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+12.4) to (+22.0) (Rear limit may be(+23.2) provided intentional spins are prohibited).",
+      "control_surfaces": "Elevator                      Up           26°    Down      24.5°\nElevator Trim Tab             Up           23°    Down      31°\nAilerons                      Up           28°    Down      18°\nRudder                        Right        28°    Left      28°\n\nSerial No. Eligible                 11AC-1 and up\n\nPage No.     1     2      3    4    5     6      7\nRev No.      17    17     17   17   17    18     17\nReformatted 3/94.\n\n-2-                                                                 A-761\nRev. 18\n\nRequired Equipment                  In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed: 1, 101, 102, 201, 202",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "S11AC",
+        "2",
+        "PCSM"
+      ],
+      "engine": "Continental A-65-8F",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "73 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1350
+      },
+      "fuel_capacity": {
+        "total_gal": 15.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+17.0) to (+21.9) at 1350 lb.\n(+14.9) to (+21.9) at 1278 lb. or less. Straight line variation between points given.\n\n1400\n\n1350\nAFT\n1300                FRONT       LIMIT\nLB.                         LIMIT\n1250\n\n1200\n\n1150\n14 15 16 17 18 19 20 21 22\nINCHES",
+      "control_surfaces": "Elevator                        Up         26°     Down      24.5°\nElevator Trim Tab               Up         23°     Down      31°\nAilerons                        Up         28°     Down      18°\nRudder                          Right      28°     Left      28°\n\nSerial No. Eligible                11AC-1 and up\n\nRequired Equipment                 In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed: 1, 101, 208, 209\n\n-3-                                                           A-761\nRev. 18",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "11BC",
+        "2"
+      ],
+      "engine": "Continental C-85-8F",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1250
+      },
+      "fuel_capacity": {
+        "total_gal": 15.5,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+12.4) to (+21.5)",
+      "control_surfaces": "Elevator                         Up        26°      Down    24.5°\nElevator Trim Tab                Up        23°      Down    31°\nAilerons                         Up        28°      Down    18°\nRudder                           Right     28°      Left    28°\n\nSerial No. Eligible                11BC-1 and up\n\nRequired Equipment                 In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed: 1, 102, 107, 201, 202",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "S11BC",
+        "2",
+        "PCSM"
+      ],
+      "engine": "Continental C-85-8F",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1350
+      },
+      "fuel_capacity": {
+        "total_gal": 15.5,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+17.0) to (+21.9) at 1350 lb.\n(+14.9) to (+21.9) at 1278 lb. or less.\nStraight line variation between points given.\nFigure under Model S11AC also applicable here.",
+      "control_surfaces": "Elevator                        Up        26°       Down       24.5°\nElevator Trim Tab               Up        23°       Down       31°\nAilerons                        Up        28°       Down       18°\nRudder                          Right     28°       Left       28°\n\nSerial No. Eligible                    11BC-1 and up\n\nRequired Equipment                     In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed: 1, 102, 107, 208, 209\n\nSpecifications Pertinent to All Models",
+      "serial_numbers": null
+    }
+  ]
+}

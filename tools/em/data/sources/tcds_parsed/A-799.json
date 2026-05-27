@@ -1,0 +1,141 @@
+{
+  "tcds_number": "A-799",
+  "revision": "55",
+  "revision_date": "July 29, 2015",
+  "tc_holder": "Textron Aviation Inc.",
+  "source_pdf": "A-799.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 3,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "170"
+      ],
+      "engine": "Continental C145-2 (See Item 112 for optional engine)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 Min. octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 160,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 90,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 115,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2200,
+        "utility_landplane": 1900
+      },
+      "fuel_capacity": {
+        "total_gal": 37.5,
+        "usable_gal": 33.5
+      },
+      "seats": null,
+      "cg_range_raw": "Normal Category: (+40.9) to (+45.2) at 2200 lb.\n(+36.3) to (+45.2) at 1733 lb or less\nUtility Category: (+38.0) to (+40.3) at 1900 lb.\n(+36.3) to (+40.3) at 1733 lb. or less\nStraight line variation between points given\n\nPage No.      1    2      3    4    5       6     7     8     9      10     11   12    13     14       15   16\nRev. No.      55   50     49   50   54      49    45    45    45     53     53   45    45     45       55   55\n\nA-799                                                              2                                                            Rev. 55\n\nI.   Model 170 (cont’d)\n\n(cont’d)\nCESSNA 170\n2200\n\n2100                                  NORMAL\nCATEGORY\nFRONT            AFT\n2000\nUTILITY\n1900 CATEGORY\nAFT\n1800\nFRONT\n1700\n\n36   37     38     39     40   41 42        43   44     45   46\nINCHES\nEmpty Wt. C.G. Range               None",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "170A",
+        "4",
+        "PCSM"
+      ],
+      "engine": "Continental C145-2 or -2H (See Item 112 for optional engine)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 Min. octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 160,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 115,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2200,
+        "utility_landplane": 1900
+      },
+      "fuel_capacity": {
+        "total_gal": 42.0,
+        "usable_gal": 37.0
+      },
+      "seats": null,
+      "cg_range_raw": "Landplane:\nNormal Category           (+40.8) to (+46.4) at 2200 lb.\n(+36.4) to (+46.4) at 1733 lb. or less\nUtility Category:        (+38.0) to (+40.3) at 1900 lb.\n(+36.4) to (+40.3) at 1733 lb. or less\nStraight line variation between points given.\n\nLBS.\n2200\n\nLANDPLANE                                    NORMAL\n2100\nCAT.\nFRONT\n2000\n\n1900                                                       AFT\nUTILITY\nCAT.\n1800                 AFT\nFRONT\n1700\n36   37   38   39    40   41 42        43   44    45      46   47\nINCHES\n\nA-799                                                   4                                                     Rev. 55\n\nII. Model 170A (cont’d)\n\n(cont’d)            Seaplane:\nNormal Category:         (+38.8) to (+45.3) at 2106 lb.\n(+37.0) to (+45.3) at 1800 lb. or less\nUtility Category:        (+38.8) to (+40.6) at 1975 lb.\n(+37.0) to (+40.6) at 1800 lb. or less\nStraight line variation between points given.\n\n(SEAPLANE)\n2200\n\n2100\nNORMAL\nFRONT      CATEGORY\n2000\nUTILITY\n1900                 CATEGORY\nAFT\n1800\nFRONT\nAFT\n36        38              40        42         44        46",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "170B",
+        "4",
+        "PCSM"
+      ],
+      "engine": "Continental C145-2 or -2H (See item 112 for optional engine)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 145
+      },
+      "fuel_grade": "80 Min. octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 160,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 140,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 100,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 115,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2200,
+        "utility_landplane": 1900
+      },
+      "fuel_capacity": {
+        "total_gal": 42.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "Landplane:\nSame as Model 170A\nSeaplane:\nNormal Category:          (+38.8) to (+44.4) at 2106 lb.\n(+37.0) to (+44.4) at 1800 lb. or less\nUtility Category:        (+38.8) to (+40.6) at 1975 lb.\n(+37.0) to (+40.6) at 1800 lb. or less\nStraight line variation between points given\n\n(SEAPLANE)\n2200\n\n2100\nNORMAL\nFRONT      CATEGORY\n2000\nUTILITY\n1900                 CATEGORY\nAFT\n1800\nFRONT\nAFT\n36        38              40       42         44         46\nINCHES",
+      "control_surfaces": null,
+      "serial_numbers": null
+    }
+  ]
+}

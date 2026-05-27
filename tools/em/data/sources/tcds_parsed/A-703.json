@@ -1,0 +1,75 @@
+{
+  "tcds_number": "A-703",
+  "revision": "5",
+  "revision_date": "August 7, 2006",
+  "tc_holder": "Piper Aircraft, Inc.",
+  "source_pdf": "A-703.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 2,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "J4",
+        "2"
+      ],
+      "engine": "Continental A-50-1 (See Item 301 for optional engines)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "73 min. octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1200
+      },
+      "fuel_capacity": {
+        "total_gal": 16.0,
+        "usable_gal": null
+      },
+      "seats": 2,
+      "cg_range_raw": null,
+      "control_surfaces": "Not available.",
+      "serial_numbers": "4-400 and up.\n(See NOTE 3 for additional limitations on Serial Nos. 4-400 through 4-452).\n\nRequired Equipment                  Items 101, 102, 103, 105, 106, and 107.\n\nPage No.      1     2     3      4   5\nRev. No.      5     4     4      4   4\n\nA-703                                             Page 2 of 5"
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "J4A",
+        "2",
+        "and",
+        "J4A-S",
+        "2",
+        "PCSM"
+      ],
+      "engine": "Continental A-65-1 (See Item 301 for optional engines)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "73 min. octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1200
+      },
+      "fuel_capacity": {
+        "total_gal": 16.0,
+        "usable_gal": null
+      },
+      "seats": 2,
+      "cg_range_raw": null,
+      "control_surfaces": "Not available.",
+      "serial_numbers": "4-400 and up.\n(See NOTE 3 for additional limitations on Serial Nos. 4-400 through 4-452).\n\nRequired Equipment          Landplane        Items 101, 102, 103, 105, 106, and 107.\nSeaplane         Items 101, 105, 106, 107, and 151.\n\nData Pertinent to All Models"
+    }
+  ]
+}

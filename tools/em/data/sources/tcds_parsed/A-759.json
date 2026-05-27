@@ -1,0 +1,658 @@
+{
+  "tcds_number": "A-759",
+  "revision": "73",
+  "revision_date": "February 9, 2011",
+  "tc_holder": "Record: Aeronca Aircraft Corporation transferred TC A-759 to",
+  "source_pdf": "A-759.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 22,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "7AC"
+      ],
+      "engine": "Continental A-65-8 (see item 115 for Lycoming O-235-C)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "73 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1220
+      },
+      "fuel_capacity": {
+        "total_gal": 13.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+10.9) to (+21.5)\nEmpty wt.\n(+14.1) to (+17.9) standard arrangement\n(+14.1) to (+15.0) when item 106(a) installed. When empty weight C.G. falls\nwithin the range given, it is not necessary to compute critical fore and aft C.G.\npositions. This range valid for standard arrangement only.",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "S7AC"
+      ],
+      "engine": "Continental A-65-8",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1320
+      },
+      "fuel_capacity": {
+        "total_gal": 13.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+10.9) to (+19.5)\nEmpty wt.\n(+13.6) to (+15.7) not valid when item 106(a) installed. When empty weight\nC.G. falls within this range, it is not necessary to compute critical fore and aft\nC.G. positions. This range valid for standard arrangement only.",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "7BCM (Army L-16A)"
+      ],
+      "engine": "Continental C-85-8, -8F, -8J or -8FJ",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1220
+      },
+      "fuel_capacity": {
+        "total_gal": 13.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+10.4) to (+19.7)\nEmpty wt.\n(+13.2) to (+15.5) valid only for standard arrangement. When empty weight\nC.G. falls within this range, it is not necessary to compute critical fore and aft\nC.G. positions.",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "7CCM (Army L-16B)"
+      ],
+      "engine": "Continental C90-8F or C90-8FJ",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1300
+      },
+      "fuel_capacity": {
+        "total_gal": 18.5,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+16.8) to (+20.0) at 1300 lb.\n(+10.0) to (+20.0) at 1087 lb. or less\nStraight line variation between points given.\nEmpty wt.\nNone\nat 1350 lb. is as follows:\n(+16.8) to (+20.4) at 1350 lb.\n(+10.0) to (+20.4) at 1087 lb. or less\nStraight line variation between points given.\nNo. of Seats           2 (1 at +11.5, 1 at +42). Placard: \"Solo from front seat only.\"",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "V",
+      "models": [
+        "7DC"
+      ],
+      "engine": "Continental C-85-8, -8F, -8J, or -8FJ",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1300
+      },
+      "fuel_capacity": {
+        "total_gal": 18.5,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+16.8) to (+20.0) at 1300 lb.\n(+10.0) to (+20.0) at 1087 lb. or less\nStraight line variation between points given.\nEmpty wt.\nNone\nat 1350 lb. is as follows:\n(+16.8) to (+20.4) at 1350 lb.\n(+10.0) to (+20.4) at 1087 lb. or less\nStraight line variation between points given.\nNo. of Seats           2 (1 at +11.5, 1 at +42). Placard: \"Solo from front seat only.\"",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VI",
+      "models": [
+        "S7DC"
+      ],
+      "engine": "Continental C-85-8F",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1400
+      },
+      "fuel_capacity": {
+        "total_gal": 18.5,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+16.8) to (+20.3) at 1400 lb.\n(+10.4) to (+20.3) at 1189 lb. or less\nStraight line variation between points given.\nEmpty wt.\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VII",
+      "models": [
+        "S7CCM"
+      ],
+      "engine": "Continental C90-8F or C90-8FJ",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1400
+      },
+      "fuel_capacity": {
+        "total_gal": 18.5,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+16.8) to (+20.3) at 1400 lb.\n(+10.4) to (+20.3) at 1189 lb. or less\nStraight line variation between points given.\nEmpty wt.\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VIII",
+      "models": [
+        "7EC"
+      ],
+      "engine": "Continental C90-12F or C90-12FJ",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1300
+      },
+      "fuel_capacity": {
+        "total_gal": 18.5,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+15.0) to (+19.2) at 1450 lb.\n(+10.2) to (+19.2) at 1190 lb. or less\nStraight line variation between points given.\nPlacard: \"Intentional spinning prohibited when carrying baggage.\"\nEmpty wt.\nNone\nat 1300 lb. is as follows:\n(+16.8) to (+19.2) at 1300 lb.\n(+10.2) to (+19.2) at 1100 lb. or less\nStraight line variation between points given.\n1500 lb. (S/N's 7EC-705 and up eligible)\nat 1500 lb. is as follows:\n(+15.0) to (+19.2) at 1500 lb.\n(+10.2) to (+19.2) at 1190 lb. or less\nStraight line variation between points given.\nNo. of Seats           2 (1 at +11.5, 1 at +42). Placard: \"Solo from front seat only.\"",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IX",
+      "models": [
+        "S7EC"
+      ],
+      "engine": "Continental C90-12F or C90-12FJ",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1474
+      },
+      "fuel_capacity": {
+        "total_gal": 18.5,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+15.0) to (+18.6) at 1474 lb.\n(+10.4) to (+18.6) at 1258 lb. or less\nStraight line variation between points given.\nPlacard: \"Intentional spinning prohibited when carrying baggage.\"\nEmpty wt.\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "X",
+      "models": [
+        "7FC"
+      ],
+      "engine": "Continental C90-12F or C90-12FJ",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1500
+      },
+      "fuel_capacity": {
+        "total_gal": 26.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+15.0) to (+17.2) at 1450 lb.\n(+10.2) to (+17.2) at 1190 lb. or less\nStraight line variation between points given.\nPlacard: \"Intentional spinning prohibited when carrying baggage.\"\nEmpty wt.\nNone\n\nA-759                                            Page 7 of 37\n\nat 1500 lb. is as follows:\n(+15.0) to (+18.5) at 1500 lb.\n(+10.2) to (+18.5) at 1190 lb. or less\nStraight line variation between points given.\nNo. of Seats           2 (1 at +11.5, 1 at +42). Placard: \"Solo from front seat only.\"",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XI",
+      "models": [
+        "7GC"
+      ],
+      "engine": "Lycoming O-290-D2B",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1650
+      },
+      "fuel_capacity": {
+        "total_gal": 39.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "Landplane: (+14.2) to (+17.7) at 1650 lb.\n(+10.2) to (+17.7) at 1230 lb. or less\nSeaplane: (+14.45) to (+17.7) at 1732 lb.\n(+11.9) to (+17.7) at 1450 lb. or less\nStraight line variation between points given.\nEmpty wt.\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XII",
+      "models": [
+        "7HC"
+      ],
+      "engine": "Lycoming O-290-D2B",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1650
+      },
+      "fuel_capacity": {
+        "total_gal": 39.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "Landplane: (+14.2) to (+17.7) at 1650 lb.\n(+10.4) to (+17.7) at 1250 lb. or less\nSeaplane: (+14.45) to (+17.7) at 1732 lb.\n(+11.9) to (+17.7) at 1450 lb. or less\nStraight line variation between points given.\nEmpty wt.\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XIII",
+      "models": [
+        "7GCA"
+      ],
+      "engine": "Lycoming O-320-A2B",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1650
+      },
+      "fuel_capacity": {
+        "total_gal": 39.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+14.2) to (+17.7) at 1650 lb.\n(+10.2) to (+17.7) at 1230 lb. or less\nStraight line variation between points given.\nEmpty wt.\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XIV",
+      "models": [
+        "7JC"
+      ],
+      "engine": "Continental C90-12F",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1450
+      },
+      "fuel_capacity": {
+        "total_gal": 26.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+15.5) to (+19.2) at 1450 lb.\n(+11.3) to (+19.2) at 1200 lb. or less\nStraight line variation between points given.\nEmpty wt.\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XV",
+      "models": [
+        "7GCB"
+      ],
+      "engine": "Lycoming O-320-A2B",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": {
+          "value": 90,
+          "unit": "knots"
+        },
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1650
+      },
+      "fuel_capacity": {
+        "total_gal": 39.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "Landplane: (+15.0) to (+19.2) at 1650 lb.\n(+12.26) to (+19.2) at 1325 lb. or less\nSeaplane: (+16.2) to (+19.2) at 1732 lb.\n(+13.0) to (+19.2) at 1500 lb. or less\nWhen performing acrobatic maneuvers, the C.G. range shall be limited to:\n(+15.0) to (+17.1) at 1650 lb.\n(+12.26) to (+17.1) at 1325 lb. or less\n\nA-759                                             Page 10 of 37\n\nWith increased flap travel (Champion Installation dwg. No. 7-1131) and\ninstallation of horizontal tail surface per Champion dwg. No. 4-1410, 4-1411 and\n4-1412:\nLandplane: (+14.2) to (+19.2) at 1732 lb.\n(+10.5) to (+19.2) at 1325 lb. or less\nWhen performing acrobatic maneuvers, the C.G. range shall be limited to:\n(+14.2) to (+17.1) at 1650 lb.\n(+10.5) to (+17.1) at 1325 lb. or less\nStraight line variation between points given.\nEmpty wt.\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XVI",
+      "models": [
+        "7KC"
+      ],
+      "engine": "Lycoming O-320-A2B",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1650
+      },
+      "fuel_capacity": {
+        "total_gal": 39.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+14.2) to (+18.6) at 1650 lb.\n(+11.9) to (+18.6) at 1406 lb. or less\nStraight line variation between points given.\nEmpty wt.\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XVII",
+      "models": [
+        "7GCBA"
+      ],
+      "engine": "Lycoming O-320-A2B",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": {
+          "value": 90,
+          "unit": "knots"
+        },
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2400
+      },
+      "fuel_capacity": {
+        "total_gal": 39.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+15.0) to (+22.5) at 2400 lb.\n(+10.5) to (+22.5) at 1325 lb. or less\nStraight line variation between points given.\nEmpty wt.\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XVIII",
+      "models": [
+        "7ECA"
+      ],
+      "engine": "Continental O-200-A (see Item 122, 124 and 125 for optional engines)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1650
+      },
+      "fuel_capacity": {
+        "total_gal": 39.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "Landplane: (+14.2) to (+19.2) at 1650 lb.\n(+10.2) to (+19.2) at 1325 lb. or less\nWhen performing acrobatic maneuvers, the C.G. range shall be limited to:\n(+14.2) to (+17.3) at 1650 lb.\n(+10.5) to (+17.3) at 1325 lb. or less\nSeaplane: (+14.2) to (+19.2) at 1732 lb.\n(+10.5) to (+19.2) at 1407 lb. or less\nStraight line variation between points given.\n(See NOTE 15 for optional CG Range)\nEmpty wt.\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XIX",
+      "models": [
+        "7GCAA"
+      ],
+      "engine": "Lycoming O-320-A2B or O-320-C2B or O-320-A2D",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1650
+      },
+      "fuel_capacity": {
+        "total_gal": 39.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+14.2) to (+18.2) at 1650 lb.\n(+10.5) to (+18.2) at 1325 lb. or less\nWhen performing acrobatic maneuvers, the C.G. range shall be limited to:\n(+14.2) to (+16.0) at 1650 lb.\n(+10.5) to (+16.0) at 1325 lb. or less\nStraight line variation between points given.\n(See NOTE 15 for optional CG Range)\nEmpty wt.\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XX",
+      "models": [
+        "7GCBC"
+      ],
+      "engine": "Lycoming O-320-A2B or O-320-C2B or O-320-A2D",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": {
+          "value": 90,
+          "unit": "knots"
+        },
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1650
+      },
+      "fuel_capacity": {
+        "total_gal": 39.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "Landplane: (+14.2) to (+19.2) at 1650 lb.\n(+10.5) to (+19.2) at 1325 lb. or less\nWhen performing acrobatic maneuvers, the C.G. range shall be limited to:\n(+14.2) to (+16.3) at 1650 lb.\n(+10.5) to (+16.3) at 1350 lb. or less\nSeaplane with Item 204(c) installed::\n(+14.8) to (+19.2) at 1732 lb.\n(+11.5) to (+19.2) at 1500 lb. or less\nSeaplane with Item 204(d) installed::\n(+13.8) to (+18.4) at 1800 lb.\n(+11.5) to (+18.4) at 1590 lb. or less\nSkiplane with Item 203(k) installed::\n(+14.2) to (+16.8) at 1650 lb.\n(+10.5) to (+16.8) at 1325 lb. or less\nSkiplane with Item 203(l) installed::\n(+14.2) to (+19.2) at 1650 lb.\n(+10.5) to (+19.2) at 1325 lb. or less\nStraight line variation between points given.\n(See NOTE 13 for optional CG Range)\nEmpty wt.\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XXI",
+      "models": [
+        "7KCAB"
+      ],
+      "engine": "Lycoming IO-320-E2A or IO-320-E2B or AEIO-320-E2B",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1650
+      },
+      "fuel_capacity": {
+        "total_gal": 39.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+14.2) to (+18.2) at 1650 lb.\n(+10.5) to (+18.2) at 1325 lb. or less\nWhen performing acrobatic maneuvers, the C.G. range shall be limited to:\n(+14.2) to (+16.0) at 1650 lb.\n(+10.5) to (+16.0) at 1325 lb. or less\nStraight line variation between points given.\n(See NOTE 15 for optional CG Range)\nEmpty wt.\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XXII",
+      "models": [
+        "7ACA"
+      ],
+      "engine": "Franklin 2A-120A or 2A-120B",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "100/120 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1220
+      },
+      "fuel_capacity": {
+        "total_gal": 13.0,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(+10.9) to (+21.5)\nEmpty wt.\nNone\nand Maximum Weight changes apply to any 7GCBC that retrofits with 7-1545 wings\nexcept for airplanes with optional engine item 122.\n:     Landplane: (+14.2) to (+19.2) at 1800 lb.\n(+10.5) to (+19.2) at 1325 lb. or less\nWhen performing acrobatic maneuvers, the C.G. range shall be limited to:\n(+14.2) to (+16.3) at 1800 lb.\n(+10.5) to (+16.3) at 1350 lb. or less\nStraight line variation between points given.\nLandplane:     (+15.4) to (+19.2) at 1950 lb.\n(+10.5) to (+19.2) at 1325 lb. or less\nStraight line variation between points given.\nand Maximum Weight changes also apply to any 7ECA, 7GCAA, or 7KCAB that\nretrofits with 7-1566 wing frames or 7-1567 covered wing frames.\n:            Landplane:     (+14.2) to (+19.2) at 1750 lb.\n(+10.5) to (+19.2) at 1325 lb. or less\nWhen performing acrobatic maneuvers,\nthe C.G. range shall be limited to:\n(+14.2) to (+16.3) at 1750 lb.\n(+10.5) to (+16.3) at 1325 lb. or less\nStraight line variation between points given.\nNormal Category:         (+14.0) to (+19.2) at 1320 lb.\n(+11.0) to (+19.2) at 1100 lb. or less\nUtility Category:      (+14.0) to (+18.2) at 1320 lb.\n(+11.0) to (+18.2) at 1100 lb. or less\nStraight line variation between points given.\nEmpty wt.\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    }
+  ]
+}

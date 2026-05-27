@@ -1,0 +1,1113 @@
+{
+  "tcds_number": "3A23",
+  "revision": "30",
+  "revision_date": null,
+  "tc_holder": null,
+  "source_pdf": "3A23.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 38,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "Bee",
+        "Dee",
+        "M-4"
+      ],
+      "engine": "Continental O-300-A or B",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 145
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2100
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:     (+15.0) to (+23.0) at 2100 lbs.\n(+11.0) to (+23.0) at 1400 lbs. or less\nNOTE: With fuel in optional auxiliary tanks, aft C.G. restricted to (+18.0).\nSee Service Bulletin No. 18, Airplane Flight Manual Supplement (AFMS) No. 4 is\nrequired.\n\nSkiplane:      Models M-4, M-4C with Fli-Lite 3000 MK IIIA Skis\n(+13.0) to (+23.0) at 1850 lbs.\n(+10.6) to (+23.0) at 1550 lbs. or less\nModels M-4, M-4C with FluiDyne A2000A Skis\n(+15.0) to (+23.0) at 2100 lbs.\n(+11.0) to (+23.0) at 1400 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model Bee Dee M-4, 3-14\nModel M-4, 15 and up\nModel M-4C, 1C and up\nModel M-4S, 1S and up\nModel M-4T, 1T and up\n\nProduction basis             (No longer in production)"
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "M-4-210"
+      ],
+      "engine": "Continental IO-360-A",
+      "engine_limits": {
+        "rpm": 2800,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2300
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:     For s/n 1001-1045, 1001C-1074C, 1079C, 1080C:\n(+15.0) to (+23.0) at 2100 lbs.\n(+11.0) to (+23.0) at 1400 lbs. or less\nFor s/n 1075C, 1081C-1117C:\n(+16.0) to (+19.6) at 2300 lbs.\n(+15.0) to (+23.0) at 2100 lbs.\n(+11.0) to (+23.0) at 1400 lbs. or less\nNOTE: S/n 1001-1035 when modified per Maule SL#7 and SL#15 and s/n 1036-\n1045, 1001C-1074C, 1079C, 1080C when modified per Maule SL#15 dated\n11/12/68 are eligible for the above C.G. range at 2300 lbs. GW.\n\nSkiplane:      Models M-4-210, M-4-210C with Fli-Lite 3000 MK IIIA Skis:\n(+13.0) to (+23.0) at 2100 lbs.\n(+10.6) to (+23.0) at 1550 lbs. or less\nModels M-4-210, M-4-210C with Federal A2000A Skis:\n(+15.0) to (+23.0) at 2100 lbs.\n(+11.0) to (+23.0) at 1400 lbs. or less\nModels M-4-210, M-4-210C, M-4-210S, M-4-210T with Federal C2200H or C3000H\nSkis:\n(+12.6) to (+18.4) at 2100 lbs.\n(+9.6) to (+18.4) at 1620 lbs. or less\n\nFloatplane:    EDO 248A2440, 248B2440 or Fleet 2500 Floats:\n(+15.5) to (+20.5) at 2300 lbs.\n(+11.0) to (+20.5) at 1600 lbs. or less\nCAP 62-2000 Floats:\n\n3A23                                                     Page 4 of 48\n\n(+15.6) to (+20.5) at 2220 lbs.\n(+12.0) to (+20.5) at 1700 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "M-4-220"
+      ],
+      "engine": "Franklin 6A-350-C1",
+      "engine_limits": {
+        "rpm": 2800,
+        "hp": 220
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2300
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:       (+15.6) to (+19.0) at 2300 lbs.\n(+14.5) to (+20.5) at 2100 lbs.\n(+11.1) to (+20.5) at 1500 lbs. or less\nModel M-4-220S, s/n 2001S only:\n(+15.0) to (+20.5) at 2100 lbs.\n(+11.0) to (+20.5) at 1400 lbs. or less\nNOTE: With fuel in optional wing auxiliary tanks, aft C.G. restricted to +18.0.\n\nSkiplane:      Federal C2200H Skis:\n(+12.6) to (+18.4) at 2100 lbs.\n(+9.6) to (+18.4) at 1620 lbs. or less\nModel M-4-220C only:\nFederal A2000A Skis\n(+14.5) to (+20.5) at 2100 lbs.\n(+11.1) to (+20.5) at 1500 lbs. or less\nFli-Lite 3000 MK IIIA Skis\n(+14.5) to (+20.5) at 2300 lbs.\n(+11.1) to (+20.5) at 1500 lbs. or less\n\nFloatplane:    EDO 248A2440, 248B2440 or Fleet 2500 Floats:\n(+15.5) to (+20.5) at 2300 lbs.\n(+11.0) to (+20.5) at 1600 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-4-220, 2001 and up\nModel M-4-220C, 2001C and up\nModel M-4-220S, 2001S and up\nModel M-4-220T, 2001T and up\n\nProduction basis            (No longer in production)"
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "M-4-180C"
+      ],
+      "engine": "Franklin 6A-335-B1A",
+      "engine_limits": {
+        "rpm": 2800,
+        "hp": 180
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2300
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:     (+15.6) to (+19.0) at 2300 lbs.\n(+14.5) to (+20.5) at 2100 lbs.\n(+11.1) to (+20.5) at 1500 lbs. or less\nStraight line variation between points given.\nNOTE: With fuel in optional wing auxiliary tanks, aft C.G. restricted to (+18.0).\nSee Service Bulletin No. 18, AFMS No. 2 is required.\nEmpty weight\nC.C. Range                None",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-4-180C, 3001C and up\nModel M-4-180S, 3001S and up\nModel M-4-180T, 3001T and up\n\nProduction basis           (No longer in production)\n\nPage 7 of 48                                                        3A23"
+    },
+    {
+      "section_roman": "V",
+      "models": [
+        "M-5-210C"
+      ],
+      "engine": "Continental IO-360-D",
+      "engine_limits": {
+        "rpm": 2800,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2300
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:        (+16.0) to (+20.5) at 2300 lbs.\n(+15.0) to (+20.5) at 2100 lbs.\n(+12.0) to (+20.5) at 1600 lbs. or less\nAll s/n modified per Maule SL#45 and SL#46:\n(+17.0) to (+20.5) at 2500 lbs.\n(+15.0) to (+20.5) at 2100 lbs.\n(+12.0) to (+20.5) at 1600 lbs. or less\n\nFloatplane:     EDO 248A2440 or 248B2440 Floats:\n(+16.0) to (+18.0) at 2300 lbs.\n(+12.0) to (+18.0) at 1600 lbs. or less\nEDO 248B2400 Floats with modification per Maule Drawing 9173A:\n(+15.6) to (+19.0) at 2500 lbs.\n(+12.0) to (+19.0) at 1600 lbs. or less\nPee Kay 2300 Floats:\n(+15.5) to (+20.0) at 2300 lbs.\n(+14.0) to (+20.0) at 1800 lbs. or less\nNote: M-5-210C s/n 6001C-6014C, 6039C, 6043C-6045C requires compliance to Maule\nSL#28 when equipped with EDO 248A2440/B2440 floats.\n\nSkiplane:       Fluidyne C2200H Skis\n(+12.5) to (+20.0) at 2300 lbs.\n(+9.5) to (+20.0) at 1600 lbs. or less\nFli-Lite 3000 MK IIIA Skis\n(+16.0) to (+20.0) at 2300 lbs.\n(+12.0) to (+20.0) at 1600 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-5-210C, 6001C and up\n\n(See NOTE 13 for float installation requirements.)\n\nProduction basis           (No longer in production)"
+    },
+    {
+      "section_roman": "VI",
+      "models": [
+        "M-5-220C"
+      ],
+      "engine": "Franklin 6A-350-C1",
+      "engine_limits": {
+        "rpm": 2800,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2300
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:             (+16.0) to (+20.5) at 2300 lbs.\n(+15.0) to (+20.5) at 2100 lbs.\n(+12.0) to (+20.5) at 1600 lbs. or less\nAll s/n modified per Maule SL#48 and SL#51:\n(+17.0) to (+20.5) at 2500 lbs.\n(+15.0) to (+20.5) at 2100 lbs.\n(+12.0) to (+20.5) at 1600 lbs. or less\n\nFloatplane:       EDO 248A2440 or 248B2440 Floats:\n(+16.0) to (+18.0) at 2300 lbs.\n(+12.0) to (+18.0) at 1600 lbs. or less\nEDO 248B2400 Floats with modification per Maule Drawing 9173A:\n(+15.6) to (+19.0) at 2500 lbs.\n(+12.0) to (+19.0) at 1600 lbs. or less\nPee Kay 2300 Floats:\n(+15.5) to (+20.0) at 2300 lbs.\n(+14.0) to (+20.0) at 1800 lbs. or less\nNOTE: M-5-220C, s/n 5002C, 5019C, 5020C, 5022C-5024C requires compliance to\nMaule SL#28 when equipped with EDO 248A2440/B2440 floats.\n\nSkiplane:        FluiDyne C2200H Skis\n(+12.5) to (+20.0) at 2300 lbs.\n( +9.5) to (+20.0) at 1600 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone\n\nPage 9 of 48                                                     3A23",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-5-220C, 5001C and up. (See NOTE 13 for float installation requirement.)\n\nProduction basis          (No longer in production)"
+    },
+    {
+      "section_roman": "VII",
+      "models": [
+        "M-5-235C"
+      ],
+      "engine": "Lycoming O-540-J1A5D, O-540-J3A5, IO-540-W1A5D,",
+      "engine_limits": {
+        "rpm": 2400,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2300
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 23.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:       S/n 7001C-7026C, 7028C, 7030C-7032C, 7037C\n(+16.0) to (+20.5) at 2300 lbs.\n(+12.0) to (+20.5) at 1600 lbs. or less\nor - S/n 7001C-7026C, 7028C, 7030C-7032C, 7037C with expanded C.G. limits per\nMaule SL#36\n(+12.5) to (+20.5) at 2300 lbs.\n(+10.5) to (+20.5) at 1700 lbs. or less\nor -S/n 7001C-7320C, 7322C-7346C, 7348C,7349C modified per Maule SL#43\n(+13.2) to (+20.5) at 2500 lbs.\n(+10.5) to (+20.5) at 1700 lbs. or less\nor -S/n 7001C-7320C, 7322C-7346C, 7348C, 7349Cmodified per Maule SL#44\n(+12.5) to (+20.5) at 2300 lbs.\n(+11.7) to (+20.5) at 1700 lbs. or less\nor -S/n 7001C-7320C, 7322C-7346C, 7348C, 7349C modified per Maule SL#43 and\nSL#44 and s/n 7321C, 7347C, 7351C, 7363C, 7369C and up\n(+13.2) to (+20.5) at 2500 lbs.\n(+11.7) to (+20.5) at 1700 lbs. or less\n\n3A23                                          Page 10 of 48\n\nFloatplane:      EDO 248A2440, 248B2440 or Aqua 2400 Floats:\n(+14.3) to (+20.0) at 2530 lbs.\n(+13.3) to (+20.0) at 2100 lbs. or less\nPee Kay 2300 Floats:\n(+14.3) to (+20.0) at 2500 lbs.\n(+13.3) to (+20.0) at 2100 lbs. or less\nEDO 248B2440, Aqua 2400, or EDO 797-2500 amphibious Floats (Floatplanes modified\nper Maule drawing 9143A (B2440's), 9166A (2400’s) or 9057A (amphibs)):\n(+14.0) to (+19.0) at 2750 lbs.\n(+10.5) to (+19.0) at 1600 lbs. or less\n\nSkiplane:        FluiDyne C2200H, C3000H, C3000M or Fli-Lite 3000 MK IIIA Skis:\n(+12.5) to (+20.0) at 2300 lbs.\n(+9.5) to (+20.0) at 1600 lbs. or less\nFluiDyne A2500A Skis:\n(+12.9) to (+20.5) at 2300 lbs.\n(+11.7) to (+20.5) at 1700 lbs. or less\nFli-Lite MK IIIA Skis (Skiplanes modified per Maule drawing 9081A):\n(+13.2) to (+20.0) at 2500 lbs\n(+11.7) to (+20.0) at 1700 lbs. or less\nFluiDyne C3000M or C3000H Skis (Skiplanes modified per Maule drawing 9158A for\nC3000M or 9174A, Rev. C or later for C3000H):\n(+13.2) to (+20.0) at 2500 lbs.\n(+10.7) to (+20.0) at 1700 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VIII",
+      "models": [
+        "M-5-180C"
+      ],
+      "engine": "Lycoming O-360-C1F",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2300
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:       (+16.7) to (+20.5) at 2300 lbs.\n(+12.6) to (+20.5) at 1600 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-5-180C, 8001C-8014C, 8016C-8019C, 8021C, 8023C-8042C, 8044C-8064C, 8068C-8094C\n\n3A23                                                  Page 12 of 48\n\nand up\n\nProduction basis          (No longer in production)"
+    },
+    {
+      "section_roman": "IX",
+      "models": [
+        "M-5-210TC"
+      ],
+      "engine": "Lycoming TO-360-F1A6D, Carburetor parts listing No. IO-5258",
+      "engine_limits": {
+        "rpm": 2575,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2300
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:       (+15.0) to (+20.5) at 2300 lbs.\n(+12.0) to (+20.5) at 1700 lbs. or less\nSkiplane:       Fli-Lite 3000 MK IIIA Skis:\n(+12.5) to (+20.0) at 2300 lbs.\n(+9.5) to (+20.0) at 1600 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-5-210TC, 9001C and up\n\nProduction basis          (No longer in production)\n\nPage 13 of 48                                                      3A23"
+    },
+    {
+      "section_roman": "X",
+      "models": [
+        "M-6-235"
+      ],
+      "engine": "Lycomin       O-540-J1A5D, O-540-J3A5, IO-540-W1A5D,",
+      "engine_limits": {
+        "rpm": 2400,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:       (+15.0) to (+20.5) at 2500 lbs.\n(+11.0) to (+20.5) at 1700 lbs. or less\n\nFloatplane:    EDO 797-2500 amphibious* or 248B2440 Floats\n(+14.0) to (+19.0) at 2750 lbs.\n(+10.5) to (+19.0) at 1600 lbs. or less\nAqua 2400 Floats\n(+14.8) to (+19.0) at 2750 lbs.\n(+10.5) to (+19.0) at 1600 lbs. or less\nWipline 3000 amphibious Floats\n(+14.0) to (+19.0) at 2750 lbs.\n(+12.0) to (+19.0) at 2100 lbs. or less\nWipline 2350 amphibious Floats***\n(+14.1) to (+19.0) at 2500 lbs.\n(+12.6) to (+19.0) at 2090 lbs. or less\n\nSkiplane:      FluiDyne A2500A Skis*\n(+14.3) to (+20.5) at 2300 lbs.\n(+11.0) to (+20.5) at 1700 lbs. or less\nFli-Lite 3000 MK IIIA Skis*\n(+15.0) to (+20.5) at 2500 lbs.\n(+11.0) to (+20.5) at 1700 lbs. or less\nFluiDyne C2200H, C3000H/AH/M wheel Skis**\n(+15.0) to (+20.0) at 2500 lbs.\n(+10.0) to (+20.0) at 1700 lbs. or less\n*Not applicable s/n 7474C and up\n**Not applicable s/n 7466C, 7468C-7473C\n***Not applicable s/n 7249C, 7356C-7465C\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-6-235, s/n 7249C, 7356C, 7379C-7444C, 7446C-7450C, 7452C-7459C, 7461C-7466C, 7468C,\n7469C, 7471C-7475C, 7488C-7514C, 7516C-7519C and up\n\nProduction basis          Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XI",
+      "models": [
+        "M-6-180"
+      ],
+      "engine": "Lycoming O-360-C1F",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2400
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:         (+16.7) to (+20.5) at 2400 lbs.\n(+13.6) to (+20.5) at 1600 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-6-180, s/n 8020C, 8065C-8067C and up\n\nProduction basis          Production Certificate No. 11S0\n\nPage 15 of 48                                                    3A23"
+    },
+    {
+      "section_roman": "XII",
+      "models": [
+        "M-5-200"
+      ],
+      "engine": "Lycoming I0-360-J1A6D",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:         (+16.7) to (+20.5) at 2500 lbs.\n(+13.2) to (+20.5) at 1700 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XIII",
+      "models": [
+        "M-7-235"
+      ],
+      "engine": "Lycoming              O-540-J1A5D, O-540-J3A5, IO-540-W1A5D,",
+      "engine_limits": {
+        "rpm": 2400,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 5,
+      "cg_range_raw": "Landplane:          (+15.0) to (+20.0) at 2500 lbs.\n(+12.5) to (+20.0) at 1700 lbs. or less\n\nFloatplane:       EDO 797-2500 amphibious or 248B2440 Floats\n(+14.0) to (+19.0) at 2750 lbs.\n(+10.5) to (+19.0) at 1600 lbs. or less\nAqua 2400 Floats\n(+15.0) to (+20.0) at 2750 lbs.\n(+12.5) to (+20.0) at 1600 lbs. or less\nWipline 3000 amphibious Floats\n(+14.0) to (+19.0) at 2750 lbs.\n(+12.0) to (+19.0) at 2100 lbs. or less\n\nSkiplane:         Fli-Lite 3000 MK IIIA Skis\n(+15.0) to (+20.0) at 2500 lbs.\n(+12.5) to (+20.0) at 1700 lbs. or less\nFluiDyne C3000H and C3000M Skis\n(+15.0) to (+20.0) at 2500 lbs.\n(+10.0) to (+20.0) at 1700 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-7-235, s/n 4001C and up;\nWith STC SA2661SO, s/n 12001C and up (also known as Model M-7-420)\n\nProduction basis          Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XIV",
+      "models": [
+        "MX-7-235"
+      ],
+      "engine": "Lycoming       O-540-J1A5D, O-540-J3A5, IO-540-W1A5D,",
+      "engine_limits": {
+        "rpm": 2400,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:        (+15.0) to (+20.5) at 2500 lbs.\n(+12.0) to (+20.5) at 1700 lbs. or less\n\nFloatplane:    EDO 797-2500 amphibious or 248B2440:\n(+14.3) to (+19.0) at 2750 lbs.\n(+12.3) to (+19.0) at 2100 lbs. or less\nWipline 2350 amphibious Floats\n(+14.1) to (+19.0) at 2500 lbs.\n(+12.6) to (+19.0) at 2090 lbs. or less\nWipline 3000 amphibious Floats\n(+14.0) to (+19.0) at 2750 lbs.\n(+12.0) to (+19.0) at 2100 lbs. or less\n\nSkiplane:      FluiDyne C3000H:\n(+15.0) to (+19.0) at 2500 lbs.\n(+11.0) to (+19.0) at 1840 lbs. or less\nFliLite 3000 MK IIIA:\n(+15.0) to (+19.0) at 2500 lbs.\n(+11.0) to (+19.0) at 1700 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model MX-7-235, s/n 10001C and up\n\nProduction basis          Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XV",
+      "models": [
+        "MX-7-180"
+      ],
+      "engine": "Lycoming 0-360-C1F",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:        (+16.7) to (+20.5) at 2500 lbs.\n(+13.6) to (+20.5) at 1600 lbs. or less\n\nFloatplane:     Aqua 2200 Floats:\n(+13.9) to (+20.5) at 2500 lbs.\n(+10.5) to (+20.5) at 1600 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model MX-7-180, s/n 11001C and up\n\nProduction basis            Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XVI",
+      "models": [
+        "MX-7-420"
+      ],
+      "engine": "Rolls-Royce Corp. (Allison)       Gas Turbine 250-B17C",
+      "engine_limits": {
+        "rpm": 2030,
+        "hp": null
+      },
+      "fuel_grade": "Primary:     Mil-T-5624L, grade JP-4 and JP-5, Mil-T-83133A, grade JP-8, ASTM-D-1655, Jet A, A1 or B, JP-1",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 43.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:        (+15.0) to (+20.0) at 2500 lbs.\n(+12.0) to (+20.0) at 1700 lbs. or less\n\nFloatplane:     Wipline 2350 Amphibious:\n(+14.1) to (+18.5) at 2500 lbs.\n(+12.6) to (+18.5) at 2090 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model MX-7-420, s/n 13001C and up\n\nProduction basis            Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XVII",
+      "models": [
+        "MXT-7-180"
+      ],
+      "engine": "Lycoming      Lycoming 0-360-C1F",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:      (+15.9) to (+20.5) at 2500 lbs.\n(+12.4) to (+20.5) at 1740 lbs. or less\n\nFloatplane:    Aqua 2200 Floats:\n(+13.9) to (+20.5) at 2500 lbs.\n(+10.5) to (+20.5) at 1600 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model MXT-7-180, s/n 14000C and up\n\nProduction basis          Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XVIII",
+      "models": [
+        "MT-7-235"
+      ],
+      "engine": "Lycoming      IO-540-W1A5D, IO-540-W1A5",
+      "engine_limits": {
+        "rpm": 2400,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 5,
+      "cg_range_raw": "Landplane:         (+15.0) to (+20.5) at 2500 lbs.\n\nPage 21 of 48                                                   3A23\n\n(+12.0) to (+20.5) at 1800 lbs. or less\n\nFloatplane:      Aqua 2400 Floats\n(+15.0) to (+20.0) at 2750 lbs.\n(+12.5) to (+20.0) at 1600 lbs. or less\nWipline 3000 amphibious Floats\n(+14.0) to (+19.0) at 2750 lbs.\n(+12.0) to (+19.0) at 2100 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model MT-7-235, s/n 18001C and up\n\nProduction basis           Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XIX",
+      "models": [
+        "M-8-235"
+      ],
+      "engine": "Lycoming      O-540-J1A5D, O-540-J3A5, IO-540-W1A5D,",
+      "engine_limits": {
+        "rpm": 2400,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:      (+15.0) to (+20.5) at 2500 lbs.\n(+12.0) to (+20.5) at 1760 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-8-235, s/n 15001C and up\n\nProduction basis           Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XX",
+      "models": [
+        "MX-7-160"
+      ],
+      "engine": "Lycoming      Lycoming 0-320-B2D",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2200
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:      (+15.4) to (+20.5) at 2200 lbs.\n(+12.5) to (+20.5) at 1600 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model MX-7-160, s/n 19001C and up\n\nProduction basis           Production Certificate No. 11S0\n\nPage 23 of 48                                                   3A23"
+    },
+    {
+      "section_roman": "XXI",
+      "models": [
+        "MXT-7-160"
+      ],
+      "engine": "Lycoming      Lycoming 0-320-B2D",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2200
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:       (+15.4) to (+20.5) at 2200 lbs.\n(+12.5) to (+20.5) at 1600 lbs. or less\n\nFloatplane:    Aqua 2200 Floats:\n(+14.6) to (+20.5) at 2200 lbs.\n(+13.5) to (+20.5) at 1600 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model MXT-7-160, s/n 17001C and up\n\nProduction basis           Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XXII",
+      "models": [
+        "MX-7-180A"
+      ],
+      "engine": "Lycoming      0-360-C1F or 0-360-C4F",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2400
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:     (+15.9) to (+20.5) at 2400 lbs.\n(+12.4) to (+20.5) at 1740 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model MX-7-180A, s/n 20001C and up\n\nProduction basis          Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XXIII",
+      "models": [
+        "MXT-7-180A"
+      ],
+      "engine": "Lycoming      0-360-C1F or 0-360-C4F",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2400
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:       (+15.9) to (+20.5) at 2400 lbs.\n(+12.4) to (+20.5) at 1740 lbs. or less\n\nFloatplane:    Aqua 2200 Floats:\n(+15.0) to (+20.5) at 2400 lbs.\n(+13.5) to (+20.5) at 1600 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model MXT-7-180A, s/n 21001C and up\n\nProduction basis          Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XXIV",
+      "models": [
+        "MX-7-180B"
+      ],
+      "engine": "Lycoming      Lycoming 0-360-C1F",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:      (+15.9) to (+20.5) at 2500 lbs.\n(+12.4) to (+20.5) at 1740 lbs. or less\nStraight line variation between points given.\n\nFloatplane:    See appropriate AFMS for C.G. range for different float installations.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model MX-7-180B, s/n 22001C and up\n\nProduction basis           Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XXV",
+      "models": [
+        "MXT-7-420"
+      ],
+      "engine": null,
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": null,
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {},
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XXVI",
+      "models": [
+        "M-7-235B"
+      ],
+      "engine": "Lycoming       O-540-J1A5D, O-540-J3A5, IO-540-W1A5D,",
+      "engine_limits": {
+        "rpm": 2400,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 5,
+      "cg_range_raw": "Landplane:        (+15.0) to (+20.0) at 2500 lbs.\n(+12.5) to (+20.0) at 1700 lbs. or less\n\nFloatplane:     EDO 797-2500 amphibious or 248B2440:\n(+14.0) to (+19.0) at 2750 lbs.\n(+12.5) to (+19.0) at 2400 lbs. or less\nAqua 2400 Floats\n(+15.0) to (+20.0) at 2750 lbs.\n(+12.5) to (+20.0) at 1600 lbs. or less\nWipline 3000 amphibious Floats\n(+14.0) to (+19.0) at 2750 lbs.\n(+12.0) to (+19.0) at 2100 lbs. or less\n\nSkiplane:        FliLite 3000 MK IIIA:\n(+15.0) to (+20.0) at 2500 lbs.\n(+12.5) to (+20.0) at 1700 lbs. or less\nFluiDyne C3000H:\n(+15.0) to (+19.5) at 2500 lbs.\n(+11.5) to (+19.5) at 1700 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-7-235B, s/n 23001C and up\n\nProduction basis          Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XXVII",
+      "models": [
+        "M-7-235A"
+      ],
+      "engine": "Lycoming      O-540-J1A5D, O-540-J3A5, IO-540-W1A5D,",
+      "engine_limits": {
+        "rpm": 2400,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 5,
+      "cg_range_raw": "Landplane:        (+15.0) to (+20.0) at 2500 lbs.\n(+12.5) to (+20.0) at 1700 lbs. or less\n\nFloatplane:    Aqua 2400 Floats\n(+15.0) to (+20.0) at 2750 lbs.\n(+12.5) to (+20.0) at 1600 lbs. or less\n\nSkiplane:      FluiDyne C3000H:\n(+15.0) to (+19.5) at 2500 lbs.\n(+11.5) to (+19.5) at 1700 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-7-235A, s/n 24001C and up\n\nProduction basis          Production Certificate No. 11S0\n\n3A23                                                   Page 28 of 48"
+    },
+    {
+      "section_roman": "XXVIII",
+      "models": [
+        "M-7-235C"
+      ],
+      "engine": "Lycoming      O-540-J1A5D, O-540-J3A5, IO-540-W1A5D,",
+      "engine_limits": {
+        "rpm": 2400,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 43.0,
+        "usable_gal": 40.0
+      },
+      "seats": 5,
+      "cg_range_raw": "Landplane:        (+15.0) to (+20.5) at 2500 lbs.\n(+12.0) to (+20.5) at 1760 lbs. or less\n\nFloatplane:    EDO 797-2500 amphibious Floats\n(+14.0) to (+19.0) at 2750 lbs.\n(+12.5) to (+19.0) at 2400 lbs. or less\nAqua 2400 Floats\n(+15.0) to (+20.0) at 2750 lbs.\n(+12.5) to (+20.0) at 1600 lbs. or less\nWipline 3000 amphibious Floats\n(+14.0) to (+19.0) at 2750 lbs.\n(+12.0) to (+19.0) at 2100 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-7-235C, s/n 25001C and up\n\nProduction basis          Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XXIX",
+      "models": [
+        "MX-7-180C"
+      ],
+      "engine": "Lycoming      Lycoming 0-360-C1F",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 47.6,
+        "usable_gal": 43.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:      (+15.9) to (+20.5) at 2500 lbs.\n(+12.4) to (+20.5) at 1740 lbs. or less\n\nFloatplane:    Aqua 2200 Floats\n(+13.9) to (+20.5) at 2500 lbs.\n(+10.5) to (+20.5) at 1600 lbs. or less\n\nWipline 2350 amphibious Floats\n(+15.0) to (+19.0) at 2500 lbs.\n(+13.5) to (+19.0) at 2090 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model MX-7-180C, s/n 28001C and up\n\nProduction basis          Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XXX",
+      "models": [
+        "M-7-260"
+      ],
+      "engine": "Lycoming      IO-540-V4A5",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 47.6,
+        "usable_gal": 43.0
+      },
+      "seats": 5,
+      "cg_range_raw": "Landplane:        (+15.0) to (+20.0) at 2500 lbs.\n\n3A23                                                  Page 30 of 48\n\n(+12.5) to (+20.0) at 1700 lbs. or less\n\nFloatplane:    Wipline 3000 amphibious Floats\n(+14.0) to (+19.0) at 2750 lbs.\n(+12.0) to (+19.0) at 2100 lbs. or less\n\nAqua 2400 Floats\n(+15.0) to (+20.0) at 2750 lbs.\n(+12.5) to (+20.0) at 1600 lbs. or less\n\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-7-260, s/n 26001C and up\n\nProduction basis          Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XXXI",
+      "models": [
+        "MT-7-260"
+      ],
+      "engine": "Lycoming      IO-540-V4A5",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 47.6,
+        "usable_gal": 43.0
+      },
+      "seats": 5,
+      "cg_range_raw": "Landplane:        (+15.0) to (+20.0) at 2500 lbs.\n(+12.5) to (+20.0) at 1700 lbs. or less\n\nFloatplane:    Wipline 3000 amphibious Floats\n(+14.0) to (+19.0) at 2750 lbs.\n(+12.0) to (+19.0) at 2100 lbs. or less\n\nAqua 2400 Floats\n(+15.0) to (+20.0) at 2750 lbs.\n(+12.5) to (+20.0) at 1600 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone\n\nPage 31 of 48                                                   3A23",
+      "control_surfaces": null,
+      "serial_numbers": "Model MT-7-260, s/n 27001C and up\n\nProduction basis          Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XXXII",
+      "models": [
+        "M-7-260C"
+      ],
+      "engine": "Lycoming      IO-540-V4A5",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 47.6,
+        "usable_gal": 43.0
+      },
+      "seats": 5,
+      "cg_range_raw": "Landplane:        (+15.0) to (+20.0) at 2500 lbs.\n(+12.5) to (+20.0) at 1700 lbs. or less\n\nFloatplane:    Wipline 3000 amphibious Floats\n(+14.0) to (+19.0) at 2750 lbs.\n(+12.0) to (+19.0) at 2100 lbs. or less\n\nAqua 2400 Floats\n(+15.0) to (+20.0) at 2750 lbs.\n(+12.5) to (+20.0) at 1600 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-7-260, s/n 30001C and up\n\nProduction basis            Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XXXIII",
+      "models": [
+        "M-7-420AC"
+      ],
+      "engine": "Rolls-Royce Corp. (Allison)        Gas Turbine 250-B17C",
+      "engine_limits": {
+        "rpm": 2030,
+        "hp": null
+      },
+      "fuel_grade": "Primary:     Mil-T-5624L, grade JP-4 and JP-5, Mil-T-83133A, grade JP-8,",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 47.6,
+        "usable_gal": 43.0
+      },
+      "seats": 5,
+      "cg_range_raw": "Landplane:        (+15.0) to (+20.5) at 2500 lbs.\n(+13.1) to (+20.5) at 2090 lbs. or less\n\nFloatplane:     Wipline 3000 Amphibious:\n(+14.0) to (+19.0) at 2750 lbs.\n(+12.0) to (+19.0) at 2100 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-7-420AC, s/n 29001C and up\n\nProduction basis          Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XXXIV",
+      "models": [
+        "MX-7-160C"
+      ],
+      "engine": "Lycoming      0-320-B2D",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2200
+      },
+      "fuel_capacity": {
+        "total_gal": 47.6,
+        "usable_gal": 43.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:       (+15.4) to (+20.5) at 2200 lbs.\n(+12.5) to (+20.5) at 1600 lbs. or less\n\nFloatplane:     Aqua 2200 Floats\n(+14.6) to (+20.5) at 2200 lbs.\n(+13.5) to (+20.5) at 1600 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model MX-7-160C, s/n 34001C and up\n\nProduction basis          Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XXXV",
+      "models": [
+        "MX-7-180AC"
+      ],
+      "engine": "Lycoming      0-360-C1F or 0-360-C4F",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2400
+      },
+      "fuel_capacity": {
+        "total_gal": 47.6,
+        "usable_gal": 43.0
+      },
+      "seats": 4,
+      "cg_range_raw": "Landplane:       (+15.9) to (+20.5) at 2400 lbs.\n(+12.4) to (+20.5) at 1740 lbs. or less\n\nFloatplane:    Aqua 2200 Floats\n(+15.0) to (+20.5) at 2400 lbs.\n(+13.5) to (+20.5) at 1600 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model MX-7-180AC, s/n 33001C and up\n\nProduction basis            Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XXXVI",
+      "models": [
+        "M-7-420A"
+      ],
+      "engine": "Rolls-Royce Corp. (Allison)       Gas Turbine 250-B17C",
+      "engine_limits": {
+        "rpm": 2030,
+        "hp": null
+      },
+      "fuel_grade": "Primary:     Mil-T-5624L, grade JP-4 and JP-5, Mil-T-83133A, grade JP-8, ASTM-D-1655, Jet A, A1 or B, JP-1",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 47.6,
+        "usable_gal": 43.0
+      },
+      "seats": 5,
+      "cg_range_raw": "Landplane:        (+15.0) to (+20.5) at 2500 lbs.\n(+13.1) to (+20.5) at 2090 lbs. or less\n\nFloatplane:     Wipline 3000 Amphibious:\n(+14.0) to (+19.0) at 2750 lbs.\n(+12.0) to (+19.0) at 2100 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-7-420A, s/n 35001C and up\n\nProduction basis            Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XXXVII",
+      "models": [
+        "MT-7-420"
+      ],
+      "engine": "Rolls-Royce Corp. (Allison)        Gas Turbine 250-B17C",
+      "engine_limits": {
+        "rpm": 2030,
+        "hp": null
+      },
+      "fuel_grade": "Primary:     Mil-T-5624L, grade JP-4 and JP-5, Mil-T-83133A, grade JP-8,",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2500
+      },
+      "fuel_capacity": {
+        "total_gal": 47.6,
+        "usable_gal": 43.0
+      },
+      "seats": 5,
+      "cg_range_raw": "Landplane:        (+16.0) to (+20.5) at 2500 lbs.\n(+13.0) to (+20.5) at 1700 lbs. or less\n\nFloatplane:      Wipline 3000 Amphibious:\n(+14.0) to (+19.0) at 2750 lbs.\n(+12.0) to (+19.0) at 2100 lbs. or less\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model MT-7-420, s/n 51001C and up\n\nProduction basis           Production Certificate No. 11S0"
+    },
+    {
+      "section_roman": "XXXVIII",
+      "models": [
+        "M-4-180V"
+      ],
+      "engine": "Lycoming      0-360-C1F or 0-360-C4F",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": null
+      },
+      "fuel_grade": "100/100LL minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2300
+      },
+      "fuel_capacity": {
+        "total_gal": 47.6,
+        "usable_gal": 43.0
+      },
+      "seats": 2,
+      "cg_range_raw": "Landplane:     (+15.6) to (+19.0) at 2300 lbs.\n(+11.0) to (+19.0) at 1500 lbs. or less\n\nPage 37 of 48                                                    3A23\n\nStraight line variation between points given.\nEmpty weight\nNone",
+      "control_surfaces": null,
+      "serial_numbers": "Model M-4-180V, s/n 47001C and up\n\nProduction basis          Production Certificate No. 11S0\n\nDATA PERTINENT TO ALL MODELS:"
+    }
+  ]
+}

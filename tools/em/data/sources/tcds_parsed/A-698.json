@@ -1,0 +1,74 @@
+{
+  "tcds_number": "A-698",
+  "revision": "14",
+  "revision_date": "August 7, 2006",
+  "tc_holder": "Piper Aircraft, Inc.",
+  "source_pdf": "A-698.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 2,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "J3L",
+        "2",
+        "and",
+        "J3L-S",
+        "2",
+        "PCSM"
+      ],
+      "engine": "Lycoming O-145-A1 (See Item 309A for optional engines)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "65 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1100
+      },
+      "fuel_capacity": {
+        "total_gal": 12.0,
+        "usable_gal": null
+      },
+      "seats": 2,
+      "cg_range_raw": null,
+      "control_surfaces": "Elevator           34°        Up          29°   Down\nAileron            18°        Up          18°   Down\nRudder             30°        Left        30°   Right\nStabilizer         2.5°       Up           4°   Down",
+      "serial_numbers": "2325, 2327, 2339, 2340, 2342, 2344, 2345, 2347, 2349, 2351, 2355 and up, 2356-A,\n2357-A and up, and 8277-1 through 8277-40.\n\nRequired Equipment            In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed:\nLandplane: Items 101, 102, 103, and 104.\nSeaplane:       Items 103, 104 and 151."
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "2"
+      ],
+      "engine": "Lycoming O-145-B1 (See Item 309B for optional engines)",
+      "engine_limits": {
+        "rpm": null,
+        "hp": null
+      },
+      "fuel_grade": "73 min. octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": null,
+        "Vno": null,
+        "Vfe": null,
+        "Va": null
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1100
+      },
+      "fuel_capacity": {
+        "total_gal": 12.0,
+        "usable_gal": null
+      },
+      "seats": 2,
+      "cg_range_raw": null,
+      "control_surfaces": "Elevator              34°     Up          29°   Down\nAileron               18°     Up          18°   Down\nRudder                30°     Left        30°   Right\nStabilizer            2.5°    Up           4°   Down",
+      "serial_numbers": "2325, 2327, 2339, 2340, 2342, 2344, 2345, 2347, 2349, 2351, 2355 and up, 2356-A,\n2357-A and up, and 8277-1 through 8277-40, and all AAF Nos. eligible. (Use\nmanufacturers serial numbers if available.)\n\nRequired Equipment                 In addition to the pertinent required basic equipment specified in CAR 4a, the following\nitems of equipment must be installed:\nLandplane: Items 101, 102, 103, and 104.\nSeaplane:       Items 103, 104 and 151.\n\nData Pertinent to All Models"
+    }
+  ]
+}

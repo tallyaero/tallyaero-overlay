@@ -1,0 +1,718 @@
+{
+  "tcds_number": "3A15",
+  "revision": "98",
+  "revision_date": null,
+  "tc_holder": "Record:        Beech Aircraft Corporation transferred to",
+  "source_pdf": "3A15.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 18,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "H35"
+      ],
+      "engine": "Continental O-470-G",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 240
+      },
+      "fuel_grade": "91/96 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 210,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 175,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 142,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2900
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing gear   (+82.1) to (+84.7) at 2900 lbs.\nextended)                  (+77.6) to (+85.7) at 2525 lbs.\n(+77.0) to (+85.7) at 2475 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing Flaps                                          Down    30°\nAileron tab                                         Fixed\nAileron                          Up    20°          Down    20°\nElevator tab                     Up     4.5°        Down    23°\n\"V\" tail elevator action         Up    22.5°        Down    17.5°\n\"V\" tail rudder action           Up    21°          Down    21°\n\"V\" tail max. combination        Up    35°          Down    30°\nrudder elevator action\n\nSerial Nos. Eligible        D-4866 through D-5330 (except D-5062)\n\nRequired Equipment          Items 1(a) and (b) or (c) or 2(a) and (b) or 8(a) and (b) and (c) or 10(a) and (b) and (d) or\n11(a) and (b) or 1(c) or 8(b) and 11(c), 101(a) and (b) or (c), 102(a) or (b), 103, 201(a) or\n(b) or (g), 202(a) or (b), 205(a) or (b) or (d) or (e), 206(a) or (b), 301(a) or (b) or (c) or\n(g), 302(a) or (d), 304(a) or (b) or (e), 403(am), 601(a), 622.\n\nRev. 98                                                 3                                                                 3A15",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "II",
+      "models": [
+        "J35"
+      ],
+      "engine": "Continental IO-470-C",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 250
+      },
+      "fuel_grade": "91/96 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 185,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 142,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2900
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing         (+82.1) to (+84.7) at 2900 lbs.\ngear extended)              (+77.6) to (+85.7) at 2525 lbs.\n(+77.0) to (+85.7) at 2475 lbs. or less\nStraight line variation between points given.\n\nEmpty Wt. C.G. Range         None",
+      "control_surfaces": "Wing Flaps                                        Down      30°\nAileron tab                                       Fixed\nAileron                          Up    20°        Down      20°\nElevator tab                     Up     4.5°      Down      23°\n\"V\" tail elevator action         Up    22.5°      Down      17.5°\n\"V\" tail rudder action           Up    21°        Down      21°\n\"V\" tail max. combination        Up    35°        Down      30°\nrudder elevator action\n\nSerial Nos. Eligible         D-5062, D-5331 through D-5725\n\nRequired Equipment           Items 3(a) and (b) or 4(a) and (b) or 9(a) and (b) and (c) or 11(a) and (c) and 3(b), 101(d)\nand (e) or (g), 102(a) or (b), 103, 201(a) or (b) or (g), 202(a) or (b), 205(a) or (b) or (d)\nor (e), 206(a) or (b), 301(b) or (c) or (g), 302(a) or (d), 304(a) or (b) or (e), 403(an),\n601(a), 622.\n\n3A15                                                         4                                                               Rev. 98",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "III",
+      "models": [
+        "K35"
+      ],
+      "engine": "Continental IO-470-C",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 250
+      },
+      "fuel_grade": "91/96 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 185,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 142,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2950
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing             (+82.1) to (+84.7) at 2950 lbs.\ngear extended)                  (+77.5) to (+85.7) at 2525 lbs.\n(+77.0) to (+85.7) at 2475 lbs.\nStraight line variation between points given.",
+      "control_surfaces": "Wing Flaps                                              Down      30°\nAileron tab                                             Fixed\nAileron                                Up   20°         Down      20°\nElevator tab                           Up    4.5°       Down      23°\n\"V\" tail elevator action               Up   22.5°       Down      19°\n\"V\" tail rudder action L.H.            Up   23°         Down      26°\nR.H.            Up   26°         Down      23°\n\"V\" tail max. combination\nrudder elevator action L.H.         Up   44°         Down 37°\nR.H.         Up   42°         Down 40°\n\nSerial Nos. Eligible             Model K35: D-5726 through D-6161\nModel M35: D-6162 through D-6561\n\nRequired Equipment               Items 3(a) and (b) or 4(a) and (b) or 9(a) and (b) and (c) or 11(a) and (c) and 3(b) or 4(b)\nor 9(b), 101(d) and (e) or (g), 102(a) or (b), 103, 201(a) or (b) or (g), 202(a) or (b),\n205(a) or (b) or (d) or (e), 206(a) or (b), 301(b) or (c) or (g), 302(a) or (b) or (d), 304(a)\nor (b) or (e), 403(ak), 601(a), 622.\n\nRev. 98                                                 5                                                                     3A15",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IV",
+      "models": [
+        "35-33",
+        "Debonair"
+      ],
+      "engine": "Continental IO-470-J (See Item 112 for optional engine.)",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 225
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 185,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 142,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 2900
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing gear    (+82.1) to (+85.7) at 2900 lbs.\nextended                    (+78.0) to (+86.6) at 2550 lbs.\n(+78.0) to (+86.7) at 2525 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing Flaps                                           Down     30°\nAileron tab                                          Fixed\nAileron                           Up    20°          Down     20°\nRudder tab                                           Fixed\nRudder                           Left   25°          Right    25°\nElevator tab                      Up    10°          Down     21°\nElevator                          Up    25°          Down     15°\n\nSerial Nos. Eligible         CD-1 through CD-224, CD-233, CD-234, CD-236, CD-241, CD-246 through CD-250\n\nRequired Equipment           Items 5(a) and (b) or (c) and (d) or 7(a) and (b) or (d) and (c) or 10(a) and (b) or (c) and\n(d) or 11(a) and (b) and (c), 101(d) or (k) and (e) or (h), 102(a) or (b), 103, 201(a) or (b)\nor (c) or (d) or (g), 202(a) or (b) or (c), 205(b) or (c) or (d) or (e), 206(a) or (b), 301(c) or\n(d) or (g), 302(a), 304(b) or (c) or (e), 403(j) or (o), 403(ac) (when two 22 gal. main fuel\ncells are installed per Item 616), 601(a).\n\n3A15                                                         6                                                               Rev. 98",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "V",
+      "models": [
+        "N35"
+      ],
+      "engine": "Continental IO-470-N",
+      "engine_limits": {
+        "rpm": 2625,
+        "hp": 260
+      },
+      "fuel_grade": "Aviation gasoline Grade 100LL or 100 minimum",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 185,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 147,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3125
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing             (+82.1) to (+85.7) at 3125 lbs.\ngear extended)                  (+77.0) to (+85.7) at 2800 lbs. or less\nStraight line variation between points given",
+      "control_surfaces": "Wing Flaps                                                  Down       30°\nAileron tab                                                 Fixed\nAileron                                Up    20°            Down       20°\nElevator tab                           Up     5.5°          Down       23°\n\"V\" tail elevator action               Up    22.5°          Down       19°\n\"V\" tail rudder action       L.H.      Up    23°       R.H. Down       26°\nR.H.      Up    26°       L.H. Down       23°\n\"V\" tail max. combination\nrudder elevator action L.H.         Up 44°                 Down 37°\nR.H.         Up 42°                 Down 40°\n\nSerial Nos. Eligible             D-6562 through D-6841\n\nRequired Equipment               Items 6(a) and (b) or 9(a) and (b) and (c) or 11(a) and (b) and (c), 101(d) and (e) or (g),\n102(a) or (b), 103, 201(a) or (b) or (g), 202(a) or (b), 205(a) or (b) or (d) or (e), 206(a) or\n(b), 301(b) or (c) or (g), 302(a) or (b) or (c), 304(a) or (b) or (e), 403(ao), 601(a), 622.\n\nRev. 98                                                   7                                                                    3A15",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VI",
+      "models": [
+        "35-A33"
+      ],
+      "engine": "Continental IO-470-J (see Item 112 for optional engine.)",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": null
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 185,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 147,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3000
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing           (+82.1) to (+86.7) at 3000 lbs.\ngear extended)                (+77.0) to (+86.7) at 2500 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing Flaps                                           Down     30°\nAileron tab                                          Fixed\nAileron                           Up    20°          Down     20°\nRudder tab                                           Fixed\nRudder                           Left   25°          Right    25°\nElevator tab                      Up    10°          Down     21°\nElevator                          Up    25°          Down     15°\n\nSerial Nos. Eligible           CD-225 through CD-232, CD-235, CD-237 through CD-240, CD-242\nthrough CD-245, CD-251 through CD-387\n\nRequired Equipment             Items 5(a) and (b) or (c) and (d) or 7(a) and (b) or (d) and (c) or 10(a) and (b) or (c) and\n(d) or 11(a) and (b) and (c), 101(d) or (k) and (e) or (h), 102(b), 103, 201(a) or (b) or (c)\nor (d) or (g), 202(a) or (b) or (c), 205(b) or (c) or (d) or (e), 206(a) or (b), 301(c) or (d) or\n(g), 302(a) or (b) or (c), 304(b) or (c) or (e), 403(k), 403(ac) (when 22 gal. main fuel\ncells are installed per Item 616), 601(a).\n\n3A15                                                    8                                                                   Rev. 98",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VII",
+      "models": [
+        "35-B33"
+      ],
+      "engine": "Continental IO-470-K",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 225
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 185,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 147,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3000
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing        (+82.1) to (+86.7) at 3000 lbs.\ngear extended)             (+77.0) to (+86.7) at 2500 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing Flaps                                            Down      30°\nAileron tab                                           Fixed\nAileron                            Up    20°          Down      20°\nRudder tab                                            Fixed\nRudder                            Left   25°          Right     25°\nElevator tab                       Up    10°          Down      21°\nElevator                           Up    25°          Down      15°\n\nSerial Nos. Eligible        CD-388 through CD-813\n\nRequired Equipment          Items 5(a) and (b) or (c) and (d) or 7(a) and (b) or (d) and (c) or 10(a) and (b) or (c) and\n(d) or 11(a) and (b) and (c), 101(d) or (k) and (e) or (f) or (h), 102(b), 103, 201(a) or (b)\nor (c) or (d) or (e) or (f) or (g) or (h), 202(a) or (b) or (c) or (d) or (e) or (f), 205(b) or (c)\nor (d) or (e), 206(a) or (b), 301(c) or (d) or (g), 302(c), 304(b) or (c) or (e), 403(m),\n403(ac) (when two 22 or 37 gal. main fuel cells are installed per Item 606), 601(a).\n\nRev. 98                                                     9                                                                    3A15",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "VIII",
+      "models": [
+        "P35"
+      ],
+      "engine": "Continental IO-470-N",
+      "engine_limits": {
+        "rpm": 2625,
+        "hp": 260
+      },
+      "fuel_grade": "Aviation gasoline Grade 100LL or 100 minimum",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 185,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 148,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3125
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing             (+82.1) to (+85.7) at 3125 lbs.\ngear extended)                  (+77.0) to (+85.7) at 2800 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing Flaps                                                Down     30°\nAileron tab                                               Fixed\nAileron                                Up    20°          Down     20°\nElevator tab                           Up     5.5°        Down     23°\n\"V\" tail elevator action               Up    22.5°        Down     19°\n\"V\" tail rudder action       L.H.      Up    23°          Down     26°\nR.H.      Up    26°          Down     23°\n\"V\" tail max. combination\nrudder elevator action L.H.         Up    44°          Down 37°\nR.H.         Up    42°          Down 40°\n\nSerial Nos. Eligible             D-6842 through D-7309, except D-7140\n\nRequired Equipment               Items 6(a) and (b) or 9(a) and (b) and (c) or 11(a) and (b) and (c), 101(d) and (e) or (f) or\n(g), 102(a) or (b), 103, 201(a) or (b) or (e) or (f) or (g) or (h), 202(a) or (b) or (d) or (f),\n205(a) or (b) or (d) or (e), 206(a) or (b), 301(b) or (c) or (g), 302(c), 304(a) or (b) or (e),\n403(ao), 601(a), 622.\n\n3A15                                                         10                                                              Rev. 98",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "IX",
+      "models": [
+        "S35"
+      ],
+      "engine": "Continental IO-520-B or IO-520-BA",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 285
+      },
+      "fuel_grade": "Aviation gasoline Grade 100LL or 100 minimum",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 190,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 152,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3300
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing             (+82.1) to (+84.7) at 3300 lbs.\ngear extended)                  (+79.0) to (+85.7) at 3000 lbs.\n(+77.0) to (+85.7) at 2800 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing Flaps                                                  Down       30°\nAileron tab                                                 Fixed\nAileron                                Up    20°            Down       20°\nElevator tab                           Up     5.5°          Down       23°\n\"V\" tail elevator action               Up    22.5°          Down       19°\n\"V\" tail rudder action        L.H.     Up    23°       R.H. Down       26°\nR.H.     Up    26°       L.H. Down       23°\n\"V\" tail max. combination\nrudder elevator action L.H.         Up    44°               Down 37°\nR.H.         Up    35°               Down 40°\n\nSerial Nos. Eligible             D-7140, D-7310 through D-7976\n\nRequired Equipment               Items 11(a) and (d) and (e) or 12(a) and (b) and 11(e) or 14(a) and (c) and 11(e), 101(i)\nand (j), 102(c) or (d), 103, 201(b) or (e) or (f) or (g) or (h), 202(a) or (b) or (d) or (f),\n205(b), or (d) or (e), 206(a) or (b), 301(e) or (f), 302(c), 304(d), 403(al), 601(a), 622.\n\nRev. 98                                                     11                                        3A15",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "X",
+      "models": [
+        "35-C33",
+        "Debonair"
+      ],
+      "engine": "Continental IO-470-K",
+      "engine_limits": {
+        "rpm": 2600,
+        "hp": 225
+      },
+      "fuel_grade": "80/87 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 185,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 147,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3050
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing             (+81.5) to (+86.7) at 3050 lbs.\ngear extended)                  (+77.0) to (+86.7) at 2700 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing Flaps                                       Down    30°\nAileron tab                                      Fixed\nAileron                         Up    20°        Down    20°\nRudder tab                                       Fixed\nRudder                         Left   25°        Right   25°\nElevator tab                    Up    10°        Down    21°\nElevator                        Up    25°        Down    15°\n\nSerial Nos. Eligible             Model 35-C55: CD-814 through CD-1118 (except CD-982)\nModel E33:    CD-1119 through CD-1234\nModel F33:    CD-1235 through CD-1254\n\n3A15                                                    12                                                                  Rev. 98\n\nX.     Model 35-C33, Model E33, Model F33 (cont'd)\n\nRequired Equipment           Model 35-C33:\n(see Item 611 for           Items 5(a) and (b) or (c) and (d) or 7(a) and (b) or (d) and (c) or 10(a) and (b) or (c) and\nreplacements and            (d) or 11(a) and (b) and (c) or 13(a) and (b) and (c) or 14(a) and (b) and 11(b), 101(d) or\nadditions with              (k) and (e) or (f) or (h), 102(b), 103, 201(a) or (b) or (c) or (d) or (e) or (f) or (g) or (h)\noperational 24v.            or (j), 202(a) or (b) or (c) or (d) or (e) or (f), 205(b) or (c) or (e), 206(a) or (b), 301(c) or\nsystem)                     (d) or (g) or (h), 302(c), 304(b) or (c) or (e), 403(q) or (s), 403(ac) (when two 22 or 37\ngal. main fuel cells are installed per Item 616), 601(a).\n\nModel E33:\n11(a) and (b) or (e) or (f) and (c), 101(d) or (k) and (e) or (f) or (h), 102(b), 103, 201(j)\nor (k), 202(e) or (f), 205(b) or (c) or (e) or (f), 206(a) or (b), 301(d) or (g), 302(c), 304(b)\nor (c) or (e), 403(u) (S/N CD-1119 through CD-1199), (v) (S/N CD-1200 through\nCD-1234), 403(ac) (when two 22 or 37 gal. main fuel cells are installed per Item 606),\n601(a).\n\nModel F33:\n11(a) and (b) or (f) and (c), 101(d) or (k) and (e) or (f) or (h), 102(b), 103, 201(j) or (k),\n202(e) or (f), 205(b) or (c) or (e) or (f), 206(a) or (b), 301(d) or (g), 302(c), 304(b) or (c)\nor (e), 403(z), 403(ac), 601(a).\n\nRev. 98                                                 13                                                          3A15",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XI",
+      "models": [
+        "V35"
+      ],
+      "engine": "Continental IO-520B or IO-520-BA; IO-520-BB (D-10179 and up)",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 285
+      },
+      "fuel_grade": "Aviation gasoline Grade 100LL or 100 minimum",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 190,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 152,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3400
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing           (+82.1) to (+84.4) at 3400 lbs.\ngear extended)                (+78.0) to (+85.7) at 3000 lbs.\n(+77.0) to (+85.7) at 2900 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing Flaps                   Approach 15°                  Down     30°\nAileron tab                                                Fixed\nAileron                           Up 20°                   Down     20°\nElevator tab                      Up   5.5°                Down     23°\n\"V\" tail elevator action          Up 22.5°                 Down     19°\n\"V\" tail rudder action L.H. Up    23° Down                   26°\nR.H. Up 26°                    Down     23°\n\"V\" tail max. combination\nrudder elevator action L.H. Up 44°                      Down 37°\nR.H. Up 35°                    Down 40°\n\nSerial Nos. Eligible        Model V35:         D-7977 through D-8598\nModel V35A:        D-8599 through D-9068\nModel V35B:        D-9069 and up\n\nRequired Equipment          D-7977 through D-10119 except D-10097 (14-volt system)\nItems 11(a) and (d) and (e) or 12(a) and (b) and (c) or 14(a) and (c) and 11(e), 101(i) and\n(j), 102(c) or (d), 103, 201(b) or (e) or (f) or (g) or (h) or (j) or (k) or (l), 202(a) or (b) or\n(d) or (e) or (f), 205(b) or (d) or (e) or (f), 206(a) or (b), 301(e) or (f) or (h), 302(c),\n304(d) or (f) or (g) or (h), 403(at) (D-7977 through D-9947), 403(bb), (S/N D-9948\nthrough D-10119 except D-10097), 601(a), 622.\nD-10097, D-10120 and after (28-volt system)\nItems 11(a) and (d) and (e) or (g) or 14(a) and (c) and 11(e) or (g) or 17(a) or (with IO-\n520-BB engine only) 18(a) and (b) and 11(e) or (g), 102(c) or (d), 103, 117(a) and (c)\nprior to D-10179, 117(a) and (d) S/N D-10179 and up; 201(k), 202(f), 205(f), 206(a),\n309(a) or (b) or (c) or (d), 310(a), 312(a) or (b), 403(bb), 601(a), 622.",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XII",
+      "models": [
+        "35-C33A",
+        "Debonair"
+      ],
+      "engine": "Continental IO-520-B or IO-520-BA",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 285
+      },
+      "fuel_grade": "Aviation gasoline Grade 100LL or 100 minimum",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 190,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 152,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "utility_landplane": 3300,
+        "normal_landplane": 2800
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing             Utility Category\ngear extended)                  (+82.1) to (+86.7) at 3300 lbs.\n(+77.0) to (+86.8) at 2800 lbs.\nStraight line variation between points given.\nAcrobatic Category\n(+78.5) to (+81.0) at 2800 lbs.",
+      "control_surfaces": "Wing Flaps                                                        Down     30°\nAileron tab                                                       Fixed\nAileron                                         Up   20°          Down     20°\nRudder tab                                                        Fixed\nRudder                                        Left   25°          Right    25°\nRudder (E33C in acrobatic category)           Left   25°          Right    20°\nElevator tab                                   Up    10°          Down     27°\nElevator                                       Up    25°          Down     15°\n\nSerial Nos. Eligible             Model 35-C33A:       CE-1 through CE-179\nModel E33A:          CE-180 through CE-289\nModel E33C:          CJ-1 through CJ-25\n\nRequired Equipment               Model 35-C33A:\nItems 11(a) and (d) and (e) or 12(a) and (b) and (c) or 14(a) and (c) and 11(e), 101(i) and\n(j), 102(c) or (d), 103, 201(a) or (b) or (c) or (d) or (e) or (f) or (g) or (h) or (j) or (k),\n202(a) or (b) or (c) or (d) or (e) or (f), 205(b) or (c) or (e), 206(a) or (b), 301(e) or (f),\n302(c), 304(d) or (f) or (g) or (h), 601(a).\n\nModel E33A:\n11(a) and (d) and (e) or 12(a) and (b) and (c) or 14(a) and (c) and 11(e), 101(i) and (j),\n102(c) or (d), 103, 201(j) or (k), 202(e) or (f), 205(b) or (c) or (e) or (f), 206(a) or (b),\n301(e) or (f) or (h), 304(d) or (f) or (g) or (h), 601(a).\n\nModel E33C:\n11(a) and (d) and (e), 101(i), (j), and (o), 102(c) or (d), 103, 201(j) or (k), 202(e) or (f),\n205(b) or (c) or (e), 206(a) or(b), 301(e) or (f) or (h), 302(c), 304(d) or (f) or (g) or (h),\n601(a).\n\n3A15                                                16                                                         Rev. 98",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XIII",
+      "models": [
+        "36"
+      ],
+      "engine": "S/N E-1 through E-1370 Continental IO-520-B or IO-520-BA",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 285
+      },
+      "fuel_grade": "Aviation gasoline Grade 100LL or 100 minimum",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 234,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 190,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 160,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3600
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": 1,
+      "cg_range_raw": "(landing        (+81.0) to (+87.7) at 3600 lb. S/N E-1 thru E-2110 except E-1946 and E-2104\ngear extended)             (+81.0) to (+87.7) at 3650 lb. S/N E-1946, E-2104, E-2111 thru E-3635, except E-3630\n(+74.0) to (+87.7) at 3100 lbs. or less\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps (S/N E-1 through E-1370)                       Down 30°\nWing flaps (S/N E-1371 through E-2110,\nexcept E-1946 and E-2104)          Approach    15°      Down 30°\nWing flaps (S/N E-1946, E-2104, E-2111\nthrough E-3635, except E-3630)      Approach    12°      Down 30°\nRight aileron tab                                         Fixed\nLeft aileron tab (S/N E-1 through E-2110,\nexcept E-1946 and E-2104)                               Fixed\nLeft aileron tab (S/N E-1946, E-2104,\nE-2111 through E-3635, except E-3630) Up        9°      Down  9°\nAileron                                    Up    20°      Down 20°\nRudder tab                                                Fixed\nRudder (E-1 through E-2110 except\nE-1946 and E-2104)                      Left   25°      Right     25°\nRudder (S/N E-1946, E-2104, E-2111\nthrough E-3635, except E-3630)            Left   25°      Right     23°\n\n3A15                                                    18                                                               Rev. 98\n\nXIII. Model 36, Model A36     (cont'd)\n\nElevator tab (S/N E-1 thru E-2110\n(cont’d)                      except E-1946 and E-2104)                    Up 10°            Down 27°\nRight elevator tab (S/N E-1946,\nE-2104, E-2111 thru E-3635                   Up 10°            Down 25°\nexcept E-3630\nLeft elevator tab (S/N E-1946,\nE-2104, E-2111 and after)                    Up     8°         Down 27°\nElevator (S/N E-1 thru E-2110\nexcept E-1946 and E-2104)                    Up 23°            Down 20°\nElevator (S/N E-1946, E-2104,\nE-2111 thru E-3635, except E-3630)           Up 25°            Down 20°\n\nSerial Nos. Eligible          Model 36:         E-1 thru E-184\nModel A36:        E-185 thru E-3635, except E-3630\nSEE NOTE 6.\n\nRequired Equipment            S/N E-1 through E-1240 except E-1111 (14-volt system)\nItems 11(a) and (d) and (e) or 14(a) and (c) and 11(e), 101(i) and (j) or (n), 102(c) or (d),\n103, 201(j) or (k), 202(f), 205(f), 206(a), 301(f) or (h), 302(c), 304(g) or (h), 410(d) or\n403(ag) (A36 S/N E-185 thru E-363 except E-357, E-358, and E-361), 403(ag), (A36\nS/N E-357, E-358, E-361 and E-364 thru E-926), 403(aq) or 403(bc) (A36 S/N E-927\nthru E-1240 except E-1111) and 601(a).\n\nS/N E-1111, E-1241 through E-3635, except E-3630 (28-volt system)\nItems 11(a) and (d) and (e) or (g) or 14(a) and (c) and 11(e) or (g) or 17(a) or (with IO-\n520-BB engine only) 18(a) and (b) and 11(e) or (g), S/N E-1111, E-1241 thru E-2110\nexcept E-1946 and E-2104, or 20(a) and (b) and 11(e) or (g) or 22 S/N E-1946, E-2104,\nE-2111 thru E-3635, except E-3630, 102(c) or (d), 103, 117(a) and (c) prior to S/N\nE-1371, 117(a) and (d) S/N E-1371 thru E-2110 except E-1946 and E-2104, 117(i) and\n(j) S/N E-1946, E-2104, E-2111 thru E-2419, 117(k) and (j) S/N E-2420 thru E-2749,\n117(l) and (j) S/N E-2750 thru E-3635, except E-3630, 201(k), 202(f), 205(f), 206(a),\n309(a) or (b) or (c) or (d) prior to S/N E-2111 except E-1946 and E-2104, 309(e) or (f)\nS/N E-1946, E-2104, E-2111 thru E-3635, except E-3630, 310(a), 312(a) or (b), or (c),\n403(bc) prior to S/N E-2111 except E-1946 and E-2104, 403(bj) S/N E-1946, E-2104,\nE-2111 thru E-3635, except E-3630, 601(a).",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XIV",
+      "models": [
+        "F33A"
+      ],
+      "engine": "Continental IO-520-B or IO-520-BA; IO-520-BB (CE-816 and up, CJ-149 and up)",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 285
+      },
+      "fuel_grade": "Aviation gasoline Grade 100LL or 100 minimum",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 190,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 152,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3400
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": 29,
+      "cg_range_raw": "(Landing           Utility Category:\ngear extended)                (+82.1) to (+86.7) at 3400 lbs.\n(+77.0) to (+86.7) at 2800 lbs.\nStraight line variation between points given.\n\nAcrobatic Category:\n(+78.5) to (+81.0) at 2800 lbs.",
+      "control_surfaces": "Wing Flaps                          Approach         15°         Down     30°\nAileron tab                                                      Fixed\nAileron                                  Up          20°         Down     20°\nRudder tab                                                       Fixed\nRudder                                  Left         25°         Right    25°\nRudder (F33C in acrobatic category)     Left         25°         Right    20°\nElevator tab                             Up          10°         Down     27°\nElevator                                 Up          25°         Down     15°\n\nSerial Nos. Eligible        Model F33A:               CE-290 and up\nModel F33C:               CJ-26 and up\n\nRequired Equipment          Model F33A: CE-290 through CE-771 except CE-748 (14-volt system)\nItems 11(a) and (d) and (e) or 12(a) and (b) and (c) or 14(a) and (c) and 11(e), 101(i) and\n(j), 102(c) or (d), 103, 201(j) or (k), 202(e) or (f), 205(b) or (c) or (e) or (f), 206(a) or\n(b), 301(h), 302(c), 304(f) or (g) or (h), 410(c), 403(az) S/N CE-290 through CE-400\nexcept CE-394 and CE-395, 403(az) S/N CE-394, CE-395, CE-401 and CE-673, 403(ar)\nor 403(az) (S/N CE-674 through CE-771 except CE-748), and 601(a).\n\nModel F33A: CE-748, CE-772 and after (28-volt system)\nItems 11(a) and (d), and (e) or (g) or 14(a) and (c) and 11(e) or (g) or 17(a) or (with\nIO-520-BB engine only) 18(a) and (b) and 11(e) or (g), 102(c) or (d), 103, 117(a) and (c)\nprior to CE-816; 117(a) and (d) S/N CE-816 and up, 201(k), 202(f), 205(f), 206(a),\n309(a) or (b) or (c) or (d), 310(a), 312(a) or (b), 403(ar), and 601(a).\n\nModel F33C: CJ-26 through CJ-148 (14-volt system)\nItems 11(a) and (d) and (e) or 14(a) and (c) and 11(e), 101(i), (j), and (o), 102(c) or (d),\n103, 201(j) or (k), 202(e) or (f), 205(b) or (c) or (e) or (f), 206(a) or (b), 301(h), 302(c),\n304(h).\nUtility Category: 410(c) and 403(ar) or 403(az) S/N CJ-26 thru CJ-30,403(ar) or\n403(az) S/N CJ-31 through CJ-128, 403(ar) S/N CJ-129 thru CJ-148 and 601(a).\nAcrobatic Category: 410(c) and 403(ar) and 403(ba) or 403(az) and 403(ba) S/N CJ-26\nthru CJ-30, 403(ar) and 403(ba) or 403(az) and 403(ba) S/N CJ-31 thru CJ-128, 403(ar)\nand 403(as) S/N CJ-129 thru CJ-148 and 601(a).\n\nModel F33C: CJ-149 and after (28-volt system)\nItems 11(a) and (d) and (e) or (g) or 14(a) and (c) and 11(e) or (g), 102(c) or (d), 103,\n117(a) and (b) and (d), 201(k), 202(f), 205(f), 206(a), 309(a) or (b) or (c) or (d), 310(a),\n312(a) or (b).\nUtility Category: 403(ar) and 601(a).\nAcrobatic Category: 403(ar) and 403(as) and 601(a).",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XV",
+      "models": [
+        "G33"
+      ],
+      "engine": "Continental IO-470-N",
+      "engine_limits": {
+        "rpm": 2625,
+        "hp": 260
+      },
+      "fuel_grade": "100/130 minimum grade aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 225,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 190,
+          "unit": "mph"
+        },
+        "Vfe": null,
+        "Va": {
+          "value": 152,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3300
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": 4,
+      "cg_range_raw": "(landing             (+81.3) to (+86.7) at 3300 lbs.\ngear extended)                 (+77.0) to (+86.7) at 2800 lbs.\nStraight line variation between points given.",
+      "control_surfaces": "Wing Flaps                                                      Down     30°\nAileron tab                                                     Fixed\nAileron                                         Up   20°        Down     20°\nRudder tab                                                      Fixed\nRudder                                       Left    25°        Right    25°\nElevator tab                                  Up     10°        Down     27°\nElevator                                      Up     25°        Down     15°\n\nSerial Nos. Eligible            CD-1255 through CD-1304\n\nRequired Equipment              Items 11(a) or (b) or (c), 101(d) and (j), 102(b), 103, 201(j) or (k), 202(e) or (f), 205(e)\nor (f), 206(a), 301(g), 302(c), 304(e), 403(ab) and (ac) or 403(ad), and 601(a).",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XVI",
+      "models": [
+        "A36TC"
+      ],
+      "engine": "Continental TSIO-520-U or TSIO-520-UB",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 300
+      },
+      "fuel_grade": "Aviation gasoline Grade 100LL or 100 minimum",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 203,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 165,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 139,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3650
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing               (+81.0) to (+87.7) at 3650 lbs.\ngear extended)                    (+74.0) to (+87.7) at 3100 lbs.\nStraight line variation between points given.",
+      "control_surfaces": "Wing Flaps                              Approach     15°        Down    30°\nAileron tab                                                     Fixed\nAileron                                         Up   20°        Down    20°\nRudder tab                                                      Fixed\nRudder                                        Left   25°        Right   25°\nElevator tab                                   Up    10°        Down    27°\nElevator                                       Up    23°        Down    20°\n\nRev. 98                                                        23                                                              3A15\n\nXVI. Model A36TC            (cont'd)\n\nSerial Nos. Eligible              EA-1 through EA-241, EA-243 through EA-272\n\nRequired Equipment                Items 14(c) and (d) and 11(e) or (g) or 16(a) and (b) and 11(e) or (g) and 403(bg),\n102(d), 103, 117(e) and (g) S/N EA-1, 117(e) and (f) or (h) S/N EA-2 and up, 201(k),\n202(f), 205(f), 206(a), 309(a) or (c) or (d), 310(a), 312(a) or (b), 403(bf), 601(a).",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XVII",
+      "models": [
+        "B36TC"
+      ],
+      "engine": "Continental TSIO-520-UB",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 300
+      },
+      "fuel_grade": "Aviation gasoline grade 100LL or 100 minimum",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 206,
+          "unit": "knots"
+        },
+        "Vno": {
+          "value": 168,
+          "unit": "knots"
+        },
+        "Vfe": {
+          "value": 15,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 141,
+          "unit": "knots"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 3850
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": null,
+      "cg_range_raw": "(landing              (+80.0) to (+87.7) at 3850 lbs.\ngear extended)                   (+74.0) to (+87.7) at 3200 lbs.\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps                                 Approach     15°        Down 30°\nRight aileron tab                                                  Fixed\nLeft aileron tab (S/N EA-242, EA-273\nthru EA-388 except EA-320)                                         Fixed\nLeft aileron tab (S/N EA-320, EA-389\nand after)                                        Up    9°        Down   9°\nAileron                                            Up   20°        Down 20°\nRudder tab                                                         Fixed\nRudder                                           Left   20°        Right 20°\nElevator tab (S/N EA-242, EA-273\nthru EA-388 except EA-320)                        Up   10°        Down 27°\nRight elevator tab (S/N EA-320,\nEA-389 and after)                                 Up   10°        Down 25°\nLeft elevator tab (S/N EA-320,\nEA-389 and after)                                 Up  8°          Down 27°\nElevator                                           Up 23°          Down 25°\n\nSerial Nos. Eligible         EA-242, EA-273 and after.            SEE NOTE 6.\n\nRequired Equipment           Items 19(a) and (b) and 11(e) or (g), 102(d), 103, 117(e) and (h), 201(k), 202(f),\n205(f), 206(a), 309(c) or (d), 310(a), 311(a), 312(a) or (b), 403(bi) prior to S/N EA-389\nexcept EA-320, 403(bk) S/N EA-320, EA-389 and after, 601(b).",
+      "serial_numbers": null
+    },
+    {
+      "section_roman": "XVIII",
+      "models": [
+        "G36"
+      ],
+      "engine": "Continental IO-550-B",
+      "engine_limits": {
+        "rpm": 2700,
+        "hp": 300
+      },
+      "fuel_grade": "Aviation gasoline Grade 100LL or 100 minimum and Chinese aviation gasoline RH-",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 234,
+          "unit": "mph"
+        },
+        "Vno": {
+          "value": 190,
+          "unit": "mph"
+        },
+        "Vfe": {
+          "value": 12,
+          "unit": "knots"
+        },
+        "Va": {
+          "value": 160,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "utility_landplane": 3400,
+        "normal_landplane": 3650
+      },
+      "fuel_capacity": {
+        "total_gal": null,
+        "usable_gal": null
+      },
+      "seats": 6,
+      "cg_range_raw": "(+81.0) to (+87.7) at 3650 lb.\n(landing gear                (+74.0) to (+87.7) at 3100 lbs. or less\nextended)                    Straight line variation between points given.\n\n(landing           (+80.4) to (+87.7) at 3600 lb.\ngear extended)               (+74.0) to (+87.7) at 3100 lb. or less\n\nStraight line variation between points given.",
+      "control_surfaces": "Wing flaps            Approach 12°         Down 30°\nRight aileron tab                          Fixed\nLeft aileron tab      Up 9°                Down 9°\nAileron               Up 20°               Down 20°\nRudder tab                                 Fixed\nRudder                Left 25°             Right 23°\nRight elevator tab    Up 10°               Down 25°\nLeft elevator tab     Up 8°                Down 27°\nElevator              Up 25°               Down 20°\n\nSerial Nos. Eligible               E-3630, E-3636 & After\n\nRequired Equipment:            Items 22, 102 (d), 103, 117(j) and (l), 201 (k), 202 (f), 205 (f), 206 (a), 309 (e) and (g),\n310 (a) and (b), 312 (c) and (d), 403 (bn) and 601(b).\n\nSpecifications Pertinent to All Models",
+      "serial_numbers": null
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "tcds_number": "A-800",
+  "revision": "11",
+  "revision_date": "August 7, 2006",
+  "tc_holder": "Piper Aircraft, Inc.",
+  "source_pdf": "A-800.pdf",
+  "parsed_at": "2026-05-13",
+  "variant_count": 1,
+  "variants": [
+    {
+      "section_roman": "I",
+      "models": [
+        "PA-15"
+      ],
+      "engine": "Lycoming O-145-B2",
+      "engine_limits": {
+        "rpm": null,
+        "hp": 65
+      },
+      "fuel_grade": "80 minimum octane aviation gasoline",
+      "v_speeds_kcas": {
+        "Vne": {
+          "value": 126,
+          "unit": "mph"
+        },
+        "Vno": null,
+        "Vfe": null,
+        "Va": {
+          "value": 87,
+          "unit": "mph"
+        }
+      },
+      "max_weight_lb": {
+        "normal_landplane": 1100
+      },
+      "fuel_capacity": {
+        "total_gal": 12.0,
+        "usable_gal": null
+      },
+      "seats": 2,
+      "cg_range_raw": null,
+      "control_surfaces": null,
+      "serial_numbers": "15-1 and up\n\nRequired Equipment             In addition to the pertinent required basic equipment specified in CAR 3, the following\nitems of equipment must be installed:\nLandplane: Items 1, 201(a), 202(a), 204(a), and 401(a).\nSkiplane        Items 1, 208, 211, 401(a), and 401(b).\nPage No. 1     2    3\nRev. No. 11    11   11\n\nA-800   Page 2 of 4\n\nPage 3 of 4                                                         A-800\n\nSpecifications Pertinent to All Models\nCertification Basis                Type Certificate No. 800 (CAR 3)\n\nProduction Basis                   Approved for manufacture of spare parts only under Production Certificate No. 206.\n\nExport Eligibility                 Deleted as of - August 14, 1995.\n\nEquipment                              A plus (+) or minus (-) sign preceding the weight of an item of equipment indicates net\nweight change when that item is installed.\n\nApproval for the installation of all items of equipment listed herein has been obtained\nby the aircraft manufacturer except those items preceded by an asterisk (*). The\nasterisk denotes that approval has been obtained by someone other than the aircraft\nmanufacturer. An item marked with an asterisk may not have been manufactured under\nan FAA monitored or approved quality control system, and therefore attention should be\npaid to workmanship and conformity with pertinent data called for in this specification.\n\nPropellers and Propeller Accessories\n\n1.   Propeller - Sensenich 70LY34, 70LY38, or any other fixed-pitch wood propeller                   +11 lbs.    (-44)\nwhich is eligible for the engine power and speed and which meets the following\nlimits:\nStatic r.p.m. at max. permissible throttle setting:\nNot over 2370, not under 2110.\nNo additional tolerance permitted.\nDiameter: Not over 70 inches, not under 66 inches.\n\nEngines and Engine Accessories - Fuel and Oil Systems\n*101. Auxiliary fuel tank (6 gallon capacity) installed in accordance with Kit and Dwgs. P-17 and        +6 lbs.     (+24)\nP-17-1 supplied by J. J. Villnove, 5607 Virginia, Kansas City, Missouri.\nLanding Gear\n201. Two main wheel-brake assemblies, 8.00-4, Type III                                                 +10 lbs.                 (0)\n(a) Goodrich Model 841A\nWheel Assembly #D-3-13-A-1\nBrake Assembly #D-2-113\n202. (a) Two main wheel 4 ply-rating tires, 8.00-4, Type III with regular tubes                        +21 lbs.                 (0)\nThe following placard required: \"Tire Pressure 11 lbs.\"\n204. Tail wheel assembly                                                                                +6 lbs.                 (+167)\n(a) Scott Model 3000-A1, Steerable\n*208. Two skis                                                                                          Use Actual Weight\n(a) Wollam W1650                                                                                     Change\n(b) Federal A-1500, A-1500A, A-1850, A-2000, A-2000A per Federal Dwg. 11R262\nwith Item 211 or 212 installed.\n(c) Federal CA-1850-8 per Federal Dwg. 11R262\n(d) Wesco per Western Aircraft Equipment Co. Dwg. Nos. 12 and 148:\n(1) A-15, (2) A-20, (3) A-25, (4) AS-2, (5) AS-2A or                 (6) AS-2B.\n*210. Consolidair Model 17 wheel fenders installed in accordance with                                    +9 lbs.                 (0)\nConsolidair Dwg. No. 0045.\n211. Two shock struts installed in accordance with Piper Dwg. 11550.                                    +5 lbs.                 (0)\n*212. Two L.C.N. shock struts per L.C.N. Corp. Dwg. No. 11550 and                                        +10 lbs.                (0)\nInstallation Instructions No. A-49101.\nEach shock strut must either have a CAA Form ACA-186 attached, or be identified\nwith the symbol \"CAA-PMA\" or \"FAA-PMA\"\n*213. La Tour wheel fenders installed in accordance with La Tour Dwg. LAP-1700 and                      Use Actual Weight\nInstallation Instructions.                                                                           Change\n\nA-800                                                  Page 4 of 4\n\nElectrical Equipment\n301. Landing lights in wing leading edge installed in accordance with Piper Dwg. 12534.                     +4 lbs.     (+5)\n\nInterior Equipment\n401. (a) Airplane Flight Manual, CAA (FAA) Approved July 1, 1948.\n(b) Skiplane Supplement to manual as follows:\n\"Performance Information with Ski Installation:\nClimb: Skiplane climb performance is essentially equal to that of the landplane.\nTake-off and landing: Under the most favorable conditions of smooth packed snow,\ntemperatures approximating 30°F, skiplane take-off distance is essentially\nequal to the landplane distance. Landing distance is approximately 20%\ngreater than the landplane distance. In applying the performance data,\ncaution should be exercised in that lower temperatures or other snow\nconditions will increase the ski friction and hence increase the take-off run\nand decrease the landing run.\"\n402. Dual controls installed in accordance with Piper Dwg. 11810.                                           +10 lbs.    (+10)\n\nNOTE 1.             Current weight and balance report including list of equipment included in certificated weight empty, and\nloading instructions when necessary, must be in each aircraft at the time of original certification and at all\ntimes thereafter (except in the case of air carrier operators having an approved weight control system).\n\nNOTE 2.             The following placards must be displayed on the instrument panel in full view of the pilot:\n(a)      \"This airplane must be operated in accordance with the operating limitations specified\nin the CAA Approved Airplane Flight Manual.\"\n(b)      \"Operate in Normal Category in compliance with Approved Flight Manual. Acrobatics\n(including spins) Prohibited.\"\n(c)      \"No Smoking.\"\n\n.....END....."
+    }
+  ]
+}
