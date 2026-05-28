@@ -1223,6 +1223,10 @@ input[type="radio"] {
   align-items: center;
   gap: 12px;
   min-width: 0;
+  /* Make room for the top-left tool-switcher chips (~185px). The
+     switcher floats fixed at top-left; this pads the first content
+     cell so the aircraft picker clears it. */
+  padding-left: 185px;
 }
 
 .top-strip-right {

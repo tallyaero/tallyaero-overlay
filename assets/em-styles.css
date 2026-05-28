@@ -1674,6 +1674,12 @@ button:hover,
 .desktop-shell .top-strip-main-row {
   height: 56px;
 }
+/* Phase 3b merge: make room for the top-left tool-switcher chips
+   (~185px) on the EM main row's first cell. Scoped to the MAIN row
+   only so the tiles row (state-panel chips) below it isn't shifted. */
+.desktop-shell .top-strip-main-row .top-strip-left {
+  padding-left: 185px;
+}
 .desktop-shell .top-strip-tiles-row {
   min-height: 40px;
   padding-top: 4px;
