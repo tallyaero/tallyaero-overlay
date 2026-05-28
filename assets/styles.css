@@ -1404,87 +1404,12 @@ input[type="radio"] {
 [data-theme="dark"] .top-strip-brand { color: #f1f5f9; }
 
 /* === Tool context switcher (Phase 3b: Overlay ⇄ EM Diagram) === */
-.tool-switcher {
-  display: inline-flex;
-  gap: 2px;
-  margin-left: 12px;
-  padding: 2px;
-  background: var(--gray-100, #f1f5f9);
-  border: 1px solid var(--gray-200, #e2e8f0);
-  border-radius: 6px;
-}
-/* Root-level switcher in TOP-RIGHT corner of the viewport — out of
-   the way of overlay's top-strip-left (aircraft + airport + maneuver
-   pickers) AND EM's top-strip-left (aircraft + env chips). Fixed
-   position survives scroll. */
-.tool-switcher-root {
-  position: fixed;
-  top: 6px;
-  right: 12px;
-  z-index: 10000;
-  background: var(--ta-surface-elevated, white);
-  border: 1px solid var(--ta-border, #e2e8f0);
-  border-radius: 6px;
-  padding: 2px;
-  display: inline-flex;
-  gap: 2px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
-}
-.tool-switcher-root .tool-switcher-link {
-  padding: 4px 10px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--gray-600, #475569);
-  text-decoration: none;
-  border-radius: 4px;
-}
-.tool-switcher-root .tool-switcher-link:hover {
-  background: var(--gray-200, #e2e8f0);
-  text-decoration: none;
-}
-.tool-switcher-root .tool-switcher-link.tool-switcher-active {
-  background: var(--brand-blue, #0d59f2);
-  color: white;
-}
-[data-theme="dark"] .tool-switcher-root {
-  background: #1e293b;
-  border-color: #334155;
-}
-[data-theme="dark"] .tool-switcher-root .tool-switcher-link {
-  color: #cbd5e1;
-}
-.tool-switcher-link {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--gray-600, #475569);
-  text-decoration: none;
-  border-radius: 4px;
-  transition: background 0.12s, color 0.12s;
-}
-.tool-switcher-link:hover {
-  background: var(--gray-200, #e2e8f0);
-  color: var(--gray-800, #1e293b);
-  text-decoration: none;
-}
-.tool-switcher-link.tool-switcher-active {
-  background: var(--brand-blue, #0d59f2);
-  color: white;
-}
-[data-theme="dark"] .tool-switcher {
-  background: #0f172a;
-  border-color: #334155;
-}
-[data-theme="dark"] .tool-switcher-link { color: #94a3b8; }
-[data-theme="dark"] .tool-switcher-link:hover {
-  background: #1e293b;
-  color: #f1f5f9;
-}
+/* NOTE: All .tool-switcher* rules removed from this file. They now
+   live SOLELY in aa-tool-switcher.css (always loaded). Having a copy
+   here too caused a conflict: this file's .tool-switcher-root set
+   `right: 12px` while aa-'s set `left: 12px` — with both stylesheets
+   active on / the element got left AND right pinned and stretched to
+   full page width. Single source of truth fixes it. */
 [data-theme="dark"] .top-strip-quicklinks .quick-link { color: #cbd5e1; }
 [data-theme="dark"] .top-strip-quicklinks .quick-link:hover { color: #60a5fa; }
 [data-theme="dark"] .top-strip-quicklinks .quick-link-sep { color: #475569; }
